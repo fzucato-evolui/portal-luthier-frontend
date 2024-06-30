@@ -1,0 +1,203 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden">
+
+    <mat-drawer-container class="flex-auto h-full">
+
+        <!-- Drawer -->
+        <mat-drawer
+            class="w-80 dark:bg-gray-900"
+            (opened)="openedNav()"
+            [autoFocus]="false"
+            [mode]="drawerMode"
+            [opened]="drawerOpened"
+            #matDrawer>
+            <div class="py-1 h-full flex flex-col overflow-hidden">
+
+                <!-- Header -->
+                <div *ngIf="workDataBase" class="flex flex-col flex-0 p-1 border-b dark:bg-transparent">
+                    <div class="flex items-center justify-between">
+                        <div class="grow px-6 text-3xl font-bold tracking-tighter">{{objectType}}</div>
+                        <div>
+                            <button
+                                mat-icon-button>
+                                <mat-icon [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="m-1">
+                        <mat-form-field
+                            class="fuse-mat-rounded fuse-mat-dense w-full"
+                            [subscriptSizing]="'dynamic'">
+                            <mat-icon
+                                matPrefix
+                                class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                            <input
+                                matInput
+                                [autocomplete]="'off'"
+                                [placeholder]="'Busca'"
+                                (keyup)="filterObjects(null)"
+                                #filtro>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <cdk-virtual-scroll-viewport itemSize="50" class="flex-auto w-full overflow-y-auto overflow-x-hidden">
+                    <ng-container *ngIf="workDataBase; else noDatabase">
+                        <ng-container *cdkVirtualFor="let table of filteredObjects | async">
+
+                            <div class="flex items-center justify-between border-b dark:bg-transparent hover:bg-gray-100 dark:hover:bg-hover p-1">
+
+                                <div class="flex items-center grow overflow-x-hidden cursor-pointer" (dblclick)="addTab(table)">
+                                    <div class="rounded-full text-lg uppercase bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                                        <mat-icon
+                                            class="evolui-menu-item-icon"
+                                            fontSet="fas" fontIcon="{{objectType === 'TABLE' ? 'fa-table' : (objectType === 'VIEW' ? 'fa-table-list' : 'fa-search')}}"></mat-icon>
+                                    </div>
+                                    <div class="min-w-0 ml-4">
+                                        <div class="font-medium truncate leading-normal text-sm">{{table.name}}</div>
+                                        <div
+                                            class="text-secondary leading-5 text-sm">
+                                            {{table.description}}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button
+                                        mat-icon-button
+                                        [matMenuTriggerFor]="chatsHeaderMenu">
+                                        <mat-icon [svgIcon]="'heroicons_outline:ellipsis-vertical'"></mat-icon>
+
+                                    </button>
+                                </div>
+
+
+                            </div>
+
+                        </ng-container>
+                    </ng-container>
+                </cdk-virtual-scroll-viewport>
+                <!-- Trocado pelo fonte acima por performance
+                <div class="flex-auto w-full overflow-y-auto overflow-x-hidden"
+                     cdkScrollable>
+                    <ng-container *ngFor="let table of filteredObjects | async">
+
+                        <div class="flex items-center justify-between border-b dark:bg-transparent hover:bg-gray-100 dark:hover:bg-hover p-1">
+
+                            <div class="flex items-center grow overflow-x-hidden cursor-pointer" (dblclick)="addTab(table)">
+                                <div class="rounded-full text-lg uppercase bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                                    <mat-icon
+                                        class="evolui-menu-item-icon"
+                                        fontSet="fas" fontIcon="{{objectType === 'TABLE' ? 'fa-table' : (objectType === 'VIEW' ? 'fa-table-list' : 'fa-search')}}"></mat-icon>
+                                </div>
+                                <div class="min-w-0 ml-4">
+                                    <div class="font-medium truncate leading-normal text-sm">{{table.name}}</div>
+                                    <div
+                                        class="text-secondary leading-5 text-sm">
+                                        {{table.description}}
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <button
+                                    mat-icon-button
+                                    [matMenuTriggerFor]="chatsHeaderMenu">
+                                    <mat-icon [svgIcon]="'heroicons_outline:ellipsis-vertical'"></mat-icon>
+
+                                </button>
+                            </div>
+
+
+                        </div>
+
+                    </ng-container>
+                </div>
+                !-->
+                <mat-menu #chatsHeaderMenu>
+                    <button mat-menu-item>
+                        <mat-icon [svgIcon]="'heroicons_outline:user-group'"></mat-icon>
+                        New group
+                    </button>
+                    <button mat-menu-item>
+                        <mat-icon [svgIcon]="'heroicons_outline:chat-bubble-left-right'"></mat-icon>
+                        Create a room
+                    </button>
+                    <button
+                        mat-menu-item>
+                        <mat-icon [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
+                        Profile
+                    </button>
+                    <button mat-menu-item>
+                        <mat-icon [svgIcon]="'heroicons_outline:archive-box'"></mat-icon>
+                        Archived
+                    </button>
+                    <button mat-menu-item>
+                        <mat-icon [svgIcon]="'heroicons_outline:star'"></mat-icon>
+                        Starred
+                    </button>
+                    <button mat-menu-item>
+                        <mat-icon [svgIcon]="'heroicons_outline:cog-8-tooth'"></mat-icon>
+                        Settings
+                    </button>
+                </mat-menu>
+                <ng-template #noDatabase>
+                    <div class="flex flex-auto flex-col items-center justify-center h-full">
+                        <mat-icon
+                            class="icon-size-24"
+                            [svgIcon]="'heroicons_outline:chat-bubble-oval-left-ellipsis'"></mat-icon>
+                        <div class="p-4 mt-4 text-2xl font-semibold tracking-tight text-secondary text-center">Escolha o banco de dados do produto</div>
+                    </div>
+                </ng-template>
+            </div>
+        </mat-drawer>
+
+        <!-- Drawer content -->
+        <mat-drawer-content class="flex flex-col overflow-hidden">
+
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-1 border-b bg-card dark:bg-transparent">
+
+                <div class="flex shrink-0 items-center mt-0 sm:mx-2">
+                    <button class="min-h-7 h-7 "
+                        mat-icon-button
+                        (click)="matDrawer.toggle()">
+                        <mat-icon [svgIcon]="'heroicons_outline:bars-3'"></mat-icon>
+                    </button>
+                </div>
+                <mat-button-toggle-group
+                    class="flex-1 min-w-0 flex-wrap items-center -m-2"
+                    name="options" [(ngModel)]="selectedTab">
+                    <mat-button-toggle
+                        *ngFor="let option of tabsOpened;"
+                        class="m-1 font-medium button-xs"
+                        [ngClass]="{
+                                    'bg-gray-300 dark:bg-gray-700': option.name === selectedTab,
+                                    'bg-transparent': option.name !== selectedTab
+                                }"
+                        [value]="option.name">
+                        <div class="flex justify-between items-center text-sm">
+                            <div>{{option.name}}</div>
+                            <button class="icon-size-4 ml-1"
+                                mat-icon-button
+                                    (click)="removeTab(option)">
+                                <mat-icon [svgIcon]="'mat_solid:close'"></mat-icon>
+                            </button>
+                        </div>
+                    </mat-button-toggle>
+                </mat-button-toggle-group>
+
+
+            </div>
+            <div class="flex-auto flex flex-col p-2 overflow-hidden">
+                <ng-container *ngFor="let table of tabsOpened;">
+                    <luthier-dictionary-table class="w-full h-full" [model]="table"
+                          [ngClass]="{'hidden': table.name !== selectedTab}">
+                    </luthier-dictionary-table>
+                </ng-container>
+
+            </div>
+        </mat-drawer-content>
+
+    </mat-drawer-container>
+
+</div>

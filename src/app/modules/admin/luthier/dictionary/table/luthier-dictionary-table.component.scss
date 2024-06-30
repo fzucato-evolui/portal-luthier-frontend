@@ -1,0 +1,50 @@
+luthier-dictionary-table {
+    .mat-expansion-panel-content {
+        overflow: hidden !important;
+    }
+    .mat-expansion-panel-body {
+        overflow: hidden !important;
+    }
+    .mat-expansion-panel-body {
+        padding: 0px !important;
+    }
+    .headers-align .mat-expansion-panel-header-description {
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+    .mat-mdc-tab-labels, .mat-mdc-tab {
+        height: 32px !important;
+    }
+    .mat-mdc-tab-group .mat-mdc-tab-body-content {
+        padding: 10px !important;
+    }
+    .mat-mdc-tab-group .table-tab .mat-mdc-tab-body-content {
+        padding: 0px !important;
+        @apply flex flex-col h-full overflow-hidden
+    }
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+        padding: 0px 10px 0px 10px !important;
+        font-size: 0.75rem !important;
+    }
+    .mat-mdc-row:hover .mat-mdc-cell {
+        background-color: lightgray;
+    }
+    .mat-mdc-table .mdc-data-table__row {
+        height: 0px !important;
+    }
+    .mat-mdc-row:nth-child(even){
+        background-color: inherit !important;
+    }
+    .mat-mdc-row:nth-child(odd){
+        background-color: whitesmoke !important;
+    }
+
+    .mat-mdc-cell {
+        .mdc-text-field {
+            margin: 0px !important;
+        }
+    }
+}
+
+

@@ -1,0 +1,10 @@
+.no-padding-expansion-panel .mat-expansion-panel-body {
+    padding: 0px !important;
+}
+.no-padding-expansion-panel .mat-expansion-panel-content {
+    padding: 0px !important;
+}
+.readOnly {
+    pointer-events: none;
+}
+

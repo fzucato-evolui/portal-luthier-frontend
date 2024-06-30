@@ -1,0 +1,64 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden">
+
+    <mat-drawer-container class="flex-auto h-full">
+
+        <!-- Drawer -->
+        <mat-drawer
+            class="w-72 dark:bg-gray-900"
+            [autoFocus]="false"
+            [mode]="drawerMode"
+            [opened]="drawerOpened"
+            #matDrawer>
+            <!-- Demo sidebar
+            <demo-sidebar></demo-sidebar>
+            -->
+            <div class="py-3">
+                <!-- Add any extra content that might be supplied with the component -->
+                <div class="extra-content">
+                    <ng-content></ng-content>
+                </div>
+
+                <!-- Fixed demo sidebar -->
+                <div class="mx-6 text-3xl font-bold tracking-tighter">Tables/Views</div>
+                <fuse-vertical-navigation
+                    [appearance]="'default'"
+                    [navigation]="menuTableData"
+                    [inner]="true"
+                    [mode]="'side'"
+                    [name]="'demo-sidebar-navigation'"
+                    [opened]="true"></fuse-vertical-navigation>
+
+            </div>
+        </mat-drawer>
+
+        <!-- Drawer content -->
+        <mat-drawer-content class="flex flex-col overflow-hidden">
+
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-2 border-b bg-card dark:bg-transparent">
+
+                <!-- Actions -->
+                <div class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
+                    <button
+                        mat-icon-button
+                        (click)="matDrawer.toggle()">
+                        <mat-icon [svgIcon]="'heroicons_outline:bars-3'"></mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main -->
+            <div
+                class="flex-auto p-6 sm:p-10 overflow-y-auto"
+                cdkScrollable>
+
+                <!-- CONTENT GOES HERE -->
+                <div class="h-400 min-h-400 max-h-400 border-2 border-dashed border-gray-300 rounded-2xl"></div>
+
+            </div>
+
+        </mat-drawer-content>
+
+    </mat-drawer-container>
+
+</div>

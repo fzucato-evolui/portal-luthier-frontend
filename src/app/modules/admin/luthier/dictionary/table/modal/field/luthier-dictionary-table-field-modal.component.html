@@ -1,0 +1,412 @@
+<div class="inset-0 w-full h-full flex flex-col min-w-0 md:overflow-y-auto relative">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-2 sm:py-4 sm:px-4 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="flex flex-row flex-row-reverse mt-2 items-center">
+                <div class="mr-2">
+                    <button
+                        mat-icon-button aria-label="close dialog" mat-dialog-close>
+                        <mat-icon
+                            class="icon-size-4"
+                            fontSet="fas" fontIcon="fa-times"></mat-icon>
+                    </button>
+                </div>
+                <div class="w-full">
+                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        {{title}}
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div
+        class="flex-auto overflow-y-auto p-3"
+        cdkScrollable>
+
+        <div [formGroup]="formSave" class="divide-y-2 divide-black h-full max-h-full max-w-full overflow-x-auto md:overflow-auto">
+
+            <div class="w-full pb-2 flex flex-col max-h-1/2 divide-black overflow-auto">
+                <div class="flex-none w-full">
+                    <mat-label class="font-medium">Possíveis Valores</mat-label>
+                </div>
+                <table mat-table matSort [dataSource]="dataSource" class="table-auto flex-1 w-full" (matSortChange)="announceSortChange($event)">
+                    <ng-container matColumnDef="buttons">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <div class="flex flex-row items-center">
+                                <button mat-icon-button aria-label="Add" (click)="add()">
+                                    <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-plus"></mat-icon>
+                                </button>
+                            </div>
+                        </th>
+                        <td mat-cell *matCellDef="let model; let i = index">
+                            <div class="flex flex-row items-center">
+                                <button mat-icon-button aria-label="Delete" (click)="delete(i)" matTooltip="Remover Banco">
+                                    <mat-icon class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="code">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+                        <td mat-cell *matCellDef="let model; let i = index"> {{model.get('code').value}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="caption">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Chave </th>
+                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                            <div class="flex flex-row items-center">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                    <input class="text-sm" matInput [formControlName]="'value'">
+                                </mat-form-field>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="value">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Valor </th>
+                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                            <div class="flex flex-row items-center">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                    <input class="text-sm" matInput [formControlName]="'caption'">
+                                </mat-form-field>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="customValue" *ngIf="fieldType === 'fields'">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Valor Customizado </th>
+                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                            <div class="flex flex-row items-center" [formGroupName]="'customCaption'">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                    <input class="text-sm" matInput [formControlName]="'value'">
+                                </mat-form-field>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="resource">
+                        <th mat-header-cell *matHeaderCellDef> Imagem </th>
+                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                            <div class="flex flex-row items-center">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                    <mat-select #imageResource class="text-sm" [compareWith]="fieldType === 'fields' ? parent.compareCode : compareImageName"
+                                                [formControl]="model.get('resource')">
+                                        <mat-select-trigger>
+                                            <img width="16" src="{{ 'data:image/png;base64,' + getSeletctedImage(imageResource.value)}}" />
+                                        </mat-select-trigger>
+                                        <ng-container *ngFor="let t of resources">
+                                            <mat-option *ngIf="t.height === 16" [value]="fieldType === 'fields' ? {code: t.code, name: t.name} : t.name" >
+                                                <img height="16" width="16" [src]="'data:image/png;base64,' + t.file"/>
+                                            </mat-option>
+                                        </ng-container>
+
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="permissionType">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo Permissão </th>
+                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                            <div class="flex flex-row items-center">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                    <mat-select class="text-sm"
+                                                formControlName="permissionType">
+
+                                        <mat-option *ngFor="let t of LuthierPermissionTypeEnum | enumArray" [value]="t.key" >
+                                            {{t.key}}
+
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="permissionMessage">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Mensagem Erro </th>
+                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                            <div class="flex flex-row items-center">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                    <input class="text-sm" matInput [formControlName]="'permissionMessage'">
+                                </mat-form-field>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+            </div>
+            <div class="w-full mb-4">
+                <div class="grid sm:grid-cols-12 gap-2 mt-4 mx-1">
+
+                    <div class="sm:col-span-2">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Código</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-list-ol"
+                                matPrefix></mat-icon>
+                            <input
+                                mask="0*"
+                                [formControlName]="'code'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-5">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Nome</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-signature"
+                                matPrefix></mat-icon>
+                            <input matInput
+                                   formControlName="name">
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-5 grid sm:grid-cols-12 pl-2">
+                        <div class="sm:col-span-6 text-sm flex items-center justify-start">
+                            <mat-slide-toggle class="text-sm" formControlName="key">Chave</mat-slide-toggle>
+                        </div>
+                        <div class="sm:col-span-6 text-sm flex items-center justify-start">
+                            <mat-slide-toggle class="text-sm" formControlName="search">Busca</mat-slide-toggle>
+                        </div>
+                        <div class="sm:col-span-6 text-sm flex items-center justify-start">
+                            <mat-slide-toggle class="text-sm" formControlName="notNull">Obrigatório</mat-slide-toggle>
+                        </div>
+                        <div class="sm:col-span-6 text-sm flex items-center justify-start">
+                            <mat-slide-toggle class="text-sm" formControlName="autoInc">Auto-Incremento</mat-slide-toggle>
+                        </div>
+                    </div>
+
+                    <div class="sm:col-span-12">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Rótulo</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-signature"
+                                matPrefix></mat-icon>
+                            <input matInput
+                                   formControlName="label">
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-12" formGroupName="customLabel" *ngIf="fieldType === 'fields'">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Rótulo Customizado</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-signature"
+                                matPrefix></mat-icon>
+                            <input matInput
+                                   formControlName="value">
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Tipo</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+
+                            <mat-select formControlName="fieldType">
+
+                                <mat-option *ngFor="let t of LuthierFieldTypeEnum | enumArray" [value]="t.key" >
+                                    {{t.key}}
+
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Tamanho</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-database"
+                                matPrefix></mat-icon>
+                            <input
+                                mask="0*"
+                                [formControlName]="'size'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Precisão</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-database"
+                                matPrefix></mat-icon>
+                            <input
+                                mask="0*"
+                                [formControlName]="'precision'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Ordem</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-database"
+                                matPrefix></mat-icon>
+                            <input
+                                mask="0*"
+                                [formControlName]="'order'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Valor Padrão</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-database"
+                                matPrefix></mat-icon>
+                            <input
+                                mask="0*"
+                                [formControlName]="'defaultValue'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Valor Mínimo</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-database"
+                                matPrefix></mat-icon>
+                            <input
+                                mask="0*"
+                                [formControlName]="'minValue'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Valor Máximo</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-database"
+                                matPrefix></mat-icon>
+                            <input
+                                mask="0*"
+                                [formControlName]="'maxValue'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-4">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>CharCase</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+
+                            <mat-select formControlName="charCase">
+
+                                <mat-option *ngFor="let t of LuthierFieldCharcaseEnum | enumArray" [value]="t.key" >
+                                    {{t.key}}
+
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-4">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Tipo Editor</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+
+                            <mat-select formControlName="editor">
+
+                                <mat-option *ngFor="let t of LuthierFieldEditorEnum | enumArray" [value]="t.key" >
+                                    {{t.key}}
+
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="sm:col-span-4">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Grupo Info.</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+
+                            <mat-select formControlName="groupInfo" [compareWith]="parent.compareCode">
+
+                                <mat-option *ngFor="let t of groupInfoModel" [value]="t" >
+                                    {{t.description}}
+
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-12">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label class="text-sm">Mascára</mat-label>
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-info"
+                                matPrefix></mat-icon>
+                            <textarea style="resize: none"
+                                      [formControlName]="'mask'"
+                                      matInput
+                                      [rows]="3"></textarea>
+
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-12">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label class="text-sm">Descrição Técnica</mat-label>
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-question"
+                                matPrefix></mat-icon>
+                            <textarea style="resize: none"
+                                      [formControlName]="'technichalDescription'"
+                                      matInput
+                                      [rows]="3"></textarea>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-12">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label class="text-sm">Help</mat-label>
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-info"
+                                matPrefix></mat-icon>
+                            <textarea style="resize: none"
+                                      [formControlName]="'userDescription'"
+                                      matInput
+                                      [rows]="3"></textarea>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <pre style="font-size: 1rem; white-space: pre-wrap;">{{ formSave.value | json}}</pre>
+
+            </div>
+
+
+        </div>
+
+        <div class="absolute bottom-0 right-0 z-50">
+
+            <button
+                class="mr-4 mb-4"
+                [disabled]="canSave() === false"
+                (click)="doSaving()"
+                mat-flat-button
+                type="button"
+                [color]="'primary'">Salvar
+            </button>
+        </div>
+    </div>
+
+</div>

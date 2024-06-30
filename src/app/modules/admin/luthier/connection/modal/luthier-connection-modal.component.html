@@ -1,0 +1,155 @@
+<div class="inset-0 w-full h-full flex flex-col min-w-0 md:overflow-y-auto relative">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-2 sm:py-4 sm:px-4 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="flex flex-row flex-row-reverse mt-2 items-center">
+                <div class="mr-2">
+                    <button
+                        mat-icon-button aria-label="close dialog" mat-dialog-close>
+                        <mat-icon
+                            class="icon-size-4"
+                            fontSet="fas" fontIcon="fa-times"></mat-icon>
+                    </button>
+                </div>
+                <div class="w-full">
+                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        {{title}}
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div
+        class="flex-auto overflow-y-auto p-6"
+        cdkScrollable>
+
+        <div [formGroup]="formSave" class="divide-y-2 divide-black h-full max-h-full max-w-full overflow-x-auto md:overflow-auto">
+
+
+            <div class="w-full mb-4">
+                <div class="w-full my-2">
+                    <div class="text-xl">Base de dados</div>
+                    <div class="text-secondary">Configuração de conexão da base de dados do Produto</div>
+
+                </div>
+                <div class="grid sm:grid-cols-12 gap-2 mt-4 mx-1">
+                    <div class="sm:col-span-2">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>ID</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-list-ol"
+                                matPrefix></mat-icon>
+                            <input
+                                mask="0*"
+                                [formControlName]="'code'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-10"></div>
+                    <!-- dbType -->
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Tipo de Banco</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+
+                            <mat-select name="dbType"
+                                        [required]="true"
+                                        [formControlName]="'dbType'">
+
+                                <mat-option *ngFor="let t of DatabaseTypeEnum | enumArray" [value]="t.key" >
+                                    {{t.key}}
+
+                                </mat-option>
+                            </mat-select>
+
+
+                        </mat-form-field>
+                    </div>
+                    <!-- database -->
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Banco de Dados</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-database"
+                                matPrefix></mat-icon>
+                            <input
+                                [formControlName]="'database'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <!-- server -->
+                    <div class="sm:col-span-12">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Host</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-server"
+                                matPrefix></mat-icon>
+                            <input
+                                [required]="true"
+                                [formControlName]="'server'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- user -->
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Usuário</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-user"
+                                matPrefix></mat-icon>
+                            <input
+                                [required]="true"
+                                [formControlName]="'user'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <!-- password -->
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Senha</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-key"
+                                matPrefix></mat-icon>
+                            <input
+                                [required]="true"
+                                [formControlName]="'password'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+
+
+                </div>
+
+                <pre style="font-size: 1rem; white-space: pre-wrap;">{{ formSave.value | json}}</pre>
+
+            </div>
+
+
+        </div>
+
+        <div class="absolute bottom-0 right-0 z-50">
+
+            <button
+                class="mr-4 mb-4"
+                [disabled]="canSave() === false"
+                (click)="doSaving()"
+                mat-flat-button
+                type="button"
+                [color]="'primary'">Salvar
+            </button>
+        </div>
+    </div>
+
+</div>

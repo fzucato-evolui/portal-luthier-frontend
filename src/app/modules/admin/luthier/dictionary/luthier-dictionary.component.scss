@@ -1,0 +1,17 @@
+luthier-dictionary fuse-vertical-navigation .fuse-vertical-navigation-wrapper {
+    box-shadow: none !important;
+}
+luthier-dictionary #component-container > *:first-child {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+luthier-dictionary {
+    .mat-drawer-inner-container {
+        overflow: hidden !important;
+    }
+}
+
+

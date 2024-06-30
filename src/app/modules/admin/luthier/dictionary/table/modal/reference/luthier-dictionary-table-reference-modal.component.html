@@ -1,0 +1,355 @@
+<div class="inset-0 w-full h-full flex flex-col min-w-0 md:overflow-y-auto relative">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-2 sm:py-4 sm:px-4 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="flex flex-row flex-row-reverse mt-2 items-center">
+                <div class="mr-2">
+                    <button
+                        mat-icon-button aria-label="close dialog" mat-dialog-close>
+                        <mat-icon
+                            class="icon-size-4"
+                            fontSet="fas" fontIcon="fa-times"></mat-icon>
+                    </button>
+                </div>
+                <div class="w-full">
+                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        {{title}}
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div
+        class="flex-auto overflow-y-auto p-3"
+        cdkScrollable>
+
+        <div [formGroup]="formSave" class="divide-y-2 divide-black h-full max-h-full max-w-full overflow-x-auto md:overflow-auto">
+
+            <div class="w-full mb-4">
+                <div class="grid sm:grid-cols-12 gap-2 mt-4 mx-1">
+
+                    <div class="sm:col-span-2">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Código</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-list-ol"
+                                matPrefix></mat-icon>
+                            <input
+                                readonly
+                                [formControlName]="'code'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-5">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Nome</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-signature"
+                                matPrefix></mat-icon>
+                            <input matInput class="uppercase"
+                                   [patterns]="customPatterns" mask="I*"
+                                   formControlName="name">
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-5">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Status</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+
+                            <mat-select formControlName="status">
+
+                                <mat-option *ngFor="let t of LuthierReferenceStatusEnum | enumArray" [value]="t.key" >
+                                    {{t.key}}
+
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Tabela PK</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+                            <mat-select #tablePK [compareWith]="parent.compareCode" (openedChange)="filterTablePK.value =null"
+                                        [formControl]="formSave.get('tablePK')" (selectionChange)="changeTablePK($event)">
+                                <div class="flex flex-col h-full w-full">
+                                    <div class="flex-none">
+                                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                            <mat-icon
+                                                class="icon-size-5"
+                                                fontSet="fas" fontIcon="fa-search"
+                                                matPrefix></mat-icon>
+                                            <input [autocomplete]="'off'" #filterTablePK matInput>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="flex-1 overflow-auto">
+                                        <ng-container *ngFor="let t of tables | filterJson : {name: filterTablePK.value}">
+                                            <mat-option [value]="{code: t.code, name: t.name}" >
+                                                {{t.name}}
+                                            </mat-option>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Nome Atributo</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-database"
+                                matPrefix></mat-icon>
+                            <input
+                                [patterns]="customPatterns" mask="J*"
+                                [formControlName]="'attributeName'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>ONDELETE</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+
+                            <mat-select formControlName="onDelete">
+
+                                <mat-option *ngFor="let t of LuthierReferenceActionEnum | enumArray" [value]="t.key" >
+                                    {{t.key}}
+
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>ONUPDATE</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+
+                            <mat-select formControlName="onUpdate">
+
+                                <mat-option *ngFor="let t of LuthierReferenceActionEnum | enumArray" [value]="t.key" >
+                                    {{t.key}}
+
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-12">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label class="text-sm">Mensagem Inclusão</mat-label>
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-info"
+                                matPrefix></mat-icon>
+                            <textarea style="resize: none"
+                                      [formControlName]="'updateMessage'"
+                                      matInput
+                                      [rows]="2"></textarea>
+
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-12">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label class="text-sm">Mensagem Exclusão</mat-label>
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-info"
+                                matPrefix></mat-icon>
+                            <textarea style="resize: none"
+                                      [formControlName]="'deleteMessage'"
+                                      matInput
+                                      [rows]="2"></textarea>
+
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Lookup Chave</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+
+                            <mat-select [disabled]="!tablePK.value" [compareWith]="parent.compareCode" (openedChange)="filterFieldsPKKey.value =null"
+                                        [formControl]="formSave.get('lookupFastFieldCode')">
+                                <div class="flex flex-col h-full w-full">
+                                    <div class="flex-none">
+                                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                            <mat-icon
+                                                class="icon-size-5"
+                                                fontSet="fas" fontIcon="fa-search"
+                                                matPrefix></mat-icon>
+                                            <input [autocomplete]="'off'" #filterFieldsPKKey matInput>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="flex-1 overflow-auto">
+                                        <ng-container *ngFor="let t of fieldsPK | filterJson : {name: filterFieldsPKKey.value}">
+                                            <mat-option [value]="{code: t.code, name: t.name, id: t.id}" >
+                                                {{t.name}}
+                                            </mat-option>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Lookup Descrição</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+
+                            <mat-select [disabled]="!tablePK.value" [compareWith]="parent.compareCode" (openedChange)="filterFieldsPKDescr.value =null"
+                                        [formControl]="formSave.get('lookupDescriptionFieldCode')">
+                                <div class="flex flex-col h-full w-full">
+                                    <div class="flex-none">
+                                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                            <mat-icon
+                                                class="icon-size-5"
+                                                fontSet="fas" fontIcon="fa-search"
+                                                matPrefix></mat-icon>
+                                            <input [autocomplete]="'off'" #filterFieldsPKDescr matInput>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="flex-1 overflow-auto">
+                                        <ng-container *ngFor="let t of fieldsPK | filterJson : {name: filterFieldsPKDescr.value}">
+                                            <mat-option [value]="{code: t.code, name: t.name, id: t.id}" >
+                                                {{t.name}}
+                                            </mat-option>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+            </div>
+            <div class="w-full pb-2 flex flex-col max-h-1/2 divide-black overflow-auto">
+                <div class="flex-none w-full">
+                    <mat-label class="font-medium">Campos da Referência</mat-label>
+                </div>
+                <table *ngIf="tablePK.value" mat-table matSort [dataSource]="dataSource" class="table-auto flex-1 w-full" (matSortChange)="announceSortChange($event)">
+                    <ng-container matColumnDef="buttons">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <div class="flex flex-row items-center">
+                                <button mat-icon-button aria-label="Add" (click)="add()" matTooltip="Adicionar Campo no Índice">
+                                    <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-plus"></mat-icon>
+                                </button>
+                            </div>
+                        </th>
+                        <td mat-cell *matCellDef="let model; let i = index">
+                            <div class="flex flex-row items-center">
+                                <button mat-icon-button aria-label="Delete" (click)="delete(i)" matTooltip="Remover Campo do Índice">
+                                    <mat-icon class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="code">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+                        <td mat-cell *matCellDef="let model; let i = index"> {{model.get('code').value}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="fieldPK.name">
+                        <th mat-header-cell *matHeaderCellDef> Campo PK</th>
+                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                            <div class="flex flex-row items-center">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                    <mat-select class="text-sm" [compareWith]="parent.compareCode" (openedChange)="filterFieldsPK.value =null"
+                                                [formControl]="model.get('fieldPK')">
+                                        <div class="flex flex-col h-full w-full">
+                                            <div class="flex-none">
+                                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                                    <mat-icon
+                                                        class="icon-size-4"
+                                                        fontSet="fas" fontIcon="fa-search"
+                                                        matPrefix></mat-icon>
+                                                    <input [autocomplete]="'off'" #filterFieldsPK matInput>
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="flex-1 overflow-auto">
+                                                <ng-container *ngFor="let t of getKeyFieldsPK() | filterJson : {name: filterFieldsPK.value}">
+                                                    <mat-option [value]="{code: t.code, name: t.name, id: t.id}" >
+                                                        {{t.name}}
+                                                    </mat-option>
+                                                </ng-container>
+                                            </div>
+                                        </div>
+
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="fieldFK.name">
+                        <th mat-header-cell *matHeaderCellDef> Campo FK</th>
+                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                            <div class="flex flex-row items-center">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                    <mat-select class="text-sm" [compareWith]="parent.compareCode" (openedChange)="filterFieldsFK.value =null"
+                                                [formControl]="model.get('fieldFK')">
+                                        <div class="flex flex-col h-full w-full">
+                                            <div class="flex-none">
+                                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                                    <mat-icon
+                                                        class="icon-size-4"
+                                                        fontSet="fas" fontIcon="fa-search"
+                                                        matPrefix></mat-icon>
+                                                    <input [autocomplete]="'off'" #filterFieldsFK matInput>
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="flex-1 overflow-auto">
+                                                <ng-container *ngFor="let t of fields | filterJson : {name: filterFieldsFK.value}">
+                                                    <mat-option [value]="{code: t.code, name: t.name, id: t.id}" >
+                                                        {{t.name}}
+                                                    </mat-option>
+                                                </ng-container>
+                                            </div>
+                                        </div>
+
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+            </div>
+            <pre style="font-size: 1rem; white-space: pre-wrap;">{{ formSave.value | json}}</pre>
+        </div>
+
+        <div class="absolute bottom-0 right-0 z-50">
+
+            <button
+                class="mr-4 mb-4"
+                [disabled]="canSave() === false"
+                (click)="doSaving()"
+                mat-flat-button
+                type="button"
+                [color]="'primary'">Salvar
+            </button>
+        </div>
+    </div>
+
+</div>

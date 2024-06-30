@@ -1,0 +1,171 @@
+<!-- Connections toggle -->
+<button
+    mat-icon-button
+    (click)="openPanel()"
+    matTooltip="Conexões"
+    #connectionsOrigin>
+    <mat-icon [svgIcon]="'heroicons_outline:link'"></mat-icon>
+</button>
+
+<!-- Connections panel -->
+<ng-template #connectionsPanel>
+
+    <div class="fixed inset-0 sm:static sm:inset-auto flex flex-col sm:min-w-90 sm:w-90 sm:rounded-2xl overflow-hidden shadow-lg">
+
+        <!-- Header -->
+        <div class="flex flex-col py-4 pr-4 pl-6 bg-primary text-on-primary">
+
+            <div class="flex shrink-0 items-center">
+                <div class="sm:hidden -ml-1 mr-3">
+                    <button
+                        mat-icon-button
+                        (click)="closePanel()">
+                        <mat-icon
+                            class="icon-size-5 text-current"
+                            [svgIcon]="'heroicons_solid:link'"></mat-icon>
+                    </button>
+                </div>
+                <div class="text-lg font-medium leading-10">Conexões</div>
+                <div class="ml-auto">
+                    <mat-icon
+                        class="icon-size-5 text-current"
+                        [svgIcon]="'heroicons_solid:link'"></mat-icon>
+                </div>
+            </div>
+            <div class="m-1">
+                <mat-form-field
+                    class="fuse-mat-rounded fuse-mat-dense w-full"
+                    [subscriptSizing]="'dynamic'">
+                    <mat-icon
+                        matPrefix
+                        class="icon-size-5"
+                        [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                    <input
+                        matInput
+                        [autocomplete]="'off'"
+                        [placeholder]="'Busca'"
+                        [(ngModel)]="filterValue"
+                        (ngModelChange)="filterObjects()"
+                        #filtro>
+                </mat-form-field>
+            </div>
+
+        </div>
+
+        <!-- Content -->
+        <div class="relative flex flex-col flex-auto sm:max-h-120 divide-y overflow-y-auto bg-card">
+            <!-- Connections -->
+            <ng-container *ngFor="let database of filteredLuthierDatabases | async; trackBy: trackByFn">
+                <div class="flex flex-col group">
+                    <div
+                        class="flex hover:bg-gray-50 dark:hover:bg-black dark:hover:bg-opacity-5">
+
+                        <div class="flex flex-auto py-5 pl-2">
+                            <!-- Icon -->
+                            <div class="flex shrink-0 items-center justify-center w-8 h-8 mr-4 rounded-full bg-gray-100 dark:bg-gray-700">
+                                <mat-icon
+                                    class="icon-size-5"
+                                    fontSet="fas" fontIcon="fa-guitar">
+                                </mat-icon>
+                            </div>
+                            <!-- Title, description & time -->
+                            <div class="flex flex-col flex-auto">
+                                <div
+                                    class="font-semibold line-clamp-1"
+                                    [innerHTML]="database.identifier"></div>
+                                <div
+                                    class="line-clamp-2"
+                                    [innerHTML]="database.description"></div>
+
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="relative flex flex-col my-5 mr-6 ml-2">
+                            <!-- Indicator -->
+                            <div [matTooltip]="workLuthierDatabase === database.id ? 'Banco de Trabalho Atual' : 'Setar Banco de Trabalho'">
+                                <button
+                                    class="w-6 h-6 min-h-6"
+                                    mat-icon-button
+                                    [disabled]="workLuthierDatabase === database.id"
+                                    (click)="toggleLuthierDatabase(database.id)">
+                            <span
+                                class="w-2 h-2 rounded-full"
+                                [ngClass]="{'bg-gray-400 dark:bg-gray-500 sm:opacity-0 sm:group-hover:opacity-100': workLuthierDatabase !== database.id,
+                                            'bg-primary': workLuthierDatabase === database.id}"></span>
+                                </button>
+                            </div>
+
+                            <!-- Expand -->
+                            <button *ngIf="workLuthierDatabase === database.id"
+                                    class="w-6 h-6 min-h-6"
+                                    mat-icon-button
+                                    (click)="toggleState()"
+                                    [matTooltip]="state === 'expanded' ? 'Recolher' : 'Expandir'">
+                                <mat-icon
+                                    class="icon-size-4"
+                                    [svgIcon]="state === 'expanded' ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"></mat-icon>
+                            </button>
+                        </div>
+
+                    </div>
+                    <mat-accordion class="no-padding-expansion-panel" *ngIf="workLuthierDatabase === database.id">
+                        <mat-expansion-panel [expanded]="state === 'expanded'">
+
+                            <div class="flex flex-col bg-gray-200">
+                                <div *ngFor="let luthierDatabase of filteredDadosDatabases | async;">
+                                    <div class="flex">
+                                        <div class="flex flex-auto pl-7">
+                                            <!-- Icon -->
+                                            <div class="flex shrink-0 items-center justify-center w-8 h-8 mr-4 rounded-full bg-gray-100 dark:bg-gray-700">
+                                                <mat-icon
+                                                    class="icon-size-5"
+                                                    [svgIcon]="'feather:database'">
+                                                </mat-icon>
+                                            </div>
+                                            <!-- Title, description & time -->
+                                            <div class="flex flex-col flex-auto">
+                                                <div
+                                                    class="font-semibold line-clamp-1"
+                                                    [innerHTML]="luthierDatabase.code + '(' + luthierDatabase.dbType + ')'"></div>
+                                                <div
+                                                    [innerHTML]="luthierDatabase.server + '-' + (luthierDatabase.dbType !== 'ORACLE' ? luthierDatabase.database : luthierDatabase.user)"></div>
+
+                                            </div>
+                                            <!-- Actions -->
+                                        </div>
+                                        <div class="relative flex flex-col my-5 mr-6 ml-2">
+                                            <!-- Indicator -->
+                                            <div [matTooltip]="workDadosDatabase === luthierDatabase.code ? 'Banco de Trabalho Atual' : 'Setar Banco de Trabalho'">
+                                                <button
+                                                    class="w-6 h-6 min-h-6"
+                                                    mat-icon-button
+                                                    [disabled]="workDadosDatabase === luthierDatabase.code"
+                                                    (click)="toggleDadosDatabase(luthierDatabase.code)"
+                                                    [matTooltip]="workDadosDatabase === luthierDatabase.code ? 'Banco de Trabalho Atual' : 'Setar Banco de Trabalho'">
+                                                <span
+                                                    class="w-2 h-2 rounded-full"
+                                                    [ngClass]="{'bg-gray-400 dark:bg-gray-500 sm:opacity-0 sm:group-hover:opacity-100': workDadosDatabase !== luthierDatabase.code,
+                                                        'bg-primary': workDadosDatabase === luthierDatabase.code}"></span>
+                                                </button>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+                        </mat-expansion-panel>
+                    </mat-accordion>
+
+                </div>
+
+            </ng-container>
+
+        </div>
+
+    </div>
+
+</ng-template>

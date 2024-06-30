@@ -1,0 +1,100 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden bg-card dark:bg-transparent z-50">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-4 border-b">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="mt-2">
+                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                    Cadastro das Bases de Dados Luthier
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div
+        class="flex-auto p-2  overflow-y-auto"
+        cdkScrollable>
+
+        <div class="flex flex-col">
+            <div class="px-">
+                <mat-form-field class="lg:w-1/3 sm:w-1/2 w-full fuse-mat-rounded fuse-mat-dense" appearance="fill">
+                    <input matInput [autocomplete]="'off'" (keyup)="fastFilter($event)" placeholder="Filtro Rápido" #input>
+                </mat-form-field>
+            </div>
+            <table #table mat-table matSort [dataSource]="dataSource" class="table-auto" (matSortChange)="announceSortChange($event)">
+
+                <ng-container matColumnDef="buttons">
+                    <th mat-header-cell *matHeaderCellDef>
+                        <div class="flex flex-row items-center">
+                            <button mat-icon-button aria-label="Add" (click)="add()">
+                                <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-plus"></mat-icon>
+                            </button>
+                            <button mat-icon-button aria-label="Add" (click)="refresh()">
+                                <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-sync"></mat-icon>
+                            </button>
+                        </div>
+                    </th>
+                    <td mat-cell *matCellDef="let model">
+                        <div class="flex flex-row items-center">
+                            <button mat-icon-button aria-label="Edit" (click)="edit(model.id)" matTooltip="Editar Banco">
+                                <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
+                            </button>
+                            <button mat-icon-button aria-label="Delete" (click)="delete(model.id)" matTooltip="Remover Banco">
+                                <mat-icon class="icon-size-5 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
+                            </button>
+                            <button mat-icon-button aria-label="Check" (click)="check(model.id)" matTooltip="Setar Banco de Trabalho">
+                                <mat-icon class="icon-size-5" [ngClass]="workDataBase === model.id ? 'text-green-500' : 'text-gray-500'" fontSet="fas" fontIcon="fa-circle-check"></mat-icon>
+                            </button>
+
+                        </div>
+                    </td>
+                </ng-container>
+
+                <!-- id -->
+                <ng-container matColumnDef="id">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+                    <td mat-cell *matCellDef="let model"> {{ model.id }} </td>
+                </ng-container>
+                <!-- identifier -->
+                <ng-container matColumnDef="identifier">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header> Identificador </th>
+                    <td mat-cell *matCellDef="let model"> {{ model.identifier }} </td>
+                </ng-container>
+                <!-- identifier -->
+                <ng-container matColumnDef="description">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header> Descrição </th>
+                    <td mat-cell *matCellDef="let model"> {{ model.description }} </td>
+                </ng-container>
+                <!-- host -->
+                <ng-container matColumnDef="host">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header> URL </th>
+                    <td mat-cell *matCellDef="let model"> {{ model.host }} </td>
+                </ng-container>
+                <!-- type -->
+                <ng-container matColumnDef="type">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
+                    <td mat-cell *matCellDef="let model"> {{ model.databaseType }} </td>
+                </ng-container>
+                <!-- database -->
+                <ng-container matColumnDef="database">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header> Banco </th>
+                    <td mat-cell *matCellDef="let model"> {{ model.database }} </td>
+                </ng-container>
+                <!-- user -->
+                <ng-container matColumnDef="user">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header> Usuário </th>
+                    <td mat-cell *matCellDef="let model"> {{ model.user }} </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+
+        </div>
+
+
+    </div>
+
+</div>
