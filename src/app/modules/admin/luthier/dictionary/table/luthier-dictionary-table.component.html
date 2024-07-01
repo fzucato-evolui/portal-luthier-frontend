@@ -239,7 +239,7 @@
             </mat-panel-description>
         </mat-expansion-panel-header>
         <mat-tab-group class="h-full overflow-hidden" (selectedTabChange)="changeTab($event)">
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" ariaLabel="fields" label="Campos" bodyClass="table-tab">
+            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="fields" label="Campos" bodyClass="table-tab">
                 <div class="flex-none md:w-1/3 md:pl-2">
                     <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                         <mat-icon
@@ -261,7 +261,7 @@
                 </div>
 
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" ariaLabel="indexes" label="Índices" bodyClass="table-tab" *ngIf="model.objectType === 'TABLE'">
+            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="indexes" label="Índices" bodyClass="table-tab" *ngIf="model.objectType === 'TABLE'">
                 <div class="flex-none md:w-1/3 md:pl-2">
                     <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                         <mat-icon
@@ -333,7 +333,7 @@
                     </table>
                 </div>
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" ariaLabel="references" label="Referências" bodyClass="table-tab">
+            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="references" label="Referências" bodyClass="table-tab">
                 <div class="flex-none md:w-1/3 md:pl-2">
                     <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                         <mat-icon
@@ -420,7 +420,7 @@
                     </table>
                 </div>
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" ariaLabel="searchs" label="Pesquisas" bodyClass="table-tab">
+            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="searchs" label="Pesquisas" bodyClass="table-tab">
                 <div class="flex-none md:w-1/3 md:pl-2">
                     <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                         <mat-icon
@@ -491,7 +491,7 @@
                 </div>
 
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" ariaLabel="groupInfos" label="Grupos de Informações" bodyClass="table-tab" *ngIf="model.objectType === 'TABLE'">
+            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="groupInfos" label="Grupos de Informações" bodyClass="table-tab" *ngIf="model.objectType === 'TABLE'">
                 <div class="flex-none md:w-1/3 md:pl-2">
                     <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                         <mat-icon
@@ -506,79 +506,12 @@
                     </mat-form-field>
                 </div>
                 <div class="flex-1 overflow-y-auto" cdkScrollable>
-                    <table #sortGroupsInfo="matSort" mat-table matSort [dataSource]="groupsInfoDataSource" class="table-auto" (matSortChange)="announceSortChange($event)">
-                        <ng-container matColumnDef="buttons">
-                            <th mat-header-cell *matHeaderCellDef sticky>
-                                <div class="flex flex-row items-center">
-                                    <button mat-icon-button aria-label="Add" (click)="newGroupInfo()" matTooltip="Adicionar Pesquisa">
-                                        <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-plus"></mat-icon>
-                                    </button>
-                                </div>
-                            </th>
-                            <td mat-cell *matCellDef="let model; let i = index">
-                                <div class="flex flex-row items-center">
-                                    <button mat-icon-button aria-label="Delete" (click)="deleteGroupInfo(i)" matTooltip="Remover Pesquisa">
-                                        <mat-icon class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
-                                    </button>
-                                    <button mat-icon-button aria-label="Edit" (click)="editGroupInfo(model, i)" matTooltip="Editar Pesquisa">
-                                        <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
-                                    </button>
-                                </div>
-                            </td>
-                        </ng-container>
-
-                        <!-- code -->
-                        <ng-container matColumnDef="code">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
-                            <td mat-cell *matCellDef="let model"> {{ model.code }} </td>
-                        </ng-container>
-                        <!-- order -->
-                        <ng-container matColumnDef="order">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Ordem </th>
-                            <td mat-cell *matCellDef="let model"> {{ model.order }} </td>
-                        </ng-container>
-                        <!-- description -->
-                        <ng-container matColumnDef="description">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Descrição </th>
-                            <td mat-cell *matCellDef="let model"> {{ model.description }} </td>
-                        </ng-container>
-                        <!-- groupInfoType -->
-                        <ng-container matColumnDef="groupInfoType">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
-                            <td mat-cell *matCellDef="let model"> {{ model.groupInfoType }} </td>
-                        </ng-container>
-                        <!-- parent.description -->
-                        <ng-container matColumnDef="parent.description">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Grupo Pai </th>
-                            <td mat-cell *matCellDef="let model"> {{ model.parent?.description }} </td>
-                        </ng-container>
-                        <!-- onDelete -->
-                        <ng-container matColumnDef="onDelete">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header> ONDELETE </th>
-                            <td mat-cell *matCellDef="let model"> {{ model.onDelete }} </td>
-                        </ng-container>
-                        <!-- attributeName -->
-                        <ng-container matColumnDef="attributeName">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome Atributo </th>
-                            <td mat-cell *matCellDef="let model"> {{ model.attributeName }} </td>
-                        </ng-container>
-                        <!-- updateMessage -->
-                        <ng-container matColumnDef="updateMessage">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Mensagem Inclusão </th>
-                            <td mat-cell *matCellDef="let model"> {{ model.updateMessage }} </td>
-                        </ng-container>
-                        <!-- deleteMessage -->
-                        <ng-container matColumnDef="deleteMessage">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Mensagem Exclusão </th>
-                            <td mat-cell *matCellDef="let model"> {{ model.deleteMessage }} </td>
-                        </ng-container>
-
-                        <tr mat-header-row *matHeaderRowDef="displayedGroupInfoColumns; sticky: true"></tr>
-                        <tr mat-row *matRowDef="let row; columns: displayedGroupInfoColumns;"></tr>
-                    </table>
+                    <ng-container
+                        *ngTemplateOutlet="fieldTableTemplate; context: { displayedColumns: displayedGroupInfoColumns, datasource: groupsInfoDataSource, fieldtype: 'groupInfos'}">
+                    </ng-container>
                 </div>
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" ariaLabel="customFields" label="Campos Adicionais" bodyClass="table-tab">
+            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="customFields" label="Campos Adicionais" bodyClass="table-tab">
                 <div class="flex-none md:w-1/3 md:pl-2">
                     <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                         <mat-icon
@@ -599,7 +532,7 @@
 
                 </div>
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" ariaLabel="customizations" label="Customizações" bodyClass="table-tab">
+            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="customizations" label="Customizações" bodyClass="table-tab">
                 <div class="flex-none md:w-1/3 md:pl-2">
                     <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                         <mat-icon
@@ -620,7 +553,7 @@
 
                 </div>
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" ariaLabel="views" label="SQL" bodyClass="table-tab" *ngIf="model.objectType === 'VIEW'">
+            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="views" label="SQL" bodyClass="table-tab" *ngIf="model.objectType === 'VIEW'">
                 <mat-tab-group>
                     <ng-container *ngFor="let t of LuthierViewBodyEnum | enumArray">
                         <mat-tab [labelClass]="['text-sm', 'font-bold']" bodyClass="h-96" label="{{t.key}}" [formGroup]="getView(t.key)">
@@ -632,7 +565,7 @@
                     </ng-container>
                 </mat-tab-group>
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" ariaLabel="bonds" label="Vínculos" bodyClass="table-tab">
+            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="bonds" label="Vínculos" bodyClass="table-tab">
                 <table #table mat-table matSort [dataSource]="model.bonds" class="table-auto" (matSortChange)="announceSortChange($event)">
                     <!-- code -->
                     <ng-container matColumnDef="code">
@@ -659,34 +592,43 @@
 </mat-accordion>
 <ng-template #fieldTableTemplate let-displayedColumns="displayedColumns" let-datasource="datasource" let-fieldtype="fieldtype">
     <table #tableFields mat-table #sortFields="matSort" matSort [dataSource]="datasource" class="table-auto" (matSortChange)="announceSortChange($event)">
-        <ng-container *ngIf="fieldtype !== 'customizations'">
-            <ng-container matColumnDef="buttons" sticky>
-                <th mat-header-cell *matHeaderCellDef>
-                    <div class="flex flex-row items-center">
-                        <button mat-icon-button aria-label="Add" (click)="add(fieldtype)">
-                            <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-plus"></mat-icon>
-                        </button>
-                    </div>
-                </th>
-                <td mat-cell *matCellDef="let field; let i = index">
-                    <div class="flex flex-row items-center">
-                        <button mat-icon-button aria-label="Delete" (click)="delete(field.id, i, fieldtype)" matTooltip="Remover">
-                            <mat-icon class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
-                        </button>
-                        <button *ngIf="!fieldRowEditing[fieldtype]" mat-icon-button aria-label="Edit" (click)="editRow(i, fieldtype)" matTooltip="Editar">
-                            <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
-                        </button>
-                        <button *ngIf="fieldRowEditing[fieldtype] === i.toString()" mat-icon-button aria-label="Save" (click)="saveRow(field.id, i, fieldtype)" matTooltip="Salvar">
-                            <mat-icon class="icon-size-4 text-green-500" fontSet="fas" fontIcon="fa-save"></mat-icon>
-                        </button>
-                        <button *ngIf="!fieldRowEditing[fieldtype]" mat-icon-button aria-label="Detail" (click)="detailField(field, i, fieldtype)" matTooltip="Detalhes do Campo">
-                            <mat-icon class="icon-size-4 text-accent" fontSet="fas" fontIcon="fa-glasses"></mat-icon>
-                        </button>
-                    </div>
-                </td>
-            </ng-container>
+        <ng-container matColumnDef="buttons" sticky>
+            <th mat-header-cell *matHeaderCellDef>
+                <div class="flex flex-row items-center">
+                    <button mat-icon-button aria-label="Add" (click)="add(fieldtype)" *ngIf="fieldtype !== 'customizations'">
+                        <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-plus"></mat-icon>
+                    </button>
+                </div>
+            </th>
+            <td mat-cell *matCellDef="let field; let i = index">
+                <div class="flex flex-row items-center">
+                    <button mat-icon-button aria-label="Delete" *ngIf="fieldtype !== 'customizations'" (click)="delete(field.id, i, fieldtype)" matTooltip="Remover">
+                        <mat-icon class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
+                    </button>
+                    <button *ngIf="!fieldRowEditing[fieldtype]" mat-icon-button aria-label="Edit" (click)="editRow(i, fieldtype)" matTooltip="Editar">
+                        <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
+                    </button>
+                    <button *ngIf="fieldRowEditing[fieldtype] === i.toString()" mat-icon-button aria-label="Save" (click)="saveRow(field.id, i, fieldtype)" matTooltip="Salvar">
+                        <mat-icon class="icon-size-4 text-green-500" fontSet="fas" fontIcon="fa-save"></mat-icon>
+                    </button>
+                    <button *ngIf="!fieldRowEditing[fieldtype] && (fieldtype === 'fields' || fieldtype === 'customFields')" mat-icon-button aria-label="Detail" (click)="detailField(field, i, fieldtype)" matTooltip="Detalhes do Campo">
+                        <mat-icon class="icon-size-4 text-accent" fontSet="fas" fontIcon="fa-glasses"></mat-icon>
+                    </button>
+                </div>
+            </td>
+        </ng-container>
+        <!-- code -->
+        <ng-container matColumnDef="code">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+            <td mat-cell *matCellDef="let field let i = index">
+                <div>
+                    {{ field.code }}
+                </div>
+            </td>
+        </ng-container>
+        <ng-container *ngIf="fieldtype === 'fields' || fieldtype === 'customFields' || fieldtype === 'groupInfos'">
             <!-- order -->
-            <ng-container matColumnDef="order" *ngIf="fieldtype !== 'customizations'">
+            <ng-container matColumnDef="order">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> # </th>
                 <td mat-cell *matCellDef="let field let i = index">
                     <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
@@ -700,15 +642,8 @@
                     </div>
                 </td>
             </ng-container>
-            <!-- code -->
-            <ng-container matColumnDef="code">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
-                <td mat-cell *matCellDef="let field let i = index">
-                    <div>
-                        {{ field.code }}
-                    </div>
-                </td>
-            </ng-container>
+        </ng-container>
+        <ng-container *ngIf="fieldtype === 'fields' || fieldtype === 'customFields'">
             <!-- key -->
             <ng-container matColumnDef="key">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> PK </th>
@@ -748,21 +683,6 @@
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'labelField'+i" class="text-sm" matInput
                                    formControlName="label">
-                        </mat-form-field>
-                    </div>
-                </td>
-            </ng-container>
-            <!-- customLabel -->
-            <ng-container *ngIf="fieldtype==='fields'" matColumnDef="customLabel">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> Rótulo Customizado </th>
-                <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
-                        {{ field.customLabel?.value }}
-                    </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customLabel')">
-                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
-                            <input [name]="'customLabelField'+i" class="text-sm" matInput
-                                   formControlName="value">
                         </mat-form-field>
                     </div>
                 </td>
@@ -848,49 +768,6 @@
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input mask="0*" [name]="'sizeField'+i" class="text-sm" matInput
                                    formControlName="size">
-                        </mat-form-field>
-                    </div>
-                </td>
-            </ng-container>
-            <!-- groupInfoCode -->
-            <ng-container matColumnDef="groupInfo.description" *ngIf="fieldtype === 'fields'">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> Grupo de Info. </th>
-                <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
-                        {{ field.groupInfo?.description }}
-                    </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center">
-                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
-
-                            <mat-select class="text-sm" [compareWith]="compareCode"
-                                        [formControl]="getFieldGroup(field.id, fieldtype).get('groupInfo')">
-                                <ng-container *ngFor="let t of model.groupInfos">
-                                    <mat-option [value]="{code: t.code, description: t.description, id: t.id}">
-                                        {{t.description}}
-                                    </mat-option>
-                                </ng-container>
-                            </mat-select>
-                        </mat-form-field>
-                    </div>
-                </td>
-            </ng-container>
-            <ng-container matColumnDef="groupInfo" *ngIf="fieldtype === 'customFields'">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> Grupo de Info. </th>
-                <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
-                        {{ field.groupInfo }}
-                    </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center">
-                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
-
-                            <mat-select class="text-sm"
-                                        [formControl]="getFieldGroup(field.id, fieldtype).get('groupInfo')">
-                                <ng-container *ngFor="let t of model.groupInfos">
-                                    <mat-option [value]="t.description">
-                                        {{t.description}}
-                                    </mat-option>
-                                </ng-container>
-                            </mat-select>
                         </mat-form-field>
                     </div>
                 </td>
@@ -1077,30 +954,69 @@
                 </td>
             </ng-container>
         </ng-container>
-        <ng-container *ngIf="fieldtype==='customizations'">
-            <ng-container matColumnDef="buttons" sticky>
-                <th mat-header-cell *matHeaderCellDef>
-                </th>
-                <td mat-cell *matCellDef="let field; let i = index">
-                    <div class="flex flex-row items-center">
-                        <button *ngIf="!fieldRowEditing[fieldtype]" mat-icon-button aria-label="Edit" (click)="editRow(i, fieldtype)" matTooltip="Editar">
-                            <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
-                        </button>
-                        <button *ngIf="fieldRowEditing[fieldtype] === i.toString()" mat-icon-button aria-label="Save" (click)="saveRow(field.id, i, fieldtype)" matTooltip="Salvar">
-                            <mat-icon class="icon-size-4 text-green-500" fontSet="fas" fontIcon="fa-save"></mat-icon>
-                        </button>
-                    </div>
-                </td>
-            </ng-container>
-            <!-- code -->
-            <ng-container matColumnDef="code">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+        <ng-container *ngIf="fieldtype === 'fields'">
+            <!-- customLabel -->
+            <ng-container matColumnDef="customLabel">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Rótulo Customizado </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div>
-                        {{ field.code }}
+                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                        {{ field.customLabel?.value }}
+                    </div>
+                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customLabel')">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                            <input [name]="'customLabelField'+i" class="text-sm" matInput
+                                   formControlName="value">
+                        </mat-form-field>
                     </div>
                 </td>
             </ng-container>
+            <!-- groupInfoCode -->
+            <ng-container matColumnDef="groupInfo.description">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Grupo de Info. </th>
+                <td mat-cell *matCellDef="let field let i = index">
+                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                        {{ field.groupInfo?.description }}
+                    </div>
+                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+
+                            <mat-select class="text-sm" [compareWith]="compareCode"
+                                        [formControl]="getFieldGroup(field.id, fieldtype).get('groupInfo')">
+                                <ng-container *ngFor="let t of model.groupInfos">
+                                    <mat-option [value]="{code: t.code, description: t.description, id: t.id}">
+                                        {{t.description}}
+                                    </mat-option>
+                                </ng-container>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </td>
+            </ng-container>
+        </ng-container>
+        <ng-container *ngIf="fieldtype === 'customFields'">
+            <ng-container matColumnDef="groupInfo">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Grupo de Info. </th>
+                <td mat-cell *matCellDef="let field let i = index">
+                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                        {{ field.groupInfo }}
+                    </div>
+                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+
+                            <mat-select class="text-sm"
+                                        [formControl]="getFieldGroup(field.id, fieldtype).get('groupInfo')">
+                                <ng-container *ngFor="let t of model.groupInfos">
+                                    <mat-option [value]="t.description">
+                                        {{t.description}}
+                                    </mat-option>
+                                </ng-container>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </td>
+            </ng-container>
+        </ng-container>
+        <ng-container *ngIf="fieldtype==='customizations'">
             <!-- name -->
             <ng-container matColumnDef="name">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome </th>
@@ -1274,6 +1190,66 @@
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'customUiConfigurationField'+i" class="text-sm" matInput
                                    formControlName="value">
+                        </mat-form-field>
+                    </div>
+                </td>
+            </ng-container>
+        </ng-container>
+        <ng-container *ngIf="fieldtype==='groupInfos'">
+            <!-- description -->
+            <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Descrição </th>
+                <td mat-cell *matCellDef="let field let i = index">
+                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                        {{ field.description }}
+                    </div>
+                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                            <input [name]="'description'+i" class="text-sm" matInput
+                                   formControlName="description">
+                        </mat-form-field>
+                    </div>
+                </td>
+            </ng-container>
+            <!-- groupInfoType -->
+            <ng-container matColumnDef="groupInfoType">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
+                <td mat-cell *matCellDef="let field let i = index">
+                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                        {{ field.groupInfoType }}
+                    </div>
+                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                            <mat-select [name]="'groupInfoTypeField'+i" class="text-sm"
+                                        formControlName="groupInfoType">
+
+                                <mat-option *ngFor="let t of LuthierGroupInfoTypeEnum | enumArray" [value]="t.key" >
+                                    {{t.key}}
+
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </td>
+            </ng-container>
+            <!-- parent.description -->
+            <ng-container matColumnDef="parent.description">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Grupo Pai </th>
+                <td mat-cell *matCellDef="let field let i = index">
+                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                        {{ field.parent?.description }}
+                    </div>
+                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+
+                            <mat-select class="text-sm" [compareWith]="compareCode"
+                                        [formControl]="getFieldGroup(field.id, fieldtype).get('parent')">
+                                <ng-container *ngFor="let t of model.groupInfos">
+                                    <mat-option *ngIf="isGroupInfoAllowed(field, t)" [value]="{code: t.code, description: t.description, id: t.id}">
+                                        {{t.description}}
+                                    </mat-option>
+                                </ng-container>
+                            </mat-select>
                         </mat-form-field>
                     </div>
                 </td>

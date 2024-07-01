@@ -41,7 +41,12 @@ export class LuthierTableModel {
     searchs?: LuthierTableSearchModel[]
 
 }
-
+export enum LuthierGroupInfoTypeEnum {
+    GROUP_OF_GROUP = ("GROUP_OF_GROUP"),
+    HORIZONTAL_GRID = ("HORIZONTAL_GRID"),
+    VERTICAL_GRID = ("VERTICAL_GRID"),
+    GROUP_IN_VERTICAL_GRID = ("GROUP_IN_VERTICAL_GRID")
+}
 export class LuthierGroupInfoModel {
     id?: string
     code?: number

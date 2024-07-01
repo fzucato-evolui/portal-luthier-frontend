@@ -9,7 +9,7 @@ import {
     ViewEncapsulation
 } from "@angular/core";
 import {Subject} from 'rxjs';
-import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {FormArray, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
@@ -20,18 +20,21 @@ import {JsonPipe, NgFor, NgIf} from '@angular/common';
 import {SharedPipeModule} from '../../../../../../../shared/pipes/shared-pipe.module';
 import {NgxMaskDirective, provideNgxMask} from 'ngx-mask';
 import {
+    LuthierCustomFieldModel,
     LuthierFieldCharcaseEnum,
     LuthierFieldEditorEnum,
     LuthierFieldLayoutEnum,
     LuthierFieldModifierEnum,
-    LuthierPermissionTypeEnum,
     LuthierFieldTypeEnum,
-    LuthierGroupInfoModel, LuthierResourceModel, LuthierTableFieldModel, LuthierCustomFieldModel
+    LuthierGroupInfoModel,
+    LuthierPermissionTypeEnum,
+    LuthierResourceModel,
+    LuthierTableFieldModel
 } from '../../../../../../../shared/models/luthier.model';
-import {TableType, LuthierDictionaryTableComponent} from '../../luthier-dictionary-table.component';
+import {LuthierDictionaryTableComponent, TableType} from '../../luthier-dictionary-table.component';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
-import {MatSort, Sort, MatSortModule} from '@angular/material/sort';
+import {MatSort, MatSortModule, Sort} from '@angular/material/sort';
 import {UtilFunctions} from '../../../../../../../shared/util/util-functions';
 
 @Component({
@@ -201,7 +204,7 @@ export class LuthierDictionaryTableFieldModalComponent implements OnInit, OnDest
     }
 
     getSeletctedImage(value: any): string {
-        if (value && value.code) {
+        if (value && UtilFunctions.isValidStringOrArray(value.code) === true) {
             const code = value.code;
             if (UtilFunctions.isValidStringOrArray(code) === true) {
                 const index = this.resources.findIndex(x => x.code === code);
@@ -210,7 +213,7 @@ export class LuthierDictionaryTableFieldModalComponent implements OnInit, OnDest
                 }
             }
         }
-        else if (UtilFunctions.isValidStringOrArray(value) === true) {
+        else if (this.fieldType === 'customFields' && UtilFunctions.isValidStringOrArray(value) === true) {
             const index = this.resources.findIndex(x => x.name.toUpperCase() === value.toUpperCase());
             if (index >= 0) {
                 return this.resources[index].file;
