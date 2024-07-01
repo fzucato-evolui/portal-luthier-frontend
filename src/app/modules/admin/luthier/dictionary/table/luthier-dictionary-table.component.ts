@@ -6,8 +6,10 @@ import {
     HostListener,
     Input,
     OnDestroy,
-    OnInit, QueryList,
-    ViewChild, ViewChildren,
+    OnInit,
+    QueryList,
+    ViewChild,
+    ViewChildren,
     ViewEncapsulation
 } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
@@ -32,12 +34,14 @@ import {LuthierDictionaryComponent} from '../luthier-dictionary.component';
 import {
     LuthierCustomFieldModel,
     LuthierCustomizationModel,
-    LuthierCustomizationType,
-    LuthierFieldCharcaseEnum, LuthierFieldCharcaseEnumParser,
-    LuthierFieldEditorEnum, LuthierFieldEditorEnumParser,
+    LuthierFieldCharcaseEnum,
+    LuthierFieldCharcaseEnumParser,
+    LuthierFieldEditorEnum,
+    LuthierFieldEditorEnumParser,
     LuthierFieldLayoutEnum,
     LuthierFieldModifierEnum,
-    LuthierFieldTypeEnum, LuthierGroupInfoModel,
+    LuthierFieldTypeEnum,
+    LuthierGroupInfoModel,
     LuthierIndexSortEnum,
     LuthierPermissionTypeEnum,
     LuthierReferenceActionEnum,
@@ -59,7 +63,7 @@ import {UtilFunctions} from '../../../../../shared/util/util-functions';
 import {cloneDeep} from 'lodash-es';
 import {NgxMaskDirective, provideNgxMask} from 'ngx-mask';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
-import {MatCheckbox, MatCheckboxChange, MatCheckboxModule} from '@angular/material/checkbox';
+import {MatCheckboxChange, MatCheckboxModule} from '@angular/material/checkbox';
 import {SharedPipeModule} from '../../../../../shared/pipes/shared-pipe.module';
 import {MatSelectModule} from '@angular/material/select';
 import {LuthierFieldValidator} from '../../../../../shared/validators/luthier.validator';
@@ -127,7 +131,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     public groupsInfoDataSource = new MatTableDataSource<LuthierGroupInfoModel>();
     @ViewChild('sortGroupsInfo') sortGroupsInfo: MatSort;
     currentTab: TableType = 'fields';
-    fieldRowEditing: { [key: string]: string }
+    fieldRowEditing: { [key: string]: string } = {}
     private _cloneModel: LuthierTableModel;
     @Input()
     set model(value: LuthierTableModel) {
@@ -227,7 +231,6 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             uiConfiguration: ['', []],
             export: [false],
             visible: [false],
-            groupInfos: [null],
             views: this.formBuilder.array([])
         });
         this.addFields('fields');
@@ -682,7 +685,11 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         if (type === 'fields') {
             const allFields = this.formBuilder.group ({
                 ...c.controls,
-                groupInfo: this.addGroupInfoField(),
+                groupInfo: this.formBuilder.group({
+                    id: [crypto.randomUUID()],
+                    code: [null],
+                    description: [null],
+                    }),
                 customSize: this.addCustomizationField(),
                 customLabel: this.addCustomizationField(),
                 customNotNull: this.addCustomizationField(),
@@ -922,7 +929,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             this.customFieldsDataSource.data[index] = fg.value;
             this.customFieldsDataSource._updateChangeSubscription();
         }
-        this.fieldRowEditing = null;
+        this.fieldRowEditing[type] = null;
         this._changeDetectorRef.detectChanges();
     }
 
