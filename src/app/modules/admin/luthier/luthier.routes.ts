@@ -12,12 +12,13 @@ const luthierResolver = (route: ActivatedRouteSnapshot, state: RouterStateSnapsh
     const service = inject(LuthierService);
     const router = inject(Router);
     return forkJoin([
-        UtilFunctions.isValidStringOrArray(authService.luthierDatabase) === true ? service.getTables() : of(null)
+        UtilFunctions.isValidStringOrArray(authService.luthierDatabase) === true ? service.getTables() : of(null),
+        UtilFunctions.isValidStringOrArray(authService.luthierDatabase) === true ? service.getVisions() : of(null)
     ])
 };
 
 export function luthierMatcher(url: UrlSegment[]) {
-    return url.length === 1 && (url[0].path == 'connection' || url[0].path == 'dictionary' || url[0].path == 'manager' )
+    return url.length === 1 && (url[0].path == 'project' || url[0].path == 'connection' || url[0].path == 'dictionary' || url[0].path == 'manager' )
         ? { consumed: url }
         : null;
 }

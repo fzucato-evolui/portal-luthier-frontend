@@ -15,7 +15,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatTable, MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatDialog} from '@angular/material/dialog';
-import {NgClass} from '@angular/common';
+import {NgClass, NgIf} from '@angular/common';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {LuthierConnectionModalComponent} from './modal/luthier-connection-modal.component';
 import {LuthierDatabaseModel} from '../../../../shared/models/luthier.model';
@@ -36,7 +36,8 @@ import {LuthierService} from '../luthier.service';
         MatTableModule,
         MatSortModule,
         MatTooltipModule,
-        NgClass
+        NgClass,
+        NgIf
 
     ],
 })
@@ -56,6 +57,9 @@ export class LuthierConnectionComponent implements OnInit, OnDestroy, AfterViewI
             return this._parent.service;
         }
         return null;
+    }
+    get hasProject(): boolean {
+        return this.service && this.service.hasProject;
     }
     /**
      * Constructor

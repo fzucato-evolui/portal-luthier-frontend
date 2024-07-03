@@ -1,2 +1,14 @@
-<luthier-dictionary [ngClass]="{'hidden': page !== 'dictionary'}"></luthier-dictionary>
-<luthier-connection [ngClass]="{'hidden': page !== 'connection'}"></luthier-connection>
+<ng-container *ngIf="hasLuthierDatabase; else noDatabase">
+    <luthier-project [ngClass]="{'hidden': page !== 'project'}"></luthier-project>
+    <luthier-dictionary [ngClass]="{'hidden': page !== 'dictionary'}"></luthier-dictionary>
+    <luthier-connection [ngClass]="{'hidden': page !== 'connection'}"></luthier-connection>
+</ng-container>
+
+<ng-template #noDatabase>
+    <div class="flex flex-auto flex-col items-center justify-center h-full">
+        <mat-icon
+            class="icon-size-24"
+            [svgIcon]="'heroicons_outline:chat-bubble-oval-left-ellipsis'"></mat-icon>
+        <div class="p-4 mt-4 text-2xl font-semibold tracking-tight text-secondary text-center">Escolha o banco de dados luthier e cadastre um projeto</div>
+    </div>
+</ng-template>

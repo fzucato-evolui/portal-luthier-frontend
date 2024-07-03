@@ -10,7 +10,14 @@ export class LuthierDatabaseModel {
     passwordhash: string
     plainPassword: string
 }
-export type LuthierObjectType = 'UNKNOW' | 'TABLE' | 'VIEW' | 'VISION' | 'PROCEDURE' | 'JUST_RUNTIME';
+
+export class LuthierProjectModel extends LuthierDatabaseModel{
+    name?: string
+    version?: string
+    ident?: string
+    protocol?: string
+}
+export type LuthierObjectType = 'UNKNOW' | 'TABLE' | 'VIEW' | 'VISION' | 'PROCEDURE' | 'JUST_RUNTIME' | 'VISION_DATASET';
 
 export class LuthierTableModel {
     code?: number
@@ -442,3 +449,26 @@ export class LuthierResourceModel {
     width?: number
     identifier?: string
 }
+
+export class LuthierVisionModel {
+    code?: number
+    name?: string
+    description?: string
+    children?: LuthierVisionDatasetModel[]
+    objectType?: LuthierObjectType
+}
+
+export class LuthierVisionDatasetModel {
+    code?: number
+    name?: string
+    description?: string
+    filter?: string
+    uiConfiguration?: string
+    parent?: LuthierVisionDatasetModel
+    children?: LuthierVisionDatasetModel[]
+    table?: LuthierTableModel
+    vision?: LuthierVisionModel
+    objectType?: LuthierObjectType
+}
+
+export type LuthierDictionaryObjectType = LuthierTableModel | LuthierVisionModel | LuthierVisionDatasetModel

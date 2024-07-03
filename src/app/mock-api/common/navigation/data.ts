@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { FuseNavigationItem } from '@fuse/components/navigation';
+import {FuseNavigationItem} from '@fuse/components/navigation';
 
 export const mainNavigation: FuseNavigationItem[] = [
     {
@@ -45,7 +45,15 @@ export const mainNavigation: FuseNavigationItem[] = [
         link    : '/luthier',
         children: [
             {
-                id   : 'lithier.connection',
+                id   : 'luthier.project',
+                title: 'Projeto',
+                type : 'basic',
+                awesomeIcon : {fontSet:"fas", fontIcon:"fa-cube"},
+                link : '/luthier/project',
+                roles : ['ROLE_SUPER', 'ROLE_HYPER']
+            },
+            {
+                id   : 'luthier.connection',
                 title: 'Conexão',
                 type : 'basic',
                 awesomeIcon : {fontSet:"fas", fontIcon:"fa-link"},
@@ -53,7 +61,7 @@ export const mainNavigation: FuseNavigationItem[] = [
                 roles : ['ROLE_SUPER', 'ROLE_HYPER']
             },
             {
-                id   : 'lithier.dictionary',
+                id   : 'luthier.dictionary',
                 title: 'Dicionário',
                 type : 'basic',
                 awesomeIcon : {fontSet:"fas", fontIcon:"fa-spell-check"},

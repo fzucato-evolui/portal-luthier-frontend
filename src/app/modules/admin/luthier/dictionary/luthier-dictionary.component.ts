@@ -19,7 +19,13 @@ import {
     FuseNavigationService,
     FuseVerticalNavigationComponent
 } from '../../../../../@fuse/components/navigation';
-import {LuthierDatabaseModel, LuthierTableModel} from '../../../../shared/models/luthier.model';
+import {
+    LuthierDatabaseModel,
+    LuthierDictionaryObjectType,
+    LuthierTableModel,
+    LuthierVisionDatasetModel,
+    LuthierVisionModel
+} from '../../../../shared/models/luthier.model';
 import {AsyncPipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {LuthierComponent} from '../luthier.component';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
@@ -32,6 +38,9 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {LuthierDictionaryTableComponent} from './table/luthier-dictionary-table.component';
 import {MessageDialogService} from '../../../../shared/services/message/message-dialog-service';
 import {LuthierService} from '../luthier.service';
+import {MatTreeModule, MatTreeNestedDataSource} from '@angular/material/tree';
+import {NestedTreeControl} from '@angular/cdk/tree';
+import {LuthierDictionaryVisionComponent} from './vision/luthier-dictionary-vision.component';
 
 @Component({
     selector     : 'luthier-dictionary',
@@ -59,6 +68,8 @@ import {LuthierService} from '../luthier.service';
         ScrollingModule,
         NgIf,
         LuthierDictionaryTableComponent,
+        MatTreeModule,
+        LuthierDictionaryVisionComponent,
     ],
 })
 export class LuthierDictionaryComponent implements OnInit, OnDestroy
@@ -67,14 +78,16 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
     drawerOpened: boolean = true;
     private databases: LuthierDatabaseModel[];
     tables: LuthierTableModel[];
-    filteredObjects: ReplaySubject<Array<LuthierTableModel>> = new ReplaySubject<Array<LuthierTableModel>>(1);
-    tabsOpened: LuthierTableModel[] = [];
-    selectedTab: string;
+    visions: LuthierVisionModel[];
+    filteredObjects: ReplaySubject<Array<LuthierDictionaryObjectType>> = new ReplaySubject<Array<LuthierDictionaryObjectType>>(1);
+    tabsOpened: LuthierDictionaryObjectType[] = [];
+    selectedTab: LuthierDictionaryObjectType;
     objectType = 'TABLE';
     @ViewChild('filtro', {static: false}) filtroComponent: ElementRef;
     @ViewChild(CdkVirtualScrollViewport, { static: false })
     cdkVirtualScrollViewPort: CdkVirtualScrollViewport;
     scrollVisible = true;
+    treeControl = new NestedTreeControl<LuthierVisionModel>(node => node.children);
     get workDataBase(): string {
 
         return UtilFunctions.isValidStringOrArray(this._parent.workDataBase) === false || isNaN(this._parent.workDataBase) ? null : this._parent.workDataBase.toString();
@@ -187,9 +200,19 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             .pipe(takeUntil(this._parent.unsubscribeAll))
             .subscribe((tables: LuthierTableModel[]) =>
             {
-                this.selectedTab = '';
+                this.selectedTab = null;
                 this.tabsOpened = [];
                 this.tables = tables;
+
+                this.filterObjects();
+            });
+        this._parent.service.visions$
+            .pipe(takeUntil(this._parent.unsubscribeAll))
+            .subscribe((visions: LuthierVisionDatasetModel[]) =>
+            {
+                this.selectedTab = null;
+                this.tabsOpened = [];
+                this.visions = visions;
 
                 this.filterObjects();
             });
@@ -222,16 +245,41 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
     }
 
     filterObjects(item?: FuseNavigationItem) {
-        const filterText = this.filtroComponent ? this.filtroComponent.nativeElement.value : null;
-        this.filteredObjects.next(this.tables.filter(x => {
-            const model = x;
-            let valid = model.objectType === this.objectType;
-            if (valid && UtilFunctions.isValidStringOrArray(filterText) === true) {
-                valid = UtilFunctions.removeAccents(model.description.toUpperCase()).includes(UtilFunctions.removeAccents(filterText.toUpperCase())) ||
-                    UtilFunctions.removeAccents(model.name.toUpperCase()).includes(UtilFunctions.removeAccents(filterText.toUpperCase()));
-            }
-            return valid;
-        }));
+        let filterText = this.filtroComponent ? this.filtroComponent.nativeElement.value : null;
+        filterText =  UtilFunctions.isValidStringOrArray(filterText) === true ? UtilFunctions.removeAccents(filterText.toUpperCase()) : '';
+        if (this.objectType === 'TABLE' || this.objectType === 'VIEW') {
+            this.filteredObjects.next(this.tables.filter(x => {
+                const model = x;
+                let valid = model.objectType === this.objectType;
+                if (valid && UtilFunctions.isValidStringOrArray(filterText) === true) {
+                    valid = UtilFunctions.removeAccents(model.description.toUpperCase()).includes(filterText) ||
+                        UtilFunctions.removeAccents(model.name.toUpperCase()).includes(filterText);
+                }
+                return valid;
+            }));
+
+        }
+        else {
+
+            const filtrered = this.visions.filter(x => {
+                const model = x;
+                let valid = true;
+                if (UtilFunctions.isValidStringOrArray(filterText) === true) {
+
+                    valid = UtilFunctions.removeAccents(model.name).toUpperCase().includes(filterText) ||
+                        UtilFunctions.removeAccents(model.description).toUpperCase().includes(filterText) ||
+                        x.children.findIndex(y =>
+                            UtilFunctions.removeAccents(y.name).toUpperCase().includes(filterText) ||
+                            UtilFunctions.removeAccents(y.description).toUpperCase().includes(filterText) ||
+                            y.children.findIndex(z =>
+                                UtilFunctions.removeAccents(z.name).toUpperCase().includes(filterText) ||
+                                UtilFunctions.removeAccents(z.description).toUpperCase().includes(filterText)
+                            ) >=0)>=0;
+                }
+                return valid;
+            });
+            this.filteredObjects.next(filtrered);
+        }
         if (item) {
             this._parent.parent.navigation.secondary[0].children.forEach(x => {
                 x.active = x.id === item.id ? true : null;
@@ -239,8 +287,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             const navComponent = this._fuseNavigationService.getComponent<FuseVerticalNavigationComponent>("secondaryNavigation");
 
             // Return if the navigation component does not exist
-            if ( !navComponent )
-            {
+            if (!navComponent) {
                 return null;
             }
             navComponent.refresh();
@@ -248,18 +295,28 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
 
     }
 
-    addTab(table: LuthierTableModel) {
-        const index = this.tabsOpened.findIndex(x => x.name.toUpperCase() === table.name);
+    addTab(table: LuthierDictionaryObjectType) {
+        const index = this.tabsOpened.findIndex(x => UtilFunctions.isValidStringOrArray(table.code) &&  x.code === table.code && x.objectType === table.objectType);
         if (index >= 0) {
-            this.selectedTab = table.name;
+            this.selectedTab = table;
         }
         else {
-            this._parent.service.getTable(table.code)
-                .then(response => {
-                    this.tabsOpened.push(response);
-                    this.selectedTab = response.name;
-                    this._changeDetectorRef.markForCheck();
-                })
+            if (table.objectType === 'TABLE' || table.objectType === 'VIEW') {
+                this._parent.service.getTable(table.code)
+                    .then(response => {
+                        this.tabsOpened.push(response);
+                        this.selectedTab = response;
+                        this._changeDetectorRef.markForCheck();
+                    })
+            }
+            else if (table.objectType === 'VISION') {
+                this._parent.service.getVision(table.code)
+                    .then(response => {
+                        this.tabsOpened.push(response);
+                        this.selectedTab = response;
+                        this._changeDetectorRef.markForCheck();
+                    })
+            }
         }
 
     }
@@ -268,11 +325,8 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
         this.refreshScroll();
     }
 
-    removeTab(table: LuthierTableModel) {
-        const index = this.tabsOpened.findIndex(x => x.name.toUpperCase() === table.name);
-        if (index >= 0) {
-            this.tabsOpened.splice(index, 1);
-        }
+    removeTab(index: number) {
+        this.tabsOpened.splice(index, 1);
     }
 
     refreshScroll() {
@@ -285,5 +339,12 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 this._changeDetectorRef.detectChanges();
             }, 100);
         }
+    }
+    hasChild = (_: number, node: LuthierVisionModel | LuthierVisionDatasetModel) => !!node.children && node.children.length > 0;
+
+    getVisionDatasource(table: LuthierVisionModel) {
+        const datasource = new MatTreeNestedDataSource<LuthierVisionModel>();
+        datasource.data = [table];
+        return datasource;
     }
 }

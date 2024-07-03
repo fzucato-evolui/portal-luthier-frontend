@@ -1,4 +1,4 @@
-<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden bg-card dark:bg-transparent z-50">
+<div *ngIf="hasProject; else noProject" class="absolute inset-0 flex flex-col min-w-0 overflow-hidden bg-card dark:bg-transparent z-50">
 
     <!-- Header -->
     <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-4 border-b">
@@ -93,3 +93,11 @@
     </div>
 
 </div>
+<ng-template #noProject>
+    <div class="absolute inset-0 flex flex-col min-w-0 flex flex-auto flex-col items-center justify-center h-full w-full">
+        <mat-icon
+            class="icon-size-24"
+            [svgIcon]="'heroicons_outline:chat-bubble-oval-left-ellipsis'"></mat-icon>
+        <div class="p-4 mt-4 text-2xl font-semibold tracking-tight text-secondary text-center">Cadastre um projeto válido</div>
+    </div>
+</ng-template>

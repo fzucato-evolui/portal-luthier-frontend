@@ -3,9 +3,11 @@ import {Injectable} from '@angular/core';
 import {BehaviorSubject, catchError, firstValueFrom, Observable, of, switchMap, tap} from 'rxjs';
 import {
     LuthierDatabaseModel,
+    LuthierProjectModel,
     LuthierResourceModel,
     LuthierSubsystemModel,
-    LuthierTableModel
+    LuthierTableModel,
+    LuthierVisionModel
 } from '../../../shared/models/luthier.model';
 import {UtilFunctions} from '../../../shared/util/util-functions';
 
@@ -15,10 +17,14 @@ export class LuthierService
     private baseUrl = `api/public/admin/luthier`;
     private baseDicUrl = `${this.baseUrl}/dictionary`;
     private baseCommonUrl = `${this.baseUrl}/common`;
+    private _project: BehaviorSubject<LuthierProjectModel> = new BehaviorSubject(null);
+    private _currentProject: LuthierProjectModel;
     private _databases: BehaviorSubject<LuthierDatabaseModel[]> = new BehaviorSubject(null);
     private _currentDatabases: LuthierDatabaseModel[];
     private _tables: BehaviorSubject<LuthierTableModel[]> = new BehaviorSubject(null);
+    private _visions: BehaviorSubject<LuthierVisionModel[]> = new BehaviorSubject(null);
     private _currentTables: LuthierTableModel[];
+    private _currentVisions: LuthierVisionModel[];
 
     /**
      * Constructor
@@ -30,6 +36,20 @@ export class LuthierService
     // -----------------------------------------------------------------------------------------------------
     // @ Accessors
     // -----------------------------------------------------------------------------------------------------
+
+    get hasProject(): boolean {
+        return this._currentProject && UtilFunctions.isValidStringOrArray(this._currentProject.name) === true;
+    }
+    set project(value: LuthierProjectModel)
+    {
+        this._currentProject = value;
+        // Store the value
+        this._project.next(value);
+    }
+    get project$(): Observable<LuthierProjectModel>
+    {
+        return this._project.asObservable();
+    }
 
     set databases(value: Array<LuthierDatabaseModel>)
     {
@@ -53,9 +73,36 @@ export class LuthierService
         return this._tables.asObservable();
     }
 
-    getDatabases(): Observable<any>
+    set visions(value: Array<LuthierVisionModel>)
+    {
+        this._currentVisions = value;
+        // Store the value
+        this._visions.next(value);
+    }
+    get visions$(): Observable<LuthierVisionModel[]>
+    {
+        return this._visions.asObservable();
+    }
+
+    getProject(): Observable<any>
     {
         this.tables = [];
+        this.project = null;
+        return this._httpClient.get<LuthierProjectModel>(`${this.baseCommonUrl}/project`).pipe(
+
+            tap((response: LuthierProjectModel) =>
+            {
+                this.project = response;
+            }),
+            catchError(error => {
+                // Handle the error and return a fallback value or rethrow the error
+                this.project = null;
+                return of('Fallback value');
+            })
+        );
+    }
+    getDatabases(): Observable<any>
+    {
         this.databases = [];
         return this._httpClient.get<LuthierDatabaseModel[]>(`${this.baseCommonUrl}/all-databases`).pipe(
 
@@ -82,9 +129,25 @@ export class LuthierService
         );
     }
 
+    getVisions(): Observable<any>
+    {
+        this._tables.next([]);
+        return this._httpClient.get<LuthierVisionModel[]>(`${this.baseDicUrl}/all-visions`).pipe(
+            tap((response: LuthierVisionModel[]) =>
+            {
+                this.visions = response;
+            }),
+        );
+    }
+
     getTable(id: number): Promise<LuthierTableModel> {
 
         return firstValueFrom(this._httpClient.get<LuthierTableModel>(`${this.baseDicUrl}/table/${id}`));
+    }
+
+    getVision(id: number): Promise<LuthierVisionModel> {
+
+        return firstValueFrom(this._httpClient.get<LuthierVisionModel>(`${this.baseDicUrl}/vision/${id}`));
     }
 
     saveTable(model: LuthierTableModel): Promise<LuthierTableModel> {

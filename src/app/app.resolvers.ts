@@ -1,9 +1,9 @@
-import { inject } from '@angular/core';
-import { NavigationService } from 'app/core/navigation/navigation.service';
-import { MessagesService } from 'app/layout/common/messages/messages.service';
-import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
-import { QuickChatService } from 'app/layout/common/quick-chat/quick-chat.service';
-import { ShortcutsService } from 'app/layout/common/shortcuts/shortcuts.service';
+import {inject} from '@angular/core';
+import {NavigationService} from 'app/core/navigation/navigation.service';
+import {MessagesService} from 'app/layout/common/messages/messages.service';
+import {NotificationsService} from 'app/layout/common/notifications/notifications.service';
+import {QuickChatService} from 'app/layout/common/quick-chat/quick-chat.service';
+import {ShortcutsService} from 'app/layout/common/shortcuts/shortcuts.service';
 import {forkJoin, of} from 'rxjs';
 import {AuthService} from './core/auth/auth.service';
 import {LuthierService} from './modules/admin/luthier/luthier.service';
@@ -25,6 +25,7 @@ export const initialDataResolver = () =>
     return forkJoin([
         databaseService.getAll(),
         UtilFunctions.isValidStringOrArray(authService.luthierDatabase) ? luthierService.getDatabases() : of(null),
+        UtilFunctions.isValidStringOrArray(authService.luthierDatabase) ? luthierService.getProject() : of(null),
         navigationService.get(),
         messagesService.getAll(),
         notificationsService.getAll(),

@@ -3,12 +3,13 @@ import {ActivatedRoute} from '@angular/router';
 import {firstValueFrom, ReplaySubject, Subject, takeUntil} from 'rxjs';
 import {LuthierService} from './luthier.service';
 import {LuthierDictionaryComponent} from './dictionary/luthier-dictionary.component';
-import {NgClass} from '@angular/common';
+import {NgClass, NgIf} from '@angular/common';
 import {CompactLayoutComponent} from '../../../layout/layouts/vertical/compact/compact.component';
-import {FuseNavigationItem} from '../../../../@fuse/components/navigation';
 import {LuthierConnectionComponent} from './connection/luthier-connection.component';
 import {AuthService, StorageChange} from '../../../core/auth/auth.service';
 import {UtilFunctions} from '../../../shared/util/util-functions';
+import {LuthierProjectComponent} from './project/luthier-project.component';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
     selector     : 'luthier',
@@ -18,13 +19,16 @@ import {UtilFunctions} from '../../../shared/util/util-functions';
     standalone   : true,
     imports: [
         NgClass,
+        NgIf,
         LuthierDictionaryComponent,
-        LuthierConnectionComponent
+        LuthierConnectionComponent,
+        LuthierProjectComponent,
+        MatIconModule
     ],
 })
 export class LuthierComponent implements OnInit, OnDestroy
 {
-    page: 'connection' | 'dictionary' | 'manager' | any = 'none';
+    page: 'project' | 'connection' | 'dictionary' | 'manager' | any = 'none';
     public unsubscribeAll: Subject<any> = new Subject<any>();
     public page$: ReplaySubject<String> = new ReplaySubject<String>(1);
     public workDataBase$: ReplaySubject<number> = new ReplaySubject<number>(1);
@@ -35,6 +39,10 @@ export class LuthierComponent implements OnInit, OnDestroy
     }
     get workDataBase(): number {
         return this._workDataBase;
+    }
+
+    get hasLuthierDatabase(): boolean {
+        return UtilFunctions.isValidStringOrArray(this.authService.luthierDatabase);
     }
     /**
      * Constructor
