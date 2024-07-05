@@ -32,7 +32,6 @@ import {MatTabChangeEvent, MatTabsModule} from '@angular/material/tabs';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {LuthierDictionaryComponent} from '../luthier-dictionary.component';
 import {
-    LuthierCustomFieldModel,
     LuthierCustomizationModel,
     LuthierFieldCharcaseEnum,
     LuthierFieldCharcaseEnumParser,
@@ -43,20 +42,20 @@ import {
     LuthierFieldTypeEnum,
     LuthierGroupInfoModel,
     LuthierGroupInfoTypeEnum,
-    LuthierIndexSortEnum,
-    LuthierPermissionTypeEnum,
-    LuthierReferenceActionEnum,
     LuthierReferenceStatusEnum,
     LuthierSearchFieldEditorEnum,
     LuthierSearchFieldOperatorEnum,
     LuthierSearchStatusEnum,
     LuthierSearchTypeEnum,
     LuthierTableFieldModel,
-    LuthierTableIndexModel,
-    LuthierTableModel,
     LuthierTableReferenceModel,
     LuthierTableSearchModel,
-    LuthierViewBodyEnum
+    LuthierVisionDatasetCustomFieldModel,
+    LuthierVisionDatasetFieldModel,
+    LuthierVisionDatasetFieldTypeEnum,
+    LuthierVisionDatasetModel,
+    LuthierVisionDatasetSearchModel,
+    LuthierVisionGroupInfoModel
 } from '../../../../../shared/models/luthier.model';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatSort, MatSortModule, Sort} from '@angular/material/sort';
@@ -66,26 +65,20 @@ import {NgxMaskDirective, provideNgxMask} from 'ngx-mask';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {MatCheckboxChange, MatCheckboxModule} from '@angular/material/checkbox';
 import {SharedPipeModule} from '../../../../../shared/pipes/shared-pipe.module';
-import {MatSelectModule} from '@angular/material/select';
+import {MatSelectChange, MatSelectModule} from '@angular/material/select';
 import {LuthierFieldValidator} from '../../../../../shared/validators/luthier.validator';
 import {MatDialog} from '@angular/material/dialog';
-import {LuthierDictionaryTableFieldModalComponent} from './modal/field/luthier-dictionary-table-field-modal.component';
-import {LuthierDictionaryTableIndexModalComponent} from './modal/index/luthier-dictionary-table-index-modal.component';
-import {
-    LuthierDictionaryTableReferenceModalComponent
-} from './modal/reference/luthier-dictionary-table-reference-modal.component';
 import {LuthierService} from '../../luthier.service';
 import {MessageDialogService} from '../../../../../shared/services/message/message-dialog-service';
-import {EnumToArrayPipe} from '../../../../../shared/pipes/util-functions.pipe';
 import {
-    LuthierDictionaryTableSearchModalComponent
-} from './modal/search/luthier-dictionary-table-search-modal.component';
+    LuthierDictionaryDatasetFieldModalComponent
+} from './modal/field/luthier-dictionary-dataset-field-modal.component';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
-    selector     : 'luthier-dictionary-table',
-    templateUrl  : './luthier-dictionary-table.component.html',
-    styleUrls : ['/luthier-dictionary-table.component.scss'],
+    selector     : 'luthier-dictionary-dataset',
+    templateUrl  : './luthier-dictionary-dataset.component.html',
+    styleUrls : ['/luthier-dictionary-dataset.component.scss'],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone   : true,
@@ -116,30 +109,30 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'group
         provideNgxMask(),
     ],
 })
-export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, AfterViewInit
+export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, AfterViewInit
 {
-    private _model: LuthierTableModel;
-    public fieldsDataSource = new MatTableDataSource<LuthierTableFieldModel>();
+    private _model: LuthierVisionDatasetModel;
+    public fieldsDataSource = new MatTableDataSource<LuthierVisionDatasetFieldModel>();
     @ViewChildren('sortFields') sortFields: QueryList<MatSort>;
-    public indexesDataSource = new MatTableDataSource<LuthierTableIndexModel>();
-    @ViewChild('sortIndexes') sortIndexes: MatSort;
-    public referencesDataSource = new MatTableDataSource<LuthierTableReferenceModel>();
-    @ViewChild('sortReferences') sortReferences: MatSort;
-    public searchsDataSource = new MatTableDataSource<LuthierTableSearchModel>();
+    public searchsDataSource = new MatTableDataSource<LuthierVisionDatasetSearchModel>();
     @ViewChild('sortSearchs') sortSearchs: MatSort;
-    public customFieldsDataSource = new MatTableDataSource<LuthierCustomFieldModel>();
-    public customizationsDataSource = new MatTableDataSource<LuthierTableFieldModel>();
-    public groupsInfoDataSource = new MatTableDataSource<LuthierGroupInfoModel>();
+    public customFieldsDataSource = new MatTableDataSource<LuthierVisionDatasetCustomFieldModel>();
+    public customizationsDataSource = new MatTableDataSource<LuthierVisionDatasetFieldModel>();
+    public groupsInfoDataSource = new MatTableDataSource<LuthierVisionGroupInfoModel>();
     currentTab: TableType = 'fields';
     fieldRowEditing: { [key: string]: string } = {}
-    private _cloneModel: LuthierTableModel;
+    private _cloneModel: LuthierVisionDatasetModel;
     @Input()
-    set model(value: LuthierTableModel) {
+    set model(value: LuthierVisionDatasetModel) {
         this._model = value;
         this._cloneModel = cloneDeep(this._model);
+        this.setParentRelation();
     }
-    get model(): LuthierTableModel {
+    get model(): LuthierVisionDatasetModel {
         return this._cloneModel;
+    }
+    get parent(): LuthierDictionaryComponent {
+        return this._parent;
     }
     get service(): LuthierService {
         return this._parent.service;
@@ -148,9 +141,9 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         return this._parent.messageService;
     }
     formSave: FormGroup;
-    displayedFieldColumns = ['buttons', 'order', 'code', 'key', 'name', 'label', 'customLabel', 'fieldType', 'modifyType',
-        'attributeName', 'autoInc', 'size', 'groupInfo.description', 'search', 'notNull',
-        'defaultValue', 'precision', 'maxValue', 'minValue', 'mask', 'charCase', 'editor',
+    displayedFieldColumns = ['buttons', 'order', 'code', 'fieldType', 'tableField.key', 'tableField.name', 'label', 'customLabel', 'mask', 'groupInfo.description',
+        'tableField.fieldType', 'tableField.size',  'readOnly', 'visible', 'notNull', 'search', 'tableField.defaultValue', 'tableField.precision',
+        'tableField.maxValue', 'tableField.minValue', 'charCase', 'editor', 'lookupFilter', 'reference.name', 'technicalDescription', 'userDescription',
         'uiConfiguration', 'layoutSize'];
     displayedFieldColumns2 = ['buttons', 'code'];
     displayedIndexColumns = ['buttons', 'code', 'sortType', 'name',
@@ -159,22 +152,22 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         'onDelete', 'attributeName', 'updateMessage', 'deleteMessage'];
     displayedGroupInfoColumns = ['buttons', 'code', 'order', 'description', 'groupInfoType',
         'parent.description'];
-    displayedCustomFieldColumns = ['buttons', 'order', 'code', 'key', 'name', 'label', 'fieldType', 'modifyType',
-        'attributeName', 'autoInc', 'size', 'groupInfo', 'search', 'notNull',
-        'defaultValue', 'precision', 'maxValue', 'minValue', 'mask', 'charCase', 'editor',
+    displayedCustomFieldColumns = ['buttons', 'order', 'code', 'fieldType', 'tableField.key', 'tableField.name', 'label', 'mask', 'groupInfo',
+        'tableField.fieldType', 'tableField.size',  'readOnly', 'visible', 'notNull', 'search', 'tableField.defaultValue', 'tableField.precision',
+        'tableField.maxValue', 'tableField.minValue', 'charCase', 'editor', 'lookupFilter', 'reference', 'technicalDescription', 'userDescription',
         'uiConfiguration', 'layoutSize'];
-    displayedCustomizationsColumns = ['buttons', 'code', 'name', 'customSize', 'customNotNull',
-        'customDefaultValue', 'customPrecision', 'customMaxValue', 'customMinValue', 'customMask',
-        'customCharCase', 'customEditor', 'customUiConfiguration'];
+    displayedCustomizationsColumns = ['buttons', 'code', 'tableField.name', 'customMask', 'customReadOnly',
+        'customVisible', 'customNotNull', 'customCharCase', 'customEditor', 'customLookupFilter', 'customUiConfiguration'];
     displayedBondColumns = [ 'code', 'name', 'description'];
     displayedSearchColumns = [ 'buttons', 'code', 'name', 'customName', 'order', 'status', 'type'];
+    LuthierVisionDatasetFieldTypeEnum = LuthierVisionDatasetFieldTypeEnum;
     LuthierFieldTypeEnum = LuthierFieldTypeEnum;
     LuthierFieldModifierEnum = LuthierFieldModifierEnum;
     LuthierFieldLayoutEnum = LuthierFieldLayoutEnum;
     LuthierFieldEditorEnum = LuthierFieldEditorEnum;
     LuthierFieldCharcaseEnum = LuthierFieldCharcaseEnum;
-    LuthierViewBodyEnum = LuthierViewBodyEnum;
     LuthierGroupInfoTypeEnum = LuthierGroupInfoTypeEnum
+    parentRelation: LuthierTableReferenceModel;
     // @ts-ignore
     @HostListener('document:keydown', ['$event'])
     onKeydownHandler(event: KeyboardEvent) {
@@ -205,12 +198,15 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
 
     ngAfterViewInit() {
+        UtilFunctions.setSortingDataAccessor(this.fieldsDataSource);
         this.fieldsDataSource.sort = this.sortFields.get(0);
-        this.indexesDataSource.sort = this.sortIndexes;
-        this.referencesDataSource.sort = this.sortReferences;
+        UtilFunctions.setSortingDataAccessor(this.searchsDataSource);
         this.searchsDataSource.sort = this.sortSearchs;
+        UtilFunctions.setSortingDataAccessor(this.groupsInfoDataSource);
         this.groupsInfoDataSource.sort = this.sortFields.get(1);
+        UtilFunctions.setSortingDataAccessor(this.customFieldsDataSource);
         this.customFieldsDataSource.sort = this.sortFields.get(2);
+        UtilFunctions.setSortingDataAccessor(this.customizationsDataSource);
         this.customizationsDataSource.sort = this.sortFields.get(3);
 
     }
@@ -219,32 +215,35 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.formSave = this.formBuilder.group({
             code: [this.model.code],
             name: ['', [Validators.required]],
-            description: ['', [Validators.required]],
+            description: [''],
             customDescription: this.addCustomizationField(),
-            creationDate: [null],
-            objectType: [''],
-            technicalDescription: ['', []],
-            userDescription: ['', []],
-            className: ['', []],
-            namespace: ['', []],
-            logins: [false],
-            logup: [false],
-            logdel: [false],
+            filter: [''],
+            customFilter: this.addCustomizationField(),
             uiConfiguration: ['', []],
-            export: [false],
-            visible: [false],
+            parent: this.formBuilder.group({
+                code: [this.model.code],
+                name: ['', [Validators.required]],
+                description: ['']
+            }),
+            table: this.formBuilder.group({
+                code: [this.model.code],
+                name: ['', [Validators.required]],
+                description: ['']
+            }),
+            vision: this.formBuilder.group({
+                code: [this.model.code],
+                name: ['', [Validators.required]],
+                description: ['']
+            }),
+            objectType: [''],
             groupInfos: this.formBuilder.array([]),
-            views: this.formBuilder.array([])
         });
         this.addFields('fields');
         this.addFields('customFields');
         this.addGroupInfos();
-        this.addViews();
         this.setCustomizations();
         this.formSave.patchValue(this.model);
         this.fieldsDataSource.data = this.model.fields;
-        this.indexesDataSource.data = this.model.indexes;
-        this.referencesDataSource.data = this.model.references;
         this.searchsDataSource.data = this.model.searchs;
         this.customFieldsDataSource.data = this.model.customFields;
         this.customizationsDataSource.data = this.model.fields;
@@ -254,99 +253,84 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     setCustomizations() {
         if (UtilFunctions.isValidStringOrArray(this.model.customizations)) {
             this.model.customizations.forEach(x => {
-                if ( x.type === 'FIELD_TABLE') {
-                    const index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                if ( x.type === 'FIELD_VISION') {
+                    const index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
                         this.model.fields[index].customLabel = x;
                     }
                 }
-                else if ( x.type === 'STATIC_VALUE') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
-                    if (index >= 0) {
-                        const field = this.model.fields[index];
-                        index = field.staticFields.findIndex(y => y.value?.toUpperCase() === x.name3?.toUpperCase());
-                        if (index >= 0) {
-                            field.staticFields[index].customCaption = x;
-                        }
-                    }
-                }
-                else if ( x.type === 'SEARCH_TABLE') {
-                    const index = this.model.searchs.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                else if ( x.type === 'SEARCH_VISION') {
+                    const index = this.model.searchs.findIndex(y => y.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
                         this.model.searchs[index].customName = x;
                     }
                 }
-                else if ( x.type === 'SEARCH_FIELD_TABLE') {
-                    let index = this.model.searchs.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                else if ( x.type === 'SEARCH_FIELD_VISION') {
+                    let index = this.model.searchs.findIndex(y => y.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
                         const search = this.model.searchs[index];
-                        index = search.searchFields.findIndex(y => y.tableField.name?.toUpperCase() === x.name3?.toUpperCase());
+                        index = search.searchFields.findIndex(y => y.field.name?.toUpperCase() === x.name4?.toUpperCase());
                         if (index >= 0) {
                             search.searchFields[index].customLabel = x;
                         }
                     }
                 }
-                else if ( x.type === 'TABLE_FIELD_SIZE') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
-                    if (index >= 0) {
-                        this.model.fields[index].customSize = x;
-                    }
-                }
-                else if ( x.type === 'TABLE_FIELD_REQUIRED') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
-                    if (index >= 0) {
-                        this.model.fields[index].customNotNull = x;
-                    }
-                }
-                else if ( x.type === 'TABLE_FIELD_DEFAULTVALUE') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
-                    if (index >= 0) {
-                        this.model.fields[index].customDefaultValue = x;
-                    }
-                }
-                else if ( x.type === 'TABLE_FIELD_PRECISION') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
-                    if (index >= 0) {
-                        this.model.fields[index].customPrecision = x;
-                    }
-                }
-                else if ( x.type === 'TABLE_FIELD_MAXVALUE') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
-                    if (index >= 0) {
-                        this.model.fields[index].customMaxValue = x;
-                    }
-                }
-                else if ( x.type === 'TABLE_FIELD_MINVALUE') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
-                    if (index >= 0) {
-                        this.model.fields[index].customMinValue = x;
-                    }
-                }
-                else if ( x.type === 'TABLE_FIELD_MASK') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                else if ( x.type === 'VISION_FIELD_MASK') {
+                    let index = this.model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
                         this.model.fields[index].customMask = x;
                     }
                 }
-                else if ( x.type === 'TABLE_FIELD_CHARCASE') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                else if ( x.type === 'VISION_FIELD_READONLY') {
+                    let index = this.model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
+                    if (index >= 0) {
+                        x.value = UtilFunctions.parseBoolean(x.value);
+                        this.model.fields[index].customReadOnly = x;
+                    }
+                }
+                else if ( x.type === 'VISION_FIELD_VISIBLE') {
+                    let index = this.model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
+                    if (index >= 0) {
+                        x.value = UtilFunctions.parseBoolean(x.value);
+                        this.model.fields[index].customVisible = x;
+                    }
+                }
+                else if ( x.type === 'VISION_FIELD_REQUIRED') {
+                    let index = this.model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3.toUpperCase());
+                    if (index >= 0) {
+                        x.value = UtilFunctions.parseBoolean(x.value);
+                        this.model.fields[index].customNotNull = x;
+                    }
+                }
+
+                else if ( x.type === 'VISION_FIELD_CHARCASE') {
+                    let index = this.model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
                         x.value = LuthierFieldCharcaseEnumParser.toValue(x.value);
                         this.model.fields[index].customCharCase = x;
                     }
                 }
-                else if ( x.type === 'TABLE_FIELD_EDITORTYPE') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                else if ( x.type === 'VISION_FIELD_EDITORTYPE') {
+                    let index = this.model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
                         x.value = LuthierFieldEditorEnumParser.toValue(x.value);
                         this.model.fields[index].customEditor = x;
                     }
                 }
-                else if ( x.type === 'TABLE_DESCRIPTION') {
+                else if ( x.type === 'VISION_FIELD_LOOKUPFILTER') {
+                    let index = this.model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
+                    if (index >= 0) {
+                        this.model.fields[index].customLookupFilter = x;
+                    }
+                }
+                else if ( x.type === 'VISION_DATASET_DESCRIPTION') {
                     this.model.customDescription = x;
                 }
-                else if ( x.type === 'FIELD_UICONFIGURATION') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                else if ( x.type === 'VISION_DATASET_FILTER') {
+                    this.model.customFilter = x;
+                }
+                else if ( x.type === 'VISION_FIELD_UICONFIGURATION') {
+                    let index = this.model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
                         this.model.fields[index].customUiConfiguration = x;
                     }
@@ -360,18 +344,51 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             this.newGroupInfo();
         }
         else {
-            const fg = this.addField(type);
-            this.getFields(type).push(fg);
-            const newField = fg.value;
-            newField['pending'] = true;
-            if (type === 'fields') {
-                this.fieldsDataSource.data.push(newField);
-                this.fieldsDataSource._updateChangeSubscription();
-            } else {
-                this.customFieldsDataSource.data.push(newField);
-                this.customFieldsDataSource._updateChangeSubscription();
-            }
-            this._changeDetectorRef.detectChanges();
+            const modal = this._matDialog.open(LuthierDictionaryDatasetFieldModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-dataset-field-modal-container' });
+            modal.componentInstance.title = 'Adição de Campos' + (type === 'customFields' ? ' Customizados ' : ' ') + 'do Dataset ' + this.model.name;
+            modal.componentInstance.parent = this;
+            modal.componentInstance.fieldType = type;
+            modal.afterClosed().subscribe((result) =>
+            {
+                if ( result === 'ok' ) {
+                    modal.componentInstance.model.fields.selected.forEach(x => {
+                        let dsField: LuthierVisionDatasetFieldModel | LuthierVisionDatasetCustomFieldModel;
+                        if (type === 'customFields') {
+                            dsField = x as LuthierVisionDatasetCustomFieldModel;
+                        }
+                        else {
+                            dsField = x as LuthierVisionDatasetFieldModel;
+                        }
+                        x.groupInfo = null;
+                        dsField.tableField = x;
+                        dsField.id = crypto.randomUUID();
+                        dsField.fieldType = modal.componentInstance.model.fieldType;
+                        if (dsField.fieldType === LuthierVisionDatasetFieldTypeEnum.LOOKUP) {
+                            if (type === 'fields') {
+                                dsField.reference = modal.componentInstance.model.reference;
+                            }
+                            else {
+                                dsField.reference = modal.componentInstance.model.reference.name;
+                            }
+                        }
+                        const c = this.addField(type);
+                        c.patchValue(dsField);
+                        const fields = this.getFields(type);
+                        fields.push(c);
+                        if (type === 'customFields') {
+                            this.customFieldsDataSource.data.push(dsField as LuthierVisionDatasetCustomFieldModel);
+                            this.customFieldsDataSource._updateChangeSubscription();
+                        }
+                        else {
+                            this.fieldsDataSource.data.push(dsField as LuthierVisionDatasetFieldModel);
+                            this.fieldsDataSource._updateChangeSubscription();
+                        }
+
+                    })
+                    this._changeDetectorRef.detectChanges();
+                }
+
+            });
         }
     }
 
@@ -388,30 +405,12 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             dataSource._updateChangeSubscription();
             if (type === 'fields') {
                 this.customizationsDataSource._updateChangeSubscription();
-                const references = this.referencesDataSource.data
-                    .filter(x => x.fieldsReference.findIndex(y => (y.fieldFK.id === id || y.fieldFK.code === code) || (y.fieldPK.id === id || y.fieldPK.code === code)) >= 0)
-                    .map(x => this.referencesDataSource.data.findIndex(y => y.name === x.name));
-                if (UtilFunctions.isValidStringOrArray(references)) {
-                    references.forEach(index => {
-                        this.referencesDataSource.data.splice(index, 1);
-                    });
-                    this.referencesDataSource._updateChangeSubscription();
-                }
-                const indexes = this.indexesDataSource.data
-                    .filter(x => x.indexFields.findIndex(y => y.tableField.id === id || y.tableField.code === code) >= 0)
-                    .map(x => this.indexesDataSource.data.findIndex(y => y.name === x.name));
-                if (UtilFunctions.isValidStringOrArray(indexes)) {
-                    indexes.forEach(index => {
-                        this.indexesDataSource.data.splice(index, 1);
-                    });
-                    this.indexesDataSource._updateChangeSubscription();
-                }
                 let deleted = false;
                 this.searchsDataSource.data.forEach(search => {
                     if (UtilFunctions.isValidStringOrArray(search.searchFields) === true) {
                         for (let index = 0; index < search.searchFields.length;) {
-                            if (search.searchFields[index].tableField &&
-                                (search.searchFields[index].tableField.id === id || search.searchFields[index].tableField.code === code)) {
+                            if (search.searchFields[index].field &&
+                                (search.searchFields[index].field.id === id || search.searchFields[index].field.code === code)) {
                                 search.searchFields.splice(index, 1);
                                 deleted = true;
                                 continue;
@@ -430,7 +429,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
 
     save() {
-        this.model = Object.assign({}, this.model, this.formSave.value) as LuthierTableModel;
+        this.model = Object.assign({}, this.model, this.formSave.value) as LuthierVisionDatasetModel;
         this.saveCustomizations();
         console.log(this.model, this.formSave.value, this.model.customizations);
     }
@@ -441,126 +440,116 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             && UtilFunctions.isValidStringOrArray(this.model.customDescription.value) === true
             && this.model.customDescription.value !== this.model.description
         ) {
-            this.model.customDescription.type = 'TABLE_DESCRIPTION';
-            this.model.customDescription.name1 = this.model.name;
+            this.model.customDescription.type = 'VISION_DATASET_DESCRIPTION';
+            this.model.customDescription.name1 = this.model.vision.name;
+            this.model.customDescription.name2 = this.model.name;
             customizations.push(this.model.customDescription);
         }
 
+        if (this.model.customFilter
+            && UtilFunctions.isValidStringOrArray(this.model.customFilter.value) === true
+            && this.model.customFilter.value !== this.model.filter
+        ) {
+            this.model.customDescription.type = 'VISION_DATASET_FILTER';
+            this.model.customDescription.name1 = this.model.vision.name;
+            this.model.customDescription.name2 = this.model.name;
+            customizations.push(this.model.customFilter);
+        }
         this.model.fields.forEach(model => {
             if (model.customLabel
                 && UtilFunctions.isValidStringOrArray(model.customLabel.value) === true
                 && model.customLabel.value !== model.label
             ) {
-                model.customLabel.type = 'FIELD_TABLE';
-                model.customLabel.name1 = this.model.name;
-                model.customLabel.name2 = model.name;
+                model.customLabel.type = 'FIELD_VISION';
+                model.customLabel.name1 = this.model.vision.name;
+                model.customLabel.name2 = this.model.name;
+                model.customLabel.name3 = model.name;
                 customizations.push(model.customLabel);
-            }
-            if (model.customSize
-                && UtilFunctions.isValidStringOrArray(model.customSize.value) === true
-                && parseInt(model.customSize.value) !== parseInt(model.size + '')
-            ) {
-                model.customSize.type = 'TABLE_FIELD_SIZE';
-                model.customSize.name1 = this.model.name;
-                model.customSize.name2 = model.name;
-                customizations.push(model.customSize);
-            }
-            if (model.customNotNull
-                && UtilFunctions.isValidStringOrArray(model.customNotNull.value) === true
-                && model.customNotNull.value !== model.notNull
-            ) {
-                model.customNotNull.type = 'TABLE_FIELD_REQUIRED';
-                model.customNotNull.name1 = this.model.name;
-                model.customNotNull.name2 = model.name;
-                model.customNotNull.value = model.customNotNull.value ? '1' : '0';
-                customizations.push(model.customNotNull);
-            }
-            if (model.customDefaultValue
-                && UtilFunctions.isValidStringOrArray(model.customDefaultValue.value) === true
-                && model.customDefaultValue.value !== model.defaultValue
-            ) {
-                model.customDefaultValue.type = 'TABLE_FIELD_DEFAULTVALUE';
-                model.customDefaultValue.name1 = this.model.name;
-                model.customDefaultValue.name2 = model.name;
-                customizations.push(model.customDefaultValue);
-            }
-            if (model.customPrecision
-                && UtilFunctions.isValidStringOrArray(model.customPrecision.value) === true
-                && parseInt(model.customPrecision.value) !== parseInt(model.precision + '')
-            ) {
-                model.customPrecision.type = 'TABLE_FIELD_PRECISION';
-                model.customPrecision.name1 = this.model.name;
-                model.customPrecision.name2 = model.name;
-                customizations.push(model.customPrecision);
-            }
-            if (model.customMaxValue
-                && UtilFunctions.isValidStringOrArray(model.customMaxValue.value) === true
-                && parseInt(model.customMaxValue.value) !== parseInt(model.maxValue + '')
-            ) {
-                model.customMaxValue.type = 'TABLE_FIELD_MAXVALUE';
-                model.customMaxValue.name1 = this.model.name;
-                model.customMaxValue.name2 = model.name;
-                customizations.push(model.customMaxValue);
-            }
-            if (model.customMinValue
-                && UtilFunctions.isValidStringOrArray(model.customMinValue.value) === true
-                && parseInt(model.customMinValue.value) !== parseInt(model.minValue + '')
-            ) {
-                model.customMinValue.type = 'TABLE_FIELD_MINVALUE';
-                model.customMinValue.name1 = this.model.name;
-                model.customMinValue.name2 = model.name;
-                customizations.push(model.customMinValue);
             }
             if (model.customMask
                 && UtilFunctions.isValidStringOrArray(model.customMask.value) === true
                 && model.customMask.value !== model.mask
             ) {
-                model.customMask.type = 'TABLE_FIELD_MASK';
-                model.customMask.name1 = this.model.name;
-                model.customMask.name2 = model.name;
+                model.customMask.type = 'VISION_FIELD_MASK';
+                model.customMask.name1 = this.model.vision.name;
+                model.customMask.name2 = this.model.name;
+                model.customMask.name3 = model.name;
                 customizations.push(model.customMask);
+            }
+            if (model.customReadOnly
+                && UtilFunctions.isValidStringOrArray(model.customReadOnly.value) === true
+                && model.customReadOnly.value !== model.readOnly
+            ) {
+                model.customReadOnly.type = 'VISION_FIELD_READONLY';
+                model.customReadOnly.name1 = this.model.vision.name;
+                model.customReadOnly.name2 = this.model.name;
+                model.customReadOnly.name3 = model.name;
+                model.customReadOnly.value = UtilFunctions.parseBoolean(model.customReadOnly.value) ? '1' : '0';
+                customizations.push(model.customReadOnly);
+            }
+            if (model.customVisible
+                && UtilFunctions.isValidStringOrArray(model.customVisible.value) === true
+                && model.customVisible.value !== model.visible
+            ) {
+                model.customVisible.type = 'VISION_FIELD_VISIBLE';
+                model.customVisible.name1 = this.model.vision.name;
+                model.customVisible.name2 = this.model.name;
+                model.customVisible.name3 = model.name;
+                model.customVisible.value = UtilFunctions.parseBoolean(model.customVisible.value) ? '1' : '0';
+                customizations.push(model.customVisible);
+            }
+            if (model.customNotNull
+                && UtilFunctions.isValidStringOrArray(model.customNotNull.value) === true
+                && model.customNotNull.value !== model.notNull
+            ) {
+                model.customNotNull.type = 'VISION_FIELD_REQUIRED';
+                model.customNotNull.name1 = this.model.vision.name;
+                model.customNotNull.name2 = this.model.name;
+                model.customNotNull.name3 = model.name;
+                model.customNotNull.value = UtilFunctions.parseBoolean(model.customNotNull.value) ? '1' : '0';
+                customizations.push(model.customNotNull);
             }
             if (model.customCharCase
                 && UtilFunctions.isValidStringOrArray(model.customCharCase.value) === true
                 && model.customCharCase.value !== model.charCase
             ) {
-                model.customCharCase.type = 'TABLE_FIELD_CHARCASE';
-                model.customCharCase.name1 = this.model.name;
-                model.customCharCase.name2 = model.name;
+                model.customCharCase.type = 'VISION_FIELD_CHARCASE';
+                model.customCharCase.name1 = this.model.vision.name;
+                model.customCharCase.name2 = this.model.name;
                 model.customCharCase.value = LuthierFieldCharcaseEnumParser.fromValue(model.customCharCase.value);
                 customizations.push(model.customCharCase);
             }
             if (model.customEditor
                 && UtilFunctions.isValidStringOrArray(model.customEditor.value) === true
-                && model.customEditor.value !== model.charCase
+                && model.customEditor.value !== model.editor
             ) {
-                model.customEditor.type = 'TABLE_FIELD_EDITORTYPE';
-                model.customEditor.name1 = this.model.name;
-                model.customEditor.name2 = model.name;
+                model.customEditor.type = 'VISION_FIELD_EDITORTYPE';
+                model.customEditor.name1 = this.model.vision.name;
+                model.customEditor.name2 = this.model.name;
+                model.customEditor.name3 = model.name;
                 model.customEditor.value = LuthierFieldEditorEnumParser.fromValue(model.customEditor.value);
                 customizations.push(model.customEditor);
             }
+            if (model.customLookupFilter
+                && UtilFunctions.isValidStringOrArray(model.customLookupFilter.value) === true
+                && model.customLookupFilter.value !== model.lookupFilter
+            ) {
+                model.customLookupFilter.type = 'VISION_FIELD_LOOKUPFILTER';
+                model.customLookupFilter.name1 = this.model.vision.name;
+                model.customLookupFilter.name2 = this.model.name;
+                model.customLookupFilter.name3 = model.name;
+                customizations.push(model.customLookupFilter);
+            }
             if (model.customUiConfiguration
                 && UtilFunctions.isValidStringOrArray(model.customUiConfiguration.value) === true
-                && model.customUiConfiguration.value !== model.mask
+                && model.customUiConfiguration.value !== model.uiConfiguration
             ) {
-                model.customUiConfiguration.type = 'FIELD_UICONFIGURATION';
-                model.customUiConfiguration.name1 = this.model.name;
-                model.customUiConfiguration.name2 = model.name;
+                model.customUiConfiguration.type = 'VISION_FIELD_UICONFIGURATION';
+                model.customUiConfiguration.name1 = this.model.vision.name;
+                model.customUiConfiguration.name2 = this.model.name;
+                model.customUiConfiguration.name3 = model.name;
                 customizations.push(model.customUiConfiguration);
             }
-            model.staticFields.forEach(staticModel => {
-                if (staticModel.customCaption
-                    && UtilFunctions.isValidStringOrArray(staticModel.customCaption) === true
-                    && staticModel.customCaption.value !== staticModel.caption
-                ) {
-                    staticModel.customCaption.type = 'STATIC_VALUE';
-                    staticModel.customCaption.name1 = this.model.name;
-                    staticModel.customCaption.name2 = model.name;
-                    staticModel.customCaption.name3 = staticModel.value;
-                    customizations.push(staticModel.customCaption);
-                }
-            });
         });
 
         this.model.searchs.forEach(model => {
@@ -568,9 +557,10 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 && UtilFunctions.isValidStringOrArray(model.customName.value) === true
                 && model.customName.value !== model.name
             ) {
-                model.customName.type = 'SEARCH_TABLE';
-                model.customName.name1 = this.model.name;
-                model.customName.name2 = model.name;
+                model.customName.type = 'SEARCH_VISION';
+                model.customName.name1 = this.model.vision.name;
+                model.customName.name2 = this.model.name;
+                model.customName.name3 = model.name;
                 customizations.push(model.customName);
             }
             model.searchFields.forEach(searchFieldModel => {
@@ -578,12 +568,13 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                     && UtilFunctions.isValidStringOrArray(searchFieldModel.customLabel) === true
                     && searchFieldModel.customLabel.value !== searchFieldModel.label
                 ) {
-                    const fieldIndex = this.model.fields.findIndex(x => x.id === searchFieldModel.tableField.id);
+                    const fieldIndex = this.model.fields.findIndex(x => x.id === searchFieldModel.field.id);
                     if (fieldIndex >= 0) {
-                        searchFieldModel.customLabel.type = 'SEARCH_FIELD_TABLE';
-                        searchFieldModel.customLabel.name1 = this.model.name;
-                        searchFieldModel.customLabel.name2 = model.name;
-                        searchFieldModel.customLabel.name3 = this.model.fields[fieldIndex].name;
+                        searchFieldModel.customLabel.type = 'SEARCH_FIELD_VISION';
+                        searchFieldModel.customLabel.name1 = this.model.vision.name;
+                        searchFieldModel.customLabel.name2 = this.model.name;
+                        searchFieldModel.customLabel.name3 = model.name;
+                        searchFieldModel.customLabel.name4 = this.model.fields[fieldIndex].name;
                         customizations.push(searchFieldModel.customLabel);
                     }
                 }
@@ -628,32 +619,8 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 }
                  */
                 const c = this.addField(type);
-                if (UtilFunctions.isValidStringOrArray(x.staticFields)) {
-                    x.staticFields.forEach(y => {
-                        (c.get('staticFields') as FormArray).push(this.addStaticField(type));
-                    });
-                }
                 fields.push(c);
             })
-        }
-    }
-    addViews() {
-        if (this.model.objectType === 'VIEW') {
-            const fa = (this.formSave.get('views') as FormArray);
-            fa.clear();
-            if (UtilFunctions.isValidStringOrArray(this.model.views) === true) {
-                this.model.views.forEach(x => {
-                    fa.push(this.addViewField());
-                })
-                const pipe = new EnumToArrayPipe();
-                const keyPair = pipe.transform(LuthierViewBodyEnum);
-                keyPair.forEach(x => {
-                    const index = this.model.views.findIndex(y => y.databaseType === x.key);
-                    if (index < 0) {
-                        fa.push(this.addViewField(x.key));
-                    }
-                })
-            }
         }
     }
     addGroupInfos() {
@@ -672,31 +639,28 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 code: [null],
                 name: [null, [Validators.required]],
                 fieldType: [null, [Validators.required]],
-                size: [0, [Validators.required]],
-                key: [false, [Validators.required]],
                 search: [false, [Validators.required]],
                 label: [null, [Validators.required]],
                 notNull: [false],
-                defaultValue: [null],
-                tableCode: [null],
                 precision: [0, [Validators.required]],
-                minValue: ["0"],
-                maxValue: ["0"],
                 mask: [null],
                 charCase: [LuthierFieldCharcaseEnum.NORMAL],
                 order: [
-                    this.model.fields.reduce((max, field) => field.order > max ? field.order : max, this.model.fields[0].order) + 1,
+                    UtilFunctions.isValidStringOrArray(this.model.fields) ? this.model.fields.reduce((max, field) => field.order > max ? field.order : max, this.model.fields[0].order) + 1 : 1,
                     [Validators.required]
                 ],
-                autoInc: [false],
+                size: [0, [Validators.required]],
                 editor: [LuthierFieldEditorEnum.AUTO],
-                modifyType: [LuthierFieldModifierEnum.INTERNO],
-                attributeName: [null, [Validators.required]],
                 technicalDescription: [null],
                 userDescription: [null],
                 layoutSize: [LuthierFieldLayoutEnum.NAO_DEFINIDO],
                 uiConfiguration: [null],
-                staticFields: this.formBuilder.array([])
+                script: [null],
+                dataType: [null, [Validators.required]],
+                readOnly: [false],
+                visible: [false],
+                tableName: [null],
+                lookupFilter: [null]
             },
             {
                 validators: LuthierFieldValidator.validate(this.getFields(type)),
@@ -710,16 +674,14 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                     code: [null],
                     description: [null],
                     }),
-                customSize: this.addCustomizationField(),
-                customLabel: this.addCustomizationField(),
-                customNotNull: this.addCustomizationField(),
-                customDefaultValue: this.addCustomizationField(),
-                customPrecision: this.addCustomizationField(),
-                customMinValue: this.addCustomizationField(),
-                customMaxValue: this.addCustomizationField(),
+                reference: this.addReferenceField(),
                 customMask: this.addCustomizationField(),
+                customReadOnly: this.addCustomizationField(),
+                customVisible: this.addCustomizationField(),
+                customNotNull: this.addCustomizationField(),
                 customCharCase: this.addCustomizationField(),
                 customEditor: this.addCustomizationField(),
+                customLookupFilter: this.addCustomizationField(),
                 customUiConfiguration: this.addCustomizationField()
             });
             return allFields;
@@ -727,7 +689,8 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         else {
             const allFields = this.formBuilder.group ({
                 ...c.controls,
-                groupInfo: [null]
+                groupInfo: [null],
+                reference: [null]
             });
             return allFields;
         }
@@ -758,104 +721,6 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 description: [null]
             })
         });
-        return c;
-    }
-    addStaticField(type: TableType): FormGroup {
-        const c = this.formBuilder.group({
-            code: [null],
-            caption: ['', [Validators.required]],
-            value: ['', [Validators.required]],
-            permissionType: [LuthierPermissionTypeEnum.USER, [Validators.required]],
-            permissionMessage: [''],
-
-        });
-        if (type === 'fields') {
-            return this.formBuilder.group({
-                ...c.controls,
-                customCaption: this.addCustomizationField(),
-                resource: this.formBuilder.group(
-                    {
-                        code: [null],
-                        name: ['']
-                    }
-                )
-            })
-        }
-        else {
-            return this.formBuilder.group({
-                ...c.controls,
-                resource: [null]
-
-            });
-        }
-    }
-
-    addViewField(bodyType?: LuthierViewBodyEnum): FormGroup {
-        const c = this.formBuilder.group({
-            databaseType: [bodyType],
-            body: ['']
-        });
-        return c;
-    }
-
-    getView(bodyType: LuthierViewBodyEnum | any): FormGroup {
-        const fa = (this.formSave.get('views') as FormArray);
-        const index = fa.controls.findIndex(x => x.get('databaseType').value === bodyType);
-        if (index >= 0) {
-            return fa.at(index) as FormGroup;
-        }
-        console.log('view is null', fa, bodyType);
-        const c = this.addViewField(bodyType);
-        fa.push(c);
-        return c;
-    }
-    addIndex(): FormGroup {
-        const c = this.formBuilder.group({
-                code: [null],
-                name: [null, [Validators.required]],
-                sortType: [LuthierIndexSortEnum.ASC, [Validators.required]],
-                unique: [false, [Validators.required]],
-                creationOrder: [1, [Validators.required]],
-                validationMessage: [null],
-                indexFields: this.formBuilder.array([], [Validators.required])
-
-            }
-        );
-        return c;
-    }
-    addIndexField(): FormGroup {
-        const c = this.formBuilder.group({
-            order: [null],
-            tableField: this.formBuilder.group(
-                {
-                    id: [null],
-                    code: [null],
-                    name: [',', [Validators.required]]
-                }, { validators: [Validators.required]}
-            )
-        });
-        return c;
-    }
-    addReference(): FormGroup {
-        const c = this.formBuilder.group({
-                code: [null],
-                name: [null, [Validators.required]],
-                status: [LuthierReferenceStatusEnum.ACTIVE, [Validators.required]],
-                onDelete: [LuthierReferenceActionEnum.NONE, [Validators.required]],
-                onUpdate: [LuthierReferenceActionEnum.NONE, [Validators.required]],
-                attributeName: [null],
-                updateMessage: [null],
-                deleteMessage: [null],
-                lookupFastFieldCode: [null, [Validators.required]],
-                lookupDescriptionFieldCode: [null, [Validators.required]],
-                tablePK: this.formBuilder.group({
-                    code: [null, [Validators.required]],
-                    name: [null, [Validators.required]]
-                }, { validators: [Validators.required]}),
-                fieldsReference: this.formBuilder.array([], [Validators.required])
-
-            }
-        );
         return c;
     }
     addReferenceField(): FormGroup {
@@ -896,21 +761,25 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     addSearchField(): FormGroup {
         const c = this.formBuilder.group({
             code: [null],
-            notNull: [null],
             label: [null, [Validators.required]],
             customLabel: this.addCustomizationField(),
             operator: [LuthierSearchFieldOperatorEnum.EQUAL, [Validators.required]],
             order: [null, [Validators.required]],
             editor: [LuthierSearchFieldEditorEnum.DEFAULT, [Validators.required]],
-            tableField: this.formBuilder.group(
+            field: this.formBuilder.group(
                 {
                     id: [null],
                     code: [null],
                     name: ['', [Validators.required]],
-                    fieldType: [],
-                    size: []
                 }, { validators: [Validators.required]}
-            )
+            ),
+            dataset: this.formBuilder.group(
+                {
+                    id: [null],
+                    code: [null],
+                    name: ['', [Validators.required]],
+                }, { validators: [Validators.required]}
+            ),
         });
         return c;
     }
@@ -975,6 +844,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
 
     detailField(model: LuthierTableFieldModel, index: number, type: TableType) {
+        /*
         this._parent.service.getImagesResources().then(resources => {
             const modal = this._matDialog.open(LuthierDictionaryTableFieldModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-field-modal-container' });
             modal.componentInstance.title = "Campo da Tabela " + this.model.name;
@@ -993,47 +863,14 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 this._changeDetectorRef.detectChanges();
             });
         })
+        */
+    }
 
-    }
-    newIndex() {
-        this.editIndex(new LuthierTableIndexModel(), -1);
-    }
-    deleteIndex(index: number) {
-        this.indexesDataSource.data.splice(index, 1);
-        this.indexesDataSource._updateChangeSubscription();
-        this._changeDetectorRef.detectChanges();
-    }
-    editIndex(model: LuthierTableIndexModel, index: number) {
-        const fields = this.model.fields.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
-        const modal = this._matDialog.open(LuthierDictionaryTableIndexModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-index-modal-container' });
-        modal.componentInstance.title = "Index da Tabela " + this.model.name;
-        modal.componentInstance.parent = this;
-        modal.componentInstance.indexModel = model;
-        modal.componentInstance.fields = fields;
-        modal.componentInstance.index = index;
-        modal.afterClosed().subscribe((result) =>
-        {
-            if ( result === 'ok' ) {
-                if (index >= 0) {
-                    this.indexesDataSource.data[index] = modal.componentInstance.formSave.value;
-                }
-                else {
-                    this.indexesDataSource.data.push(modal.componentInstance.formSave.value);
-                }
-                this.indexesDataSource._updateChangeSubscription();
-                this._changeDetectorRef.detectChanges();
-            }
-
-        });
-
-    }
     newReference() {
         this.editReference(new LuthierTableReferenceModel(), -1);
     }
     deleteReference(index: number) {
-        this.referencesDataSource.data.splice(index, 1);
-        this.referencesDataSource._updateChangeSubscription();
-        this._changeDetectorRef.detectChanges();
+
     }
     editReference(model: LuthierTableReferenceModel, index: number) {
         if (index >= 0 && model.tablePK && model.tablePK.code >= 0) {
@@ -1047,6 +884,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         }
     }
     openModalReference(model: LuthierTableReferenceModel, index: number, fielsPK: LuthierTableFieldModel[]) {
+        /*
         const fields = this.model.fields.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
         const modal = this._matDialog.open(LuthierDictionaryTableReferenceModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-reference-modal-container' });
         modal.componentInstance.title = "Referência da Tabela " + this.model.name;
@@ -1070,9 +908,11 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             }
 
         });
+
+         */
     }
     newSearch() {
-        this.editIndex(new LuthierTableSearchModel(), -1);
+        this.editSearch(new LuthierTableSearchModel(), -1);
     }
     deleteSearch(index: number) {
         this.searchsDataSource.data.splice(index, 1);
@@ -1080,6 +920,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this._changeDetectorRef.detectChanges();
     }
     editSearch(model: LuthierTableSearchModel, index: number) {
+        /*
         this._parent.service.getActiveSubsystems().then(subsystems => {
             const fields = this.model.fields.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
             const modal = this._matDialog.open(LuthierDictionaryTableSearchModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-search-modal-container' });
@@ -1104,6 +945,8 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
             });
         });
+
+         */
     }
 
     newGroupInfo() {
@@ -1188,14 +1031,6 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         const filterValue = (event.target as HTMLInputElement).value;
         this.fieldsDataSource.filter = filterValue.trim().toLowerCase();
     }
-    filterIndexes(event: Event) {
-        const filterValue = (event.target as HTMLInputElement).value;
-        this.indexesDataSource.filter = filterValue.trim().toLowerCase();
-    }
-    filterReferences(event: Event) {
-        const filterValue = (event.target as HTMLInputElement).value;
-        this.referencesDataSource.filter = filterValue.trim().toLowerCase();
-    }
     filterSearchs(event: Event) {
         const filterValue = (event.target as HTMLInputElement).value;
         this.searchsDataSource.filter = filterValue.trim().toLowerCase();
@@ -1248,5 +1083,51 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         }
         return true;
 
+    }
+
+    isMyDescendant(t: LuthierVisionDatasetModel, parent?: LuthierVisionDatasetModel ): boolean {
+        if (!parent) {
+            parent = this.model;
+        }
+        if (UtilFunctions.isValidStringOrArray(parent.children) === true) {
+            let yes = parent.children.findIndex(x => x.code === t.code) >= 0;
+            if (yes === false) {
+                for (let child of parent.children) {
+                    yes = this.isMyDescendant(t, child);
+                    if (yes) {
+                        return true;
+                    }
+                }
+            }
+            else {
+                return true;
+            }
+        }
+        else {
+            return false;
+        }
+    }
+
+    setParentRelation() {
+        this.parentRelation = null;
+        if (this.model.parent) {
+            let index = this.model.relatives.findIndex(x => x.code === this.model.parent.code);
+            if (index >= 0) {
+                index = this.model.table.references.findIndex(x => x.tablePK.code === this.model.relatives[index].table.code);
+                if (index >= 0) {
+                    this.parentRelation = this.model.table.references[index];
+                }
+            }
+        }
+    }
+
+    parentChanged(event: MatSelectChange) {
+        this.model.parent = event.value;
+        this.setParentRelation();
+        this._changeDetectorRef;
+    }
+
+    hasParentProblem(): boolean {
+        return this.model.parent && this.model.parent.code >= 0 && !this.parentRelation;
     }
 }

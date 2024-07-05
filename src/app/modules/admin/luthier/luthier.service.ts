@@ -7,6 +7,7 @@ import {
     LuthierResourceModel,
     LuthierSubsystemModel,
     LuthierTableModel,
+    LuthierVisionDatasetModel,
     LuthierVisionModel
 } from '../../../shared/models/luthier.model';
 import {UtilFunctions} from '../../../shared/util/util-functions';
@@ -146,8 +147,11 @@ export class LuthierService
     }
 
     getVision(id: number): Promise<LuthierVisionModel> {
-
         return firstValueFrom(this._httpClient.get<LuthierVisionModel>(`${this.baseDicUrl}/vision/${id}`));
+    }
+    getDataset(id: number): Promise<LuthierVisionDatasetModel> {
+
+        return firstValueFrom(this._httpClient.get<LuthierVisionDatasetModel>(`${this.baseDicUrl}/dataset/${id}`));
     }
 
     saveTable(model: LuthierTableModel): Promise<LuthierTableModel> {

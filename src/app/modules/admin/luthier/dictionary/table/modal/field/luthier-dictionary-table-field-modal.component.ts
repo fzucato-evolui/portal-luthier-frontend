@@ -137,7 +137,7 @@ export class LuthierDictionaryTableFieldModalComponent implements OnInit, OnDest
                 editor: [LuthierFieldEditorEnum.AUTO],
                 modifyType: [LuthierFieldModifierEnum.INTERNO],
                 attributeName: [null, [Validators.required]],
-                technichalDescription: [null],
+                technicalDescription: [null],
                 userDescription: [null],
                 layoutSize: [LuthierFieldLayoutEnum.NAO_DEFINIDO],
                 uiConfiguration: [null],

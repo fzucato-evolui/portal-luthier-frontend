@@ -41,6 +41,7 @@ import {LuthierService} from '../luthier.service';
 import {MatTreeModule, MatTreeNestedDataSource} from '@angular/material/tree';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {LuthierDictionaryVisionComponent} from './vision/luthier-dictionary-vision.component';
+import {LuthierDictionaryDatasetComponent} from './dataset/luthier-dictionary-dataset.component';
 
 @Component({
     selector     : 'luthier-dictionary',
@@ -70,6 +71,7 @@ import {LuthierDictionaryVisionComponent} from './vision/luthier-dictionary-visi
         LuthierDictionaryTableComponent,
         MatTreeModule,
         LuthierDictionaryVisionComponent,
+        LuthierDictionaryDatasetComponent,
     ],
 })
 export class LuthierDictionaryComponent implements OnInit, OnDestroy
@@ -311,6 +313,14 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             }
             else if (table.objectType === 'VISION') {
                 this._parent.service.getVision(table.code)
+                    .then(response => {
+                        this.tabsOpened.push(response);
+                        this.selectedTab = response;
+                        this._changeDetectorRef.markForCheck();
+                    })
+            }
+            else if (table.objectType === 'VISION_DATASET') {
+                this._parent.service.getDataset(table.code)
                     .then(response => {
                         this.tabsOpened.push(response);
                         this.selectedTab = response;

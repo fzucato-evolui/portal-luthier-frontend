@@ -173,7 +173,7 @@ export class LuthierTableFieldModel {
     customEditor?: LuthierCustomizationModel
     modifyType?: LuthierFieldModifierEnum | string
     attributeName?: string
-    technichalDescription?: string
+    technicalDescription?: string
     userDescription?: string
     layoutSize?: LuthierFieldLayoutEnum | string
     uiConfiguration?: string
@@ -292,11 +292,11 @@ export class LuthierCustomFieldModel {
     order?: number
     groupInfo?: string
     autoInc?: boolean
-    technichalDescription?: string
+    technicalDescription?: string
     userDescription?: string
     modifyType?: string
     attributeName?: string
-    layoutSize?: string
+    layoutSize?: LuthierFieldLayoutEnum | string
     uiConfiguration?: string
     staticFields?: LuthierTableStaticCustomFieldModel[]
     realName?: string
@@ -462,13 +462,137 @@ export class LuthierVisionDatasetModel {
     code?: number
     name?: string
     description?: string
+    customDescription: LuthierCustomizationModel;
     filter?: string
+    customFilter: LuthierCustomizationModel;
     uiConfiguration?: string
     parent?: LuthierVisionDatasetModel
     children?: LuthierVisionDatasetModel[]
     table?: LuthierTableModel
     vision?: LuthierVisionModel
     objectType?: LuthierObjectType
+    fields?: LuthierVisionDatasetFieldModel[]
+    groupInfos?: LuthierVisionGroupInfoModel[]
+    searchs?: LuthierVisionDatasetSearchModel[]
+    customizations?: LuthierCustomizationModel[]
+    customFields?: LuthierVisionDatasetCustomFieldModel[]
+    relatives?: LuthierVisionDatasetModel[]
+}
+export enum LuthierVisionDatasetFieldTypeEnum {
+    NORMAL = ("NORMAL"),
+    CALCULATED = ("CALCULATED"),
+    LOOKUP  = ("LOOKUP")
+}
+export class LuthierVisionGroupInfoModel extends LuthierGroupInfoModel {
+
+}
+export class LuthierVisionDatasetFieldModel {
+    code?: number
+    name?: any
+    fieldType?: LuthierVisionDatasetFieldTypeEnum
+    size?: number
+    search?: boolean
+    label?: string
+    customLabel: LuthierCustomizationModel;
+    notNull?: boolean
+    customNotNull: LuthierCustomizationModel;
+    datasetCode?: number
+    precision?: number
+    mask?: string
+    customMask: LuthierCustomizationModel;
+    charCase?: LuthierFieldCharcaseEnum | string
+    customCharCase: LuthierCustomizationModel;
+    order?: number
+    groupInfoCode?: number
+    editor?: LuthierFieldEditorEnum | string
+    customEditor: LuthierCustomizationModel;
+    technicalDescription?: string
+    userDescription?: string
+    layoutSize?: LuthierFieldLayoutEnum | string
+    uiConfiguration?: string
+    customUiConfiguration: LuthierCustomizationModel;
+    script?: string
+    dataType?: LuthierFieldTypeEnum | string
+    tableFieldCode?: number
+    readOnly?: boolean
+    customReadOnly: LuthierCustomizationModel;
+    visible?: boolean
+    customVisible: LuthierCustomizationModel;
+    tabName?: string
+    lookupFilter?: string
+    customLookupFilter: LuthierCustomizationModel;
+    referenceCode?: number
+    dataset?: LuthierDatabaseModel
+    groupInfo?: LuthierVisionGroupInfoModel
+    tableField?: LuthierTableFieldModel
+    reference?: LuthierTableReferenceModel
+    id?: string
 }
 
+export class LuthierVisionDatasetSearchModel {
+    code?: number
+    datasetCode?: number
+    name?: string
+    customName: LuthierCustomizationModel;
+    status?: LuthierSearchStatusEnum | string
+    type?: LuthierSearchTypeEnum | string
+    order?: number
+    dataset?: LuthierDatabaseModel
+    searchFields?: LuthierVisionDatasetSearchFieldModel[]
+    subsystems: LuthierVisionDatasetSearchSubsystemModel[]
+
+
+}
+export class LuthierVisionDatasetSearchFieldModel {
+    code?: number
+    searchCode?: number
+    datasetCode?: number
+    fieldCode?: number
+    label?: string
+    customLabel: LuthierCustomizationModel;
+    operator?: LuthierSearchFieldOperatorEnum | string
+    order?: number
+    editor?: LuthierSearchFieldEditorEnum | string
+    search: LuthierVisionDatasetSearchModel
+    dataset: LuthierVisionDatasetModel
+    field?: LuthierVisionDatasetFieldModel
+}
+
+export class LuthierVisionDatasetSearchSubsystemModel {
+    searchCode?: number
+    subsystemCode?: number
+    search?: LuthierVisionDatasetSearchModel
+    subsystem?: LuthierSubsystemModel
+}
+
+export class LuthierVisionDatasetCustomFieldModel {
+    id?: string
+    code?: number
+    visionName?: string
+    datasetName?: string
+    dataType?: LuthierFieldTypeEnum | string
+    script?: string
+    fieldDatasetName?: string
+    mask?: string
+    readOnly?: boolean
+    visible?: boolean
+    required?: boolean
+    editor?: LuthierFieldEditorEnum | string
+    charcase?: LuthierFieldCharcaseEnum | string
+    lookupFilter?: string
+    fieldType?: LuthierVisionDatasetFieldTypeEnum | string
+    size?: number
+    label?: string
+    precision?: number
+    order?: number
+    groupInfo?: string
+    search?: boolean
+    technicalDescription?: string
+    userDescription?: string
+    lookupTable?: string
+    layoutSize?: LuthierFieldLayoutEnum | string
+    uiConfiguration: string
+    reference?: string
+    tableField?: LuthierTableFieldModel | LuthierCustomFieldModel;
+}
 export type LuthierDictionaryObjectType = LuthierTableModel | LuthierVisionModel | LuthierVisionDatasetModel

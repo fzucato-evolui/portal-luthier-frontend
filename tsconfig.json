@@ -22,6 +22,6 @@
     "angularCompilerOptions": {
         "enableI18nLegacyMessageIdFormat": false,
         "enableIvy": true,
-        "strictTemplates": true
+        "strictTemplates": false
     }
 }

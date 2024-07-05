@@ -1,0 +1,183 @@
+<div class="inset-0 w-full h-full flex flex-col min-w-0 md:overflow-y-auto relative">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-2 sm:py-4 sm:px-4 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="flex flex-row flex-row-reverse mt-2 items-center">
+                <div class="mr-2">
+                    <button
+                        mat-icon-button aria-label="close dialog" mat-dialog-close>
+                        <mat-icon
+                            class="icon-size-4"
+                            fontSet="fas" fontIcon="fa-times"></mat-icon>
+                    </button>
+                </div>
+                <div class="w-full">
+                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        {{title}}
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div
+        class="flex-auto overflow-hidden p-3">
+
+        <div class="divide-y-2 divide-black h-full max-h-full max-w-full flex flex-col">
+            <div class="w-full mb-4 flex-none">
+                <div class="grid sm:grid-cols-12 gap-2 mt-4 mx-1">
+
+                    <div class="sm:col-span-4">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Tipo</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+
+                            <mat-select [(ngModel)]="model.fieldType" (selectionChange)="changeFieldType($event)">
+
+                                <ng-container *ngFor="let t of LuthierVisionDatasetFieldTypeEnum | enumArray">
+                                    <mat-option  [value]="t.key" *ngIf="t.key !== 'CALCULATED'">
+                                        {{t.key}}
+
+                                    </mat-option>
+                                </ng-container>
+
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-8">
+                        <mat-form-field  *ngIf = "model.fieldType && model.fieldType === 'LOOKUP'" [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Tabela</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+                            <mat-select [compareWith]="parent.compareCode" (openedChange)="filterTable.value =null"
+                                        [(ngModel)]="model.reference" (selectionChange)="changeTable($event)">
+                                <div class="flex flex-col h-full w-full">
+                                    <div class="flex-none">
+                                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                            <mat-icon
+                                                class="icon-size-5"
+                                                fontSet="fas" fontIcon="fa-search"
+                                                matPrefix></mat-icon>
+                                            <input [autocomplete]="'off'" #filterTable matInput>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="flex-1 overflow-auto">
+                                        <ng-container *ngFor="let t of references | filterJson : {'tablePK.name': filterTable.value}">
+                                            <mat-option [value]="t" >
+                                                {{t.tablePK.name + ' - ' + t.tablePK.description }}
+                                            </mat-option>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="w-full pb-2 flex flex-col divide-black overflow-hidden flex-1">
+                <div class="flex-none w-full flex justify-between">
+                    <mat-label class="font-medium">Campos da Tabela</mat-label>
+                    <div class="flex-none md:w-1/3 md:pl-2">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-search"
+                                matPrefix></mat-icon>
+                            <input
+                                [autocomplete]="'off'"
+                                class="text-sm"
+                                (input)="filterFields($event)"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="flex-1 w-full overflow-auto" cdkScrollable>
+                    <table mat-table matSort [dataSource]="dataSource" class="table-auto" (matSortChange)="announceSortChange($event)">
+                        <ng-container matColumnDef="buttons">
+                            <th mat-header-cell *matHeaderCellDef>
+                                <div class="flex flex-row items-center">
+                                    <mat-checkbox *ngIf="model.fieldType === 'NORMAL'" (change)="$event ? toggleAllRows() : null"
+                                                  [checked]="model.fields.hasValue() && isAllSelected()"
+                                                  [indeterminate]="model.fields.hasValue() && !isAllSelected()">
+                                    </mat-checkbox>
+                                </div>
+                            </th>
+                            <td mat-cell *matCellDef="let field; let i = index">
+                                <div class="flex flex-row items-center" [matTooltip]="field['forbidden'] === true ? 'Campo já selecionado' : ''">
+                                    <mat-checkbox [ngClass]="{'readOnly': field['forbidden'] === true}" (click)="$event.stopPropagation()"
+                                                  (change)="$event ? model.fields.toggle(field) : null"
+                                                  [checked]="model.fields.isSelected(field)">
+                                    </mat-checkbox>
+                                </div>
+
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="code">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+                            <td mat-cell *matCellDef="let field; let i = index"> {{field.code}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="key">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> PK </th>
+                            <td mat-cell *matCellDef="let field; let i = index"> {{field.key}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome </th>
+                            <td mat-cell *matCellDef="let field; let i = index"> {{field.name}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="label">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Rótulo </th>
+                            <td mat-cell *matCellDef="let field; let i = index"> {{field.label}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="fieldType">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
+                            <td mat-cell *matCellDef="let field; let i = index"> {{field.fieldType}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="size">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Tamanho </th>
+                            <td mat-cell *matCellDef="let field; let i = index"> {{field.size}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="notNull">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Obrigatório </th>
+                            <td mat-cell *matCellDef="let field; let i = index"> {{field.notNull}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="precision">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Precisão </th>
+                            <td mat-cell *matCellDef="let field; let i = index"> {{field.precision}} </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                    </table>
+                    <!--
+                    <pre style="font-size: 1rem; white-space: pre-wrap;">{{ model | json}}</pre>
+                    !-->
+                </div>
+
+            </div>
+
+
+
+        </div>
+
+        <div class="absolute bottom-0 right-0 z-50">
+
+            <button
+                class="mr-4 mb-4"
+                [disabled]="canSave() !== true"
+                (click)="doSaving()"
+                mat-flat-button
+                type="button"
+                [color]="'primary'">Salvar
+            </button>
+        </div>
+    </div>
+
+</div>

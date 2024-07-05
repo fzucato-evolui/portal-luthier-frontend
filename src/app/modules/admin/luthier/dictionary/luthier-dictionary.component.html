@@ -251,6 +251,9 @@
                     <luthier-dictionary-vision *ngIf="table.objectType === 'VISION'" class="w-full h-full" [model]="table"
                           [ngClass]="{'hidden': table !== selectedTab}">
                     </luthier-dictionary-vision>
+                    <luthier-dictionary-dataset *ngIf="table.objectType === 'VISION_DATASET'" class="w-full h-full" [model]="table"
+                                               [ngClass]="{'hidden': table !== selectedTab}">
+                    </luthier-dictionary-dataset>
                 </ng-container>
 
             </div>

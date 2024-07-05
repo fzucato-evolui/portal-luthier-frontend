@@ -1,3 +1,5 @@
+import {MatTableDataSource} from '@angular/material/table';
+
 export class UtilFunctions {
 
     public static removeNonAlphaNumeric(value: string): string {
@@ -63,5 +65,14 @@ export class UtilFunctions {
             return value === 'true' || value === '1';
         }
         return !!value;
+    }
+
+    public static setSortingDataAccessor(dataSource: MatTableDataSource<any>) {
+        dataSource.sortingDataAccessor = (item, property) => {
+            if (property.includes('.')) {
+                return property.split('.').reduce((o,i)=>o[i], item);
+            }
+            return item[property];
+        };
     }
 }

@@ -1,0 +1,304 @@
+<div class="inset-0 w-full h-full flex flex-col min-w-0 md:overflow-y-auto relative">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-2 sm:py-4 sm:px-4 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="flex flex-row flex-row-reverse mt-2 items-center">
+                <div class="mr-2">
+                    <button
+                        mat-icon-button aria-label="close dialog" mat-dialog-close>
+                        <mat-icon
+                            class="icon-size-4"
+                            fontSet="fas" fontIcon="fa-times"></mat-icon>
+                    </button>
+                </div>
+                <div class="w-full">
+                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        {{title}}
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div
+        class="flex-auto overflow-y-auto p-3"
+        cdkScrollable>
+
+        <div [formGroup]="formSave" class="divide-y-2 divide-black h-full max-h-full max-w-full overflow-x-auto md:overflow-auto">
+
+            <div class="w-full mb-4">
+                <div class="grid sm:grid-cols-12 gap-2 mt-4 mx-1">
+
+                    <div class="sm:col-span-2">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Código</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-list-ol"
+                                matPrefix></mat-icon>
+                            <input
+                                readonly
+                                [formControlName]="'code'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Status</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+
+                            <mat-select formControlName="status">
+
+                                <mat-option *ngFor="let t of LuthierSearchStatusEnum | enumArray" [value]="t.key" >
+                                    {{t.key}}
+
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Ordem</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-database"
+                                matPrefix></mat-icon>
+                            <input
+                                mask="0*"
+                                [formControlName]="'order'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-4">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Tipo</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+
+                            <mat-select formControlName="type">
+
+                                <mat-option *ngFor="let t of LuthierSearchTypeEnum | enumArray" [value]="t.key" >
+                                    {{t.key}}
+
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-12">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Subsistemas</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+                            <mat-select #selectSubsystem multiple [compareWith]="compareSubsytemsCode" (openedChange)="filterSubsystem.value =null"
+                                        (selectionChange)="onSelectionChange($event)"
+                                        [value]="formSave.get('subsystems').value">
+                                <div class="flex flex-col h-full w-full">
+                                    <div class="flex-none">
+                                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                            <mat-icon
+                                                class="icon-size-5"
+                                                fontSet="fas" fontIcon="fa-search"
+                                                matPrefix></mat-icon>
+                                            <input [autocomplete]="'off'" #filterSubsystem matInput>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="flex-1 overflow-auto">
+                                        <ng-container *ngFor="let t of subsystems | filterJson : {description: filterSubsystem.value}">
+                                            <mat-option [value]="t" [disabled]="isSubsystemDisabled(t,selectSubsystem.value) ">
+                                                {{t.description}}
+                                            </mat-option>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Descrição</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-signature"
+                                matPrefix></mat-icon>
+                            <input matInput
+                                   formControlName="name">
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-6" formGroupName="customName">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Descrição Customizada</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-signature"
+                                matPrefix></mat-icon>
+                            <input matInput
+                                   formControlName="value">
+                        </mat-form-field>
+                    </div>
+                </div>
+
+            </div>
+            <div class="w-full pb-2 flex flex-col max-h-1/2 divide-black overflow-auto">
+                <div class="flex-none w-full">
+                    <mat-label class="font-medium">Campos da Pesquisa</mat-label>
+                </div>
+                <table mat-table matSort [dataSource]="dataSource" class="table-auto flex-1 w-full" (matSortChange)="announceSortChange($event)">
+                    <ng-container matColumnDef="buttons">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <div class="flex flex-row items-center">
+                                <button mat-icon-button aria-label="Add" (click)="add()" matTooltip="Adicionar Campo no Índice">
+                                    <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-plus"></mat-icon>
+                                </button>
+                            </div>
+                        </th>
+                        <td mat-cell *matCellDef="let model; let i = index">
+                            <div class="flex flex-row items-center">
+                                <button mat-icon-button aria-label="Delete" (click)="delete(i)" matTooltip="Remover Campo do Índice">
+                                    <mat-icon class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="code">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+                        <td mat-cell *matCellDef="let model; let i = index"> {{model.get('code').value}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="label">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Caption </th>
+                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                            <div class="flex flex-row items-center">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                    <input class="text-sm" matInput [formControlName]="'label'">
+                                </mat-form-field>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="customLabel">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Caption Customizado </th>
+                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                            <div class="flex flex-row items-center" formGroupName="customLabel">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                    <input class="text-sm" matInput [formControlName]="'value'">
+                                </mat-form-field>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="operator">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Operador </th>
+                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                            <div class="flex flex-row items-center">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                    <mat-select class="text-sm"
+                                                formControlName="operator">
+
+                                        <mat-option *ngFor="let t of LuthierSearchFieldOperatorEnum | enumArray" [value]="t.key" >
+                                            {{t.key}}
+
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="tableField.name">
+                        <th mat-header-cell *matHeaderCellDef> Dataset </th>
+                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                            <div class="flex flex-row items-center">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                    <mat-select class="text-sm" [compareWith]="parent.compareCode"
+                                                [formControl]="model.get('tableField')">
+                                        <ng-container *ngFor="let t of fields">
+                                            <mat-option [value]="{id: t.id, code: t.code, name: t.name}" >
+                                                {{t.name}}
+                                            </mat-option>
+                                        </ng-container>
+
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="tableField.name">
+                        <th mat-header-cell *matHeaderCellDef> Campo </th>
+                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                            <div class="flex flex-row items-center">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                    <mat-select class="text-sm" [compareWith]="parent.compareCode"
+                                                [formControl]="model.get('tableField')">
+                                        <ng-container *ngFor="let t of fields">
+                                            <mat-option [value]="{id: t.id, code: t.code, name: t.name, fieldType: t.fieldType, size: t.size}" >
+                                                {{t.name}}
+                                            </mat-option>
+                                        </ng-container>
+
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="tableField.fieldType">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
+                        <td mat-cell *matCellDef="let model; let i = index"> {{model.get('tableField').get('fieldType').value}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="tableField.size">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Tamanho </th>
+                        <td mat-cell *matCellDef="let model; let i = index"> {{model.get('tableField').get('size').value}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="editor">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Editor </th>
+                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                            <div class="flex flex-row items-center">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                    <mat-select class="text-sm"
+                                                formControlName="editor">
+
+                                        <mat-option *ngFor="let t of LuthierSearchFieldEditorEnum | enumArray" [value]="t.key" >
+                                            {{t.key}}
+
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="order">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Ordem </th>
+                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                            <div class="flex flex-row items-center">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                    <input class="text-sm" mask="0*" matInput [formControlName]="'order'">
+                                </mat-form-field>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+            </div>
+            <pre style="font-size: 1rem; white-space: pre-wrap;">{{ formSave.value | json}}</pre>
+        </div>
+
+        <div class="absolute bottom-0 right-0 z-50">
+
+            <button
+                class="mr-4 mb-4"
+                [disabled]="canSave() === false"
+                (click)="doSaving()"
+                mat-flat-button
+                type="button"
+                [color]="'primary'">Salvar
+            </button>
+        </div>
+    </div>
+
+</div>
