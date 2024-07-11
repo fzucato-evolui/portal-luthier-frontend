@@ -9,7 +9,7 @@ import {
     ViewEncapsulation
 } from "@angular/core";
 import {Subject} from 'rxjs';
-import {FormArray, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormArray, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
@@ -20,13 +20,14 @@ import {JsonPipe, NgFor, NgIf} from '@angular/common';
 import {SharedPipeModule} from '../../../../../../../shared/pipes/shared-pipe.module';
 import {NgxMaskDirective, provideNgxMask} from 'ngx-mask';
 import {
+    LuthierSearchFieldEditorEnum,
+    LuthierSearchFieldOperatorEnum,
+    LuthierSearchStatusEnum,
+    LuthierSearchTypeEnum,
     LuthierSubsystemModel,
     LuthierTableFieldModel,
     LuthierTableSearchModel,
-    LuthierSearchTypeEnum,
-    LuthierSearchStatusEnum,
-    LuthierSearchFieldEditorEnum,
-    LuthierSearchFieldOperatorEnum, LuthierTableSearchSubsystemModel
+    LuthierTableSearchSubsystemModel
 } from '../../../../../../../shared/models/luthier.model';
 import {LuthierDictionaryTableComponent} from '../../luthier-dictionary-table.component';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
@@ -87,7 +88,7 @@ export class LuthierDictionaryTableSearchModalComponent implements OnInit, OnDes
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     title: string;
     private _parent: LuthierDictionaryTableComponent;
-    displayedColumns = [ 'buttons', 'code', 'label', 'customLabel', 'operator', 'tableField.name', 'tableField.fieldType', 'tableField.size', 'editor', 'order'];
+    displayedColumns = [ 'buttons', 'order', 'code', 'tableField.name', 'tableField.fieldType', 'tableField.size', 'label', 'customLabel', 'operator', 'editor'];
     LuthierSearchTypeEnum = LuthierSearchTypeEnum;
     LuthierSearchStatusEnum = LuthierSearchStatusEnum;
     LuthierSearchFieldEditorEnum = LuthierSearchFieldEditorEnum;

@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-import {NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import {CommonModule, NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
 import {
     FormArray,
     FormBuilder,
@@ -47,9 +47,8 @@ import {
     LuthierSearchFieldOperatorEnum,
     LuthierSearchStatusEnum,
     LuthierSearchTypeEnum,
-    LuthierTableFieldModel,
+    LuthierTableModel,
     LuthierTableReferenceModel,
-    LuthierTableSearchModel,
     LuthierVisionDatasetCustomFieldModel,
     LuthierVisionDatasetFieldModel,
     LuthierVisionDatasetFieldTypeEnum,
@@ -73,6 +72,9 @@ import {MessageDialogService} from '../../../../../shared/services/message/messa
 import {
     LuthierDictionaryDatasetFieldModalComponent
 } from './modal/field/luthier-dictionary-dataset-field-modal.component';
+import {
+    LuthierDictionaryDatasetSearchModalComponent
+} from './modal/search/luthier-dictionary-dataset-search-modal.component';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -88,6 +90,7 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'group
         MatButtonModule,
         NgForOf,
         FormsModule,
+        CommonModule,
         MatInputModule,
         ReactiveFormsModule,
         MatFormFieldModule,
@@ -122,10 +125,12 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     currentTab: TableType = 'fields';
     fieldRowEditing: { [key: string]: string } = {}
     private _cloneModel: LuthierVisionDatasetModel;
+    tables: LuthierTableModel[];
     @Input()
     set model(value: LuthierVisionDatasetModel) {
         this._model = value;
         this._cloneModel = cloneDeep(this._model);
+        this.tables = cloneDeep(this.parent.tables);
         this.setParentRelation();
     }
     get model(): LuthierVisionDatasetModel {
@@ -637,30 +642,37 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         const c = this.formBuilder.group({
                 id: [crypto.randomUUID()],
                 code: [null],
-                name: [null, [Validators.required]],
+                name: [null],
                 fieldType: [null, [Validators.required]],
                 search: [false, [Validators.required]],
                 label: [null, [Validators.required]],
                 notNull: [false],
-                precision: [0, [Validators.required]],
+                precision: [null],
                 mask: [null],
                 charCase: [LuthierFieldCharcaseEnum.NORMAL],
                 order: [
                     UtilFunctions.isValidStringOrArray(this.model.fields) ? this.model.fields.reduce((max, field) => field.order > max ? field.order : max, this.model.fields[0].order) + 1 : 1,
                     [Validators.required]
                 ],
-                size: [0, [Validators.required]],
+                size: [null],
                 editor: [LuthierFieldEditorEnum.AUTO],
                 technicalDescription: [null],
                 userDescription: [null],
                 layoutSize: [LuthierFieldLayoutEnum.NAO_DEFINIDO],
                 uiConfiguration: [null],
                 script: [null],
-                dataType: [null, [Validators.required]],
+                dataType: [null],
                 readOnly: [false],
                 visible: [false],
                 tableName: [null],
-                lookupFilter: [null]
+                lookupFilter: [null],
+                tableField: this.formBuilder.group({
+                    id: [null],
+                    code: [null],
+                    name: ['', [Validators.required]],
+                    size: [null],
+                    fieldType: [null]
+                })
             },
             {
                 validators: LuthierFieldValidator.validate(this.getFields(type)),
@@ -731,15 +743,15 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 {
                     id: [null],
                     code: [null],
-                    name: [null, [Validators.required]]
-                }, { validators: [Validators.required]}
+                    name: [null]
+                }
             ),
             fieldFK: this.formBuilder.group(
                 {
                     id: [null],
                     code: [null],
-                    name: [null, [Validators.required]]
-                }, { validators: [Validators.required]}
+                    name: [null]
+                }
             )
         });
         return c;
@@ -766,21 +778,32 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             operator: [LuthierSearchFieldOperatorEnum.EQUAL, [Validators.required]],
             order: [null, [Validators.required]],
             editor: [LuthierSearchFieldEditorEnum.DEFAULT, [Validators.required]],
-            field: this.formBuilder.group(
-                {
-                    id: [null],
-                    code: [null],
-                    name: ['', [Validators.required]],
-                }, { validators: [Validators.required]}
-            ),
+            field: this.addSearchFieldField(),
             dataset: this.formBuilder.group(
                 {
+                    id: [''],
+                    code: [null],
+                    name: ['', [Validators.required]],
+                }
+            ),
+        });
+        return c;
+    }
+    addSearchFieldField() {
+        const c = this.formBuilder.group(
+            {
+                id: [null],
+                code: [null],
+                name: [''],
+                tableField: this.formBuilder.group({
                     id: [null],
                     code: [null],
                     name: ['', [Validators.required]],
-                }, { validators: [Validators.required]}
-            ),
-        });
+                    size: [null],
+                    fieldType: [null]
+                })
+            }, { validators: [Validators.required]}
+        );
         return c;
     }
     addSearchSubsystem(): FormGroup {
@@ -799,7 +822,6 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     saveRow(id: string, index: number, type: TableType) {
         const fg = this.getFieldGroup(id, type);
         if (fg.invalid) {
-            console.log(fg, fg.errors);
             this.messageService.open("Existem campo inválidos!", "Error de Validação", "warning");
             fg.updateValueAndValidity();
             this._changeDetectorRef.detectChanges();
@@ -842,92 +864,21 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             return v1 === v2;
         }
     }
-
-    detailField(model: LuthierTableFieldModel, index: number, type: TableType) {
-        /*
-        this._parent.service.getImagesResources().then(resources => {
-            const modal = this._matDialog.open(LuthierDictionaryTableFieldModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-field-modal-container' });
-            modal.componentInstance.title = "Campo da Tabela " + this.model.name;
-            modal.componentInstance.parent = this;
-            modal.componentInstance.model = model;
-            modal.componentInstance.resources = resources;
-            modal.componentInstance.fieldType = type;
-            modal.afterClosed().subscribe((result) =>
-            {
-                if ( result === 'ok' ) {
-                    const fg = this.getFieldGroup(model.id, type);
-                    fg.controls = modal.componentInstance.formSave.controls;
-                    fg.updateValueAndValidity();
-                    this.saveRow(model.id, index, type);
-                }
-                this._changeDetectorRef.detectChanges();
-            });
-        })
-        */
-    }
-
-    newReference() {
-        this.editReference(new LuthierTableReferenceModel(), -1);
-    }
-    deleteReference(index: number) {
-
-    }
-    editReference(model: LuthierTableReferenceModel, index: number) {
-        if (index >= 0 && model.tablePK && model.tablePK.code >= 0) {
-            this.service.getTable(model.tablePK.code)
-                .then(table => {
-                    this.openModalReference(model, index, table.fields);
-                })
-        }
-        else {
-            this.openModalReference(model, index, []);
-        }
-    }
-    openModalReference(model: LuthierTableReferenceModel, index: number, fielsPK: LuthierTableFieldModel[]) {
-        /*
-        const fields = this.model.fields.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
-        const modal = this._matDialog.open(LuthierDictionaryTableReferenceModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-reference-modal-container' });
-        modal.componentInstance.title = "Referência da Tabela " + this.model.name;
-        modal.componentInstance.parent = this;
-        modal.componentInstance.referenceModel = model;
-        modal.componentInstance.fields = fields;
-        modal.componentInstance.fieldsPK = fielsPK;
-        modal.componentInstance.index = index;
-        modal.componentInstance.tables = cloneDeep(this._parent.tables);
-        modal.afterClosed().subscribe((result) =>
-        {
-            if ( result === 'ok' ) {
-                if (index >= 0) {
-                    this.referencesDataSource.data[index] = modal.componentInstance.formSave.value;
-                }
-                else {
-                    this.referencesDataSource.data.push(modal.componentInstance.formSave.value);
-                }
-                this.referencesDataSource._updateChangeSubscription();
-                this._changeDetectorRef.detectChanges();
-            }
-
-        });
-
-         */
-    }
     newSearch() {
-        this.editSearch(new LuthierTableSearchModel(), -1);
+        this.editSearch(new LuthierVisionDatasetSearchModel(), -1);
     }
     deleteSearch(index: number) {
         this.searchsDataSource.data.splice(index, 1);
         this.searchsDataSource._updateChangeSubscription();
         this._changeDetectorRef.detectChanges();
     }
-    editSearch(model: LuthierTableSearchModel, index: number) {
-        /*
+    editSearch(model: LuthierVisionDatasetSearchModel, index: number) {
         this._parent.service.getActiveSubsystems().then(subsystems => {
             const fields = this.model.fields.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
-            const modal = this._matDialog.open(LuthierDictionaryTableSearchModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-search-modal-container' });
-            modal.componentInstance.title = "Pesquisa da Tabela " + this.model.name;
+            const modal = this._matDialog.open(LuthierDictionaryDatasetSearchModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-dataset-search-modal-container' });
+            modal.componentInstance.title = "Pesquisa do Dataset " + this.model.name;
             modal.componentInstance.parent = this;
             modal.componentInstance.searchModel = model;
-            modal.componentInstance.fields = fields;
             modal.componentInstance.subsystems = subsystems;
             modal.componentInstance.index = index;
             modal.afterClosed().subscribe((result) =>
@@ -946,7 +897,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             });
         });
 
-         */
+
     }
 
     newGroupInfo() {
@@ -1113,7 +1064,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         if (this.model.parent) {
             let index = this.model.relatives.findIndex(x => x.code === this.model.parent.code);
             if (index >= 0) {
-                index = this.model.table.references.findIndex(x => x.tablePK.code === this.model.relatives[index].table.code);
+                index = this.model.table?.references?.findIndex(x => x.tablePK.code === this.model.relatives[index].table.code);
                 if (index >= 0) {
                     this.parentRelation = this.model.table.references[index];
                 }
@@ -1128,6 +1079,80 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     }
 
     hasParentProblem(): boolean {
-        return this.model.parent && this.model.parent.code >= 0 && !this.parentRelation;
+        return this.model.table && this.model.parent && this.model.parent.code >= 0 && !this.parentRelation;
+    }
+
+    importSearchTable() {
+        this.service.getTable(this.model.table.code)
+            .then(table => {
+                if (UtilFunctions.isValidStringOrArray(table.searchs) === true) {
+                    const newSearch = cloneDeep(table.searchs);
+                    UtilFunctions.nullCodeAndSetID(newSearch);
+                    newSearch.forEach((x, searchIndex) => {
+                        const index = this.model.searchs.findIndex(y => y.name === x.name);
+                        if (index >= 0) {
+                            x.name = x.name + crypto.randomUUID();
+                        }
+                        for (let i = 0; i < x.searchFields.length;) {
+                            const searchField = x.searchFields[i];
+                            const fieldIndex = this.model.fields.findIndex(k => k.tableField.name === searchField.tableField.name);
+                            if (fieldIndex < 0) {
+                                x.searchFields.splice(i, 1);
+                                continue;
+                            }
+                            searchField['dataset'] = this.model;
+                            searchField['field'] = this.model.fields[fieldIndex];
+                            i++;
+                        }
+                        // Tem que voltar pois apagou o campo code
+                        x.subsystems = table.searchs[searchIndex].subsystems;
+                        this.searchsDataSource.data.push(x as LuthierVisionDatasetSearchModel);
+                    });
+                    this.searchsDataSource._updateChangeSubscription();
+                    this._changeDetectorRef.detectChanges();
+                }
+            })
+
+    }
+
+    changeTable(event: MatSelectChange) {
+        this.fieldsDataSource.data.splice(0, this.fieldsDataSource.data.length);
+        this.getFields('fields').clear();
+        this.fieldsDataSource._updateChangeSubscription();
+
+        this.searchsDataSource.data.splice(0, this.searchsDataSource.data.length);
+        this.searchsDataSource._updateChangeSubscription();
+
+        this.customizationsDataSource.data.splice(0, this.customizationsDataSource.data.length);
+        this.customizationsDataSource._updateChangeSubscription();
+
+        this.customFieldsDataSource.data.splice(0, this.customFieldsDataSource.data.length);
+        this.getFields('customFields').clear();
+        this.customFieldsDataSource._updateChangeSubscription();
+
+        this._changeDetectorRef.detectChanges();
+        const table = event.value as LuthierTableModel;
+        const index = this.tables.findIndex(x => x.code === table.code);
+        if (UtilFunctions.isValidStringOrArray(this.tables[index].id) === false) {
+            this.service.getTable(table.code)
+                .then(result => {
+                    result.id = crypto.randomUUID();
+                    this.tables[index] = result;
+                    this.model.table = result;
+                    this.formSave.get('table').patchValue(result);
+                    this.setParentRelation();
+                    this._changeDetectorRef.detectChanges();
+                })
+        }
+        else {
+            this.model.table = table;
+            this.formSave.get('table').patchValue(table);
+            this.setParentRelation();
+            this._changeDetectorRef.detectChanges();
+        }
+    }
+
+    changeName(name: string) {
+        this.model.name = name;
     }
 }

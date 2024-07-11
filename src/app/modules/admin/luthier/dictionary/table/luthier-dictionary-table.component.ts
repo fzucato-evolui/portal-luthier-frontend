@@ -56,7 +56,8 @@ import {
     LuthierTableModel,
     LuthierTableReferenceModel,
     LuthierTableSearchModel,
-    LuthierViewBodyEnum
+    LuthierViewBodyEnum,
+    LuthierViewModel
 } from '../../../../../shared/models/luthier.model';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatSort, MatSortModule, Sort} from '@angular/material/sort';
@@ -80,6 +81,8 @@ import {EnumToArrayPipe} from '../../../../../shared/pipes/util-functions.pipe';
 import {
     LuthierDictionaryTableSearchModalComponent
 } from './modal/search/luthier-dictionary-table-search-modal.component';
+import {DatabaseTypeEnum} from '../../../../../shared/models/portal-luthier-database.model';
+import {debounceTime, takeUntil} from 'rxjs';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -118,6 +121,7 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'group
 })
 export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, AfterViewInit
 {
+
     private _model: LuthierTableModel;
     public fieldsDataSource = new MatTableDataSource<LuthierTableFieldModel>();
     @ViewChildren('sortFields') sortFields: QueryList<MatSort>;
@@ -147,6 +151,18 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     get messageService(): MessageDialogService {
         return this._parent.messageService;
     }
+    get dadosDatabaseType(): DatabaseTypeEnum | string {
+        return this._parent.currentDataBase?.dbType;
+    }
+    get dadosViewBodyType(): LuthierViewBodyEnum | string {
+        if (this.dadosDatabaseType === 'MSSQL') {
+            return LuthierViewBodyEnum.SQLSERVER;
+        }
+        else {
+            return this.dadosDatabaseType;
+        }
+    }
+
     formSave: FormGroup;
     displayedFieldColumns = ['buttons', 'order', 'code', 'key', 'name', 'label', 'customLabel', 'fieldType', 'modifyType',
         'attributeName', 'autoInc', 'size', 'groupInfo.description', 'search', 'notNull',
@@ -198,6 +214,12 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
     ngOnInit(): void {
         this.refresh();
+        this._parent.parent.workDataBase$
+            .pipe(takeUntil(this._parent.parent.unsubscribeAll), debounceTime(100))
+            .subscribe((workDataBase: number) =>
+            {
+                this._changeDetectorRef.detectChanges();
+            });
     }
 
     ngOnDestroy(): void {
@@ -1248,5 +1270,56 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         }
         return true;
 
+    }
+
+    parseView(bodyType: LuthierViewBodyEnum) {
+        const fg = this.getView(bodyType);
+        const model = fg.value as LuthierViewModel;
+        if (model && UtilFunctions.isValidStringOrArray(model.body) === true) {
+            this.service.parseView(this.model.name, model)
+                .then(table => {
+                    console.log(table);
+                    if (UtilFunctions.isValidStringOrArray(table.fields) === true) {
+                        table.fields.forEach(x => {
+                            const index = this.fieldsDataSource.data.findIndex(y => y.name.toUpperCase() === x.name.toUpperCase());
+                            if (index < 0) {
+                                UtilFunctions.nullCodeAndSetID(x, ['staticFields[?].resource.code']);
+                                const fg = this.addField('fields');
+                                if (UtilFunctions.isValidStringOrArray(x.staticFields)) {
+                                    x.staticFields.forEach(y => {
+                                        (fg.get('staticFields') as FormArray).push(this.addStaticField('fields'));
+                                    });
+                                }
+                                this.getFields('fields').push(fg);
+                                fg.patchValue(x);
+                                const newField = fg.value;
+                                newField['pending'] = true;
+                                this.fieldsDataSource.data.push(newField);
+                                this.fieldsDataSource._updateChangeSubscription();
+                            }
+                        });
+                    }
+                    if (UtilFunctions.isValidStringOrArray(table.customFields) === true) {
+                        table.customFields.forEach(x => {
+                            const index = this.customFieldsDataSource.data.findIndex(y => y.name.toUpperCase() === x.name.toUpperCase());
+                            if (index < 0) {
+                                UtilFunctions.nullCodeAndSetID(x);
+                                const fg = this.addField('customFields');
+                                if (UtilFunctions.isValidStringOrArray(x.staticFields)) {
+                                    x.staticFields.forEach(y => {
+                                        (fg.get('staticFields') as FormArray).push(this.addStaticField('customFields'));
+                                    });
+                                }
+                                this.getFields('customFields').push(fg);
+                                fg.patchValue(x);
+                                const newField = fg.value;
+                                newField['pending'] = true;
+                                this.customFieldsDataSource.data.push(newField);
+                                this.customFieldsDataSource._updateChangeSubscription();
+                            }
+                        });
+                    }
+                })
+        }
     }
 }

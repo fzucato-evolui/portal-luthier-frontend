@@ -19,6 +19,7 @@ import {SharedPipeModule} from '../../../../shared/pipes/shared-pipe.module';
 import {LuthierProjectModel} from '../../../../shared/models/luthier.model';
 import {LuthierComponent} from '../luthier.component';
 import {DatabaseTypeEnum} from '../../../../shared/models/portal-luthier-database.model';
+import {MessageDialogService} from '../../../../shared/services/message/message-dialog-service';
 
 @Component({
     selector       : 'luthier-project',
@@ -58,6 +59,7 @@ export class LuthierProjectComponent implements OnInit, OnDestroy
 
     constructor(private _formBuilder: FormBuilder,
                 private _parent: LuthierComponent,
+                public _messageService: MessageDialogService,
                 private _changeDetectorRef: ChangeDetectorRef)
     {
     }
@@ -103,14 +105,12 @@ export class LuthierProjectComponent implements OnInit, OnDestroy
 
     doSaving() {
 
-        /*
-        this.model = this.formSave.value as PortalLuthierDatabaseModel;
-        this._service.save(this.model).then(value => {
-            this._messageService.open("Metadados de versão salvo com sucesso!", "SUCESSO", "success")
-            this.dialogRef.close();
+        this.model = this.formSave.value as LuthierProjectModel;
+        this._parent.service.saveProject(this.model).then(value => {
+            this._messageService.open("Projeto salvo com sucesso!", "SUCESSO", "success");
         });
 
-         */
+
     }
 
     canSave(): boolean {

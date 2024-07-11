@@ -90,14 +90,13 @@ export class LuthierConnectionModalComponent implements OnInit, OnDestroy
 
     doSaving() {
 
-        /*
-        this.model = this.formSave.value as PortalLuthierDatabaseModel;
-        this._service.save(this.model).then(value => {
-            this._messageService.open("Metadados de versão salvo com sucesso!", "SUCESSO", "success")
+        this.model = this.formSave.value as LuthierDatabaseModel;
+        this._service.saveDatabase(this.model).then(value => {
+            this._messageService.open("Configuração de conexão da base de dados do produto salva com sucesso!", "SUCESSO", "success")
             this.dialogRef.close();
         });
 
-         */
+
     }
 
     canSave(): boolean {

@@ -26,7 +26,8 @@ import {
     LuthierSearchTypeEnum,
     LuthierSubsystemModel,
     LuthierTableSearchSubsystemModel,
-    LuthierVisionDatasetSearchFieldModel,
+    LuthierVisionDatasetFieldModel,
+    LuthierVisionDatasetModel,
     LuthierVisionDatasetSearchModel
 } from '../../../../../../../shared/models/luthier.model';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
@@ -70,7 +71,6 @@ export class LuthierDictionaryDatasetSearchModalComponent implements OnInit, OnD
     formSave: FormGroup;
     @ViewChild(MatSort) sort: MatSort;
     searchModel: LuthierVisionDatasetSearchModel;
-    fields: LuthierVisionDatasetSearchFieldModel[];
     private _subsystems: LuthierSubsystemModel[];
     get subsystems(): LuthierSubsystemModel[] {
         return this._subsystems;
@@ -88,14 +88,25 @@ export class LuthierDictionaryDatasetSearchModalComponent implements OnInit, OnD
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     title: string;
     private _parent: LuthierDictionaryDatasetComponent;
-    displayedColumns = [ 'buttons', 'code', 'label', 'customLabel', 'operator', 'dataset.name', 'tableField.name', 'tableField.fieldType', 'tableField.size', 'editor', 'order'];
+    displayedColumns = [ 'buttons', 'order', 'code', 'dataset.name', 'field.tableField.name', 'field.tableField.fieldType', 'field.tableField.size', 'label', 'customLabel', 'operator', 'editor'];
     LuthierSearchTypeEnum = LuthierSearchTypeEnum;
     LuthierSearchStatusEnum = LuthierSearchStatusEnum;
     LuthierSearchFieldEditorEnum = LuthierSearchFieldEditorEnum;
     LuthierSearchFieldOperatorEnum = LuthierSearchFieldOperatorEnum;
+    datasets: LuthierVisionDatasetModel[];
     public customPatterns = { 'I': { pattern: new RegExp('\[a-zA-Z0-9_\]')}, 'J': { pattern: new RegExp('\[a-zA-Z0-9\]')} };
     set parent(value: LuthierDictionaryDatasetComponent) {
         this._parent = value;
+        this.datasets = [];
+        this.datasets.push(value.model);
+        if (UtilFunctions.isValidStringOrArray(value.model.relatives) === true) {
+            value.model.relatives.forEach(x => {
+                if (x.name !== value.model.name) {
+                    this.datasets.push(x);
+                }
+            })
+        }
+
     }
 
     get parent(): LuthierDictionaryDatasetComponent {
@@ -236,5 +247,51 @@ export class LuthierDictionaryDatasetSearchModalComponent implements OnInit, OnD
             return false;
         }
         return UtilFunctions.isValidStringOrArray(value) === true && value.findIndex(x => x.subsystem.code === -1) >= 0;
+    }
+
+    getDatasetFields(model: FormGroup): LuthierVisionDatasetFieldModel[] {
+        const datasetName = model.get('dataset')?.value?.name;
+        if(UtilFunctions.isValidStringOrArray(datasetName) === true) {
+            const index = this.datasets.findIndex(x => x.name === datasetName);
+            if (index >= 0) {
+                return this.datasets[index].fields;
+            }
+        }
+        return null;
+    }
+
+    datasetChanged(model: FormGroup, event: MatSelectChange) {
+        model.get('field')?.get('tableField').patchValue(
+            {
+                id: '',
+                code: null,
+                name: '',
+                size: null,
+                fieldType: null
+            }
+        );
+        this._changeDetectorRef.detectChanges();
+    }
+
+    fieldChanged(model: FormGroup, event: MatSelectChange) {
+        model.get('label').setValue(event.value.tableField.name);
+        this._changeDetectorRef.detectChanges();
+
+    }
+
+    getInvalidControls() {
+        const invalid = [];
+        (this.formSave.get('searchFields') as FormArray).controls.forEach(x => {
+            const fgField = x.get('field') as FormGroup;
+
+            const controls =fgField.controls;
+            for (const name in controls) {
+                if (controls[name].invalid) {
+                    invalid.push(name);
+                }
+            }
+
+        });
+        return invalid;
     }
 }

@@ -61,13 +61,13 @@ export class FilterJsonPipe implements PipeTransform {
         return isValue;
     }
 
-    private static isEquals(filter: any, value) {
+    public static isEquals(filter: any, value) {
         value = UtilFunctions.removeAccents(value.toString()).toLowerCase();
         filter = UtilFunctions.removeAccents(filter.toString()).toLowerCase();
         return value.includes(filter);
     }
 
-    private static pathDataAccessor(item: any, path: string): any {
+    public static pathDataAccessor(item: any, path: string): any {
         return path.split('.')
             .reduce((accumulator: any, key: string) => {
                 return accumulator ? accumulator[key] : undefined;

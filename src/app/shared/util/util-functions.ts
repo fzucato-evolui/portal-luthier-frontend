@@ -1,4 +1,5 @@
 import {MatTableDataSource} from '@angular/material/table';
+import {cloneDeep} from 'lodash-es';
 
 export class UtilFunctions {
 
@@ -74,5 +75,72 @@ export class UtilFunctions {
             }
             return item[property];
         };
+    }
+    public static nullCodeAndSetID(obj, ignoredPaths?: Array<string>, keys?) {
+        if (!keys) {
+            keys = '';
+        }
+        if (Array.isArray(obj)) {
+
+            obj.forEach((item, index) => {
+                if (UtilFunctions.isValidStringOrArray(ignoredPaths)) {
+                    const clone = cloneDeep(ignoredPaths);
+                    clone.forEach((path, i) => {
+                        if (path.includes('[?]')) {
+                            path = path.replace('[?]', `[${index}]`);
+                            clone[i] = path;
+                        }
+                    })
+                    UtilFunctions.nullCodeAndSetID(item, clone, keys + `[${index}]`);
+                }
+                else {
+                    UtilFunctions.nullCodeAndSetID(item, ignoredPaths, keys + `[${index}]`);
+                }
+            });
+        } else if (typeof obj === 'object' && obj !== null) {
+            for (const key in obj) {
+                let ignored = false;
+                if (UtilFunctions.isValidStringOrArray(ignoredPaths)) {
+                    for(const path of ignoredPaths) {
+                        if (keys === path || (keys + '.' + key) === path) {
+                            ignored = true;
+                            break;
+                        }
+                    }
+                }
+                if (!ignored) {
+                    if (key === 'code') {
+                        obj[key] = null;
+                        obj['id'] = crypto.randomUUID();
+                    } else {
+                        UtilFunctions.nullCodeAndSetID(obj[key], ignoredPaths, UtilFunctions.isValidStringOrArray(keys) ? keys + '.' + key : key);
+                    }
+                }
+            }
+        }
+    }
+
+    public static pathDataAccessor(item: any, path: string): any {
+        return path.split('.')
+            .reduce((accumulator: any, key: string) => {
+                const match = key.match(new RegExp('\[\d\]'));
+                if (match) {
+                    key = key.replace(match[0], '');
+                    const index = match[0].replace('[', '').replace(']', '');
+                    return accumulator ? accumulator[key][index] : undefined
+                }
+                return accumulator ? accumulator[key] : undefined;
+            }, item);
+    }
+
+    public static pathDataAccessorArray(array, path) {
+        return array.reduce((acc, obj) => {
+            const fieldValue = UtilFunctions.pathDataAccessor(obj, path);
+            if (!acc[fieldValue]) {
+                acc[fieldValue] = [];
+            }
+            acc[fieldValue].push(obj);
+            return acc;
+        }, {});
     }
 }

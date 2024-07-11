@@ -20,13 +20,14 @@ export class LuthierProjectModel extends LuthierDatabaseModel{
 export type LuthierObjectType = 'UNKNOW' | 'TABLE' | 'VIEW' | 'VISION' | 'PROCEDURE' | 'JUST_RUNTIME' | 'VISION_DATASET';
 
 export class LuthierTableModel {
+    id?: string;
     code?: number
     name?: string
     description?: string
     customDescription?: LuthierCustomizationModel
     creationDate?: Date
     mainDatabaseCode?: number
-    objectType?: LuthierObjectType
+    objectType?: LuthierObjectType | string
     technicalDescription?: string
     userDescription?: string
     className?: string
@@ -451,14 +452,17 @@ export class LuthierResourceModel {
 }
 
 export class LuthierVisionModel {
+    id?: string;
     code?: number
     name?: string
     description?: string
     children?: LuthierVisionDatasetModel[]
     objectType?: LuthierObjectType
+
 }
 
 export class LuthierVisionDatasetModel {
+    id?: string
     code?: number
     name?: string
     description?: string

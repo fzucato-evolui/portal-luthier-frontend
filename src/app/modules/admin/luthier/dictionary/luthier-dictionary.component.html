@@ -17,7 +17,7 @@
                     <div class="flex items-center justify-between">
                         <div class="grow px-6 text-3xl font-bold tracking-tighter">{{objectType}}</div>
                         <div>
-                            <button
+                            <button (click)="addObject()"
                                 mat-icon-button>
                                 <mat-icon [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
                             </button>
@@ -50,7 +50,7 @@
 
                                 <div class="flex items-center grow cursor-pointer" (dblclick)="addTab(table)">
                                     <div class="rounded-full text-lg uppercase bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
-                                        <mat-icon [matMenuTriggerFor]="chatsHeaderMenu"
+                                        <mat-icon [matMenuTriggerFor]="objectsMenu" [matMenuTriggerData]="{object: table}"
                                             class="evolui-menu-item-icon"
                                             fontSet="fas" fontIcon="{{objectType === 'TABLE' ? 'fa-table' : (objectType === 'VIEW' ? 'fa-table-list' : 'fa-search')}}"></mat-icon>
                                     </div>
@@ -75,13 +75,13 @@
 
                             </div>
                             <div *ngIf="objectType === 'VISION'" class="flex items-center w-full max-w-full overflow-x-auto justify-between border-b dark:bg-transparent hover:bg-gray-100 dark:hover:bg-hover p-1">
-                                <mat-tree [dataSource]="getVisionDatasource(table)" [treeControl]="treeControl" class="example-tree bg-transparent w-full h-full">
+                                <mat-tree #tree [dataSource]="[table]" [treeControl]="treeControl" class="example-tree bg-transparent w-full h-full">
 
                                     <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle class="bg-transparent w-full h-full">
-                                        <div class="flex items-center grow cursor-pointer" (dblclick)="addTab(node)">
+                                        <div *ngIf="!node['removed']" class="flex items-center grow cursor-pointer" (dblclick)="addTab(node)">
                                             <div class="rounded-full text-lg uppercase bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
                                                 <mat-icon
-                                                    [matMenuTriggerFor]="chatsHeaderMenu"
+                                                    [matMenuTriggerFor]="objectsMenu" [matMenuTriggerData]="{object: node, vision: table}"
                                                     class="evolui-menu-item-icon"
                                                     fontSet="fas" fontIcon="{{node.objectType === 'VISION' ? 'fa-glasses' : 'fa-table-list'}}"></mat-icon>
                                             </div>
@@ -96,8 +96,8 @@
                                     </mat-tree-node>
                                     <!-- This is the tree node template for expandable nodes -->
                                     <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild" class="bg-transparent w-full h-full">
-                                        <div class="mat-tree-node">
-                                            <button mat-icon-button matTreeNodeToggle
+                                        <div *ngIf="!node['removed']" class="mat-tree-node">
+                                            <button mat-icon-button matTreeNodeToggle [ngClass]="childreenWasRemoved(node)===true? 'invisible -ml-[20px]': ''"
                                                     [attr.aria-label]="'Toggle ' + node.name">
                                                 <mat-icon class="mat-icon-rtl-mirror">
                                                     {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
@@ -106,7 +106,7 @@
                                             <div class="flex items-center grow overflow-x-hidden cursor-pointer" (dblclick)="addTab(node)">
                                                 <div class="rounded-full text-lg uppercase bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
                                                     <mat-icon
-                                                        [matMenuTriggerFor]="chatsHeaderMenu"
+                                                        [matMenuTriggerFor]="objectsMenu" [matMenuTriggerData]="{object: node, vision: table}"
                                                         class="evolui-menu-item-icon"
                                                         fontSet="fas" fontIcon="{{node.objectType === 'VISION' ? 'fa-glasses' : 'fa-table-list'}}"></mat-icon>
                                                 </div>
@@ -121,7 +121,7 @@
                                         </div>
                                         <!-- There is inline padding applied to this div using styles.
                                             This padding value depends on the mat-icon-button width.  -->
-                                        <div [class.example-tree-invisible]="!treeControl.isExpanded(node)"
+                                        <div *ngIf="!node['removed']" [class.example-tree-invisible]="!treeControl.isExpanded(node)"
                                              role="group">
                                             <ng-container matTreeNodeOutlet></ng-container>
                                         </div>
@@ -168,32 +168,19 @@
                     </ng-container>
                 </div>
                 !-->
-                <mat-menu #chatsHeaderMenu>
-                    <button mat-menu-item>
-                        <mat-icon [svgIcon]="'heroicons_outline:user-group'"></mat-icon>
-                        New group
-                    </button>
-                    <button mat-menu-item>
-                        <mat-icon [svgIcon]="'heroicons_outline:chat-bubble-left-right'"></mat-icon>
-                        Create a room
-                    </button>
-                    <button
-                        mat-menu-item>
-                        <mat-icon [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
-                        Profile
-                    </button>
-                    <button mat-menu-item>
-                        <mat-icon [svgIcon]="'heroicons_outline:archive-box'"></mat-icon>
-                        Archived
-                    </button>
-                    <button mat-menu-item>
-                        <mat-icon [svgIcon]="'heroicons_outline:star'"></mat-icon>
-                        Starred
-                    </button>
-                    <button mat-menu-item>
-                        <mat-icon [svgIcon]="'heroicons_outline:cog-8-tooth'"></mat-icon>
-                        Settings
-                    </button>
+                <mat-menu #objectsMenu>
+                    <ng-template matMenuContent let-object="object" let-vision="vision">
+                        <button mat-menu-item (click)="removeObject(object, vision)">
+                            <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                            Remover
+                        </button>
+                        <button mat-menu-item *ngIf="vision" (click)="addDataset(object, vision)">
+                            <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                            Adicionar Dataset
+                        </button>
+                    </ng-template>
+
+
                 </mat-menu>
                 <ng-template #noDatabase>
                     <div class="flex flex-auto flex-col items-center justify-center h-full">

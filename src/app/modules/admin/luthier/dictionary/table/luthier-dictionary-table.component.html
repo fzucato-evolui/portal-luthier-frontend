@@ -240,18 +240,23 @@
         </mat-expansion-panel-header>
         <mat-tab-group class="h-full overflow-hidden" (selectedTabChange)="changeTab($event)">
             <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="fields" label="Campos" bodyClass="table-tab">
-                <div class="flex-none md:w-1/3 md:pl-2">
-                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
-                        <mat-icon
-                            class="evolui-menu-item-icon"
-                            fontSet="fas" fontIcon="fa-search"
-                            matPrefix></mat-icon>
-                        <input
-                            [autocomplete]="'off'"
-                            class="text-sm"
-                            (input)="filterFields($event)"
-                            matInput>
-                    </mat-form-field>
+                <div class="flex-none flex justify-between items-center pt-1">
+                    <div class="flex-none flex">
+
+                    </div>
+                    <div class="flex-none flex md:w-1/3 md:pr-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-search"
+                                matPrefix></mat-icon>
+                            <input
+                                [autocomplete]="'off'"
+                                class="text-sm"
+                                (input)="filterFields($event)"
+                                matInput>
+                        </mat-form-field>
+                    </div>
                 </div>
                 <div class="flex-1 overflow-y-auto" cdkScrollable>
                     <ng-container
@@ -262,18 +267,23 @@
 
             </mat-tab>
             <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="indexes" label="Índices" bodyClass="table-tab" *ngIf="model.objectType === 'TABLE'">
-                <div class="flex-none md:w-1/3 md:pl-2">
-                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
-                        <mat-icon
-                            class="evolui-menu-item-icon"
-                            fontSet="fas" fontIcon="fa-search"
-                            matPrefix></mat-icon>
-                        <input
-                            [autocomplete]="'off'"
-                            class="text-sm"
-                            (input)="filterIndexes($event)"
-                            matInput>
-                    </mat-form-field>
+                <div class="flex-none flex justify-between items-center pt-1">
+                    <div class="flex-none flex">
+
+                    </div>
+                    <div class="flex-none flex md:w-1/3 md:pr-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-search"
+                                matPrefix></mat-icon>
+                            <input
+                                [autocomplete]="'off'"
+                                class="text-sm"
+                                (input)="filterIndexes($event)"
+                                matInput>
+                        </mat-form-field>
+                    </div>
                 </div>
                 <div class="flex-1 overflow-y-auto" cdkScrollable>
                     <table #tableIndexes mat-table matSort #sortIndexes="matSort" [dataSource]="indexesDataSource" class="table-auto" (matSortChange)="announceSortChange($event)">
@@ -334,18 +344,23 @@
                 </div>
             </mat-tab>
             <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="references" label="Referências" bodyClass="table-tab">
-                <div class="flex-none md:w-1/3 md:pl-2">
-                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
-                        <mat-icon
-                            class="evolui-menu-item-icon"
-                            fontSet="fas" fontIcon="fa-search"
-                            matPrefix></mat-icon>
-                        <input
-                            [autocomplete]="'off'"
-                            class="text-sm"
-                            (input)="filterReferences($event)"
-                            matInput>
-                    </mat-form-field>
+                <div class="flex-none flex justify-between items-center pt-1">
+                    <div class="flex-none flex">
+
+                    </div>
+                    <div class="flex-none flex md:w-1/3 md:pr-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-search"
+                                matPrefix></mat-icon>
+                            <input
+                                [autocomplete]="'off'"
+                                class="text-sm"
+                                (input)="filterReferences($event)"
+                                matInput>
+                        </mat-form-field>
+                    </div>
                 </div>
                 <div class="flex-1 overflow-y-auto" cdkScrollable>
                     <table #table mat-table matSort #sortReferences="matSort" [dataSource]="referencesDataSource" class="table-auto" (matSortChange)="announceSortChange($event)">
@@ -421,18 +436,23 @@
                 </div>
             </mat-tab>
             <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="searchs" label="Pesquisas" bodyClass="table-tab">
-                <div class="flex-none md:w-1/3 md:pl-2">
-                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
-                        <mat-icon
-                            class="evolui-menu-item-icon"
-                            fontSet="fas" fontIcon="fa-search"
-                            matPrefix></mat-icon>
-                        <input
-                            [autocomplete]="'off'"
-                            class="text-sm"
-                            (input)="filterSearchs($event)"
-                            matInput>
-                    </mat-form-field>
+                <div class="flex-none flex justify-between items-center pt-1">
+                    <div class="flex-none flex">
+
+                    </div>
+                    <div class="flex-none flex md:w-1/3 md:pr-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-search"
+                                matPrefix></mat-icon>
+                            <input
+                                [autocomplete]="'off'"
+                                class="text-sm"
+                                (input)="filterSearchs($event)"
+                                matInput>
+                        </mat-form-field>
+                    </div>
                 </div>
                 <div class="flex-1 overflow-y-auto" cdkScrollable>
                     <table #table mat-table matSort #sortSearchs="matSort" [dataSource]="searchsDataSource" class="table-auto" (matSortChange)="announceSortChange($event)">
@@ -492,18 +512,23 @@
 
             </mat-tab>
             <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="groupInfos" label="Grupos de Informações" bodyClass="table-tab" *ngIf="model.objectType === 'TABLE'">
-                <div class="flex-none md:w-1/3 md:pl-2">
-                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
-                        <mat-icon
-                            class="evolui-menu-item-icon"
-                            fontSet="fas" fontIcon="fa-search"
-                            matPrefix></mat-icon>
-                        <input
-                            [autocomplete]="'off'"
-                            class="text-sm"
-                            (input)="filterGroupsInfo($event)"
-                            matInput>
-                    </mat-form-field>
+                <div class="flex-none flex justify-between items-center pt-1">
+                    <div class="flex-none flex">
+
+                    </div>
+                    <div class="flex-none flex md:w-1/3 md:pr-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-search"
+                                matPrefix></mat-icon>
+                            <input
+                                [autocomplete]="'off'"
+                                class="text-sm"
+                                (input)="filterGroupsInfo($event)"
+                                matInput>
+                        </mat-form-field>
+                    </div>
                 </div>
                 <div class="flex-1 overflow-y-auto" cdkScrollable>
                     <ng-container
@@ -512,18 +537,23 @@
                 </div>
             </mat-tab>
             <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="customFields" label="Campos Adicionais" bodyClass="table-tab">
-                <div class="flex-none md:w-1/3 md:pl-2">
-                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
-                        <mat-icon
-                            class="evolui-menu-item-icon"
-                            fontSet="fas" fontIcon="fa-search"
-                            matPrefix></mat-icon>
-                        <input
-                            [autocomplete]="'off'"
-                            class="text-sm"
-                            (input)="filterCustomFields($event)"
-                            matInput>
-                    </mat-form-field>
+                <div class="flex-none flex justify-between items-center pt-1">
+                    <div class="flex-none flex">
+
+                    </div>
+                    <div class="flex-none flex md:w-1/3 md:pr-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-search"
+                                matPrefix></mat-icon>
+                            <input
+                                [autocomplete]="'off'"
+                                class="text-sm"
+                                (input)="filterCustomFields($event)"
+                                matInput>
+                        </mat-form-field>
+                    </div>
                 </div>
                 <div class="flex-1 overflow-y-auto" cdkScrollable>
                     <ng-container
@@ -533,18 +563,23 @@
                 </div>
             </mat-tab>
             <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="customizations" label="Customizações" bodyClass="table-tab">
-                <div class="flex-none md:w-1/3 md:pl-2">
-                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
-                        <mat-icon
-                            class="evolui-menu-item-icon"
-                            fontSet="fas" fontIcon="fa-search"
-                            matPrefix></mat-icon>
-                        <input
-                            [autocomplete]="'off'"
-                            class="text-sm"
-                            (input)="filterCustomizations($event)"
-                            matInput>
-                    </mat-form-field>
+                <div class="flex-none flex justify-between items-center pt-1">
+                    <div class="flex-none flex">
+
+                    </div>
+                    <div class="flex-none flex md:w-1/3 md:pr-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-search"
+                                matPrefix></mat-icon>
+                            <input
+                                [autocomplete]="'off'"
+                                class="text-sm"
+                                (input)="filterCustomizations($event)"
+                                matInput>
+                        </mat-form-field>
+                    </div>
                 </div>
                 <div class="flex-1 overflow-y-auto" cdkScrollable>
                     <ng-container
@@ -557,10 +592,25 @@
                 <mat-tab-group>
                     <ng-container *ngFor="let t of LuthierViewBodyEnum | enumArray">
                         <mat-tab [labelClass]="['text-sm', 'font-bold']" bodyClass="h-96" label="{{t.key}}" [formGroup]="getView(t.key)">
-                            <textarea class="text-sm p-2 w-full h-full"
-                                      [formControlName]="'body'"
-                                      matInput>
-                            </textarea>
+                            <div class="flex-none flex justify-between items-center pt-1">
+                                <div class="flex-none flex">
+                                    <button class="text-sm min-h-7 h-7" *ngIf="t.key === 'GENERICO' || t.key === 'CUSTOM' || t.key === dadosViewBodyType"
+                                            mat-flat-button
+                                            color="primary" (click)="parseView(t.key)">
+                                        <mat-icon
+                                            class="icon-size-4"
+                                            svgIcon="mat_solid:import_export"></mat-icon>
+                                        <span class="ml-2">Importar campos pela query</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex-1" cdkScrollable>
+                                <textarea class="text-sm p-2 w-full h-full"
+                                          [formControlName]="'body'"
+                                          matInput>
+                                </textarea>
+                            </div>
+
                         </mat-tab>
                     </ng-container>
                 </mat-tab-group>

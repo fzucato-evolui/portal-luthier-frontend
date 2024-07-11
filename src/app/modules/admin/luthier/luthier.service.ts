@@ -7,10 +7,12 @@ import {
     LuthierResourceModel,
     LuthierSubsystemModel,
     LuthierTableModel,
+    LuthierViewModel,
     LuthierVisionDatasetModel,
     LuthierVisionModel
 } from '../../../shared/models/luthier.model';
 import {UtilFunctions} from '../../../shared/util/util-functions';
+import {cloneDeep} from 'lodash-es';
 
 @Injectable({providedIn: 'root'})
 export class LuthierService
@@ -62,6 +64,10 @@ export class LuthierService
     {
         return this._databases.asObservable();
     }
+    get currentDatabases(): Array<LuthierDatabaseModel>
+    {
+        return this._currentDatabases;
+    }
 
     set tables(value: Array<LuthierTableModel>)
     {
@@ -102,6 +108,26 @@ export class LuthierService
             })
         );
     }
+    saveProject(model: LuthierProjectModel): Promise<LuthierProjectModel> {
+        return firstValueFrom(this._httpClient.post<LuthierProjectModel>(`${this.baseCommonUrl}/project`, model).pipe(
+            switchMap((response: LuthierProjectModel) => {
+                if (UtilFunctions.isValidStringOrArray(this._currentDatabases) === false) {
+                    this._currentDatabases = new Array<LuthierDatabaseModel>();
+                }
+                const mainDatabase = cloneDeep(response);
+                mainDatabase.code = -1;
+                const index = this._currentDatabases.findIndex(x => x.code === -1);
+                if (index < 0) {
+                    this._currentDatabases.push(mainDatabase);
+                } else {
+                    this._currentDatabases[index] = mainDatabase;
+                }
+                this.databases = this._currentDatabases;
+                this.project = response;
+                // Return a new observable with the response
+                return of(response);
+            })));
+    }
     getDatabases(): Observable<any>
     {
         this.databases = [];
@@ -117,6 +143,28 @@ export class LuthierService
                 return of('Fallback value');
             })
         );
+    }
+
+    saveDatabase(model: LuthierDatabaseModel): Promise<LuthierDatabaseModel> {
+        return firstValueFrom(this._httpClient.post<LuthierDatabaseModel>(`${this.baseCommonUrl}/database`, model).pipe(
+            switchMap((response: LuthierDatabaseModel) => {
+                if (UtilFunctions.isValidStringOrArray(this._currentDatabases) === false) {
+                    this._currentDatabases = new Array<LuthierDatabaseModel>();
+                }
+                if (model.code && model.code > 0) {
+                    const index = this._currentDatabases.findIndex(x => x.code === model.code);
+                    if (index < 0) {
+                        this._currentDatabases.push(response);
+                    } else {
+                        this._currentDatabases[index] = response;
+                    }
+                } else {
+                    this._currentDatabases.push(response);
+                }
+                this.databases = this._currentDatabases;
+                // Return a new observable with the response
+                return of(response);
+            })));
     }
 
     getTables(): Observable<any>
@@ -149,9 +197,15 @@ export class LuthierService
     getVision(id: number): Promise<LuthierVisionModel> {
         return firstValueFrom(this._httpClient.get<LuthierVisionModel>(`${this.baseDicUrl}/vision/${id}`));
     }
+    getVisionChildreen(id: number): Promise<LuthierVisionDatasetModel[]> {
+        return firstValueFrom(this._httpClient.get<LuthierVisionDatasetModel[]>(`${this.baseDicUrl}/vision-childreen/${id}`));
+    }
     getDataset(id: number): Promise<LuthierVisionDatasetModel> {
 
         return firstValueFrom(this._httpClient.get<LuthierVisionDatasetModel>(`${this.baseDicUrl}/dataset/${id}`));
+    }
+    parseView(name: string, model: LuthierViewModel): Promise<LuthierTableModel> {
+        return firstValueFrom(this._httpClient.post<LuthierTableModel>(`${this.baseDicUrl}/parse-view/${name}`, model));
     }
 
     saveTable(model: LuthierTableModel): Promise<LuthierTableModel> {
@@ -197,6 +251,10 @@ export class LuthierService
     getActiveSubsystems(): Promise<LuthierSubsystemModel[]> {
 
         return firstValueFrom(this._httpClient.get<LuthierSubsystemModel[]>(`${this.baseCommonUrl}/get-active-subsystems`));
+    }
+
+    syncSchemas(): Promise<any> {
+        return firstValueFrom(this._httpClient.patch<any>(`${this.baseDicUrl}/sync-schemas`, null));
     }
 
 }

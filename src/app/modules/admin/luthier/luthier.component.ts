@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit, ViewEncapsulation} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {firstValueFrom, ReplaySubject, Subject, takeUntil} from 'rxjs';
+import {ReplaySubject, Subject, takeUntil} from 'rxjs';
 import {LuthierService} from './luthier.service';
 import {LuthierDictionaryComponent} from './dictionary/luthier-dictionary.component';
 import {NgClass, NgIf} from '@angular/common';
@@ -10,6 +10,7 @@ import {AuthService, StorageChange} from '../../../core/auth/auth.service';
 import {UtilFunctions} from '../../../shared/util/util-functions';
 import {LuthierProjectComponent} from './project/luthier-project.component';
 import {MatIconModule} from '@angular/material/icon';
+import {LuthierDatabaseModel} from '../../../shared/models/luthier.model';
 
 @Component({
     selector     : 'luthier',
@@ -32,7 +33,9 @@ export class LuthierComponent implements OnInit, OnDestroy
     public unsubscribeAll: Subject<any> = new Subject<any>();
     public page$: ReplaySubject<String> = new ReplaySubject<String>(1);
     public workDataBase$: ReplaySubject<number> = new ReplaySubject<number>(1);
+    public luthierDataBase$: ReplaySubject<number> = new ReplaySubject<number>(1);
     private _workDataBase: number;
+    private _luthierDatabase: number;
     set workDataBase(value: number) {
         this.authService.dadosDatabase = value.toString();
         this._workDataBase = value;
@@ -40,9 +43,29 @@ export class LuthierComponent implements OnInit, OnDestroy
     get workDataBase(): number {
         return this._workDataBase;
     }
-
+    get currentDataBase(): LuthierDatabaseModel {
+        if (UtilFunctions.isValidStringOrArray(this.workDataBase) === true) {
+            const index = this.service.currentDatabases.findIndex(x => x.code === this.workDataBase);
+            return this.service.currentDatabases[index];
+        }
+        return null;
+    }
+    set luthierDataBase(value: number) {
+        this.authService.luthierDatabase = value.toString();
+        this._luthierDatabase = value;
+    }
+    get luthierDataBase(): number {
+        return this._luthierDatabase;
+    }
     get hasLuthierDatabase(): boolean {
-        return UtilFunctions.isValidStringOrArray(this.authService.luthierDatabase);
+        const database = this.authService.luthierDatabase;
+        /*
+        if (parseInt(database) != this.luthierDataBase) {
+            this._luthierDatabase = parseInt(database);
+            this.luthierDataBase$.next(this._luthierDatabase);
+        }
+         */
+        return UtilFunctions.isValidStringOrArray(database);
     }
     /**
      * Constructor
@@ -74,16 +97,10 @@ export class LuthierComponent implements OnInit, OnDestroy
                 if (storage.key === 'dadosDatabase') {
                     this._workDataBase = UtilFunctions.isValidStringOrArray(storage.value) ? parseInt(storage.value) : null;
                     this.workDataBase$.next(this._workDataBase);
-                    console.log("changed database", this._workDataBase);
                 }
                 if (storage.key === 'luthierDatabase') {
-                    if (UtilFunctions.isValidStringOrArray(storage.value) === true) {
-                        firstValueFrom(this.service.getTables());
-                    }
-                    else {
-                        this.service.tables = [];
-                        this.service.databases = [];
-                    }
+                    this._luthierDatabase = UtilFunctions.isValidStringOrArray(storage.value) ? parseInt(storage.value) : null;
+                    this.luthierDataBase$.next(this._luthierDatabase);
                 }
             });
         this._route.url.pipe(takeUntil(this.unsubscribeAll)).subscribe(segment => {
