@@ -2,11 +2,8 @@ import {ActivatedRouteSnapshot, RouterStateSnapshot, Routes} from '@angular/rout
 import {inject} from '@angular/core';
 import {PortalLuthierDatabaseService} from './portal-luthier-database.service';
 import {PortalLuthierDatabaseComponent} from './portal-luthier-database.component';
-import {
-    FuseNavigationItem,
-    FuseNavigationService,
-    FuseVerticalNavigationComponent
-} from '../../../../../@fuse/components/navigation';
+import {FuseNavigationService, FuseVerticalNavigationComponent} from '../../../../../@fuse/components/navigation';
+import {of} from 'rxjs';
 
 const portalLuthierDatabaseResolver = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
     const service = inject(PortalLuthierDatabaseService);
@@ -21,7 +18,7 @@ const portalLuthierDatabaseResolver = (route: ActivatedRouteSnapshot, state: Rou
         navComponent.refresh();
     }
 
-    return service.getAll();
+    return of(null);
 }
 export default [
 

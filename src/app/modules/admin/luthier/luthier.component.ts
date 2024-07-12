@@ -6,11 +6,11 @@ import {LuthierDictionaryComponent} from './dictionary/luthier-dictionary.compon
 import {NgClass, NgIf} from '@angular/common';
 import {CompactLayoutComponent} from '../../../layout/layouts/vertical/compact/compact.component';
 import {LuthierConnectionComponent} from './connection/luthier-connection.component';
-import {AuthService, StorageChange} from '../../../core/auth/auth.service';
 import {UtilFunctions} from '../../../shared/util/util-functions';
 import {LuthierProjectComponent} from './project/luthier-project.component';
 import {MatIconModule} from '@angular/material/icon';
 import {LuthierDatabaseModel} from '../../../shared/models/luthier.model';
+import {StorageChange, UserService} from '../../../shared/services/user/user.service';
 
 @Component({
     selector     : 'luthier',
@@ -37,7 +37,7 @@ export class LuthierComponent implements OnInit, OnDestroy
     private _workDataBase: number;
     private _luthierDatabase: number;
     set workDataBase(value: number) {
-        this.authService.dadosDatabase = value.toString();
+        this.userService.dadosDatabase = value.toString();
         this._workDataBase = value;
     }
     get workDataBase(): number {
@@ -51,14 +51,14 @@ export class LuthierComponent implements OnInit, OnDestroy
         return null;
     }
     set luthierDataBase(value: number) {
-        this.authService.luthierDatabase = value.toString();
+        this.userService.luthierDatabase = value.toString();
         this._luthierDatabase = value;
     }
     get luthierDataBase(): number {
         return this._luthierDatabase;
     }
     get hasLuthierDatabase(): boolean {
-        const database = this.authService.luthierDatabase;
+        const database = this.userService.luthierDatabase;
         /*
         if (parseInt(database) != this.luthierDataBase) {
             this._luthierDatabase = parseInt(database);
@@ -72,7 +72,7 @@ export class LuthierComponent implements OnInit, OnDestroy
      */
     constructor(private _route: ActivatedRoute,
                 public parent: CompactLayoutComponent,
-                private authService: AuthService,
+                private userService: UserService,
                 public service: LuthierService)
     {
     }
@@ -86,11 +86,11 @@ export class LuthierComponent implements OnInit, OnDestroy
      */
     ngOnInit(): void
     {
-        const dadosDatabase = this.authService.dadosDatabase;
+        const dadosDatabase = this.userService.dadosDatabase;
         if (UtilFunctions.isValidStringOrArray(dadosDatabase) === true) {
             this.workDataBase = parseInt(dadosDatabase);
         }
-        this.authService.storageChange$
+        this.userService.storageChange$
             .pipe(takeUntil(this.unsubscribeAll))
             .subscribe((storage: StorageChange) =>
             {

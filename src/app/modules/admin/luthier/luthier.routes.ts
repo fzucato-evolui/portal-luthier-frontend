@@ -3,17 +3,18 @@ import {LuthierComponent} from './luthier.component';
 import {inject} from '@angular/core';
 import {forkJoin, of} from 'rxjs';
 import {LuthierService} from './luthier.service';
-import {AuthService} from '../../../core/auth/auth.service';
 import {UtilFunctions} from '../../../shared/util/util-functions';
+import {UserService} from '../../../shared/services/user/user.service';
 
 const luthierResolver = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) =>
 {
-    const authService = inject(AuthService);
+    const userService = inject(UserService);
     const service = inject(LuthierService);
     const router = inject(Router);
     return forkJoin([
-        UtilFunctions.isValidStringOrArray(authService.luthierDatabase) === true ? service.getTables() : of(null),
-        UtilFunctions.isValidStringOrArray(authService.luthierDatabase) === true ? service.getVisions() : of(null)
+        UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getProject() : of(null),
+        UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getTables() : of(null),
+        UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getVisions() : of(null)
     ])
 };
 
@@ -28,6 +29,7 @@ export default [
     {
         matcher     : luthierMatcher,
         component: LuthierComponent,
+        data: {authorities: ['ROLE_HYPER']},
         resolve  : {
             data: luthierResolver,
         }

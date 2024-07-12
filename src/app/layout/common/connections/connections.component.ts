@@ -21,7 +21,6 @@ import {
     PortalLuthierDatabaseService
 } from '../../../modules/admin/portal/luthier-database/portal-luthier-database.service';
 import {LuthierService} from '../../../modules/admin/luthier/luthier.service';
-import {AuthService, StorageChange} from '../../../core/auth/auth.service';
 import {PortalLuthierDatabaseModel} from '../../../shared/models/portal-luthier-database.model';
 import {LuthierDatabaseModel} from '../../../shared/models/luthier.model';
 import {UtilFunctions} from '../../../shared/util/util-functions';
@@ -30,6 +29,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {FormsModule} from '@angular/forms';
 import {MessageDialogService} from '../../../shared/services/message/message-dialog-service';
+import {StorageChange, UserService} from '../../../shared/services/user/user.service';
 
 @Component({
     selector       : 'connections',
@@ -78,7 +78,7 @@ export class ConnectionsComponent implements OnInit, OnDestroy
         private _changeDetectorRef: ChangeDetectorRef,
         private _portalDatabaseService: PortalLuthierDatabaseService,
         private _luthierService: LuthierService,
-        private _authService: AuthService,
+        private _userService: UserService,
         private _messageService: MessageDialogService,
         private _overlay: Overlay,
         private _viewContainerRef: ViewContainerRef,
@@ -95,22 +95,25 @@ export class ConnectionsComponent implements OnInit, OnDestroy
      */
     ngOnInit(): void
     {
-        const luthierDatabase = this._authService.luthierDatabase;
+        const luthierDatabase = this._userService.luthierDatabase;
         if (UtilFunctions.isValidStringOrArray(luthierDatabase)) {
             this.workLuthierDatabase = parseInt(luthierDatabase);
         }
-        const dadosDatabase = this._authService.dadosDatabase;
+        const dadosDatabase = this._userService.dadosDatabase;
         if (UtilFunctions.isValidStringOrArray(dadosDatabase)) {
             this.workDadosDatabase = parseInt(dadosDatabase);
         }
-        this._authService.storageChange$
+        this._userService.storageChange$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((storage: StorageChange) =>
             {
                 if (storage.key === 'luthierDatabase') {
                     this.workLuthierDatabase = parseInt(storage.value);
-                    this._authService.dadosDatabase = '';
-                    firstValueFrom(this._luthierService.getDatabases());
+                    this._userService.dadosDatabase = '';
+                    if (UtilFunctions.isValidStringOrArray(storage.value) === true) {
+                        firstValueFrom(this._luthierService.getDatabases());
+                        firstValueFrom(this._luthierService.checkUser());
+                    }
 
                 }
                 else if (storage.key === 'dadosDatabase') {
@@ -195,7 +198,7 @@ export class ConnectionsComponent implements OnInit, OnDestroy
     {
         this._messageService.open('Ao alterar o banco de trabalho Luthier, os metadados são recarregados e todo trabalho atual será perdido. Confirma a operação?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
             if (result === 'confirmed') {
-                this._authService.luthierDatabase = id.toString();
+                this._userService.luthierDatabase = id.toString();
 
             }
         });
@@ -205,7 +208,7 @@ export class ConnectionsComponent implements OnInit, OnDestroy
 
     toggleDadosDatabase(id: number): void
     {
-        this._authService.dadosDatabase = id.toString();
+        this._userService.dadosDatabase = id.toString();
     }
 
 

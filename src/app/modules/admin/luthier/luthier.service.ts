@@ -7,6 +7,7 @@ import {
     LuthierResourceModel,
     LuthierSubsystemModel,
     LuthierTableModel,
+    LuthierUserModel,
     LuthierViewModel,
     LuthierVisionDatasetModel,
     LuthierVisionModel
@@ -17,7 +18,7 @@ import {cloneDeep} from 'lodash-es';
 @Injectable({providedIn: 'root'})
 export class LuthierService
 {
-    private baseUrl = `api/public/admin/luthier`;
+    private baseUrl = `api/admin/luthier`;
     private baseDicUrl = `${this.baseUrl}/dictionary`;
     private baseCommonUrl = `${this.baseUrl}/common`;
     private _project: BehaviorSubject<LuthierProjectModel> = new BehaviorSubject(null);
@@ -130,6 +131,7 @@ export class LuthierService
     }
     getDatabases(): Observable<any>
     {
+        console.log('Get Databases');
         this.databases = [];
         return this._httpClient.get<LuthierDatabaseModel[]>(`${this.baseCommonUrl}/all-databases`).pipe(
 
@@ -199,6 +201,9 @@ export class LuthierService
     }
     getVisionChildreen(id: number): Promise<LuthierVisionDatasetModel[]> {
         return firstValueFrom(this._httpClient.get<LuthierVisionDatasetModel[]>(`${this.baseDicUrl}/vision-childreen/${id}`));
+    }
+    checkUser(): Observable<LuthierUserModel> {
+        return this._httpClient.put<LuthierUserModel>(`${this.baseCommonUrl}/check-user`, null);
     }
     getDataset(id: number): Promise<LuthierVisionDatasetModel> {
 

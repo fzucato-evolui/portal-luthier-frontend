@@ -1,14 +1,22 @@
-import { BooleanInput } from '@angular/cdk/coercion';
-import { NgClass, NgIf } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { Router } from '@angular/router';
-import { UserService } from 'app/core/user/user.service';
-import { User } from 'app/core/user/user.types';
-import { Subject, takeUntil } from 'rxjs';
+import {BooleanInput} from '@angular/cdk/coercion';
+import {NgClass, NgIf} from '@angular/common';
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    Input,
+    OnDestroy,
+    OnInit,
+    ViewEncapsulation
+} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatIconModule} from '@angular/material/icon';
+import {MatMenuModule} from '@angular/material/menu';
+import {Router} from '@angular/router';
+import {Subject, takeUntil} from 'rxjs';
+import {UserModel} from '../../../shared/models/user.model';
+import {UserService} from '../../../shared/services/user/user.service';
 
 @Component({
     selector       : 'user',
@@ -26,7 +34,7 @@ export class UserComponent implements OnInit, OnDestroy
     /* eslint-enable @typescript-eslint/naming-convention */
 
     @Input() showAvatar: boolean = true;
-    user: User;
+    user: UserModel;
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
@@ -53,7 +61,7 @@ export class UserComponent implements OnInit, OnDestroy
         // Subscribe to user changes
         this._userService.user$
             .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((user: User) =>
+            .subscribe((user: UserModel) =>
             {
                 this.user = user;
 
@@ -72,35 +80,14 @@ export class UserComponent implements OnInit, OnDestroy
         this._unsubscribeAll.complete();
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
-
-    /**
-     * Update the user status
-     *
-     * @param status
-     */
-    updateUserStatus(status: string): void
-    {
-        // Return if user is not available
-        if ( !this.user )
-        {
-            return;
-        }
-
-        // Update the user
-        this._userService.update({
-            ...this.user,
-            status,
-        }).subscribe();
-    }
 
     /**
      * Sign out
      */
     signOut(): void
     {
+        this._userService.signOut();
         this._router.navigate(['/sign-out']);
+        this.user = null;
     }
 }

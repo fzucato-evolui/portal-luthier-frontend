@@ -8,7 +8,7 @@ import {UtilFunctions} from '../../../../shared/util/util-functions';
 @Injectable({providedIn: 'root'})
 export class PortalLuthierDatabaseService
 {
-    private baseRestUrl = 'api/public/admin/portal/luthier-database';
+    private baseRestUrl = 'api/admin/portal/luthier-database';
     private _model: BehaviorSubject<PortalLuthierDatabaseModel[]> = new BehaviorSubject(null);
     private _currentModel: PortalLuthierDatabaseModel[] = [];
 

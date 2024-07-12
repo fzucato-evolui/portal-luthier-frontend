@@ -1,15 +1,16 @@
-import { provideHttpClient } from '@angular/common/http';
-import { ApplicationConfig } from '@angular/core';
-import { LuxonDateAdapter } from '@angular/material-luxon-adapter';
-import { DateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
-import { provideAnimations } from '@angular/platform-browser/animations';
-import { PreloadAllModules, provideRouter, withInMemoryScrolling, withPreloading } from '@angular/router';
-import { provideFuse } from '@fuse';
-import { appRoutes } from 'app/app.routes';
-import { provideAuth } from 'app/core/auth/auth.provider';
-import { provideIcons } from 'app/core/icons/icons.provider';
-import { provideTransloco } from 'app/core/transloco/transloco.provider';
-import { mockApiServices } from 'app/mock-api';
+import {provideHttpClient} from '@angular/common/http';
+import {ApplicationConfig} from '@angular/core';
+import {LuxonDateAdapter} from '@angular/material-luxon-adapter';
+import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
+import {provideAnimations} from '@angular/platform-browser/animations';
+import {PreloadAllModules, provideRouter, withInMemoryScrolling, withPreloading} from '@angular/router';
+import {provideFuse} from '@fuse';
+import {appRoutes} from 'app/app.routes';
+import {provideAuth} from 'app/core/auth/auth.provider';
+import {provideIcons} from 'app/core/icons/icons.provider';
+import {provideTransloco} from 'app/core/transloco/transloco.provider';
+import {mockApiServices} from 'app/mock-api';
+import {provideRoot} from './shared/services/root/root.provider';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -42,7 +43,7 @@ export const appConfig: ApplicationConfig = {
 
         // Transloco Config
         provideTransloco(),
-
+        provideRoot(),
         // Fuse
         provideAuth(),
         provideIcons(),

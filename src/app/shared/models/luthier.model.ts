@@ -600,3 +600,40 @@ export class LuthierVisionDatasetCustomFieldModel {
     tableField?: LuthierTableFieldModel | LuthierCustomFieldModel;
 }
 export type LuthierDictionaryObjectType = LuthierTableModel | LuthierVisionModel | LuthierVisionDatasetModel
+
+export enum LuthierUserTypeEnum {
+    SYSTEM = ("SYSTEM"),
+    NORMAL = ("NORMAL"),
+    DEVELOPER = ("DEVELOPER"),
+    ENGENIEER = ("ENGENIEER"),
+    SUPER = ("SUPER")
+}
+export enum LuthierUserStatusEnum {
+    INACTIVE = ("INACTIVE"),
+    ACTIVE = ("ACTIVE")
+}
+export enum LuthierUserGroupEnum {
+    USER = ("USER"),
+    GROUP = ("GROUP")
+}
+export enum LuthierUserActionEnum {
+    NONE = ("NONE"),
+    CHANGE_PASSWORD = ("CHANGE_PASSWORD")
+}
+export class LuthierUserModel {
+    code?: number;
+    name?: string;
+    login?: string;
+    userType?: LuthierUserTypeEnum;
+    date?: Date;
+    projectCode: number;
+    status?: LuthierUserStatusEnum;
+    group?: LuthierUserGroupEnum;
+    email?: string;
+    sms?: string;
+    password?: string;
+    action?: LuthierUserActionEnum;
+    hash?: string;
+    deadLine?: Date;
+    multiAccess?: boolean;
+    }

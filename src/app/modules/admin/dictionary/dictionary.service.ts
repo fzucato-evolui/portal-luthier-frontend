@@ -1,7 +1,6 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Chat, Contact, Profile } from 'app/modules/admin/apps/chat/chat.types';
-import { BehaviorSubject, filter, map, Observable, of, switchMap, take, tap, throwError } from 'rxjs';
+import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {BehaviorSubject, Observable, tap} from 'rxjs';
 import {LuthierDatabaseModel, LuthierTableModel} from '../../../shared/models/luthier.model';
 
 @Injectable({providedIn: 'root'})
@@ -33,7 +32,7 @@ export class DictionaryService
 
     getDatabases(): Observable<any>
     {
-        return this._httpClient.get<LuthierDatabaseModel[]>('api/public/admin/luthier/dictionary/database/all').pipe(
+        return this._httpClient.get<LuthierDatabaseModel[]>('api/admin/luthier/dictionary/database/all').pipe(
             tap((response: LuthierDatabaseModel[]) =>
             {
                 this._databases.next(response);
@@ -43,7 +42,7 @@ export class DictionaryService
 
     getTables(): Observable<any>
     {
-        return this._httpClient.get<LuthierTableModel[]>('api/public/admin/luthier/dictionary/table/all').pipe(
+        return this._httpClient.get<LuthierTableModel[]>('api/admin/luthier/dictionary/table/all').pipe(
             tap((response: LuthierTableModel[]) =>
             {
                 this._tables.next(response);

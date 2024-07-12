@@ -1,8 +1,20 @@
 {
-  "/api/public/admin/*": {
-    "target": "http://localhost:8039",
-    "secure": false,
-    "logLevel": "debug",
-    "changeOrigin": true
-  }
+    "/api/admin/*": {
+        "target": "http://localhost:8039",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
+    },
+    "/api/public/root/*": {
+        "target": "http://localhost:8039",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
+    },
+    "/api/public/auth/*": {
+        "target": "http://localhost:8039",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
+    }
 }

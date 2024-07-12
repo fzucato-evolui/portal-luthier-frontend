@@ -1,9 +1,8 @@
-import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { AuthService } from 'app/core/auth/auth.service';
-import { AuthUtils } from 'app/core/auth/auth.utils';
-import { catchError, Observable, throwError } from 'rxjs';
+import {HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpRequest} from '@angular/common/http';
+import {inject} from '@angular/core';
+import {catchError, Observable, throwError} from 'rxjs';
 import {UtilFunctions} from '../../shared/util/util-functions';
+import {UserService} from '../../shared/services/user/user.service';
 
 /**
  * Intercept
@@ -13,11 +12,11 @@ import {UtilFunctions} from '../../shared/util/util-functions';
  */
 export const authInterceptor = (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> =>
 {
-    const authService = inject(AuthService);
+    const authService = inject(UserService);
 
     let headers = req.headers;
 
-    if ( authService.accessToken && !AuthUtils.isTokenExpired(authService.accessToken) )
+    if ( authService.accessToken )
     {
         headers = headers.set('Authorization', 'Bearer ' + authService.accessToken);
     }
