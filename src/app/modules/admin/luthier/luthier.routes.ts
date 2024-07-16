@@ -11,15 +11,23 @@ const luthierResolver = (route: ActivatedRouteSnapshot, state: RouterStateSnapsh
     const userService = inject(UserService);
     const service = inject(LuthierService);
     const router = inject(Router);
-    return forkJoin([
-        UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getProject() : of(null),
-        UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getTables() : of(null),
-        UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getVisions() : of(null)
-    ])
+    let forks = [
+        UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getProject() : of(null)
+    ]
+    if (route.url[0].toString().includes('dictionary')) {
+        forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getTables() : of(null));
+        forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getVisions() : of(null));
+    }
+    else if (route.url[0].toString().includes('users')) {
+        forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.checkUser() : of(null));
+        forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getUsers() : of(null));
+    }
+    return forkJoin(forks);
 };
 
 export function luthierMatcher(url: UrlSegment[]) {
-    return url.length === 1 && (url[0].path == 'project' || url[0].path == 'connection' || url[0].path == 'dictionary' || url[0].path == 'manager' )
+    return url.length === 1 && (url[0].path == 'project' || url[0].path == 'connection' || url[0].path == 'dictionary'
+        || url[0].path == 'manager' || url[0].path === 'users' )
         ? { consumed: url }
         : null;
 }

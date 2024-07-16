@@ -1,0 +1,51 @@
+:host {
+    width: 100% !important;
+    height: 100% !important;
+}
+.luthier-user-user-modal-container {
+    max-width: 70vw !important;
+    width: 70vw !important;
+    max-height: 95vh !important;
+    height: 95vh !important;
+
+    mat-dialog-container {
+        padding: 10px !important;
+    }
+    .mat-mdc-dialog-surface {
+        padding: 10px !important;;
+    }
+    .readOnly {
+        pointer-events: none;
+        opacity: 60%;
+    }
+    .mat-card-header-text {
+        @apply w-full #{'!important'};
+    }
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+        padding: 0px 10px 0px 10px !important;
+        font-size: 0.75rem !important;
+    }
+    .mat-mdc-row:hover .mat-mdc-cell {
+        background-color: lightgray;
+    }
+    .mat-mdc-table .mdc-data-table__row {
+        height: 0px !important;
+    }
+    .mat-mdc-row:nth-child(even){
+        background-color: inherit !important;
+    }
+    .mat-mdc-row:nth-child(odd){
+        background-color: whitesmoke !important;
+    }
+
+    .mat-mdc-cell {
+        .mdc-text-field {
+            margin: 0px !important;
+        }
+    }
+    .mat-mdc-tab-group .table-tab .mat-mdc-tab-body-content {
+        padding: 0px !important;
+        @apply flex flex-col h-full overflow-hidden
+    }
+}

@@ -1,0 +1,375 @@
+<div class="inset-0 w-full h-full flex flex-col min-w-0 md:overflow-y-auto relative">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-2 sm:py-4 sm:px-4 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="flex flex-row flex-row-reverse mt-2 items-center">
+                <div class="mr-2">
+                    <button
+                        mat-icon-button aria-label="close dialog" mat-dialog-close>
+                        <mat-icon
+                            class="icon-size-4"
+                            fontSet="fas" fontIcon="fa-times"></mat-icon>
+                    </button>
+                </div>
+                <div class="w-full">
+                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        {{title}}
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div
+        class="flex-auto overflow-hidden p-3">
+
+        <mat-tab-group class="h-full w-full overflow-hidden">
+            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="details" label="Detalhes">
+                <div [formGroup]="formSave" class="h-full max-h-full max-w-full overflow-x-auto md:overflow-auto">
+
+                    <div class="w-full mb-4">
+                        <div class="grid sm:grid-cols-12 gap-2 mt-4 mx-1">
+                            <!--code !-->
+                            <div class="sm:col-span-3">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                    <mat-label>Código</mat-label>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        fontSet="fas" fontIcon="fa-list-ol"
+                                        matPrefix></mat-icon>
+                                    <input
+                                        readonly
+                                        [formControlName]="'code'"
+                                        matInput>
+                                </mat-form-field>
+                            </div>
+                            <!--status !-->
+                            <div class="sm:col-span-3">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                    <mat-label>Status</mat-label>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        fontSet="fas" fontIcon="fa-t"
+                                        matPrefix></mat-icon>
+
+                                    <mat-select formControlName="status">
+
+                                        <mat-option *ngFor="let t of LuthierUserStatusEnum | enumArray" [value]="t.key" >
+                                            {{t.key}}
+
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                            <!--date !-->
+                            <div class="sm:col-span-3">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                    <mat-label>Data Criação</mat-label>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        fontSet="fas" fontIcon="fa-list-ol"
+                                        matPrefix></mat-icon>
+                                    <input
+                                        readonly
+                                        [value]="userModel.date | date: 'dd/MM/yyyy'"
+                                        matInput>
+                                </mat-form-field>
+                            </div>
+                            <!--userType !-->
+                            <div class="sm:col-span-3">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                    <mat-label>Tipo</mat-label>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        fontSet="fas" fontIcon="fa-t"
+                                        matPrefix></mat-icon>
+
+                                    <mat-select formControlName="userType">
+
+                                        <mat-option *ngFor="let t of LuthierUserTypeEnum | enumArray" [value]="t.key" >
+                                            {{t.key}}
+
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!--name !-->
+                            <div class="sm:col-span-12">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                    <mat-label>Nome</mat-label>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        fontSet="fas" fontIcon="fa-signature"
+                                        matPrefix></mat-icon>
+                                    <input matInput
+                                           formControlName="name">
+                                </mat-form-field>
+                            </div>
+
+                            <!--login !-->
+                            <div class="sm:col-span-5">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                    <mat-label>Login</mat-label>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        fontSet="fas" fontIcon="fa-signature"
+                                        matPrefix></mat-icon>
+                                    <input matInput
+                                           formControlName="login">
+                                </mat-form-field>
+                            </div>
+                            <!--sms !-->
+                            <div class="sm:col-span-4">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                    <mat-label>Celular</mat-label>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        fontSet="fas" fontIcon="fa-phone"
+                                        matPrefix></mat-icon>
+                                    <input
+                                        mask="0*"
+                                        [formControlName]="'sms'"
+                                        matInput>
+                                </mat-form-field>
+                            </div>
+                            <!--multipleAccess !-->
+                            <div class="sm:col-span-3 text-sm flex items-center justify-center">
+                                <mat-slide-toggle class="text-sm" formControlName="multiAccess">Permite múltiplos acessos?</mat-slide-toggle>
+                            </div>
+
+                            <!--email !-->
+                            <div class="sm:col-span-12">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                    <mat-label>Email</mat-label>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        fontSet="fas" fontIcon="fa-signature"
+                                        matPrefix></mat-icon>
+                                    <input matInput
+                                           formControlName="email">
+                                </mat-form-field>
+                            </div>
+
+                            <!--password !-->
+                            <div class="sm:col-span-4">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                    <mat-label>Senha</mat-label>
+                                    <mat-icon
+                                        class="icon-size-5"
+                                        fontSet="fas" fontIcon="fa-key"
+                                        matPrefix></mat-icon>
+                                    <input matInput
+                                           formControlName="password">
+                                </mat-form-field>
+                            </div>
+                            <!--change password !-->
+                            <div class="sm:col-span-4 text-sm flex items-center justify-center">
+                                <mat-slide-toggle [checked]="formSave.get('action').value && formSave.get('action').value === 'CHANGE_PASSWORD' ? true : false"
+                                    (change)="changePasswordChanged($event)" class="text-sm">Alterar Senha no login?</mat-slide-toggle>
+                            </div>
+                            <!--deadLine !-->
+                            <div class="sm:col-span-4">
+                                <mat-form-field
+                                    class="fuse-mat-dense w-full"
+                                    [subscriptSizing]="'dynamic'">
+                                    <mat-label>Senha expira em</mat-label>
+                                    <mat-icon
+                                        matPrefix
+                                        class="hidden sm:flex icon-size-5"
+                                        [svgIcon]="'heroicons_solid:cake'"></mat-icon>
+                                    <input
+                                        matInput
+                                        [matDatepicker]="deadLineDatepicker"
+                                        formControlName="deadLine">
+                                    <mat-datepicker-toggle
+                                        matSuffix
+                                        [for]="deadLineDatepicker">
+                                    </mat-datepicker-toggle>
+                                    <mat-datepicker #deadLineDatepicker></mat-datepicker>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                    </div>
+                    <pre style="font-size: 1rem; white-space: pre-wrap;">{{ formSave.value | json}}</pre>
+                </div>
+            </mat-tab>
+            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="groups" label="Grupos" bodyClass="table-tab">
+                <div class="flex-none flex justify-between items-center py-1">
+                    <div class="flex-none flex">
+
+                    </div>
+                    <div class="flex-none flex md:w-1/3 md:pr-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-search"
+                                matPrefix></mat-icon>
+                            <input
+                                [autocomplete]="'off'"
+                                class="text-sm"
+                                (input)="filterGroups($event)"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto" cdkScrollable>
+                    <table mat-table matSort #sortGroups="matSort" [dataSource]="dataSourceGroups" class="table-auto">
+                        <ng-container matColumnDef="buttons">
+                            <th mat-header-cell *matHeaderCellDef>
+                                <div class="flex flex-row items-center">
+                                    <mat-checkbox (change)="$event ? toggleAllGroupsRows() : null"
+                                                  [checked]="selectedGroups.hasValue() && isAllGroupsSelected()"
+                                                  [indeterminate]="selectedGroups.hasValue() && !isAllGroupsSelected()">
+                                    </mat-checkbox>
+                                </div>
+                            </th>
+                            <td mat-cell *matCellDef="let group; let i = index">
+                                <div class="flex flex-row items-center">
+                                    <mat-checkbox (click)="$event.stopPropagation()"
+                                                  (change)="$event ? selectedGroups.toggle(group) : null"
+                                                  [checked]="selectedGroups.isSelected(group)">
+                                    </mat-checkbox>
+                                </div>
+
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="group.code">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+                            <td mat-cell *matCellDef="let group; let i = index"> {{group.group.code}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="group.name">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome </th>
+                            <td mat-cell *matCellDef="let group; let i = index"> {{group.group.name}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="group.login">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Login </th>
+                            <td mat-cell *matCellDef="let group; let i = index"> {{group.group.login}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="group.userType">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
+                            <td mat-cell *matCellDef="let group; let i = index"> {{group.group.userType}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="group.date">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Data Criação </th>
+                            <td mat-cell *matCellDef="let group; let i = index"> {{group.group.date | date:'dd/MM/yyyy'}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="group.status">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
+                            <td mat-cell *matCellDef="let group; let i = index"> {{group.group.status}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="group.email">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Email </th>
+                            <td mat-cell *matCellDef="let group; let i = index"> {{group.group.email}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="group.sms">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Celular </th>
+                            <td mat-cell *matCellDef="let group; let i = index"> {{group.group.sms}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="group.multiAccess">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Múltiplo Acesso </th>
+                            <td mat-cell *matCellDef="let group; let i = index"> {{group.group.multiAccess}} </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="displayedGroupColumns; sticky: true"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedGroupColumns;"></tr>
+                    </table>
+                    <pre style="font-size: 1rem; white-space: pre-wrap;">{{ selectedGroups.selected | json}}</pre>
+                </div>
+            </mat-tab>
+            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="subsystems" label="Subsistemas" bodyClass="table-tab">
+                <div class="flex-none flex justify-between items-center py-1">
+                    <div class="flex-none flex">
+
+                    </div>
+                    <div class="flex-none flex md:w-1/3 md:pr-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-search"
+                                matPrefix></mat-icon>
+                            <input
+                                [autocomplete]="'off'"
+                                class="text-sm"
+                                (input)="filterSubsystems($event)"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto" cdkScrollable>
+                    <table mat-table matSort #sortSubsystems="matSort" [dataSource]="dataSourceSubsystems" class="table-auto">
+                        <ng-container matColumnDef="buttons">
+                            <th mat-header-cell *matHeaderCellDef>
+                                <div class="flex flex-row items-center">
+                                    <mat-checkbox (change)="$event ? toggleAllSubsystemsRows() : null"
+                                                  [checked]="selectedSubsystems.hasValue() && isAllSubsystemsSelected()"
+                                                  [indeterminate]="selectedSubsystems.hasValue() && !isAllSubsystemsSelected()">
+                                    </mat-checkbox>
+                                </div>
+                            </th>
+                            <td mat-cell *matCellDef="let subsystem; let i = index">
+                                <div class="flex flex-row items-center">
+                                    <mat-checkbox (click)="$event.stopPropagation()"
+                                                  (change)="$event ? selectedSubsystems.toggle(subsystem) : null"
+                                                  [checked]="selectedSubsystems.isSelected(subsystem)">
+                                    </mat-checkbox>
+                                </div>
+
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="subsystem.code">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+                            <td mat-cell *matCellDef="let subsystem; let i = index"> {{subsystem.subsystem.code}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="subsystem.description">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Descrição </th>
+                            <td mat-cell *matCellDef="let subsystem; let i = index"> {{subsystem.subsystem.description}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="subsystem.plataform">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Plataforma </th>
+                            <td mat-cell *matCellDef="let subsystem; let i = index"> {{subsystem.subsystem.plataform}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="access">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Acesso <th>
+                            <td mat-cell *matCellDef="let subsystem; let i = index">
+                            <div class="flex flex-row items-center">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                    <mat-select class="text-sm"
+                                                [(ngModel)]="subsystem.access">
+
+                                        <mat-option *ngFor="let t of LuthierUserSubsystemAcessEnum | enumArray" [value]="t.key" >
+                                            {{t.key}}
+
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="displayedSubsystemsColumns; sticky: true"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedSubsystemsColumns;"></tr>
+                    </table>
+
+                    <pre style="font-size: 1rem; white-space: pre-wrap;">{{ selectedSubsystems.selected | json}}</pre>
+
+                </div>
+            </mat-tab>
+        </mat-tab-group>
+
+
+        <div class="absolute bottom-0 right-0 z-50">
+
+            <button
+                class="mr-4 mb-4"
+                [disabled]="canSave() === false"
+                (click)="doSaving()"
+                mat-flat-button
+                type="button"
+                [color]="'primary'">Salvar
+            </button>
+        </div>
+    </div>
+
+</div>

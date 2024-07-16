@@ -7,6 +7,7 @@ import {
     LuthierResourceModel,
     LuthierSubsystemModel,
     LuthierTableModel,
+    LuthierUserGroupEnum,
     LuthierUserModel,
     LuthierViewModel,
     LuthierVisionDatasetModel,
@@ -29,6 +30,10 @@ export class LuthierService
     private _visions: BehaviorSubject<LuthierVisionModel[]> = new BehaviorSubject(null);
     private _currentTables: LuthierTableModel[];
     private _currentVisions: LuthierVisionModel[];
+    private _user: BehaviorSubject<LuthierUserModel> = new BehaviorSubject(null);
+    private _currentUser: LuthierUserModel;
+    private _users: BehaviorSubject<LuthierUserModel[]> = new BehaviorSubject(null);
+    private _currentUsers: LuthierUserModel[];
 
     /**
      * Constructor
@@ -53,6 +58,26 @@ export class LuthierService
     get project$(): Observable<LuthierProjectModel>
     {
         return this._project.asObservable();
+    }
+    set user(value: LuthierUserModel)
+    {
+        this._currentUser = value;
+        // Store the value
+        this._user.next(value);
+    }
+    get user$(): Observable<LuthierUserModel>
+    {
+        return this._user.asObservable();
+    }
+    set users(value: LuthierUserModel[])
+    {
+        this._currentUsers = value;
+        // Store the value
+        this._users.next(value);
+    }
+    get users$(): Observable<LuthierUserModel[]>
+    {
+        return this._users.asObservable();
     }
 
     set databases(value: Array<LuthierDatabaseModel>)
@@ -131,7 +156,6 @@ export class LuthierService
     }
     getDatabases(): Observable<any>
     {
-        console.log('Get Databases');
         this.databases = [];
         return this._httpClient.get<LuthierDatabaseModel[]>(`${this.baseCommonUrl}/all-databases`).pipe(
 
@@ -142,6 +166,21 @@ export class LuthierService
             catchError(error => {
                 // Handle the error and return a fallback value or rethrow the error
                 this.databases = [];
+                return of('Fallback value');
+            })
+        );
+    }
+    getUsers(): Observable<any>
+    {
+        return this._httpClient.get<LuthierUserModel[]>(`${this.baseCommonUrl}/all-users`).pipe(
+
+            tap((response: LuthierUserModel[]) =>
+            {
+                this.users = response;
+            }),
+            catchError(error => {
+                // Handle the error and return a fallback value or rethrow the error
+                this.project = null;
                 return of('Fallback value');
             })
         );
@@ -164,6 +203,132 @@ export class LuthierService
                     this._currentDatabases.push(response);
                 }
                 this.databases = this._currentDatabases;
+                // Return a new observable with the response
+                return of(response);
+            })));
+    }
+    deleteDatabase(id: number): Promise<any>  {
+        return firstValueFrom(this._httpClient.delete<any>(`${this.baseCommonUrl}/database/${id}`).pipe(
+            switchMap((response) => {
+                const index = this._currentDatabases.findIndex(x => x.code === id);
+                if (index >= 0) {
+                    this._currentDatabases.splice(index, 1);
+                    this.databases = this._currentDatabases;
+                }
+                // Return a new observable with the response
+                return of(response);
+            })));
+    }
+
+    saveUser(model: LuthierUserModel): Promise<LuthierUserModel> {
+        return firstValueFrom(this._httpClient.post<LuthierUserModel>(`${this.baseCommonUrl}/user`, model).pipe(
+            switchMap((response: LuthierUserModel) => {
+                if (UtilFunctions.isValidStringOrArray(this._users) === false) {
+                    this._currentUsers = new Array<LuthierUserModel>();
+                }
+                if (model.code && model.code > 0) {
+                    const index = this._currentUsers.findIndex(x => x.code === model.code);
+                    if (index < 0) {
+                        this._currentUsers.push(response);
+                    } else {
+                        this._currentUsers[index] = response;
+                    }
+                } else {
+                    this._currentUsers.push(response);
+                }
+                if (response.group === LuthierUserGroupEnum.USER) {
+                    this._currentUsers.forEach((user,index) => {
+                        if (user.group === LuthierUserGroupEnum.GROUP) {
+                            const indexUser = UtilFunctions.isValidStringOrArray(user.users) === true ? user.users.findIndex(x => x.user.code === response.code) : -1;
+                            if (indexUser >= 0) {
+                                if (UtilFunctions.isValidStringOrArray(response.groups) === false) {
+                                    this._currentUsers[index].users.splice(indexUser, 1);
+                                }
+                                else {
+                                    response.groups.forEach(x => {
+                                        if (this._currentUsers[index].code === x.group.code) {
+                                            this._currentUsers[index].users.push({user: response});
+                                        }
+                                    })
+                                }
+                            }
+                            else {
+                                if (UtilFunctions.isValidStringOrArray(response.groups) === true) {
+                                    response.groups.forEach(x => {
+                                        if (this._currentUsers[index].code === x.group.code) {
+                                            this._currentUsers[index].users.push({user: response});
+                                        }
+                                    })
+                                }
+
+                            }
+                        }
+                    })
+                }
+                else if (response.group === LuthierUserGroupEnum.GROUP) {
+                    this._currentUsers.forEach((user,index) => {
+                        if (user.group === LuthierUserGroupEnum.USER) {
+                            const indexGroup = UtilFunctions.isValidStringOrArray(user.groups) === true ? user.groups.findIndex(x => x.group.code === response.code) : -1;
+                            if (indexGroup >= 0) {
+                                if (UtilFunctions.isValidStringOrArray(response.users) === false) {
+                                    this._currentUsers[index].groups.splice(indexGroup, 1);
+                                }
+                                else {
+                                    response.users.forEach(x => {
+                                        if (this._currentUsers[index].code === x.user.code) {
+                                            this._currentUsers[index].groups.push({group: response});
+                                        }
+                                    })
+                                }
+                            }
+                            else {
+                                if (UtilFunctions.isValidStringOrArray(response.users) === true) {
+                                    response.users.forEach(x => {
+                                        if (this._currentUsers[index].code === x.user.code) {
+                                            this._currentUsers[index].groups.push({group: response});
+                                        }
+                                    })
+                                }
+
+                            }
+                        }
+                    })
+                }
+                this.users = this._currentUsers;
+                // Return a new observable with the response
+                return of(response);
+            })));
+    }
+    deleteUser(id: number): Promise<any>  {
+        return firstValueFrom(this._httpClient.delete<any>(`${this.baseCommonUrl}/user/${id}`).pipe(
+            switchMap((response) => {
+                const index = this._currentUsers.findIndex(x => x.code === id);
+                if (index >= 0) {
+                    response = this._currentUsers[index];
+                    if (response.group === LuthierUserGroupEnum.USER) {
+                        this._currentUsers.forEach((user,index) => {
+                            if (user.group === LuthierUserGroupEnum.GROUP) {
+                                const indexUser = UtilFunctions.isValidStringOrArray(user.users) === true ? user.users.findIndex(x => x.user.code === response.code) : -1;
+                                if (indexUser >= 0) {
+                                    this._currentUsers[index].users.splice(indexUser, 1);
+                                }
+                            }
+                        })
+                    }
+                    else if (response.group === LuthierUserGroupEnum.GROUP) {
+                        this._currentUsers.forEach((user,index) => {
+                            if (user.group === LuthierUserGroupEnum.USER) {
+                                const indexGroup = UtilFunctions.isValidStringOrArray(user.groups) === true ? user.groups.findIndex(x => x.group.code === response.code) : -1;
+                                if (indexGroup >= 0) {
+                                    this._currentUsers[index].groups.splice(indexGroup, 1);
+                                }
+                            }
+                        })
+                    }
+
+                    this._currentUsers.splice(index, 1);
+                    this.users = this._currentUsers;
+                }
                 // Return a new observable with the response
                 return of(response);
             })));
@@ -199,11 +364,19 @@ export class LuthierService
     getVision(id: number): Promise<LuthierVisionModel> {
         return firstValueFrom(this._httpClient.get<LuthierVisionModel>(`${this.baseDicUrl}/vision/${id}`));
     }
+    getUser(id: number): Promise<LuthierUserModel> {
+        return firstValueFrom(this._httpClient.get<LuthierUserModel>(`${this.baseCommonUrl}/user/${id}`));
+    }
     getVisionChildreen(id: number): Promise<LuthierVisionDatasetModel[]> {
         return firstValueFrom(this._httpClient.get<LuthierVisionDatasetModel[]>(`${this.baseDicUrl}/vision-childreen/${id}`));
     }
     checkUser(): Observable<LuthierUserModel> {
-        return this._httpClient.put<LuthierUserModel>(`${this.baseCommonUrl}/check-user`, null);
+        return this._httpClient.put<LuthierUserModel>(`${this.baseCommonUrl}/check-user`, null).pipe(
+            tap((response: LuthierUserModel) =>
+            {
+                this.user = response;
+            }),
+        );
     }
     getDataset(id: number): Promise<LuthierVisionDatasetModel> {
 

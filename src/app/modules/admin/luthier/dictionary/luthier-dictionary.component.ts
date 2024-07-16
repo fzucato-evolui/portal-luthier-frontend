@@ -42,6 +42,8 @@ import {MatTreeModule} from '@angular/material/tree';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {LuthierDictionaryVisionComponent} from './vision/luthier-dictionary-vision.component';
 import {LuthierDictionaryDatasetComponent} from './dataset/luthier-dictionary-dataset.component';
+import {Clipboard, ClipboardModule} from '@angular/cdk/clipboard';
+import * as FileSaver from 'file-saver';
 
 @Component({
     selector     : 'luthier-dictionary',
@@ -72,6 +74,7 @@ import {LuthierDictionaryDatasetComponent} from './dataset/luthier-dictionary-da
         MatTreeModule,
         LuthierDictionaryVisionComponent,
         LuthierDictionaryDatasetComponent,
+        ClipboardModule
     ],
 })
 export class LuthierDictionaryComponent implements OnInit, OnDestroy
@@ -110,7 +113,8 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 private _fuseNavigationService: FuseNavigationService,
                 private _changeDetectorRef: ChangeDetectorRef,
                 public messageService: MessageDialogService,
-                private _parent: LuthierComponent)
+                private _parent: LuthierComponent,
+                public clipboard: Clipboard)
     {
     }
 
@@ -172,6 +176,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 title   : 'Ferramentas',
                 type    : 'aside',
                 awesomeIcon : {fontSet: 'fas', fontIcon: 'fa-hammer'},
+                roles : ['ROLE_SUPER', 'ROLE_HYPER'],
                 children: [
                     {
                         id      : 'luthier.dictionary.tools.sync',
@@ -192,7 +197,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             {
                 if (page === 'dictionary') {
                     setTimeout(() => {
-                        this._parent.parent.navigation.secondary = secondaryNavigation;
+                        this._parent.parent.sercondaryNavigation = secondaryNavigation;
                     }, 0);
                     this.refreshScroll();
                 }
@@ -227,7 +232,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             });
         if (this._parent.page === 'dictionary') {
             setTimeout(() => {
-                this._parent.parent.navigation.secondary = secondaryNavigation;
+                this._parent.parent.sercondaryNavigation = secondaryNavigation;
                 this._changeDetectorRef.detectChanges();
             }, 0);
         }
@@ -311,7 +316,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             }
         }
         if (item) {
-            this._parent.parent.navigation.secondary[0].children.forEach(x => {
+            this._parent.parent.sercondaryNavigation[0].children.forEach(x => {
                 x.active = x.id === item.id ? true : null;
             });
             const navComponent = this._fuseNavigationService.getComponent<FuseVerticalNavigationComponent>("secondaryNavigation");
@@ -514,18 +519,35 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
     }
 
     enableSecondaryMenu(disabled: boolean) {
-        this._parent.parent.navigation.secondary.forEach(x => {
-            x.disabled = disabled;
-            x.children.forEach(y => {
-                y.disabled = disabled;
+        if (UtilFunctions.isValidStringOrArray(this._parent.parent.sercondaryNavigation) === true) {
+            this._parent.parent.sercondaryNavigation.forEach(x => {
+                x.disabled = disabled;
+                x.children.forEach(y => {
+                    y.disabled = disabled;
+                });
             });
-        });
-        const navComponent = this._fuseNavigationService.getComponent<FuseVerticalNavigationComponent>("secondaryNavigation");
+            const navComponent = this._fuseNavigationService.getComponent<FuseVerticalNavigationComponent>("secondaryNavigation");
 
-        // Return if the navigation component does not exist
-        if (!navComponent) {
-            return null;
+            // Return if the navigation component does not exist
+            if (!navComponent) {
+                return null;
+            }
+            navComponent.refresh();
         }
-        navComponent.refresh();
+    }
+
+    export(object: LuthierDictionaryObjectType, vision: LuthierVisionModel, clipBoard: boolean) {
+        if (object.objectType === 'TABLE' || object.objectType === 'VIEW') {
+            this.service.getTable(object.code)
+                .then(result => {
+                    if (clipBoard === true) {
+                        this.clipboard.copy(JSON.stringify(result));
+                        this.messageService.open('Dados copiados para o clipboard', 'SUCESSO', 'success');
+                    }
+                    else {
+                        FileSaver.saveAs(JSON.stringify(result), `${object.objectType}_${object.name}.json`);
+                    }
+                })
+        }
     }
 }

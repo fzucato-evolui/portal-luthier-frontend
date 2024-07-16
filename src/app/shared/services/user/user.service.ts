@@ -121,6 +121,9 @@ export class UserService
         // Store the value
         this._user.next(value);
     }
+    get user(): UserModel {
+        return this.model;
+    }
 
     get user$(): Observable<UserModel>
     {
@@ -132,13 +135,13 @@ export class UserService
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
 
-    hasAnyAuthority(authorities: any[], user: UserModel): boolean {
-        if(authorities.length === 0 && UtilFunctions.isValidObject(user)) {
+    hasAnyAuthority(authorities: any[]): boolean {
+        if(authorities.length === 0 && UtilFunctions.isValidObject(this.model)) {
             return true;
         }
 
         for (let i = 0; i < authorities.length; i++) {
-            if (UtilFunctions.isValidStringOrArray(user.authorities) === true && user.authorities.findIndex( x => x === authorities[i]) >= 0) {
+            if (UtilFunctions.isValidStringOrArray(this.model.authorities) === true && this.model.authorities.findIndex( x => x === authorities[i]) >= 0) {
                 return true;
             }
         }

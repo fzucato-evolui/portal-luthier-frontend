@@ -123,7 +123,8 @@ export class UtilFunctions {
     public static pathDataAccessor(item: any, path: string): any {
         return path.split('.')
             .reduce((accumulator: any, key: string) => {
-                const match = key.match(new RegExp('\[\d\]'));
+                const regex = /\[\d+\]/g; // Global match for all numbers
+                const match = key.match(new RegExp(regex));
                 if (match) {
                     key = key.replace(match[0], '');
                     const index = match[0].replace('[', '').replace(']', '');
@@ -142,5 +143,30 @@ export class UtilFunctions {
             acc[fieldValue].push(obj);
             return acc;
         }, {});
+    }
+
+    public static getHttpErrorMessage(value) {
+        let errorMessage;
+        if (value.error.detail !== undefined) {
+            errorMessage = value.error.detail;
+        } else if (value.error && value.error.message) {
+            errorMessage = value.error.message;
+        } else if (value.error && value.error.error) {
+            errorMessage = value.error.error;
+        } else if (value.error && value.error.fieldErrors) {
+            errorMessage = value.error.fieldErrors[0].message;
+        } else if (value.error && value.error.message) {
+            errorMessage = value.error.message;
+        } else if (value.error) {
+            errorMessage = value.error;
+        } else if (value.message !== undefined) {
+            errorMessage = value.message;
+        } else {
+            errorMessage = value;
+        }
+        if (errorMessage === null || errorMessage === undefined) {
+            errorMessage = 'Erro desconhecido';
+        }
+        return errorMessage;
     }
 }

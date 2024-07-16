@@ -16,6 +16,25 @@
                 svgIcon="mat_solid:undo"></mat-icon>
             <span class="ml-2">Reverter</span>
         </button>
+        <button class="text-sm min-h-7 h-7"
+                mat-flat-button
+                color="warn" [matMenuTriggerFor]="menuImportTable">
+            <mat-icon
+                class="icon-size-4"
+                svgIcon="mat_solid:import_export"></mat-icon>
+            <span class="ml-2">Importar</span>
+        </button>
+        <mat-menu #menuImportTable="matMenu">
+            <button mat-menu-item (click)="readTableFromClipboard()">
+                <mat-icon [svgIcon]="'mat_outline:content_copy'"></mat-icon>
+                Importar do Clipboard
+            </button>
+            <button mat-menu-item (click)="fileTableInput.click()">
+                <mat-icon [svgIcon]="'mat_solid:file_download'"></mat-icon>
+                Importar de Arquivo
+            </button>
+            <input type="file" #fileTableInput (change)="readTableFromFile($event)" accept=".json" style="display: none;" />
+        </mat-menu>
     </div>
     <mat-expansion-panel expanded="true" class="flex-none max-h-1/2 flex flex-col mb-2 mt-0">
         <mat-expansion-panel-header class="flex-none" [collapsedHeight]="'32px'" [expandedHeight]="'32px'">

@@ -189,6 +189,7 @@ export enum LuthierPermissionTypeEnum {
     ONLY_SYSTEM =  ("ONLY_SYSTEM")
 }
 export class LuthierTableStaticFieldModel {
+    id?: string
     code?: number
     value?: string
     caption?: string
@@ -211,6 +212,7 @@ export enum LuthierReferenceStatusEnum {
     ACTIVE = ("ACTIVE")
 }
 export class LuthierTableReferenceModel {
+    id?: string
     code?: number
     name?: string
     status?: LuthierReferenceStatusEnum | string
@@ -242,6 +244,7 @@ export enum LuthierIndexSortEnum {
     DESC = ("DESC")
 }
 export class LuthierTableIndexModel {
+    id?: string
     code?: number
     name?: string
     sortType?: LuthierIndexSortEnum | string
@@ -303,6 +306,7 @@ export class LuthierCustomFieldModel {
     realName?: string
 }
 export class LuthierTableStaticCustomFieldModel {
+    id?: string
     code?: number
     tableCustomFieldCode?: number
     value?: string
@@ -341,6 +345,7 @@ export type LuthierCustomizationType =
     'FIELD_UICONFIGURATION' |
     'VISION_FIELD_UICONFIGURATION';
 export class LuthierCustomizationModel {
+    id?: string
     code?: number
     date?: Date
     type?: LuthierCustomizationType
@@ -361,6 +366,7 @@ export enum LuthierSearchStatusEnum {
     ACTIVE = ("ACTIVE")
 }
 export class LuthierTableSearchModel {
+    id?: string
     code?: number
     tableCode?: number
     name?: string
@@ -395,6 +401,7 @@ export enum LuthierSearchFieldOperatorEnum {
     NOT_NULL = ("NOT_NULL")
 }
 export class LuthierTableSearchFieldModel {
+    id?: string
     code?: number
     searchCode?: number
     tableFieldCode?: number
@@ -636,4 +643,27 @@ export class LuthierUserModel {
     hash?: string;
     deadLine?: Date;
     multiAccess?: boolean;
-    }
+    groups?: LuthierUserGroupModel[]
+    users?: LuthierUserGroupModel[]
+    subsystems?: LuthierUserSubsystemModel[]
+}
+export enum LuthierUserSubsystemAcessEnum {
+    NO_ACCESS = ('NO_ACCESS'),
+    NORMAL = ('NORMAL'),
+    MANAGER = ('MANAGER')
+}
+export class LuthierUserSubsystemModel {
+    userCode?: number
+    subsystemCode?: number
+    user?: LuthierUserModel
+    subsystem?: LuthierSubsystemModel
+    access?: LuthierUserSubsystemAcessEnum | string
+}
+
+export class LuthierUserGroupModel {
+    userCode?: number
+    groupCode?: number
+    user?: LuthierUserModel
+    group?: LuthierUserModel
+}
+

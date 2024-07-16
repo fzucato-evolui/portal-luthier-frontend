@@ -75,6 +75,7 @@ import {
 import {
     LuthierDictionaryDatasetSearchModalComponent
 } from './modal/search/luthier-dictionary-dataset-search-modal.component';
+import {FilterPredicateUtil} from '../../../../../shared/util/util-classes';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -150,11 +151,6 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         'tableField.fieldType', 'tableField.size',  'readOnly', 'visible', 'notNull', 'search', 'tableField.defaultValue', 'tableField.precision',
         'tableField.maxValue', 'tableField.minValue', 'charCase', 'editor', 'lookupFilter', 'reference.name', 'technicalDescription', 'userDescription',
         'uiConfiguration', 'layoutSize'];
-    displayedFieldColumns2 = ['buttons', 'code'];
-    displayedIndexColumns = ['buttons', 'code', 'sortType', 'name',
-        'creationOrder', 'unique', 'validationMessage'];
-    displayedReferenceColumns = ['buttons', 'code', 'status', 'name', 'tablePK.name', 'onUpdate',
-        'onDelete', 'attributeName', 'updateMessage', 'deleteMessage'];
     displayedGroupInfoColumns = ['buttons', 'code', 'order', 'description', 'groupInfoType',
         'parent.description'];
     displayedCustomFieldColumns = ['buttons', 'order', 'code', 'fieldType', 'tableField.key', 'tableField.name', 'label', 'mask', 'groupInfo',
@@ -163,7 +159,6 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         'uiConfiguration', 'layoutSize'];
     displayedCustomizationsColumns = ['buttons', 'code', 'tableField.name', 'customMask', 'customReadOnly',
         'customVisible', 'customNotNull', 'customCharCase', 'customEditor', 'customLookupFilter', 'customUiConfiguration'];
-    displayedBondColumns = [ 'code', 'name', 'description'];
     displayedSearchColumns = [ 'buttons', 'code', 'name', 'customName', 'order', 'status', 'type'];
     LuthierVisionDatasetFieldTypeEnum = LuthierVisionDatasetFieldTypeEnum;
     LuthierFieldTypeEnum = LuthierFieldTypeEnum;
@@ -204,16 +199,29 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
 
     ngAfterViewInit() {
         UtilFunctions.setSortingDataAccessor(this.fieldsDataSource);
+        const filterPredicateFields = FilterPredicateUtil.withColumns(this.displayedFieldColumns);
+        this.fieldsDataSource.filterPredicate = filterPredicateFields.instance.bind(filterPredicateFields);
         this.fieldsDataSource.sort = this.sortFields.get(0);
-        UtilFunctions.setSortingDataAccessor(this.searchsDataSource);
-        this.searchsDataSource.sort = this.sortSearchs;
-        UtilFunctions.setSortingDataAccessor(this.groupsInfoDataSource);
-        this.groupsInfoDataSource.sort = this.sortFields.get(1);
-        UtilFunctions.setSortingDataAccessor(this.customFieldsDataSource);
-        this.customFieldsDataSource.sort = this.sortFields.get(2);
-        UtilFunctions.setSortingDataAccessor(this.customizationsDataSource);
-        this.customizationsDataSource.sort = this.sortFields.get(3);
 
+        UtilFunctions.setSortingDataAccessor(this.searchsDataSource);
+        const filterPredicateSearchs = FilterPredicateUtil.withColumns(this.displayedSearchColumns);
+        this.searchsDataSource.filterPredicate = filterPredicateSearchs.instance.bind(filterPredicateSearchs);
+        this.searchsDataSource.sort = this.sortSearchs;
+
+        UtilFunctions.setSortingDataAccessor(this.groupsInfoDataSource);
+        const filterPredicateGroupsInfo = FilterPredicateUtil.withColumns(this.displayedGroupInfoColumns);
+        this.groupsInfoDataSource.filterPredicate = filterPredicateGroupsInfo.instance.bind(filterPredicateGroupsInfo);
+        this.groupsInfoDataSource.sort = this.sortFields.get(1);
+
+        UtilFunctions.setSortingDataAccessor(this.customFieldsDataSource);
+        const filterPredicateCustomFields = FilterPredicateUtil.withColumns(this.displayedCustomFieldColumns);
+        this.customFieldsDataSource.filterPredicate = filterPredicateCustomFields.instance.bind(filterPredicateCustomFields);
+        this.customFieldsDataSource.sort = this.sortFields.get(2);
+
+        UtilFunctions.setSortingDataAccessor(this.customizationsDataSource);
+        const filterPredicateCustomizations = FilterPredicateUtil.withColumns(this.displayedCustomizationsColumns);
+        this.customizationsDataSource.filterPredicate = filterPredicateCustomizations.instance.bind(filterPredicateCustomizations);
+        this.customizationsDataSource.sort = this.sortFields.get(3);
     }
 
     refresh() {

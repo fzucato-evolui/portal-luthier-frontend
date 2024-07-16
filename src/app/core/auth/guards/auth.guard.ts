@@ -8,7 +8,6 @@ export const AuthGuard: CanActivateFn | CanActivateChildFn = (route, state) =>
 {
     const router: Router = inject(Router);
     const service = inject(UserService);
-    console.log('Auth Guard');
     // Check the authentication status
     //return inject(AuthService).check().pipe(
     return service.user$.pipe(
@@ -24,7 +23,7 @@ export const AuthGuard: CanActivateFn | CanActivateChildFn = (route, state) =>
                 return of(urlTree);
             }
             if (route.data && UtilFunctions.isValidStringOrArray(route.data.authorities) === true) {
-                if (service.hasAnyAuthority(route.data.authorities, user) === false) {
+                if (service.hasAnyAuthority(route.data.authorities) === false) {
                     return of(false);
                 }
             }

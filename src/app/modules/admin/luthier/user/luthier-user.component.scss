@@ -1,5 +1,5 @@
 
-luthier-connection {
+luthier-user {
     .mat-mdc-header-cell,
     .mat-mdc-cell {
         padding: 0px 10px 0px 10px !important;
@@ -23,6 +23,10 @@ luthier-connection {
 
     .mat-mdc-row.checked {
         background-color: darkseagreen !important;
+    }
+    .mat-mdc-tab-group .table-tab .mat-mdc-tab-body-content {
+        padding: 0px !important;
+        @apply flex flex-col h-full overflow-hidden
     }
 
 }

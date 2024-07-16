@@ -7,7 +7,7 @@ import {
     ViewChild,
     ViewEncapsulation
 } from '@angular/core';
-import {Subject, takeUntil} from 'rxjs';
+import {firstValueFrom, Subject, takeUntil} from 'rxjs';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -110,7 +110,7 @@ export class LuthierConnectionComponent implements OnInit, OnDestroy, AfterViewI
     }
 
     refresh() {
-        this._parent.service.getDatabases();
+        firstValueFrom(this._parent.service.getDatabases());
     }
 
     update() {
@@ -137,7 +137,8 @@ export class LuthierConnectionComponent implements OnInit, OnDestroy, AfterViewI
     }
 
     fastFilter($event: KeyboardEvent) {
-
+        const filterValue = (event.target as HTMLInputElement).value;
+        this.databases.filter = filterValue.trim().toLowerCase();
     }
 
     check(id) {

@@ -1,8 +1,113 @@
-import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {Navigation} from 'app/core/navigation/navigation.types';
-import {forkJoin, map, Observable, ReplaySubject, tap} from 'rxjs';
+import {Observable, of, ReplaySubject} from 'rxjs';
+import {FuseNavigationItem} from '../../../@fuse/components/navigation';
+import {UserService} from '../../shared/services/user/user.service';
+import {cloneDeep} from 'lodash-es';
+import {UtilFunctions} from '../../shared/util/util-functions';
 
+export const mainNavigation: FuseNavigationItem[] = [
+    {
+        id      : 'portal',
+        title   : 'Portal',
+        subtitle: '',
+        type    : 'aside',
+        awesomeIcon    : {fontSet: 'fas', fontIcon: 'fa-dungeon'},
+        link    : '/portal',
+        children: [
+            {
+                id   : 'poral.luthier-databases',
+                title: 'Luthier Databases',
+                type : 'basic',
+                awesomeIcon : {fontSet:"fas", fontIcon:"fa-database"},
+                link : '/portal/luthier-database',
+            },
+            {
+                id   : 'portal.config',
+                title: 'Configurações',
+                type : 'basic',
+                awesomeIcon : {fontSet:"fas", fontIcon:"fa-wrench"},
+                link : '/portal/config',
+                roles : ['ROLE_SUPER', 'ROLE_HYPER']
+            },
+            {
+                id   : 'portal.users',
+                title: 'Usuários',
+                type : 'basic',
+                awesomeIcon : {fontSet:"fas", fontIcon:"fa-users"},
+                link : '/portal/users',
+                roles : ['ROLE_SUPER', 'ROLE_HYPER']
+            },
+
+        ]
+    },
+    {
+        id      : 'luthier',
+        title   : 'Luthier',
+        subtitle: '',
+        type    : 'aside',
+        awesomeIcon    : {fontSet: 'fas', fontIcon: 'fa-guitar'},
+        link    : '/luthier',
+        children: [
+            {
+                id   : 'luthier.project',
+                title: 'Projeto',
+                type : 'basic',
+                awesomeIcon : {fontSet:"fas", fontIcon:"fa-cube"},
+                link : '/luthier/project',
+                roles : ['ROLE_SUPER', 'ROLE_HYPER']
+            },
+            {
+                id   : 'luthier.connection',
+                title: 'Conexão',
+                type : 'basic',
+                awesomeIcon : {fontSet:"fas", fontIcon:"fa-link"},
+                link : '/luthier/connection',
+                roles : ['ROLE_SUPER', 'ROLE_HYPER']
+            },
+            {
+                id   : 'luthier.users',
+                title: 'Usuários',
+                type : 'basic',
+                awesomeIcon : {fontSet:"fas", fontIcon:"fa-user"},
+                link : '/luthier/users',
+                roles : ['ROLE_SUPER', 'ROLE_HYPER']
+            },
+            {
+                id   : 'luthier.dictionary',
+                title: 'Dicionário',
+                type : 'basic',
+                awesomeIcon : {fontSet:"fas", fontIcon:"fa-spell-check"},
+                link : '/luthier/dictionary',
+                roles : ['ROLE_SUPER', 'ROLE_HYPER']
+            },
+            {
+                id   : 'luthier.manager',
+                title: 'Manager',
+                type : 'basic',
+                awesomeIcon    : {fontSet: 'fab', fontIcon: 'fa-markdown'},
+                link : '/luthier/manager',
+            },
+        ]
+    },
+    {
+        id      : 'license',
+        title   : 'Licenças',
+        subtitle: '',
+        type    : 'basic',
+        awesomeIcon    : {fontSet: 'fas', fontIcon: 'fa-key'},
+        link    : '/license'
+    },
+    {
+        id      : 'context',
+        title   : 'Context',
+        subtitle: '',
+        type    : 'basic',
+        awesomeIcon    : {fontSet: 'fas', fontIcon: 'fa-arrows-to-circle'},
+        link    : '/context'
+    },
+
+];
 @Injectable({providedIn: 'root'})
 export class NavigationService
 {
@@ -11,7 +116,7 @@ export class NavigationService
     /**
      * Constructor
      */
-    constructor(private _httpClient: HttpClient)
+    constructor(private _userService: UserService)
     {
     }
 
@@ -27,23 +132,35 @@ export class NavigationService
         return this._navigation.asObservable();
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
-
-    /**
-     * Get all navigation data
-     */
-    get(): Observable<Navigation>
+    get(): Observable<any>
     {
-        return forkJoin([
-            this._httpClient.get<Navigation>('api/common/navigation')
-        ]).pipe(
-            tap(([navigation]) => {
-                this._navigation.next(navigation);
-            }),
-            map(([navigation]) => navigation)
-        );
+        const items = cloneDeep(mainNavigation);
+        items.forEach(item => {
+            this.setRoles(item);
+        });
+        const navigation: Navigation = {
+            compact: items,
+            default   : null,
+            futuristic: null,
+            horizontal: null,
+            secondary: null
+        }
+        this._navigation.next(navigation);
+        return of(navigation);
+    }
 
+    setRoles(item: FuseNavigationItem) {
+        if (UtilFunctions.isValidStringOrArray(item.roles) === true) {
+            if (this._userService.hasAnyAuthority(item.roles) === false) {
+                item.hidden = (item) => {
+                    return true;
+                }
+            }
+        }
+        if (UtilFunctions.isValidStringOrArray(item.children) === true) {
+            item.children.forEach(child => {
+                this.setRoles(child);
+            })
+        }
     }
 }

@@ -178,6 +178,14 @@
                             <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
                             Adicionar Dataset
                         </button>
+                        <button mat-menu-item (click)="export(object, vision, true)">
+                            <mat-icon [svgIcon]="'mat_outline:content_copy'"></mat-icon>
+                            Exportar para Clipboard
+                        </button>
+                        <button mat-menu-item (click)="export(object, vision, false)">
+                            <mat-icon [svgIcon]="'mat_solid:file_download'"></mat-icon>
+                            Exportar para Arquivo
+                        </button>
                     </ng-template>
 
 

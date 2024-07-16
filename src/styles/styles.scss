@@ -6,6 +6,10 @@
     @apply icon-size-4;
     overflow: visible !important;
 }
+#rootMainContent.readOnly {
+    pointer-events: none;
+    opacity: 60%;
+}
 /*
 td {
     mat-form-field {

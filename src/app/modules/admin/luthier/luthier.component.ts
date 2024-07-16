@@ -11,6 +11,7 @@ import {LuthierProjectComponent} from './project/luthier-project.component';
 import {MatIconModule} from '@angular/material/icon';
 import {LuthierDatabaseModel} from '../../../shared/models/luthier.model';
 import {StorageChange, UserService} from '../../../shared/services/user/user.service';
+import {LuthierUserComponent} from './user/luthier-user.component';
 
 @Component({
     selector     : 'luthier',
@@ -24,7 +25,8 @@ import {StorageChange, UserService} from '../../../shared/services/user/user.ser
         LuthierDictionaryComponent,
         LuthierConnectionComponent,
         LuthierProjectComponent,
-        MatIconModule
+        MatIconModule,
+        LuthierUserComponent
     ],
 })
 export class LuthierComponent implements OnInit, OnDestroy
@@ -106,7 +108,7 @@ export class LuthierComponent implements OnInit, OnDestroy
         this._route.url.pipe(takeUntil(this.unsubscribeAll)).subscribe(segment => {
             this.page = segment[0].path;
             setTimeout(() => {
-                this.parent.navigation.secondary = null;
+                this.parent.sercondaryNavigation = null;
             }, 0);
             this.page$.next(this.page);
         });
