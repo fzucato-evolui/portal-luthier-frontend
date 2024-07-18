@@ -182,17 +182,34 @@ export class LuthierDictionaryTableReferenceModalComponent implements OnInit, On
     }
 
     changeTablePK(event: MatSelectChange) {
-        this.parent.service.getTable(event.value.code)
-            .then(table => {
+        if (UtilFunctions.isValidStringOrArray(event.value.code) === true) {
+            this.parent.service.getTable(event.value.code)
+                .then(table => {
+                    this.fieldsPK = table.fields;
+                    this.formSave.get('name').setValue('FK_' + this.parent.model.name + '_' + table.name);
+                    this.formSave.get('lookupFastField').patchValue({code: null, id: null, name: null});
+                    this.formSave.get('lookupDescriptionField').patchValue({code: null, id: null, name: null});
+                    this.getReferenceFields().clear();
+                    this.dataSource.data = this.getReferenceFields().controls as (FormGroup[]);
+                    this.dataSource._updateChangeSubscription();
+                    this.formSave.updateValueAndValidity();
+                    this._changeDetectorRef.detectChanges();
+                })
+        }
+        else {
+            const index = this.tables.findIndex(x => x.id === event.value.id);
+            if (index >= 0) {
+                const table = this.tables[index];
                 this.fieldsPK = table.fields;
                 this.formSave.get('name').setValue('FK_' + this.parent.model.name + '_' + table.name);
-                this.formSave.get('lookupFastFieldCode').setValue(null);
-                this.formSave.get('lookupDescriptionFieldCode').setValue(null);
+                this.formSave.get('lookupFastField').patchValue({code: null, id: null, name: null});
+                this.formSave.get('lookupDescriptionField').patchValue({code: null, id: null, name: null});
                 this.getReferenceFields().clear();
                 this.dataSource.data = this.getReferenceFields().controls as (FormGroup[]);
                 this.dataSource._updateChangeSubscription();
                 this.formSave.updateValueAndValidity();
                 this._changeDetectorRef.detectChanges();
-            })
+            }
+        }
     }
 }

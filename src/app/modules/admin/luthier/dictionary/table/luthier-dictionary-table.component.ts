@@ -137,7 +137,6 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     public customizationsDataSource = new MatTableDataSource<LuthierTableFieldModel>();
     public groupsInfoDataSource = new MatTableDataSource<LuthierGroupInfoModel>();
     currentTab: TableType = 'fields';
-    fieldRowEditing: { [key: string]: string } = {}
     private _cloneModel: LuthierTableModel;
     @Input()
     set model(value: LuthierTableModel) {
@@ -197,12 +196,12 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     @HostListener('document:keydown', ['$event'])
     onKeydownHandler(event: KeyboardEvent) {
         if (event.code === 'F8' || event.code === 'Escape') {
-            if (UtilFunctions.isValidStringOrArray(this.fieldRowEditing[this.currentTab]) === true) {
+            const row = this.getRowEditing(this.currentTab);
+            if (row) {
                 event.preventDefault();
-                const field = this.model[this.currentTab][this.fieldRowEditing[this.currentTab]];
-                const fg = this.getFieldGroup(field.id, this.currentTab);
-                fg.patchValue(field);
-                this.fieldRowEditing[this.currentTab] = null;
+                const fg = this.getFieldGroup(row.id, this.currentTab);
+                fg.patchValue(row);
+                row['editing'] = false;
                 this._changeDetectorRef.detectChanges();
             }
         }
@@ -400,6 +399,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
 
     delete(id: string, index: number,type: TableType) {
+        index = this.getRealIndex(index, type).index;
         const fieldIndex = this.getFields(type).controls.findIndex(x => x.get("id").value === id);
         this.getFields(type).removeAt(fieldIndex);
         if (type === 'groupInfos') {
@@ -457,6 +457,24 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.model = Object.assign({}, this.model, this.formSave.value) as LuthierTableModel;
         this.saveCustomizations();
         console.log(this.model, this.formSave.value, this.model.customizations);
+        this.service.saveTable(this.model)
+            .then(result => {
+                result.id = this.model.id;
+                this.model = result;
+                this.refresh();
+                const index = this._parent.tabsOpened.findIndex(x => x.id === this.model.id);
+                this._parent.tabsOpened.splice(index, 1, this.model);
+                this._parent.selectedTab = this.model;
+                this._changeDetectorRef.detectChanges();
+                this.messageService.open(`${this.model.objectType === 'TABLE' ? 'Tabela' : 'View'} salva com sucesso`, 'SUCESSO', 'success')
+            })
+    }
+
+    canSave(): boolean {
+        if (this.formSave) {
+            return !this.formSave.invalid;
+        }
+        return false;
     }
 
     saveCustomizations() {
@@ -729,11 +747,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         if (type === 'fields') {
             const allFields = this.formBuilder.group ({
                 ...c.controls,
-                groupInfo: this.formBuilder.group({
-                    id: [crypto.randomUUID()],
-                    code: [null],
-                    description: [null],
-                    }),
+                groupInfo: [null],
                 customSize: this.addCustomizationField(),
                 customLabel: this.addCustomizationField(),
                 customNotNull: this.addCustomizationField(),
@@ -776,33 +790,24 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             description: [null, [Validators.required]],
             groupInfoType: [null, [Validators.required]],
             order: [null, [Validators.required]],
-            parent: this.formBuilder.group({
-                id: [null],
-                code: [null],
-                description: [null]
-            })
+            parent: [null]
         });
         return c;
     }
     addStaticField(type: TableType): FormGroup {
         const c = this.formBuilder.group({
             code: [null],
-            caption: ['', [Validators.required]],
-            value: ['', [Validators.required]],
+            caption: [null, [Validators.required]],
+            value: [null, [Validators.required]],
             permissionType: [LuthierPermissionTypeEnum.USER, [Validators.required]],
-            permissionMessage: [''],
+            permissionMessage: [null],
 
         });
         if (type === 'fields') {
             return this.formBuilder.group({
                 ...c.controls,
                 customCaption: this.addCustomizationField(),
-                resource: this.formBuilder.group(
-                    {
-                        code: [null],
-                        name: ['']
-                    }
-                )
+                resource: [null]
             })
         }
         else {
@@ -817,7 +822,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     addViewField(bodyType?: LuthierViewBodyEnum): FormGroup {
         const c = this.formBuilder.group({
             databaseType: [bodyType],
-            body: ['']
+            body: [null]
         });
         return c;
     }
@@ -854,7 +859,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 {
                     id: [null],
                     code: [null],
-                    name: [',', [Validators.required]]
+                    name: ['', [Validators.required]]
                 }, { validators: [Validators.required]}
             )
         });
@@ -870,12 +875,9 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 attributeName: [null],
                 updateMessage: [null],
                 deleteMessage: [null],
-                lookupFastFieldCode: [null, [Validators.required]],
-                lookupDescriptionFieldCode: [null, [Validators.required]],
-                tablePK: this.formBuilder.group({
-                    code: [null, [Validators.required]],
-                    name: [null, [Validators.required]]
-                }, { validators: [Validators.required]}),
+                lookupFastField: [null, Validators.required],
+                lookupDescriptionField: [null, Validators.required],
+                tablePK: [null, Validators.required],
                 fieldsReference: this.formBuilder.array([], [Validators.required])
 
             }
@@ -947,11 +949,55 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         });
         return c;
     }
+    getRealIndex(index: number, type: TableType): {index: number, dataSource: MatTableDataSource<any>} {
+        const dataSource = this.getDatasourceFromType(type);
+        if (index < 0) {
+            return {index: index, dataSource: dataSource};
+        }
+        return {index: dataSource.data.indexOf(dataSource.filteredData[index]), dataSource: dataSource};
+    }
+
+    getDatasourceFromType(type: TableType): MatTableDataSource<any> {
+
+        if (type === 'fields') {
+            return this.fieldsDataSource;
+        }
+        else if (type === 'customFields') {
+            return this.customFieldsDataSource;
+        }
+        else if (type === 'customizations') {
+            return this.customizationsDataSource;
+        }
+        else if (type === 'groupInfos') {
+            return this.groupsInfoDataSource;
+        }
+        else if (type === 'references') {
+            return this.referencesDataSource;
+        }
+        else if (type === 'indexes') {
+            return this.indexesDataSource;
+        }
+        else if (type === 'searchs') {
+            return this.searchsDataSource;
+        }
+    }
+
+    getRowEditing(type: TableType): any {
+        const dataSource = this.getDatasourceFromType(type);
+        const index = dataSource.data.findIndex(x => x['editing'] === true);
+        if (index >= 0) {
+            return dataSource.data[index];
+        }
+        return null;
+    }
     editRow(index: number, type: TableType) {
-        this.fieldRowEditing[type] = index.toString();
+        const editing = this.getRealIndex(index, type);
+        editing.dataSource.data[editing.index]['editing'] = true;
     }
 
     saveRow(id: string, index: number, type: TableType) {
+        const editing = this.getRealIndex(index, type);
+        index = editing.index;
         const fg = this.getFieldGroup(id, type);
         if (fg.invalid) {
             console.log(fg, fg.errors);
@@ -976,7 +1022,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             this.customFieldsDataSource.data[index] = fg.value;
             this.customFieldsDataSource._updateChangeSubscription();
         }
-        this.fieldRowEditing[type] = null;
+        editing.dataSource[editing.index]['editing'] = false;
         this._changeDetectorRef.detectChanges();
     }
 
@@ -999,6 +1045,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
 
     detailField(model: LuthierTableFieldModel, index: number, type: TableType) {
+        index = this.getRealIndex(index, type).index;
         this._parent.service.getImagesResources().then(resources => {
             const modal = this._matDialog.open(LuthierDictionaryTableFieldModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-field-modal-container' });
             modal.componentInstance.title = "Campo da Tabela " + this.model.name;
@@ -1023,11 +1070,13 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.editIndex(new LuthierTableIndexModel(), -1);
     }
     deleteIndex(index: number) {
+        index = this.getRealIndex(index, 'indexes').index;
         this.indexesDataSource.data.splice(index, 1);
         this.indexesDataSource._updateChangeSubscription();
         this._changeDetectorRef.detectChanges();
     }
     editIndex(model: LuthierTableIndexModel, index: number) {
+        index = this.getRealIndex(index, 'indexes').index;
         const fields = this.model.fields.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
         const modal = this._matDialog.open(LuthierDictionaryTableIndexModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-index-modal-container' });
         modal.componentInstance.title = "Index da Tabela " + this.model.name;
@@ -1055,11 +1104,13 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.editReference(new LuthierTableReferenceModel(), -1);
     }
     deleteReference(index: number) {
+        index = this.getRealIndex(index, 'references').index;
         this.referencesDataSource.data.splice(index, 1);
         this.referencesDataSource._updateChangeSubscription();
         this._changeDetectorRef.detectChanges();
     }
     editReference(model: LuthierTableReferenceModel, index: number) {
+        index = this.getRealIndex(index, 'references').index;
         if (index >= 0 && model.tablePK && model.tablePK.code >= 0) {
             this.service.getTable(model.tablePK.code)
                 .then(table => {
@@ -1067,19 +1118,29 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 })
         }
         else {
-            this.openModalReference(model, index, []);
+            if (model.tablePK && model.tablePK.id === this.model.id) {
+                this.openModalReference(model, index, this.model.fields);
+            }
+            else {
+                this.openModalReference(model, index, []);
+            }
+
         }
     }
-    openModalReference(model: LuthierTableReferenceModel, index: number, fielsPK: LuthierTableFieldModel[]) {
+    openModalReference(model: LuthierTableReferenceModel, index: number, fieldsPK: LuthierTableFieldModel[]) {
         const fields = this.model.fields.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
         const modal = this._matDialog.open(LuthierDictionaryTableReferenceModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-reference-modal-container' });
         modal.componentInstance.title = "Referência da Tabela " + this.model.name;
         modal.componentInstance.parent = this;
         modal.componentInstance.referenceModel = model;
         modal.componentInstance.fields = fields;
-        modal.componentInstance.fieldsPK = fielsPK;
         modal.componentInstance.index = index;
         modal.componentInstance.tables = cloneDeep(this._parent.tables);
+        if (UtilFunctions.isValidStringOrArray(this.model.code) === false) {
+            modal.componentInstance.tables.unshift(this.model);
+        }
+        modal.componentInstance.fieldsPK = fieldsPK;
+        console.log('openModalReference', fieldsPK, modal.componentInstance.tables, model);
         modal.afterClosed().subscribe((result) =>
         {
             if ( result === 'ok' ) {
@@ -1099,11 +1160,13 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.editIndex(new LuthierTableSearchModel(), -1);
     }
     deleteSearch(index: number) {
+        index = this.getRealIndex(index, 'searchs').index;
         this.searchsDataSource.data.splice(index, 1);
         this.searchsDataSource._updateChangeSubscription();
         this._changeDetectorRef.detectChanges();
     }
     editSearch(model: LuthierTableSearchModel, index: number) {
+        index = this.getRealIndex(index, 'searchs').index;
         this._parent.service.getActiveSubsystems().then(subsystems => {
             const fields = this.model.fields.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
             const modal = this._matDialog.open(LuthierDictionaryTableSearchModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-search-modal-container' });
@@ -1140,6 +1203,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this._changeDetectorRef.detectChanges();
     }
     deleteGroupInfo(id: string, index: number) {
+        index = this.getRealIndex(index, 'groupInfos').index;
         const groupInfo =  this.groupsInfoDataSource.data[index];
         const groupInfoWithGroupInfo = this.groupsInfoDataSource.data
             .filter(x => x.parent &&  (x.parent.id === groupInfo.id || x.parent.code === groupInfo.code))
@@ -1176,6 +1240,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this._changeDetectorRef.detectChanges();
     }
     editGroupInfo(id: string, index: number, value: LuthierGroupInfoModel) {
+        index = this.getRealIndex(index, 'groupInfos').index;
         const groupInfo =  this.groupsInfoDataSource.data[index];
         const groupInfoWithGroupInfo = this.groupsInfoDataSource.data
             .filter(x => x.parent &&  (x.parent.id === groupInfo.id || x.parent.code === groupInfo.code))
@@ -1361,356 +1426,433 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
     importTable(model: LuthierTableModel) {
         if (model) {
-            if (UtilFunctions.isValidStringOrArray(model.code) === false) {
-                this.messageService.open('Erro ao ler tabela', 'ERRO', 'error');
-                return;
-            }
-            if (model.objectType != this.model.objectType) {
-                this.messageService.open('Erro ao ler tabela', 'ERRO', 'error');
-                return;
-            }
-            model.name = this.model.name;
-            model.code = this.model.code;
-            model.id = this.model.id;
-            model.bonds = this.model.bonds;
-
-            //groupInfos
-            if (UtilFunctions.isValidStringOrArray(model.groupInfos) === false) {
-                model.groupInfos = [];
-            }
-            if (UtilFunctions.isValidStringOrArray(this.model.groupInfos) === false) {
-                this.model.groupInfos = [];
-            }
-
-            for(let i = 0; i < this.model.groupInfos.length; i++) {
-                let groupInfo = this.model.groupInfos[i];
-                let index = model.groupInfos.findIndex(x => x.description.toUpperCase() === groupInfo.description.toUpperCase());
-                if (index >= 0) {
-                    model.groupInfos[index].code = groupInfo.code;
-                    model.groupInfos[index].id = groupInfo.id;
-
-                    const [item] = model.groupInfos.splice(index, 1);
-                    model.groupInfos.splice(i, 0, item);
-                }
-                else {
-                    model.groupInfos.splice(i, 0, groupInfo);
-                }
-            }
-            for(let i = this.model.groupInfos.length; i < model.groupInfos.length; i++) {
-                let groupInfo = model.groupInfos[i];
-                groupInfo.code = null;
-                groupInfo.id = crypto.randomUUID();
-            }
-            for (let i = 0; i < model.groupInfos.length; i++) {
-                let groupInfo = model.groupInfos[i];
-                if (groupInfo.parent) {
-                    const index = model.groupInfos.findIndex(x => x.description === groupInfo.parent.description);
-                    groupInfo.parent = model.groupInfos[index];
-                }
-            }
-            //end groupInfos
-
-            // field
-            if (UtilFunctions.isValidStringOrArray(model.fields) === false) {
-                model.fields = [];
-            }
-            if (UtilFunctions.isValidStringOrArray(this.model.fields) === false) {
-                this.model.fields = [];
-            }
-            for(let i = 0; i < this.model.fields.length; i++) {
-                let field = this.model.fields[i];
-                let index = model.fields.findIndex(x => x.name.toUpperCase() === field.name.toUpperCase());
-                if (index >= 0) {
-                    model.fields[index].code = field.code;
-                    model.fields[index].id = field.id;
-                    if (UtilFunctions.isValidStringOrArray(field.staticFields) === false) {
-                        field.staticFields = [];
-                    }
-                    if (UtilFunctions.isValidStringOrArray(model.fields[index].staticFields) === false) {
-                        model.fields[index].staticFields = [];
-                    }
-                    for (let j = 0; j < field.staticFields.length; j++) {
-                        let staticField = field.staticFields[j];
-                        const staticFieldIndex = model.fields[index].staticFields.findIndex(x => x.value.toUpperCase() === staticField.value.toUpperCase());
-                        if (staticFieldIndex >= 0) {
-                            model.fields[index].staticFields[staticFieldIndex].code = staticField.code;
-                            model.fields[index].staticFields[staticFieldIndex].id = staticField.id;
-                            const [itemStatic] = model.fields[index].staticFields.splice(staticFieldIndex, 1);
-                            model.fields[index].staticFields.splice(j, 0, itemStatic);
+            this.service.getActiveSubsystems()
+                .then(subsystems => {
+                    try {
+                        if (UtilFunctions.isValidStringOrArray(model.code) === false) {
+                            this.messageService.open('Erro ao ler tabela', 'ERRO', 'error');
+                            return;
                         }
-                        else {
-                            model.fields[index].staticFields.splice(j, 0, staticField);
+                        if (model.objectType != this.model.objectType) {
+                            this.messageService.open('Erro ao ler tabela', 'ERRO', 'error');
+                            return;
                         }
-                    }
-                    for (let j = field.staticFields.length; j < model.fields[index].staticFields.length; j++) {
-                        let staticField = model.fields[index].staticFields[j];
-                        staticField.code = null;
-                        staticField.id = crypto.randomUUID();
-                    }
-
-                    const [item] = model.fields.splice(index, 1);
-                    model.fields.splice(i, 0, item);
-                }
-                else {
-                    model.fields.splice(i, 0, field);
-                }
-            }
-            for(let i = this.model.fields.length; i < model.fields.length; i++) {
-                let field = model.fields[i];
-                field.code = null;
-                field.id = crypto.randomUUID();
-            }
-            for(let i = 0; i < model.fields.length; i++) {
-                let field = model.fields[i];
-                if (field.groupInfo) {
-                    const index = model.groupInfos.findIndex(x => x.description === field.groupInfo.description);
-                    field.groupInfo = model.groupInfos[index];
-                }
-            }
-            // end fields
-
-            // customFields
-            if (UtilFunctions.isValidStringOrArray(model.customFields) === false) {
-                model.customFields = [];
-            }
-            if (UtilFunctions.isValidStringOrArray(this.model.customFields) === false) {
-                this.model.customFields = [];
-            }
-            for(let i = 0; i < this.model.customFields.length; i++) {
-                let field = this.model.customFields[i];
-                let index = model.customFields.findIndex(x => x.name.toUpperCase() === field.name.toUpperCase());
-                if (index >= 0) {
-                    model.customFields[index].code = field.code;
-                    model.customFields[index].id = field.id;
-                    if (UtilFunctions.isValidStringOrArray(field.staticFields) === false) {
-                        field.staticFields = [];
-                    }
-                    if (UtilFunctions.isValidStringOrArray(model.customFields[index].staticFields) === false) {
-                        model.customFields[index].staticFields = [];
-                    }
-                    for (let j = 0; j < field.staticFields.length; j++) {
-                        let staticField = field.staticFields[j];
-                        const staticFieldIndex = model.customFields[index].staticFields.findIndex(x => x.value.toUpperCase() === staticField.value.toUpperCase());
-                        if (staticFieldIndex >= 0) {
-                            model.customFields[index].staticFields[staticFieldIndex].code = staticField.code;
-                            model.customFields[index].staticFields[staticFieldIndex].id = staticField.id;
-                            const [itemStatic] = model.customFields[index].staticFields.splice(staticFieldIndex, 1);
-                            model.customFields[index].staticFields.splice(j, 0, itemStatic);
+                        if (UtilFunctions.isValidStringOrArray(this.model.code) === false) {
+                            this.model.name = model.name;
                         }
-                        else {
-                            model.customFields[index].staticFields.splice(j, 0, staticField);
+                        const importedCode = model.code;
+                        model.name = this.model.name;
+                        model.code = this.model.code;
+                        model.id = this.model.id;
+                        model.bonds = this.model.bonds;
+
+                        //groupInfos
+                        if (UtilFunctions.isValidStringOrArray(model.groupInfos) === false) {
+                            model.groupInfos = [];
                         }
-                    }
-                    for (let j = field.staticFields.length; j < model.fields[index].staticFields.length; j++) {
-                        let staticField = model.customFields[index].staticFields[j];
-                        staticField.code = null;
-                        staticField.id = crypto.randomUUID();
-                    }
-
-                    const [item] = model.customFields.splice(index, 1);
-                    model.customFields.splice(i, 0, item);
-                }
-                else {
-                    model.customFields.splice(i, 0, field);
-                }
-            }
-            for(let i = this.model.customFields.length; i < model.customFields.length; i++) {
-                let field = model.customFields[i];
-                field.code = null;
-                field.id = crypto.randomUUID();
-            }
-            for(let i = 0; i < model.customFields.length; i++) {
-                let field = model.customFields[i];
-                if (field.groupInfo) {
-                    const index = model.groupInfos.findIndex(x => x.description === field.groupInfo);
-                    field.groupInfo = model.groupInfos[index].description;
-                }
-            }
-            // end customFields
-
-            //references
-            if (UtilFunctions.isValidStringOrArray(model.references) === false) {
-                model.references = [];
-            }
-            if (UtilFunctions.isValidStringOrArray(this.model.references) === false) {
-                this.model.references = [];
-            }
-
-            for(let i = 0; i < this.model.references.length; i++) {
-                let reference = this.model.references[i];
-                let index = model.references.findIndex(x => x.name.toUpperCase() === reference.name.toUpperCase());
-                if (index >= 0) {
-                    const newReference = model.references[index];
-                    if (this._parent.tables.findIndex(x => x.code === newReference.tablePK.code) < 0) {
-                        model.references.splice(i, 0, reference);
-                        continue;
-                    }
-                    model.references[index].code = reference.code;
-                    model.references[index].id = reference.id;
-                    if (UtilFunctions.isValidStringOrArray(reference.fieldsReference) === false) {
-                        reference.fieldsReference = [];
-                    }
-                    if (UtilFunctions.isValidStringOrArray(model.references[index].fieldsReference) === false) {
-                        model.references[index].fieldsReference = [];
-                    }
-                    for (let j = 0; j < model.references[index].fieldsReference.length; j++) {
-                        let referenceField = model.references[index].fieldsReference[j];
-                        const indexField = model.fields.findIndex(x => x.name.toUpperCase() === referenceField.fieldFK.name.toUpperCase());
-                        referenceField.fieldFK = model.fields[indexField];
-                    }
-
-                    const [item] = model.references.splice(index, 1);
-                    model.references.splice(i, 0, item);
-                }
-                else {
-                    model.references.splice(i, 0, reference);
-                }
-            }
-            for(let i = this.model.references.length; i < model.references.length; i++) {
-                let reference = model.references[i];
-                reference.code = null;
-                reference.id = crypto.randomUUID();
-            }
-            //end references
-
-            //indexes
-            if (UtilFunctions.isValidStringOrArray(model.indexes) === false) {
-                model.indexes = [];
-            }
-            if (UtilFunctions.isValidStringOrArray(this.model.indexes) === false) {
-                this.model.indexes = [];
-            }
-
-            for(let i = 0; i < this.model.indexes.length; i++) {
-                let idx = this.model.indexes[i];
-                let index = model.indexes.findIndex(x => x.name.toUpperCase() === idx.name.toUpperCase());
-                if (index >= 0) {
-                    model.indexes[index].code = idx.code;
-                    model.indexes[index].id = idx.id;
-                    if (UtilFunctions.isValidStringOrArray(idx.indexFields) === false) {
-                        idx.indexFields = [];
-                    }
-                    if (UtilFunctions.isValidStringOrArray(model.indexes[index].indexFields) === false) {
-                        model.indexes[index].indexFields = [];
-                    }
-                    for (let j = 0; j < model.indexes[index].indexFields.length; j++) {
-                        let idxField = model.indexes[index].indexFields[j];
-                        const indexField = model.fields.findIndex(x => x.name.toUpperCase() === idxField.tableField.name.toUpperCase());
-                        idxField.tableField = model.fields[indexField];
-                    }
-
-                    const [item] = model.indexes.splice(index, 1);
-                    model.indexes.splice(i, 0, item);
-                }
-                else {
-                    model.indexes.splice(i, 0, idx);
-                }
-            }
-            for(let i = this.model.indexes.length; i < model.indexes.length; i++) {
-                let idx = model.indexes[i];
-                idx.code = null;
-                idx.id = crypto.randomUUID();
-            }
-            //end indexes
-
-            //searchs
-            if (UtilFunctions.isValidStringOrArray(model.searchs) === false) {
-                model.searchs = [];
-            }
-            if (UtilFunctions.isValidStringOrArray(this.model.searchs) === false) {
-                this.model.searchs = [];
-            }
-
-            for(let i = 0; i < this.model.searchs.length; i++) {
-                let search = this.model.searchs[i];
-                let index = model.searchs.findIndex(x => x.name.toUpperCase() === search.name.toUpperCase());
-                if (index >= 0) {
-                    model.searchs[index].code = search.code;
-                    model.searchs[index].id = search.id;
-                    if (UtilFunctions.isValidStringOrArray(search.searchFields) === false) {
-                        search.searchFields = [];
-                    }
-                    if (UtilFunctions.isValidStringOrArray(model.searchs[index].searchFields) === false) {
-                        model.searchs[index].searchFields = [];
-                    }
-                    for (let j = 0; j < search.searchFields.length; j++) {
-                        let searchField = search.searchFields[j];
-                        const searchFieldIndex = model.searchs[index].searchFields.findIndex(x => x.label.toUpperCase() === searchField.label.toUpperCase());
-                        if (searchFieldIndex >= 0) {
-                            model.searchs[index].searchFields[searchFieldIndex].code = searchField.code;
-                            model.searchs[index].searchFields[searchFieldIndex].id = searchField.id;
-                            const [itemSearch] = model.searchs[index].searchFields.splice(searchFieldIndex, 1);
-                            model.searchs[index].searchFields.splice(j, 0, itemSearch);
+                        if (UtilFunctions.isValidStringOrArray(this.model.groupInfos) === false) {
+                            this.model.groupInfos = [];
                         }
-                        else {
-                            model.searchs[index].searchFields.splice(j, 0, searchField);
+
+                        for(let i = 0; i < this.model.groupInfos.length; i++) {
+                            let groupInfo = this.model.groupInfos[i];
+                            let index = model.groupInfos.findIndex(x => x.description.toUpperCase() === groupInfo.description.toUpperCase());
+                            if (index >= 0) {
+                                model.groupInfos[index].code = groupInfo.code;
+                                model.groupInfos[index].id = groupInfo.id;
+
+                                const [item] = model.groupInfos.splice(index, 1);
+                                model.groupInfos.splice(i, 0, item);
+                            }
+                            else {
+                                model.groupInfos.splice(i, 0, groupInfo);
+                            }
                         }
-                    }
-                    for (let j = search.searchFields.length; j < model.searchs[index].searchFields.length; j++) {
-                        let searchField = model.searchs[index].searchFields[j];
-                        searchField.code = null;
-                        searchField.id = crypto.randomUUID();
-                    }
-                    for (let j = 0; j < model.searchs[index].searchFields.length; j++) {
-                        let searchField = model.searchs[index].searchFields[j];
-                        const indexField = model.fields.findIndex(x => x.name.toUpperCase() === searchField.tableField.name.toUpperCase());
-                        searchField.tableField = model.fields[indexField];
-                    }
+                        for(let i = this.model.groupInfos.length; i < model.groupInfos.length; i++) {
+                            let groupInfo = model.groupInfos[i];
+                            groupInfo.code = null;
+                            groupInfo.id = crypto.randomUUID();
+                        }
+                        for (let i = 0; i < model.groupInfos.length; i++) {
+                            let groupInfo = model.groupInfos[i];
+                            if (groupInfo.parent) {
+                                const index = model.groupInfos.findIndex(x => x.description === groupInfo.parent.description);
+                                groupInfo.parent = model.groupInfos[index];
+                            }
+                        }
+                        //end groupInfos
 
-                    const [item] = model.searchs.splice(index, 1);
-                    model.searchs.splice(i, 0, item);
-                }
-                else {
-                    model.searchs.splice(i, 0, search);
-                }
-            }
-            for(let i = this.model.searchs.length; i < model.searchs.length; i++) {
-                let search = model.searchs[i];
-                search.code = null;
-                search.id = crypto.randomUUID();
-            }
-            //end searchs
+                        // field
+                        if (UtilFunctions.isValidStringOrArray(model.fields) === false) {
+                            model.fields = [];
+                        }
+                        if (UtilFunctions.isValidStringOrArray(this.model.fields) === false) {
+                            this.model.fields = [];
+                        }
+                        for(let i = 0; i < this.model.fields.length; i++) {
+                            let field = this.model.fields[i];
+                            let index = model.fields.findIndex(x => x.name.toUpperCase() === field.name.toUpperCase());
+                            if (index >= 0) {
+                                model.fields[index].code = field.code;
+                                model.fields[index].id = field.id;
+                                if (UtilFunctions.isValidStringOrArray(field.staticFields) === false) {
+                                    field.staticFields = [];
+                                }
+                                if (UtilFunctions.isValidStringOrArray(model.fields[index].staticFields) === false) {
+                                    model.fields[index].staticFields = [];
+                                }
+                                for (let j = 0; j < field.staticFields.length; j++) {
+                                    let staticField = field.staticFields[j];
+                                    const staticFieldIndex = model.fields[index].staticFields.findIndex(x => x.value.toUpperCase() === staticField.value.toUpperCase());
+                                    if (staticFieldIndex >= 0) {
+                                        model.fields[index].staticFields[staticFieldIndex].code = staticField.code;
+                                        model.fields[index].staticFields[staticFieldIndex].id = staticField.id;
+                                        const [itemStatic] = model.fields[index].staticFields.splice(staticFieldIndex, 1);
+                                        model.fields[index].staticFields.splice(j, 0, itemStatic);
+                                    }
+                                    else {
+                                        model.fields[index].staticFields.splice(j, 0, staticField);
+                                    }
+                                }
+                                for (let j = field.staticFields.length; j < model.fields[index].staticFields.length; j++) {
+                                    let staticField = model.fields[index].staticFields[j];
+                                    staticField.code = null;
+                                    staticField.id = crypto.randomUUID();
+                                }
 
-            //customizations
-            if (UtilFunctions.isValidStringOrArray(model.customizations) === false) {
-                model.customizations = [];
-            }
-            if (UtilFunctions.isValidStringOrArray(this.model.customizations) === false) {
-                this.model.customizations = [];
-            }
-            for(let i = 0; i < model.customizations.length; i++) {
-                model.customizations[i].name1 = this.model.name;
-            }
+                                const [item] = model.fields.splice(index, 1);
+                                model.fields.splice(i, 0, item);
+                            }
+                            else {
+                                model.fields.splice(i, 0, field);
+                            }
+                        }
+                        for(let i = this.model.fields.length; i < model.fields.length; i++) {
+                            let field = model.fields[i];
+                            field.code = null;
+                            field.id = crypto.randomUUID();
+                            field.staticFields.forEach(x => {
+                                x.code = null;
+                                x.id = crypto.randomUUID();
+                            });
+                        }
+                        for(let i = 0; i < model.fields.length; i++) {
+                            let field = model.fields[i];
+                            if (field.groupInfo && UtilFunctions.isValidStringOrArray(field.groupInfo.description) === true) {
+                                const index = model.groupInfos.findIndex(x => x.description === field.groupInfo.description);
+                                field.groupInfo = model.groupInfos[index];
+                            }
+                            else {
+                                field.groupInfo = null;
+                            }
+                        }
+                        // end fields
 
-            for(let i = 0; i < this.model.customizations.length; i++) {
-                let customization = this.model.customizations[i];
-                let index = model.customizations.findIndex(x =>
-                    x.name1.toUpperCase() === customization.name1.toUpperCase() &&
-                    x.name2.toUpperCase() === customization.name2.toUpperCase() &&
-                    x.name3.toUpperCase() === customization.name3.toUpperCase() &&
-                    x.name4.toUpperCase() === customization.name4.toUpperCase() &&
-                    x.name5.toUpperCase() === customization.name5.toUpperCase() &&
-                    x.type === customization.type
-                );
-                if (index >= 0) {
-                    model.customizations[index].code = customization.code;
-                    model.customizations[index].id = customization.id;
-                    const [item] = model.customizations.splice(index, 1);
-                    model.customizations.splice(i, 0, item);
-                }
-                else {
-                    model.customizations.splice(i, 0, customization);
-                }
-            }
-            for(let i = this.model.customizations.length; i < model.customizations.length; i++) {
-                let customization = model.customizations[i];
-                customization.code = null;
-                customization.id = crypto.randomUUID();
-            }
-            //end customizations
-            this._cloneModel = model;
-            this.refresh();
-            this._changeDetectorRef.detectChanges();
+                        // customFields
+                        if (UtilFunctions.isValidStringOrArray(model.customFields) === false) {
+                            model.customFields = [];
+                        }
+                        if (UtilFunctions.isValidStringOrArray(this.model.customFields) === false) {
+                            this.model.customFields = [];
+                        }
+                        for(let i = 0; i < this.model.customFields.length; i++) {
+                            let field = this.model.customFields[i];
+                            let index = model.customFields.findIndex(x => x.name.toUpperCase() === field.name.toUpperCase());
+                            if (index >= 0) {
+                                model.customFields[index].code = field.code;
+                                model.customFields[index].id = field.id;
+                                if (UtilFunctions.isValidStringOrArray(field.staticFields) === false) {
+                                    field.staticFields = [];
+                                }
+                                if (UtilFunctions.isValidStringOrArray(model.customFields[index].staticFields) === false) {
+                                    model.customFields[index].staticFields = [];
+                                }
+                                for (let j = 0; j < field.staticFields.length; j++) {
+                                    let staticField = field.staticFields[j];
+                                    const staticFieldIndex = model.customFields[index].staticFields.findIndex(x => x.value.toUpperCase() === staticField.value.toUpperCase());
+                                    if (staticFieldIndex >= 0) {
+                                        model.customFields[index].staticFields[staticFieldIndex].code = staticField.code;
+                                        model.customFields[index].staticFields[staticFieldIndex].id = staticField.id;
+                                        const [itemStatic] = model.customFields[index].staticFields.splice(staticFieldIndex, 1);
+                                        model.customFields[index].staticFields.splice(j, 0, itemStatic);
+                                    }
+                                    else {
+                                        model.customFields[index].staticFields.splice(j, 0, staticField);
+                                    }
+                                }
+                                for (let j = field.staticFields.length; j < model.fields[index].staticFields.length; j++) {
+                                    let staticField = model.customFields[index].staticFields[j];
+                                    staticField.code = null;
+                                    staticField.id = crypto.randomUUID();
+                                }
+
+                                const [item] = model.customFields.splice(index, 1);
+                                model.customFields.splice(i, 0, item);
+                            }
+                            else {
+                                model.customFields.splice(i, 0, field);
+                            }
+                        }
+                        for(let i = this.model.customFields.length; i < model.customFields.length; i++) {
+                            let field = model.customFields[i];
+                            field.code = null;
+                            field.id = crypto.randomUUID();
+                            field.staticFields.forEach(x => {
+                                x.code = null;
+                                x.id = crypto.randomUUID();
+                            });
+                        }
+                        for(let i = 0; i < model.customFields.length; i++) {
+                            let field = model.customFields[i];
+                            if (field.groupInfo && UtilFunctions.isValidStringOrArray(field.groupInfo) === true) {
+                                const index = model.groupInfos.findIndex(x => x.description === field.groupInfo);
+                                field.groupInfo = model.groupInfos[index].description;
+                            }
+                            else {
+                                field.groupInfo = null;
+                            }
+                        }
+                        // end customFields
+
+                        //references
+                        if (UtilFunctions.isValidStringOrArray(model.references) === false) {
+                            model.references = [];
+                        }
+                        if (UtilFunctions.isValidStringOrArray(this.model.references) === false) {
+                            this.model.references = [];
+                        }
+
+                        for(let i = 0; i < this.model.references.length; i++) {
+                            let reference = this.model.references[i];
+                            let index = model.references.findIndex(x => x.name.toUpperCase() === reference.name.toUpperCase());
+                            if (index >= 0) {
+                                model.references[index].code = reference.code;
+                                model.references[index].id = reference.id;
+                                const [item] = model.references.splice(index, 1);
+                                model.references.splice(i, 0, item);
+                            }
+                            else {
+                                model.references.splice(i, 0, reference);
+                            }
+                        }
+                        for(let i = this.model.references.length; i < model.references.length; i++) {
+                            let reference = model.references[i];
+                            reference.code = null;
+                            reference.id = crypto.randomUUID();
+                            for (let j = 0; j < reference.fieldsReference.length; j++) {
+                                let referenceField = reference.fieldsReference[j];
+                                referenceField.code = null;
+                                referenceField.id = crypto.randomUUID();
+                            }
+                        }
+                        for(let i = 0; i < model.references.length;) {
+                            let reference = model.references[i];
+                            if (reference.tablePK.code === importedCode) {
+                                reference.tablePK = {id: model.id, code: model.code, name: model.name};
+                                reference.fieldsReference.forEach(referenceField => {
+                                    const indexField = model.fields.findIndex(x => x.name.toUpperCase() === referenceField.fieldPK.name.toUpperCase());
+                                    referenceField.fieldPK = model.fields[indexField];
+                                });
+                                {
+                                    const indexField = model.fields.findIndex(x => x.name.toUpperCase() === reference.lookupFastField.name.toUpperCase());
+                                    reference.lookupFastField = model.fields[indexField];
+                                }
+                                {
+                                    const indexField = model.fields.findIndex(x => x.name.toUpperCase() === reference.lookupDescriptionField.name.toUpperCase());
+                                    reference.lookupDescriptionField = model.fields[indexField];
+                                }
+
+                            }
+                            else if (this._parent.tables.findIndex(x => x.code === reference.tablePK.code) < 0) {
+                                model.references.splice(i, 1);
+                                continue;
+                            }
+                            if (UtilFunctions.isValidStringOrArray(reference.fieldsReference) === false) {
+                                reference.fieldsReference = [];
+                            }
+                            for (let j = 0; j < reference.fieldsReference.length; j++) {
+                                let referenceField = reference.fieldsReference[j];
+                                const indexField = model.fields.findIndex(x => x.name.toUpperCase() === referenceField.fieldFK.name.toUpperCase());
+                                referenceField.fieldFK = model.fields[indexField];
+                            }
+                            i++;
+                        }
+
+                        //end references
+
+                        //indexes
+                        if (UtilFunctions.isValidStringOrArray(model.indexes) === false) {
+                            model.indexes = [];
+                        }
+                        if (UtilFunctions.isValidStringOrArray(this.model.indexes) === false) {
+                            this.model.indexes = [];
+                        }
+
+                        for(let i = 0; i < this.model.indexes.length; i++) {
+                            let idx = this.model.indexes[i];
+                            let index = model.indexes.findIndex(x => x.name.toUpperCase() === idx.name.toUpperCase());
+                            if (index >= 0) {
+                                model.indexes[index].code = idx.code;
+                                model.indexes[index].id = idx.id;
+
+                                const [item] = model.indexes.splice(index, 1);
+                                model.indexes.splice(i, 0, item);
+                            }
+                            else {
+                                model.indexes.splice(i, 0, idx);
+                            }
+                        }
+                        for(let i = this.model.indexes.length; i < model.indexes.length; i++) {
+                            let idx = model.indexes[i];
+                            idx.code = null;
+                            idx.id = crypto.randomUUID();
+                        }
+                        for(let i = 0; i < model.indexes.length; i++) {
+                            let idx = model.indexes[i];
+                            if (UtilFunctions.isValidStringOrArray(idx.indexFields) === false) {
+                                idx.indexFields = [];
+                            }
+                            for (let j = 0; j < idx.indexFields.length; j++) {
+                                let idxField = idx.indexFields[j];
+                                const indexField = model.fields.findIndex(x => x.name.toUpperCase() === idxField.tableField.name.toUpperCase());
+                                idxField.tableField = model.fields[indexField];
+                            }
+                        }
+
+                        //end indexes
+
+                        //searchs
+                        if (UtilFunctions.isValidStringOrArray(model.searchs) === false) {
+                            model.searchs = [];
+                        }
+                        if (UtilFunctions.isValidStringOrArray(this.model.searchs) === false) {
+                            this.model.searchs = [];
+                        }
+
+                        for(let i = 0; i < this.model.searchs.length; i++) {
+                            let search = this.model.searchs[i];
+                            let index = model.searchs.findIndex(x => x.name.toUpperCase() === search.name.toUpperCase());
+                            if (index >= 0) {
+                                model.searchs[index].code = search.code;
+                                model.searchs[index].id = search.id;
+                                if (UtilFunctions.isValidStringOrArray(search.searchFields) === false) {
+                                    search.searchFields = [];
+                                }
+                                if (UtilFunctions.isValidStringOrArray(model.searchs[index].searchFields) === false) {
+                                    model.searchs[index].searchFields = [];
+                                }
+                                for (let j = 0; j < search.searchFields.length; j++) {
+                                    let searchField = search.searchFields[j];
+                                    const searchFieldIndex = model.searchs[index].searchFields.findIndex(x => x.label.toUpperCase() === searchField.label.toUpperCase());
+                                    if (searchFieldIndex >= 0) {
+                                        model.searchs[index].searchFields[searchFieldIndex].code = searchField.code;
+                                        model.searchs[index].searchFields[searchFieldIndex].id = searchField.id;
+                                        const [itemSearch] = model.searchs[index].searchFields.splice(searchFieldIndex, 1);
+                                        model.searchs[index].searchFields.splice(j, 0, itemSearch);
+                                    }
+                                    else {
+                                        model.searchs[index].searchFields.splice(j, 0, searchField);
+                                    }
+                                }
+                                for (let j = search.searchFields.length; j < model.searchs[index].searchFields.length; j++) {
+                                    let searchField = model.searchs[index].searchFields[j];
+                                    searchField.code = null;
+                                    searchField.id = crypto.randomUUID();
+                                }
+                                for (let j = search.subsystems.length; j < model.searchs[index].subsystems.length;) {
+                                    let subsystemField = model.searchs[index].subsystems[j];
+
+                                    const indexField = subsystems.findIndex(x => x.code === subsystemField.subsystem.code);
+                                    if (indexField < 0) {
+                                        model.searchs[index].subsystems.splice(j, 1);
+                                        continue;
+                                    }
+                                    j++;
+                                }
+                                for (let j = 0; j < model.searchs[index].searchFields.length; j++) {
+                                    let searchField = model.searchs[index].searchFields[j];
+                                    const indexField = model.fields.findIndex(x => x.name.toUpperCase() === searchField.tableField.name.toUpperCase());
+                                    searchField.tableField = model.fields[indexField];
+                                }
+
+                                const [item] = model.searchs.splice(index, 1);
+                                model.searchs.splice(i, 0, item);
+                            }
+                            else {
+                                model.searchs.splice(i, 0, search);
+                            }
+                        }
+                        for(let i = this.model.searchs.length; i < model.searchs.length; i++) {
+                            let search = model.searchs[i];
+                            search.code = null;
+                            search.id = crypto.randomUUID();
+                            for (let j = 0; j < search.searchFields.length; j++) {
+                                let searchField = search.searchFields[j];
+                                searchField.code = null;
+                                searchField.id = crypto.randomUUID();
+
+                                const indexField = model.fields.findIndex(x => x.name.toUpperCase() === searchField.tableField.name.toUpperCase());
+                                searchField.tableField = model.fields[indexField];
+                            }
+                            for (let j = 0; j < search.subsystems.length;) {
+                                let subsystemField = search.subsystems[j];
+
+                                const indexField = subsystems.findIndex(x => x.code === subsystemField.subsystem.code);
+                                if (indexField < 0) {
+                                    search.subsystems.splice(j, 1);
+                                    continue;
+                                }
+                                j++;
+                            }
+                        }
+                        //end searchs
+
+                        //customizations
+                        if (UtilFunctions.isValidStringOrArray(model.customizations) === false) {
+                            model.customizations = [];
+                        }
+                        if (UtilFunctions.isValidStringOrArray(this.model.customizations) === false) {
+                            this.model.customizations = [];
+                        }
+                        for(let i = 0; i < model.customizations.length; i++) {
+                            model.customizations[i].name1 = this.model.name;
+                        }
+
+                        for(let i = 0; i < this.model.customizations.length; i++) {
+                            let customization = this.model.customizations[i];
+                            let index = model.customizations.findIndex(x =>
+                                x.name1.toUpperCase() === customization.name1.toUpperCase() &&
+                                x.name2.toUpperCase() === customization.name2.toUpperCase() &&
+                                x.name3.toUpperCase() === customization.name3.toUpperCase() &&
+                                x.name4.toUpperCase() === customization.name4.toUpperCase() &&
+                                x.name5.toUpperCase() === customization.name5.toUpperCase() &&
+                                x.type === customization.type
+                            );
+                            if (index >= 0) {
+                                model.customizations[index].code = customization.code;
+                                model.customizations[index].id = customization.id;
+                                const [item] = model.customizations.splice(index, 1);
+                                model.customizations.splice(i, 0, item);
+                            }
+                            else {
+                                model.customizations.splice(i, 0, customization);
+                            }
+                        }
+                        for(let i = this.model.customizations.length; i < model.customizations.length; i++) {
+                            let customization = model.customizations[i];
+                            customization.code = null;
+                            customization.id = crypto.randomUUID();
+                        }
+                        //end customizations
+                        this._cloneModel = model;
+                        this.refresh();
+                        this._changeDetectorRef.detectChanges();
+                        this.messageService.open('Importação realizada com sucesso', 'SUCESSO', 'success');
+
+                    } catch (e) {
+                        this.messageService.open('Erro na importação : ' + e, 'ERRO', 'error');
+                    }
+                });
         }
     }
 }

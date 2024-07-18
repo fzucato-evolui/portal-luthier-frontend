@@ -228,8 +228,11 @@ export class LuthierTableReferenceModel {
     tableFK?: LuthierTableModel
     tablePK?: LuthierTableModel
     fieldsReference?: LuthierTableReferenceFieldModel[]
+    lookupFastField?: LuthierTableFieldModel
+    lookupDescriptionField?: LuthierTableFieldModel
 }
 export class LuthierTableReferenceFieldModel {
+    id?: string
     code?: number
     status?: number
     referenceCod?: number

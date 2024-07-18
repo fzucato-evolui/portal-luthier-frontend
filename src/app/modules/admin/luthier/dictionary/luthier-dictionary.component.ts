@@ -241,10 +241,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             .pipe(takeUntil(this._parent.unsubscribeAll))
             .subscribe((tables: LuthierTableModel[]) =>
             {
-                this.selectedTab = null;
-                this.tabsOpened = [];
                 this.tables = tables;
-
                 this.filterObjects();
             });
         this._parent.service.visions$
@@ -407,25 +404,38 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
     hasChild = (_: number, node: LuthierVisionModel | LuthierVisionDatasetModel) => !!node.children && node.children.length > 0;
 
     removeObject(object: LuthierDictionaryObjectType, vision: LuthierVisionModel) {
-        if (object.objectType === 'TABLE' || object.objectType == 'VIEW') {
-            const index = this.tables.findIndex(x => x.code === object.code);
-            if (index >= 0) {
-                this.tables.splice(index, 1);
-                this.filterObjects(null);
+        this.messageService.open('Tem certeza de que deseja remover o objeto?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
+            if (result === 'confirmed') {
+                if (object.objectType === 'TABLE' || object.objectType == 'VIEW') {
+                    this.service.deleteTable(object.code)
+                        .then(result => {
+
+                            let index = this.tabsOpened.findIndex(x => x.objectType === object.objectType && x.id === object.id);
+                            this.tabsOpened.splice(index, 1);
+                            this.selectedTab = null;
+                            object['removed'] = true;
+                            this.filterObjects(null);
+                            this._changeDetectorRef.detectChanges();
+                            this.messageService.open(`${object.objectType === 'TABLE' ? 'Tabela' : 'View'} removida com sucesso`, 'SUCESSO', 'success');
+                        })
+
+                }
+                else if (object.objectType === 'VISION') {
+                    const index = this.visions.findIndex(x => x.code === object.code && x.objectType === 'VISION');
+                    if (index >= 0) {
+                        this.visions.splice(index, 1);
+                        this.filterObjects(null);
+                    }
+                }
+                else if (object.objectType === 'VISION_DATASET') {
+                    if (this.removeDataset(object.code, vision) === true) {
+                        this.filterObjects(null);
+                    }
+                }
+
             }
-        }
-        else if (object.objectType === 'VISION') {
-            const index = this.visions.findIndex(x => x.code === object.code && x.objectType === 'VISION');
-            if (index >= 0) {
-                this.visions.splice(index, 1);
-                this.filterObjects(null);
-            }
-        }
-        else if (object.objectType === 'VISION_DATASET') {
-            if (this.removeDataset(object.code, vision) === true) {
-                this.filterObjects(null);
-            }
-        }
+        });
+
     }
     removeDataset(code: number, model: LuthierVisionModel | LuthierVisionDatasetModel): boolean {
         if (UtilFunctions.isValidStringOrArray(model.children) === false) {

@@ -46,7 +46,7 @@
                     <ng-container *ngIf="workDataBase; else noDatabase">
                         <ng-container *cdkVirtualFor="let table of filteredObjects | async">
 
-                            <div *ngIf="objectType !== 'VISION'" class="flex items-center w-full max-w-full overflow-x-auto justify-between border-b dark:bg-transparent hover:bg-gray-100 dark:hover:bg-hover p-1">
+                            <div *ngIf="objectType !== 'VISION' && !table['removed']" class="flex items-center w-full max-w-full overflow-x-auto justify-between border-b dark:bg-transparent hover:bg-gray-100 dark:hover:bg-hover p-1">
 
                                 <div class="flex items-center grow cursor-pointer" (dblclick)="addTab(table)">
                                     <div class="rounded-full text-lg uppercase bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">

@@ -147,7 +147,7 @@ export class UtilFunctions {
 
     public static getHttpErrorMessage(value) {
         let errorMessage;
-        if (value.error.detail !== undefined) {
+        if (value.error && value.error.detail !== undefined) {
             errorMessage = value.error.detail;
         } else if (value.error && value.error.message) {
             errorMessage = value.error.message;

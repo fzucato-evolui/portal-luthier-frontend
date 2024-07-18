@@ -95,7 +95,7 @@
                                     </div>
                                     <div class="flex-1 overflow-auto">
                                         <ng-container *ngFor="let t of tables | filterJson : {name: filterTablePK.value}">
-                                            <mat-option [value]="{code: t.code, name: t.name}" >
+                                            <mat-option [value]="{id: t.id, code: t.code, name: t.name}" >
                                                 {{t.name}}
                                             </mat-option>
                                         </ng-container>
@@ -188,7 +188,7 @@
                                 matPrefix></mat-icon>
 
                             <mat-select [disabled]="!tablePK.value" [compareWith]="parent.compareCode" (openedChange)="filterFieldsPKKey.value =null"
-                                        [formControl]="formSave.get('lookupFastFieldCode')">
+                                        [formControl]="formSave.get('lookupFastField')">
                                 <div class="flex flex-col h-full w-full">
                                     <div class="flex-none">
                                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
@@ -219,7 +219,7 @@
                                 matPrefix></mat-icon>
 
                             <mat-select [disabled]="!tablePK.value" [compareWith]="parent.compareCode" (openedChange)="filterFieldsPKDescr.value =null"
-                                        [formControl]="formSave.get('lookupDescriptionFieldCode')">
+                                        [formControl]="formSave.get('lookupDescriptionField')">
                                 <div class="flex flex-col h-full w-full">
                                     <div class="flex-none">
                                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">

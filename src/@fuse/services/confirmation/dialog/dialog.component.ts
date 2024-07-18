@@ -1,9 +1,9 @@
-import { NgClass, NgIf } from '@angular/common';
-import { Component, Inject, ViewEncapsulation } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { FuseConfirmationConfig } from '@fuse/services/confirmation/confirmation.types';
+import {NgClass, NgIf} from '@angular/common';
+import {Component, Inject, ViewEncapsulation} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {MAT_DIALOG_DATA, MatDialogModule} from '@angular/material/dialog';
+import {MatIconModule} from '@angular/material/icon';
+import {FuseConfirmationConfig} from '@fuse/services/confirmation/confirmation.types';
 
 @Component({
     selector     : 'fuse-confirmation-dialog',
@@ -13,7 +13,9 @@ import { FuseConfirmationConfig } from '@fuse/services/confirmation/confirmation
             .fuse-confirmation-dialog-panel {
 
                 @screen md {
-                    @apply w-128;
+                    //@apply w-128;
+                    max-width: 95vw !important;
+                    max-height: 95vh !important;
                 }
 
                 .mat-mdc-dialog-container {
