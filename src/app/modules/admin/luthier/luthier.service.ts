@@ -408,7 +408,7 @@ export class LuthierService
             })));
     }
 
-    deleteTable(id: number): Promise<LuthierTableModel>  {
+    deleteTable(id: number): Promise<any>  {
         return firstValueFrom(this._httpClient.delete<LuthierTableModel>(`${this.baseDicUrl}/table/${id}`).pipe(
             switchMap((response: LuthierTableModel) => {
                 const index = this._currentTables.findIndex(x => x.code === id);
@@ -416,6 +416,135 @@ export class LuthierService
                     this._currentTables.splice(index, 1);
                     this.tables = this._currentTables;
                 }
+                // Return a new observable with the response
+                return of(response);
+            })));
+    }
+
+    saveVision(model: LuthierVisionModel): Promise<LuthierVisionModel> {
+        return firstValueFrom(this._httpClient.post<LuthierVisionModel>(`${this.baseDicUrl}/vision`, model).pipe(
+            switchMap((response: LuthierVisionModel) => {
+                if (UtilFunctions.isValidStringOrArray(this._currentVisions) === false) {
+                    this._currentVisions = new Array<LuthierVisionModel>();
+                }
+                if (model.code && model.code > 0) {
+                    const index = this._currentVisions.findIndex(x => x.code === model.code);
+                    if (index < 0) {
+                        this._currentVisions.push(response);
+                    } else {
+                        this._currentVisions[index] = response;
+                    }
+                } else {
+                    this._currentVisions.push(response);
+                }
+                this.visions = this._currentVisions;
+                return of(response);
+            })));
+    }
+
+    deleteVision(id: number): Promise<any>  {
+        return firstValueFrom(this._httpClient.delete<any>(`${this.baseDicUrl}/vision/${id}`).pipe(
+            switchMap((response: any) => {
+                const index = this._currentVisions.findIndex(x => x.code === id);
+                if (index >= 0) {
+                    this._currentVisions.splice(index, 1);
+                    this.visions = this._currentVisions;
+                }
+                // Return a new observable with the response
+                return of(response);
+            })));
+    }
+
+    saveDataset(model: LuthierVisionDatasetModel): Promise<LuthierVisionDatasetModel> {
+        return firstValueFrom(this._httpClient.post<LuthierVisionDatasetModel>(`${this.baseDicUrl}/dataset`, model).pipe(
+            switchMap((response: LuthierVisionDatasetModel) => {
+                if (UtilFunctions.isValidStringOrArray(this._currentVisions) === false) {
+                    this._currentVisions = new Array<LuthierVisionModel>();
+                }
+                const indexVision = this._currentVisions.findIndex(x => x.code === response.vision.code);
+                if (UtilFunctions.isValidStringOrArray(this._currentVisions[indexVision].children) === false) {
+                    this._currentVisions[indexVision].children = new Array<LuthierVisionDatasetModel>();
+                }
+                let parent: {model: LuthierVisionDatasetModel, index: number} = null;
+                if (response.parent && UtilFunctions.isValidStringOrArray(response.parent.code) === true) {
+                    parent = this.getDatasetByCode(response.parent.code, this._currentVisions[indexVision]);
+                    if (UtilFunctions.isValidStringOrArray(parent.model.children) === false) {
+                        parent.model.children = new Array<LuthierVisionDatasetModel>();
+                    }
+                }
+                if (model.code && model.code > 0) {
+                    if (parent === null) {
+                        //Tinha pai e agora nao tem mais, precisa remover do antigo
+                        if (model.parent && UtilFunctions.isValidStringOrArray(model.parent.code)) {
+                            const oldParent = this.getDatasetByCode(model.parent.code, this._currentVisions[indexVision]);
+                            oldParent.model.children.splice(oldParent.index, 1);
+                            this._currentVisions[indexVision].children.push(response);
+                        }
+                        // Continua sendo filho da visao
+                        else {
+                            const indexDataset = this._currentVisions[indexVision].children.findIndex(x => x.code === model.code);
+                            this._currentVisions[indexVision].children[indexDataset] = response;
+                        }
+                        this._currentVisions[indexVision].children.sort((a, b) => {
+                            return a.name.localeCompare(b.name);
+                        });
+
+                    } else {
+                        //Tinha pai e permanece tendo
+                        if (model.parent && UtilFunctions.isValidStringOrArray(model.parent.code)) {
+                            // Continua com o mesmo pai
+                            if (model.parent.code === parent.model.code) {
+                                parent.model.children[parent.index] = response
+                            }
+                            // Mudou de pai. , precisa remover do antigo
+                            else {
+                                const oldParent = this.getDatasetByCode(model.parent.code, this._currentVisions[indexVision]);
+                                oldParent.model.children.splice(oldParent.index, 1);
+                                parent.model.children.push(response);
+                            }
+                        }
+                        // Não tinha pai, mas agora tem. Precisa apagar da visão
+                        else {
+                            const indexDataset = this._currentVisions[indexVision].children.findIndex(x => x.code === model.code);
+                            this._currentVisions[indexVision].children.splice(indexDataset, 1);
+                            parent.model.children.push(response);
+                        }
+                        parent.model.children.sort((a, b) => {
+                            return a.name.localeCompare(b.name);
+                        });
+                    }
+                }
+                else {
+                    if (parent === null) {
+                        this._currentVisions[indexVision].children.push(response);
+                        this._currentVisions[indexVision].children.sort((a, b) => {
+                            return a.name.localeCompare(b.name);
+                        });
+                    } else {
+                        parent.model.children.push(response);
+                        parent.model.children.sort((a, b) => {
+                            return a.name.localeCompare(b.name);
+                        });
+                    }
+                }
+                this.visions = this._currentVisions;
+                return of(response);
+            })));
+    }
+
+    deleteDataset(model: LuthierVisionDatasetModel): Promise<any>  {
+        return firstValueFrom(this._httpClient.delete<any>(`${this.baseDicUrl}/dataset/${model.code}`).pipe(
+            switchMap((response: any) => {
+                const indexVision = this._currentVisions.findIndex(x => x.code === model.vision.code);
+                if (model.parent && UtilFunctions.isValidStringOrArray(model.parent.code)) {
+                    const oldParent = this.getDatasetByCode(model.parent.code, this._currentVisions[indexVision]);
+                    oldParent.model.children.splice(oldParent.index, 1);
+                }
+                else {
+                    const indexDataset = this._currentVisions[indexVision].children.findIndex(x => x.code === model.code);
+                    this._currentVisions[indexVision].children.splice(indexDataset, 1);
+                }
+                this.visions = this._currentVisions;
                 // Return a new observable with the response
                 return of(response);
             })));
@@ -433,6 +562,26 @@ export class LuthierService
 
     syncSchemas(): Promise<any> {
         return firstValueFrom(this._httpClient.patch<any>(`${this.baseDicUrl}/sync-schemas`, null));
+    }
+
+    getDatasetByCode(code: number, parent: LuthierVisionDatasetModel | LuthierVisionModel ): {model :LuthierVisionDatasetModel, index: number} {
+        if (UtilFunctions.isValidStringOrArray(parent.children) === true) {
+            let index = parent.children.findIndex(x => x.code === code);
+            if (index < 0) {
+                for (let child of parent.children) {
+                    const dataset = this.getDatasetByCode(code, child);
+                    if (dataset != null) {
+                        return dataset;
+                    }
+                }
+            }
+            else {
+                return {model: parent.children[index], index: index};
+            }
+        }
+        else {
+            return null;
+        }
     }
 
 }

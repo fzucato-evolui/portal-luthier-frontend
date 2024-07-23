@@ -16,7 +16,11 @@
                 <div *ngIf="workDataBase" class="flex flex-col flex-0 p-1 border-b dark:bg-transparent">
                     <div class="flex items-center justify-between">
                         <div class="grow px-6 text-3xl font-bold tracking-tighter">{{objectType}}</div>
-                        <div>
+                        <div class="flex">
+                            <button (click)="refresh()"
+                                    mat-icon-button>
+                                <mat-icon [svgIcon]="'mat_outline:refresh'"></mat-icon>
+                            </button>
                             <button (click)="addObject()"
                                 mat-icon-button>
                                 <mat-icon [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
@@ -75,9 +79,9 @@
 
                             </div>
                             <div *ngIf="objectType === 'VISION'" class="flex items-center w-full max-w-full overflow-x-auto justify-between border-b dark:bg-transparent hover:bg-gray-100 dark:hover:bg-hover p-1">
-                                <mat-tree #tree [dataSource]="[table]" [treeControl]="treeControl" class="example-tree bg-transparent w-full h-full">
+                                <mat-tree #matTree [dataSource]="getTreeDataSource(table, matTree)" [treeControl]="treeControl" class="example-tree bg-transparent w-full h-full">
 
-                                    <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle class="bg-transparent w-full h-full">
+                                    <mat-tree-node *matTreeNodeDef="let node; when: !hasChild" matTreeNodeToggle class="bg-transparent w-full h-full">
                                         <div *ngIf="!node['removed']" class="flex items-center grow cursor-pointer" (dblclick)="addTab(node)">
                                             <div class="rounded-full text-lg uppercase bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
                                                 <mat-icon

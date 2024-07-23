@@ -672,13 +672,13 @@
             </th>
             <td mat-cell *matCellDef="let field; let i = index">
                 <div class="flex flex-row items-center">
-                    <button mat-icon-button aria-label="Delete" *ngIf="fieldtype !== 'customizations'" (click)="delete(field.id, i, fieldtype)" matTooltip="Remover">
+                    <button mat-icon-button aria-label="Delete" *ngIf="fieldtype !== 'customizations'" (click)="delete(field, i, fieldtype)" matTooltip="Remover">
                         <mat-icon class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
                     </button>
                     <button *ngIf="!field['editing']" mat-icon-button aria-label="Edit" (click)="editRow(i, fieldtype)" matTooltip="Editar">
                         <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
                     </button>
-                    <button *ngIf="field['editing']" mat-icon-button aria-label="Save" (click)="saveRow(field.id, i, fieldtype)" matTooltip="Salvar">
+                    <button *ngIf="field['editing']" mat-icon-button aria-label="Save" (click)="saveRow(field, i, fieldtype)" matTooltip="Salvar">
                         <mat-icon class="icon-size-4 text-green-500" fontSet="fas" fontIcon="fa-save"></mat-icon>
                     </button>
                     <button *ngIf="!field['editing'] && (fieldtype === 'fields' || fieldtype === 'customFields')" mat-icon-button aria-label="Detail" (click)="detailField(field, i, fieldtype)" matTooltip="Detalhes do Campo">
@@ -704,7 +704,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.order }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input mask="0*" [name]="'orderField'+i" class="text-sm" matInput
                                    formControlName="order">
@@ -721,7 +721,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.key }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-checkbox [name]="'keyField'+i" class="text-sm" formControlName="key"></mat-checkbox>
                     </div>
 
@@ -734,7 +734,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.name }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'nameField'+i" class="text-sm" matInput
                                    formControlName="name">
@@ -749,7 +749,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.label }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'labelField'+i" class="text-sm" matInput
                                    formControlName="label">
@@ -764,7 +764,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.fieldType }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'fieldTypeField'+i" class="text-sm"
                                         formControlName="fieldType">
@@ -785,7 +785,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.modifyType }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'modifyTypeField'+i" class="text-sm"
                                         formControlName="modifyType">
@@ -806,7 +806,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.attributeName }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'attributeNameField'+i" class="text-sm" matInput
                                    formControlName="attributeName">
@@ -821,7 +821,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.autoInc }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-checkbox [name]="'autoIncField'+i" class="text-sm" formControlName="autoInc"></mat-checkbox>
                     </div>
 
@@ -834,7 +834,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.size }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input mask="0*" [name]="'sizeField'+i" class="text-sm" matInput
                                    formControlName="size">
@@ -849,7 +849,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.search }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-checkbox [name]="'searchField'+i" class="text-sm" formControlName="search"></mat-checkbox>
                     </div>
 
@@ -862,7 +862,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.notNull }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)" #group="ngForm">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)" #group="ngForm">
                         <mat-checkbox (change)="checkIndeterminate($event, group.form.get('notNull'))"
                                       [indeterminate]="group.form.get('notNull').value === null"
                                       [name]="'notNullField'+i" class="text-sm" formControlName="notNull"></mat-checkbox>
@@ -877,7 +877,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.defaultValue }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'defaultValueField'+i" class="text-sm" matInput
                                    formControlName="defaultValue">
@@ -892,7 +892,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.precision }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input mask="0*" [name]="'precisionField'+i" class="text-sm" matInput
                                    formControlName="precision">
@@ -907,7 +907,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.maxValue }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'maxValueField'+i" class="text-sm" matInput
                                    formControlName="maxValue">
@@ -922,7 +922,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.minValue }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'minValueField'+i" class="text-sm" matInput
                                    formControlName="minValue">
@@ -937,7 +937,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.mask }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'maskField'+i" class="text-sm" matInput
                                    formControlName="mask">
@@ -952,7 +952,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.charCase }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'charCaseField'+i" class="text-sm"
                                         formControlName="charCase">
@@ -973,7 +973,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.editor }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'editorField'+i" class="text-sm"
                                         formControlName="editor">
@@ -994,7 +994,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.uiConfiguration }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'uiConfigurationField'+i" class="text-sm" matInput
                                    formControlName="uiConfiguration">
@@ -1009,7 +1009,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.layoutSize }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'layoutSizeField'+i" class="text-sm"
                                         formControlName="layoutSize">
@@ -1032,7 +1032,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.customLabel?.value }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customLabel')">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customLabel')">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'customLabelField'+i" class="text-sm" matInput
                                    formControlName="value">
@@ -1051,7 +1051,7 @@
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
 
                             <mat-select class="text-sm" [compareWith]="compareCode"
-                                        [formControl]="getFieldGroup(field.id, fieldtype).get('groupInfo')">
+                                        [formGroup]="getFieldGroup(field, fieldtype).get('groupInfo')">
                                 <ng-container *ngFor="let t of model.groupInfos">
                                     <mat-option [value]="{code: t.code, description: t.description, id: t.id}">
                                         {{t.description}}
@@ -1074,7 +1074,7 @@
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
 
                             <mat-select class="text-sm"
-                                        [formControl]="getFieldGroup(field.id, fieldtype).get('groupInfo')">
+                                        [formControl]="getFieldGroup(field, fieldtype).get('groupInfo')">
                                 <ng-container *ngFor="let t of model.groupInfos">
                                     <mat-option [value]="t.description">
                                         {{t.description}}
@@ -1103,7 +1103,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.customSize?.value }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customSize')">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customSize')">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input mask="0*" [name]="'customSizeField'+i" class="text-sm" matInput
                                    formControlName="value">
@@ -1118,7 +1118,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.customNotNull?.value }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customNotNull')" #group="ngForm">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customNotNull')" #group="ngForm">
                         <mat-checkbox (change)="checkIndeterminate($event, group.form.get('value'))"
                                       [indeterminate]="group.form.get('value').value === null"
                                       [name]="'customNotNullField'+i" class="text-sm" formControlName="value"></mat-checkbox>
@@ -1133,7 +1133,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.customDefaultValue?.value }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customDefaultValue')">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customDefaultValue')">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'customDefaultValueField'+i" class="text-sm" matInput
                                    formControlName="value">
@@ -1148,7 +1148,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.customPrecision?.value }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customPrecision')">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customPrecision')">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input mask="0*" [name]="'customPrecisionField'+i" class="text-sm" matInput
                                    formControlName="value">
@@ -1163,7 +1163,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.customMaxValue?.value }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customMaxValue')">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customMaxValue')">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'customMaxValueField'+i" class="text-sm" matInput
                                    formControlName="value">
@@ -1178,7 +1178,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.customMinValue?.value }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customMinValue')">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customMinValue')">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'customMinValueField'+i" class="text-sm" matInput
                                    formControlName="value">
@@ -1193,7 +1193,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.customMask?.value }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customMask')">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customMask')">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'customMaskField'+i" class="text-sm" matInput
                                    formControlName="value">
@@ -1208,7 +1208,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.customCharCase?.value }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customCharCase')">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customCharCase')">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'customCharCaseField'+i" class="text-sm"
                                         formControlName="value">
@@ -1232,7 +1232,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.customEditor?.value }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customEditor')">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customEditor')">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'customEditorField'+i" class="text-sm"
                                         formControlName="value">
@@ -1256,7 +1256,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.customUiConfiguration?.value }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customUiConfiguration')">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customUiConfiguration')">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'customUiConfigurationField'+i" class="text-sm" matInput
                                    formControlName="value">
@@ -1273,7 +1273,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.description }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'description'+i" class="text-sm" matInput
                                    formControlName="description">
@@ -1288,7 +1288,7 @@
                     <div *ngIf="!field['editing']">
                         {{ field.groupInfoType }}
                     </div>
-                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'groupInfoTypeField'+i" class="text-sm"
                                         formControlName="groupInfoType">
@@ -1313,7 +1313,7 @@
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
 
                             <mat-select class="text-sm" [compareWith]="compareCode"
-                                        [formControl]="getFieldGroup(field.id, fieldtype).get('parent')">
+                                        [formControl]="getFieldGroup(field, fieldtype).get('parent')">
                                 <ng-container *ngFor="let t of model.groupInfos">
                                     <mat-option *ngIf="isGroupInfoAllowed(field, t)" [value]="{code: t.code, description: t.description, id: t.id}">
                                         {{t.description}}

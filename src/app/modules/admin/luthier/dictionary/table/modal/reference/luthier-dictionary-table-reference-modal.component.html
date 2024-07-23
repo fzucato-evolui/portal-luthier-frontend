@@ -275,7 +275,7 @@
                             <div class="flex flex-row items-center">
                                 <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                                     <mat-select class="text-sm" [compareWith]="parent.compareCode" (openedChange)="filterFieldsPK.value =null"
-                                                [formControl]="model.get('fieldPK')">
+                                                [formGroup]="model.get('fieldPK')">
                                         <div class="flex flex-col h-full w-full">
                                             <div class="flex-none">
                                                 <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
@@ -306,7 +306,7 @@
                             <div class="flex flex-row items-center">
                                 <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                                     <mat-select class="text-sm" [compareWith]="parent.compareCode" (openedChange)="filterFieldsFK.value =null"
-                                                [formControl]="model.get('fieldFK')">
+                                                [formGroup]="model.get('fieldFK')">
                                         <div class="flex flex-col h-full w-full">
                                             <div class="flex-none">
                                                 <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">

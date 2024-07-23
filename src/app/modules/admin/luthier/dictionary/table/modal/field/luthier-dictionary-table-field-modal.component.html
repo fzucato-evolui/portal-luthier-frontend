@@ -89,7 +89,7 @@
                             <div class="flex flex-row items-center">
                                 <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                                     <mat-select #imageResource class="text-sm" [compareWith]="fieldType === 'fields' ? parent.compareCode : compareImageName"
-                                                [formControl]="model.get('resource')">
+                                                [formGroup]="model.get('resource')">
                                         <mat-select-trigger>
                                             <img width="16" src="{{ 'data:image/png;base64,' + getSeletctedImage(imageResource.value)}}" />
                                         </mat-select-trigger>

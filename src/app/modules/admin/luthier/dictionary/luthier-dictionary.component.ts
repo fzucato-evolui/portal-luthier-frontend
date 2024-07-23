@@ -6,7 +6,9 @@ import {
     ElementRef,
     OnDestroy,
     OnInit,
+    QueryList,
     ViewChild,
+    ViewChildren,
     ViewEncapsulation
 } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
@@ -38,12 +40,13 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {LuthierDictionaryTableComponent} from './table/luthier-dictionary-table.component';
 import {MessageDialogService} from '../../../../shared/services/message/message-dialog-service';
 import {LuthierService} from '../luthier.service';
-import {MatTreeModule} from '@angular/material/tree';
+import {MatTree, MatTreeModule, MatTreeNestedDataSource} from '@angular/material/tree';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {LuthierDictionaryVisionComponent} from './vision/luthier-dictionary-vision.component';
 import {LuthierDictionaryDatasetComponent} from './dataset/luthier-dictionary-dataset.component';
 import {Clipboard, ClipboardModule} from '@angular/cdk/clipboard';
 import * as FileSaver from 'file-saver';
+import {cloneDeep} from 'lodash-es';
 
 @Component({
     selector     : 'luthier-dictionary',
@@ -93,6 +96,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
     cdkVirtualScrollViewPort: CdkVirtualScrollViewport;
     scrollVisible = true;
     treeControl = new NestedTreeControl<LuthierVisionModel>(node => node.children);
+    @ViewChildren(MatTree) trees: QueryList<MatTree<any>>;
     get workDataBase(): string {
 
         return UtilFunctions.isValidStringOrArray(this._parent.workDataBase) === false || isNaN(this._parent.workDataBase) ? null : this._parent.workDataBase.toString();
@@ -142,7 +146,9 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                         awesomeIcon : {fontSet: 'fas', fontIcon: 'fa-table'},
                         function: item => {
                             this.objectType = 'TABLE';
+                            this.filteredObjects.next(null);
                             this.filterObjects(item);
+                            this._changeDetectorRef.markForCheck();
 
                         },
                     },
@@ -153,7 +159,9 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                         awesomeIcon : {fontSet: 'fas', fontIcon: 'fa-eye'},
                         function: item => {
                             this.objectType = 'VIEW';
+                            this.filteredObjects.next(null);
                             this.filterObjects(item);
+                            this._changeDetectorRef.markForCheck();
 
                         },
                     },
@@ -164,8 +172,9 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                         awesomeIcon : {fontSet: 'fas', fontIcon: 'fa-glasses'},
                         function: item => {
                             this.objectType = 'VISION';
+                            this.filteredObjects.next(null);
                             this.filterObjects(item);
-
+                            this._changeDetectorRef.markForCheck();
                         },
                     },
 
@@ -248,10 +257,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             .pipe(takeUntil(this._parent.unsubscribeAll))
             .subscribe((visions: LuthierVisionDatasetModel[]) =>
             {
-                this.selectedTab = null;
-                this.tabsOpened = [];
                 this.visions = visions;
-
                 this.filterObjects();
             });
         // Subscribe to media changes
@@ -401,7 +407,9 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             }, 100);
         }
     }
-    hasChild = (_: number, node: LuthierVisionModel | LuthierVisionDatasetModel) => !!node.children && node.children.length > 0;
+    hasChild = (_: number, node: LuthierVisionModel | LuthierVisionDatasetModel) => {
+        return !!node.children && node.children.length > 0;
+    }
 
     removeObject(object: LuthierDictionaryObjectType, vision: LuthierVisionModel) {
         this.messageService.open('Tem certeza de que deseja remover o objeto?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
@@ -421,16 +429,35 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
 
                 }
                 else if (object.objectType === 'VISION') {
-                    const index = this.visions.findIndex(x => x.code === object.code && x.objectType === 'VISION');
-                    if (index >= 0) {
-                        this.visions.splice(index, 1);
-                        this.filterObjects(null);
-                    }
+                    this.service.deleteVision(object.code)
+                        .then(result => {
+
+                            let index = this.tabsOpened.findIndex(x => x.objectType === object.objectType && x.id === object.id);
+                            this.tabsOpened.splice(index, 1);
+                            this.selectedTab = null;
+                            object['removed'] = true;
+                            vision['updated'] = true;
+                            this._changeDetectorRef.detectChanges();
+                            this.messageService.open(`Visão removida com sucesso`, 'SUCESSO', 'success');
+                        })
+
                 }
                 else if (object.objectType === 'VISION_DATASET') {
+                    /*
                     if (this.removeDataset(object.code, vision) === true) {
                         this.filterObjects(null);
                     }
+                     */
+                    this.service.deleteDataset(object as LuthierVisionDatasetModel)
+                        .then(result => {
+                            let index = this.tabsOpened.findIndex(x => x.objectType === object.objectType && this.compareCode(x, object));
+                            this.tabsOpened.splice(index, 1);
+                            this.selectedTab = null;
+                            object['removed'] = true;
+                            vision['updated'] = true;
+                            this._changeDetectorRef.detectChanges();
+                            this.messageService.open(`Dataset removido com sucesso`, 'SUCESSO', 'success');
+                        })
                 }
 
             }
@@ -469,11 +496,12 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
         return false;
     }
 
-    addDataset(model: LuthierVisionModel | LuthierVisionDatasetModel, vision: LuthierVisionModel) {
-        this.service.getVisionChildreen(vision.code)
+    addDataset(model: LuthierVisionModel | LuthierVisionDatasetModel, vision: LuthierVisionModel): any {
+        return this.service.getVisionChildreen(vision.code)
             .then(relatives => {
                 const newModel = new LuthierVisionDatasetModel();
-                newModel.vision = vision;
+                newModel.vision = cloneDeep(vision);
+                newModel.vision.children = null;
                 newModel.name = 'Novo Dataset';
                 newModel.id = crypto.randomUUID();
                 newModel.objectType = 'VISION_DATASET';
@@ -485,9 +513,18 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 newModel.customizations = [];
                 newModel.groupInfos = [];
                 this.addTab(newModel);
+
             })
 
 
+    }
+    refresh() {
+        if (this.objectType === 'VISION') {
+            firstValueFrom(this.service.getVisions());
+        }
+        else {
+            firstValueFrom(this.service.getTables());
+        }
     }
     addObject() {
         if (this.objectType === 'VISION') {
@@ -558,6 +595,65 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                         FileSaver.saveAs(JSON.stringify(result), `${object.objectType}_${object.name}.json`);
                     }
                 })
+        }
+        else if (object.objectType === 'VISION') {
+            this.service.getVision(object.code)
+                .then(result => {
+                    if (clipBoard === true) {
+                        this.clipboard.copy(JSON.stringify(result));
+                        this.messageService.open('Dados copiados para o clipboard', 'SUCESSO', 'success');
+                    }
+                    else {
+                        FileSaver.saveAs(JSON.stringify(result), `${object.objectType}_${object.name}.json`);
+                    }
+                })
+        }
+    }
+
+    getTreeDataSource(table: LuthierVisionModel, tree: MatTree<any>): MatTreeNestedDataSource<LuthierVisionModel> {
+        if (!tree.dataSource) {
+            const dataSource = new MatTreeNestedDataSource<LuthierVisionModel>();
+            dataSource.data = [table];
+            return dataSource;
+        }
+        else {
+            const dataSource = tree.dataSource as MatTreeNestedDataSource<LuthierVisionModel>;
+
+            if (table['removed'] === true) {
+                table['updated'] = false;
+                dataSource.data = null
+                dataSource.disconnect();
+            }
+            else if (table['updated'] === true) {
+                table['updated'] = false;
+                dataSource.data = null;
+                dataSource.data = [table];
+            }
+            else {
+                dataSource.data = [table];
+            }
+            return dataSource;
+        }
+
+
+    }
+
+    updateDatasetNode (dataset: LuthierVisionDatasetModel) {
+        const visionIndex = this.visions.findIndex(x => x.code === dataset.vision.code);
+        this.visions[visionIndex]['updated'] = true;
+    }
+
+    compareCode(v1: any , v2: any): boolean {
+        if (v1 && v2) {
+            if (UtilFunctions.isValidStringOrArray(v1.code) === true) {
+                return v1.code === v2.code || v1.code === v2;
+            }
+            else {
+                return v1.id === v2.id || v1.id === v2;
+            }
+        }
+        else {
+            return v1 === v2;
         }
     }
 }

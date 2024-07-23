@@ -1,6 +1,7 @@
 <mat-accordion class="h-full flex flex-col headers-align" multi [formGroup]="formSave">
     <div class="flex-none flex mb-2">
         <button class="text-sm min-h-7 h-7"
+                [disabled]="canSave() === false"
                 mat-flat-button
                 color="primary" (click)="save()">
             <mat-icon
@@ -16,6 +17,25 @@
                 svgIcon="mat_solid:undo"></mat-icon>
             <span class="ml-2">Reverter</span>
         </button>
+        <button class="text-sm min-h-7 h-7"
+                mat-flat-button
+                color="warn" [matMenuTriggerFor]="menuImportDataset">
+            <mat-icon
+                class="icon-size-4"
+                svgIcon="mat_solid:import_export"></mat-icon>
+            <span class="ml-2">Importar</span>
+        </button>
+        <mat-menu #menuImportDataset="matMenu">
+            <button mat-menu-item (click)="readDatasetFromClipboard()">
+                <mat-icon [svgIcon]="'mat_outline:content_copy'"></mat-icon>
+                Importar do Clipboard
+            </button>
+            <button mat-menu-item (click)="fileTableInput.click()">
+                <mat-icon [svgIcon]="'mat_solid:file_download'"></mat-icon>
+                Importar de Arquivo
+            </button>
+            <input type="file" #fileTableInput (change)="readDatasetFromFile($event)" accept=".json" style="display: none;" />
+        </mat-menu>
     </div>
     <mat-expansion-panel expanded="true" class="flex-none max-h-1/2 flex flex-col mb-2 mt-0">
         <mat-expansion-panel-header class="flex-none" [collapsedHeight]="'32px'" [expandedHeight]="'32px'">
@@ -66,7 +86,7 @@
                                 fontSet="fas" fontIcon="fa-t"
                                 matPrefix></mat-icon>
                             <mat-select class="text-sm" [compareWith]="compareCode" (openedChange)="filterTables.value =null"
-                                        (selectionChange)="changeTable($event)" [value]="model.table">
+                                        (selectionChange)="changeTable($event)" [required]="true" [value]="model.table">
                                 <div class="flex flex-col h-full w-full">
                                     <div class="flex-none">
                                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
@@ -110,8 +130,7 @@
                                 class="evolui-menu-item-icon"
                                 fontSet="fas" fontIcon="fa-t"
                                 matPrefix></mat-icon>
-                            <mat-select class="text-sm" [compareWith]="compareCode" (selectionChange)="parentChanged($event)"
-                                        [formControl]="formSave.get('parent')">
+                            <mat-select class="text-sm" [compareWith]="compareCode" (selectionChange)="parentChanged($event)">
                                 <mat-option [value]="null" >
                                     Nenhum
                                 </mat-option>
@@ -133,7 +152,6 @@
                                 matPrefix></mat-icon>
                             <input
                                 class="text-sm"
-                                [required]="true"
                                 [formControlName]="'filter'"
                                 matInput>
                         </mat-form-field>
@@ -209,7 +227,7 @@
 
                 <div class="w-full" *ngIf="model.parent && model.parent.code >= 0">
                     <div class="grid grid-cols-3 gap-2" *ngIf="hasParentProblem() === false">
-                        <ng-container *ngFor="let fk of parentRelation.fieldsReference">
+                        <ng-container *ngFor="let fk of parentRelation?.fieldsReference">
                             <div class="col-span-1 font-bold text-right">
                                 {{'(' + fk.fieldFK.code + ') ' + fk.fieldFK.name}}
                             </div>
@@ -298,7 +316,7 @@
                     </div>
                 </div>
                 <div class="flex-1 overflow-y-auto" cdkScrollable>
-                    <table #table mat-table matSort #sortSearchs="matSort" [dataSource]="searchsDataSource" class="table-auto" (matSortChange)="announceSortChange($event)">
+                    <table mat-table matSort #sortSearchs="matSort" [dataSource]="searchsDataSource" class="table-auto" (matSortChange)="announceSortChange($event)">
                         <ng-container matColumnDef="buttons">
                             <th mat-header-cell *matHeaderCellDef sticky>
                                 <div class="flex flex-row items-center">
@@ -432,7 +450,7 @@
     </mat-expansion-panel>
 </mat-accordion>
 <ng-template #fieldTableTemplate let-displayedColumns="displayedColumns" let-datasource="datasource" let-fieldtype="fieldtype">
-    <table #tableFields mat-table #sortFields="matSort" matSort [dataSource]="datasource" class="table-auto" (matSortChange)="announceSortChange($event)">
+    <table mat-table #sortFields="matSort" matSort [dataSource]="datasource" class="table-auto" (matSortChange)="announceSortChange($event)">
         <ng-container matColumnDef="buttons" sticky>
             <th mat-header-cell *matHeaderCellDef>
                 <div class="flex flex-row items-center">
@@ -443,17 +461,14 @@
             </th>
             <td mat-cell *matCellDef="let field; let i = index">
                 <div class="flex flex-row items-center">
-                    <button mat-icon-button aria-label="Delete" *ngIf="fieldtype !== 'customizations'" (click)="delete(field.id, i, fieldtype)" matTooltip="Remover">
+                    <button mat-icon-button aria-label="Delete" *ngIf="fieldtype !== 'customizations'" (click)="delete(field, i, fieldtype)" matTooltip="Remover">
                         <mat-icon class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
                     </button>
-                    <button *ngIf="!fieldRowEditing[fieldtype]" mat-icon-button aria-label="Edit" (click)="editRow(i, fieldtype)" matTooltip="Editar">
+                    <button *ngIf="!field['editing']" mat-icon-button aria-label="Edit" (click)="editRow(i, fieldtype)" matTooltip="Editar">
                         <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
                     </button>
-                    <button *ngIf="fieldRowEditing[fieldtype] === i.toString()" mat-icon-button aria-label="Save" (click)="saveRow(field.id, i, fieldtype)" matTooltip="Salvar">
+                    <button *ngIf="field['editing']" mat-icon-button aria-label="Save" (click)="saveRow(field, i, fieldtype)" matTooltip="Salvar">
                         <mat-icon class="icon-size-4 text-green-500" fontSet="fas" fontIcon="fa-save"></mat-icon>
-                    </button>
-                    <button *ngIf="!fieldRowEditing[fieldtype] && (fieldtype === 'fields' || fieldtype === 'customFields')" mat-icon-button aria-label="Detail" (click)="detailField(field, i, fieldtype)" matTooltip="Detalhes do Campo">
-                        <mat-icon class="icon-size-4 text-accent" fontSet="fas" fontIcon="fa-glasses"></mat-icon>
                     </button>
                 </div>
             </td>
@@ -473,10 +488,10 @@
             <ng-container matColumnDef="order">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> # </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.order }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input mask="0*" [name]="'orderField'+i" class="text-sm" matInput
                                    formControlName="order">
@@ -511,10 +526,10 @@
             <ng-container matColumnDef="label">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Rótulo </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.label }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'labelField'+i" class="text-sm" matInput
                                    formControlName="label">
@@ -525,10 +540,10 @@
             <ng-container matColumnDef="customLabel">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Rótulo Customizado </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.customLabel?.value }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customLabel')">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customLabel')">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'customLabelField'+i" class="text-sm" matInput
                                    formControlName="value">
@@ -539,10 +554,10 @@
             <ng-container matColumnDef="mask">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Máscara </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.mask }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'maskField'+i" class="text-sm" matInput
                                    formControlName="mask">
@@ -553,14 +568,14 @@
             <ng-container matColumnDef="groupInfo.description">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Grupo de Info. </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.groupInfo?.description }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
 
                             <mat-select class="text-sm" [compareWith]="compareCode"
-                                        [formControl]="getFieldGroup(field.id, fieldtype).get('groupInfo')">
+                                        [formGroup]="getFieldGroup(field, fieldtype).get('groupInfo')">
                                 <ng-container *ngFor="let t of model.groupInfos">
                                     <mat-option [value]="{code: t.code, description: t.description, id: t.id}">
                                         {{t.description}}
@@ -590,10 +605,10 @@
             <ng-container matColumnDef="readOnly">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Somente Leitura </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.readOnly }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)" #group="ngForm">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)" #group="ngForm">
                         <mat-checkbox (change)="checkIndeterminate($event, group.form.get('readOnly'))"
                                       [indeterminate]="group.form.get('readOnly').value === null"
                                       [name]="'readOnlyField'+i" class="text-sm" formControlName="readOnly"></mat-checkbox>
@@ -604,10 +619,10 @@
             <ng-container matColumnDef="visible">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Visível </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.visible }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)" #group="ngForm">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)" #group="ngForm">
                         <mat-checkbox (change)="checkIndeterminate($event, group.form.get('visible'))"
                                       [indeterminate]="group.form.get('visible').value === null"
                                       [name]="'visibleField'+i" class="text-sm" formControlName="visible"></mat-checkbox>
@@ -618,10 +633,10 @@
             <ng-container matColumnDef="notNull">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Obrigatório </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.notNull }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)" #group="ngForm">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)" #group="ngForm">
                         <mat-checkbox (change)="checkIndeterminate($event, group.form.get('notNull'))"
                                       [indeterminate]="group.form.get('notNull').value === null"
                                       [name]="'notNullField'+i" class="text-sm" formControlName="notNull"></mat-checkbox>
@@ -632,10 +647,10 @@
             <ng-container matColumnDef="search">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Busca </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.search }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-checkbox [name]="'searchField'+i" class="text-sm" formControlName="search"></mat-checkbox>
                     </div>
 
@@ -676,10 +691,10 @@
             <ng-container matColumnDef="charCase">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> CharCase </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.charCase }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'charCaseField'+i" class="text-sm"
                                         formControlName="charCase">
@@ -696,10 +711,10 @@
             <ng-container matColumnDef="editor">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo Editor </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.editor }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'editorField'+i" class="text-sm"
                                         formControlName="editor">
@@ -716,10 +731,10 @@
             <ng-container matColumnDef="lookupFilter">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Lookup Filter </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.lookupFilter }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'lookupFilter'+i" class="text-sm" matInput
                                    formControlName="lookupFilter">
@@ -738,10 +753,10 @@
             <ng-container matColumnDef="technicalDescription">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Detalhes Técnicos </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.technicalDescription }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'technicalDescriptionField'+i" class="text-sm" matInput
                                    formControlName="technicalDescription">
@@ -752,10 +767,10 @@
             <ng-container matColumnDef="userDescription">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Help </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.userDescription }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'userDescriptionField'+i" class="text-sm" matInput
                                    formControlName="userDescription">
@@ -766,10 +781,10 @@
             <ng-container matColumnDef="uiConfiguration">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Config. Visual </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.uiConfiguration }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'uiConfigurationField'+i" class="text-sm" matInput
                                    formControlName="uiConfiguration">
@@ -780,10 +795,10 @@
             <ng-container matColumnDef="layoutSize">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tamanho Layout </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.layoutSize }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'layoutSizeField'+i" class="text-sm"
                                         formControlName="layoutSize">
@@ -803,10 +818,10 @@
             <ng-container matColumnDef="order">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> # </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.order }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input mask="0*" [name]="'orderField'+i" class="text-sm" matInput
                                    formControlName="order">
@@ -841,10 +856,10 @@
             <ng-container matColumnDef="label">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Rótulo </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.label }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'labelField'+i" class="text-sm" matInput
                                    formControlName="label">
@@ -855,10 +870,10 @@
             <ng-container matColumnDef="mask">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Máscara </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.mask }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'maskField'+i" class="text-sm" matInput
                                    formControlName="mask">
@@ -869,14 +884,14 @@
             <ng-container matColumnDef="groupInfo">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Grupo de Info. </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.groupInfo }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
 
                             <mat-select class="text-sm"
-                                        [formControl]="getFieldGroup(field.id, fieldtype).get('groupInfo')">
+                                        [formControl]="getFieldGroup(field, fieldtype).get('groupInfo')">
                                 <ng-container *ngFor="let t of model.groupInfos">
                                     <mat-option [value]="t.description">
                                         {{t.description}}
@@ -906,10 +921,10 @@
             <ng-container matColumnDef="readOnly">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Somente Leitura </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.readOnly }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)" #group="ngForm">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)" #group="ngForm">
                         <mat-checkbox (change)="checkIndeterminate($event, group.form.get('readOnly'))"
                                       [indeterminate]="group.form.get('readOnly').value === null"
                                       [name]="'readOnlyField'+i" class="text-sm" formControlName="readOnly"></mat-checkbox>
@@ -920,10 +935,10 @@
             <ng-container matColumnDef="visible">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Visível </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.visible }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)" #group="ngForm">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)" #group="ngForm">
                         <mat-checkbox (change)="checkIndeterminate($event, group.form.get('visible'))"
                                       [indeterminate]="group.form.get('visible').value === null"
                                       [name]="'visibleField'+i" class="text-sm" formControlName="visible"></mat-checkbox>
@@ -934,10 +949,10 @@
             <ng-container matColumnDef="notNull">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Obrigatório </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.notNull }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)" #group="ngForm">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)" #group="ngForm">
                         <mat-checkbox (change)="checkIndeterminate($event, group.form.get('notNull'))"
                                       [indeterminate]="group.form.get('notNull').value === null"
                                       [name]="'notNullField'+i" class="text-sm" formControlName="notNull"></mat-checkbox>
@@ -948,10 +963,10 @@
             <ng-container matColumnDef="search">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Busca </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.search }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-checkbox [name]="'searchField'+i" class="text-sm" formControlName="search"></mat-checkbox>
                     </div>
 
@@ -992,10 +1007,10 @@
             <ng-container matColumnDef="charCase">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> CharCase </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.charCase }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'charCaseField'+i" class="text-sm"
                                         formControlName="charCase">
@@ -1012,10 +1027,10 @@
             <ng-container matColumnDef="editor">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo Editor </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.editor }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'editorField'+i" class="text-sm"
                                         formControlName="editor">
@@ -1032,10 +1047,10 @@
             <ng-container matColumnDef="lookupFilter">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Lookup Filter </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.lookupFilter }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'lookupFilter'+i" class="text-sm" matInput
                                    formControlName="lookupFilter">
@@ -1054,10 +1069,10 @@
             <ng-container matColumnDef="technicalDescription">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Detalhes Técnicos </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.technicalDescription }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'technicalDescriptionField'+i" class="text-sm" matInput
                                    formControlName="technicalDescription">
@@ -1068,10 +1083,10 @@
             <ng-container matColumnDef="userDescription">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Help </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.userDescription }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'userDescriptionField'+i" class="text-sm" matInput
                                    formControlName="userDescription">
@@ -1082,10 +1097,10 @@
             <ng-container matColumnDef="uiConfiguration">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Config. Visual </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.uiConfiguration }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'uiConfigurationField'+i" class="text-sm" matInput
                                    formControlName="uiConfiguration">
@@ -1096,10 +1111,10 @@
             <ng-container matColumnDef="layoutSize">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tamanho Layout </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.layoutSize }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'layoutSizeField'+i" class="text-sm"
                                         formControlName="layoutSize">
@@ -1120,10 +1135,10 @@
             <ng-container matColumnDef="order">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> # </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.order }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input mask="0*" [name]="'orderField'+i" class="text-sm" matInput
                                    formControlName="order">
@@ -1135,10 +1150,10 @@
             <ng-container matColumnDef="description">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Descrição </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.description }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'description'+i" class="text-sm" matInput
                                    formControlName="description">
@@ -1150,10 +1165,10 @@
             <ng-container matColumnDef="groupInfoType">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.groupInfoType }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype)">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'groupInfoTypeField'+i" class="text-sm"
                                         formControlName="groupInfoType">
@@ -1171,14 +1186,14 @@
             <ng-container matColumnDef="parent.description">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Grupo Pai </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.parent?.description }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
 
                             <mat-select class="text-sm" [compareWith]="compareCode"
-                                        [formControl]="getFieldGroup(field.id, fieldtype).get('parent')">
+                                        [formControl]="getFieldGroup(field, fieldtype).get('parent')">
                                 <ng-container *ngFor="let t of model.groupInfos">
                                     <mat-option *ngIf="isGroupInfoAllowed(field, t)" [value]="{code: t.code, description: t.description, id: t.id}">
                                         {{t.description}}
@@ -1203,10 +1218,10 @@
             <ng-container matColumnDef="customMask">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Máscara </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.customMask?.value }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customMask')">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customMask')">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'customMaskField'+i" class="text-sm" matInput
                                    formControlName="value">
@@ -1217,10 +1232,10 @@
             <ng-container matColumnDef="customReadOnly">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Somente Leitura </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.customReadOnly?.value }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customReadOnly')" #group="ngForm">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customReadOnly')" #group="ngForm">
                         <mat-checkbox (change)="checkIndeterminate($event, group.form.get('value'))"
                                       [indeterminate]="group.form.get('value').value === null"
                                       [name]="'customReadOnlyField'+i" class="text-sm" formControlName="value"></mat-checkbox>
@@ -1231,10 +1246,10 @@
             <ng-container matColumnDef="customVisible">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Visível </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.customVisible?.value }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customVisible')" #group="ngForm">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customVisible')" #group="ngForm">
                         <mat-checkbox (change)="checkIndeterminate($event, group.form.get('value'))"
                                       [indeterminate]="group.form.get('value').value === null"
                                       [name]="'customVisibleField'+i" class="text-sm" formControlName="value"></mat-checkbox>
@@ -1245,10 +1260,10 @@
             <ng-container matColumnDef="customNotNull">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Obrigatório </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.customNotNull?.value }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customNotNull')" #group="ngForm">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customNotNull')" #group="ngForm">
                         <mat-checkbox (change)="checkIndeterminate($event, group.form.get('value'))"
                                       [indeterminate]="group.form.get('value').value === null"
                                       [name]="'customNotNullField'+i" class="text-sm" formControlName="value"></mat-checkbox>
@@ -1259,10 +1274,10 @@
             <ng-container matColumnDef="customCharCase">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> CharCase </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.customCharCase?.value }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customCharCase')">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customCharCase')">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'customCharCaseField'+i" class="text-sm"
                                         formControlName="value">
@@ -1282,10 +1297,10 @@
             <ng-container matColumnDef="customEditor">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo Editor </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.customEditor?.value }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customEditor')">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customEditor')">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <mat-select [name]="'customEditorField'+i" class="text-sm"
                                         formControlName="value">
@@ -1305,10 +1320,10 @@
             <ng-container matColumnDef="customLookupFilter">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Lookup Filter </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.customLookupFilter?.value }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customLookupFilter')">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customLookupFilter')">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'customLookupFilterField'+i" class="text-sm" matInput
                                    formControlName="value">
@@ -1319,10 +1334,10 @@
             <ng-container matColumnDef="customUiConfiguration">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Config. Visual </th>
                 <td mat-cell *matCellDef="let field let i = index">
-                    <div *ngIf="fieldRowEditing[fieldtype] !== i.toString()">
+                    <div *ngIf="!field['editing']">
                         {{ field.customUiConfiguration?.value }}
                     </div>
-                    <div *ngIf="fieldRowEditing[fieldtype] === i.toString()" class="flex flex-row items-center" [formGroup]="getFieldGroup(field.id, fieldtype).get('customUiConfiguration')">
+                    <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customUiConfiguration')">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                             <input [name]="'customUiConfigurationField'+i" class="text-sm" matInput
                                    formControlName="value">

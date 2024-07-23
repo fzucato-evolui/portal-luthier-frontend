@@ -19,6 +19,8 @@ import {cloneDeep} from 'lodash-es';
 import {NgxMaskDirective, provideNgxMask} from 'ngx-mask';
 import {LuthierService} from '../../luthier.service';
 import {MessageDialogService} from '../../../../../shared/services/message/message-dialog-service';
+import {MatMenuModule} from '@angular/material/menu';
+import {UtilFunctions} from '../../../../../shared/util/util-functions';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -35,7 +37,8 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'group
         ReactiveFormsModule,
         MatFormFieldModule,
         MatTooltipModule,
-        NgxMaskDirective
+        NgxMaskDirective,
+        MatMenuModule
     ],
     providers: [
         provideNgxMask(),
@@ -86,12 +89,92 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy
 
     save() {
         this.model = Object.assign({}, this.model, this.formSave.value) as LuthierVisionModel;
-        console.log(this.model, this.formSave.value);
+        this.service.saveVision(this.model)
+            .then(result => {
+                result.id = this.model.id;
+                this.model = result;
+                this.refresh();
+                const index = this._parent.tabsOpened.findIndex(x => x.id === this.model.id);
+                this._parent.tabsOpened.splice(index, 1, this.model);
+                this._parent.selectedTab = this.model;
+                this._changeDetectorRef.detectChanges();
+                this.messageService.open(`Visão salva com sucesso`, 'SUCESSO', 'success')
+            })
+    }
+
+    canSave(): boolean {
+        if (this.formSave) {
+            return !this.formSave.invalid;
+        }
+        return false;
     }
 
     revert() {
         this.model = this._model;
         this.refresh();
         this._changeDetectorRef.detectChanges();
+    }
+
+    async readVisionFromClipboard() {
+        try {
+            const text = await navigator.clipboard.readText();
+            const model = JSON.parse(text) as LuthierVisionModel;
+            setTimeout(() => {
+                this.importVision(model);
+            })
+        } catch (error) {
+            this.messageService.open('Erro ao ler conteúdo do clipboard '+ error, 'ERRO', 'error');
+            console.error('Failed to read clipboard contents: ', error);
+        }
+    }
+
+    readVisionFromFile(event: Event) {
+        const input = event.target as HTMLInputElement;
+        if (input.files && input.files.length > 0) {
+            const file = input.files[0];
+            // You can further process the selected file here
+            const reader = new FileReader();
+            reader.onload = () => {
+                const text = reader.result as string;
+                const model = JSON.parse(text) as LuthierVisionModel;
+                setTimeout(() => {
+                    this.importVision(model);
+                });
+
+            };
+            reader.onerror = (error) => {
+                this.messageService.open('Erro ao ler arquivo '+ error, 'ERRO', 'error');
+            };
+            reader.readAsText(file);
+        }
+    }
+
+    importVision(model: LuthierVisionModel) {
+        if (model) {
+            try {
+                if (UtilFunctions.isValidStringOrArray(model.code) === false) {
+                    this.messageService.open('Erro ao ler visão', 'ERRO', 'error');
+                    return;
+                }
+                if (model.objectType != this.model.objectType) {
+                    this.messageService.open('Erro ao ler visão', 'ERRO', 'error');
+                    return;
+                }
+                if (UtilFunctions.isValidStringOrArray(this.model.code) === false) {
+                    this.model.name = model.name;
+                }
+                model.name = this.model.name;
+                model.code = this.model.code;
+                model.id = this.model.id;
+
+                this._cloneModel = model;
+                this.refresh();
+                this._changeDetectorRef.detectChanges();
+                this.messageService.open('Importação realizada com sucesso', 'SUCESSO', 'success');
+
+            } catch (e) {
+                this.messageService.open('Erro na importação : ' + e, 'ERRO', 'error');
+            }
+        }
     }
 }

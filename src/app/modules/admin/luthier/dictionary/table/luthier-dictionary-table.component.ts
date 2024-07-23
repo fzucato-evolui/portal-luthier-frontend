@@ -32,6 +32,7 @@ import {MatTabChangeEvent, MatTabsModule} from '@angular/material/tabs';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {LuthierDictionaryComponent} from '../luthier-dictionary.component';
 import {
+    LuthierBasicModel,
     LuthierCustomFieldModel,
     LuthierCustomizationModel,
     LuthierFieldCharcaseEnum,
@@ -199,7 +200,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             const row = this.getRowEditing(this.currentTab);
             if (row) {
                 event.preventDefault();
-                const fg = this.getFieldGroup(row.id, this.currentTab);
+                const fg = this.getFieldGroup(row, this.currentTab);
                 fg.patchValue(row);
                 row['editing'] = false;
                 this._changeDetectorRef.detectChanges();
@@ -398,22 +399,22 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         }
     }
 
-    delete(id: string, index: number,type: TableType) {
+    delete(model: LuthierBasicModel, index: number,type: TableType) {
         index = this.getRealIndex(index, type).index;
-        const fieldIndex = this.getFields(type).controls.findIndex(x => x.get("id").value === id);
+        const fieldIndex = this.getFields(type).controls.findIndex(x => this.compareCode(x.value, model));
         this.getFields(type).removeAt(fieldIndex);
         if (type === 'groupInfos') {
-            this.deleteGroupInfo(id, index);
+            this.deleteGroupInfo(model, index);
         }
         else {
             const dataSource = type === 'fields' ? this.fieldsDataSource : this.customFieldsDataSource;
-            const code = dataSource.data[index].code;
+            const data = dataSource.data[index].code;
             dataSource.data.splice(index, 1);
             dataSource._updateChangeSubscription();
             if (type === 'fields') {
                 this.customizationsDataSource._updateChangeSubscription();
                 const references = this.referencesDataSource.data
-                    .filter(x => x.fieldsReference.findIndex(y => (y.fieldFK.id === id || y.fieldFK.code === code) || (y.fieldPK.id === id || y.fieldPK.code === code)) >= 0)
+                    .filter(x => x.fieldsReference.findIndex(y => this.compareCode(y.fieldFK, data) || this.compareCode(y.fieldPK, data)) >= 0)
                     .map(x => this.referencesDataSource.data.findIndex(y => y.name === x.name));
                 if (UtilFunctions.isValidStringOrArray(references)) {
                     references.forEach(index => {
@@ -422,7 +423,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                     this.referencesDataSource._updateChangeSubscription();
                 }
                 const indexes = this.indexesDataSource.data
-                    .filter(x => x.indexFields.findIndex(y => y.tableField.id === id || y.tableField.code === code) >= 0)
+                    .filter(x => x.indexFields.findIndex(y => this.compareCode(y.tableField, data)) >= 0)
                     .map(x => this.indexesDataSource.data.findIndex(y => y.name === x.name));
                 if (UtilFunctions.isValidStringOrArray(indexes)) {
                     indexes.forEach(index => {
@@ -435,7 +436,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                     if (UtilFunctions.isValidStringOrArray(search.searchFields) === true) {
                         for (let index = 0; index < search.searchFields.length;) {
                             if (search.searchFields[index].tableField &&
-                                (search.searchFields[index].tableField.id === id || search.searchFields[index].tableField.code === code)) {
+                                this.compareCode(search.searchFields[index].tableField, data)) {
                                 search.searchFields.splice(index, 1);
                                 deleted = true;
                                 continue;
@@ -456,7 +457,6 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     save() {
         this.model = Object.assign({}, this.model, this.formSave.value) as LuthierTableModel;
         this.saveCustomizations();
-        console.log(this.model, this.formSave.value, this.model.customizations);
         this.service.saveTable(this.model)
             .then(result => {
                 result.id = this.model.id;
@@ -620,7 +620,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                     && UtilFunctions.isValidStringOrArray(searchFieldModel.customLabel) === true
                     && searchFieldModel.customLabel.value !== searchFieldModel.label
                 ) {
-                    const fieldIndex = this.model.fields.findIndex(x => x.id === searchFieldModel.tableField.id);
+                    const fieldIndex = this.model.fields.findIndex(x => this.compareCode(x, searchFieldModel.tableField));
                     if (fieldIndex >= 0) {
                         searchFieldModel.customLabel.type = 'SEARCH_FIELD_TABLE';
                         searchFieldModel.customLabel.name1 = this.model.name;
@@ -644,8 +644,8 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     getFields(type: TableType): FormArray {
         return this.formSave.get(type === 'customizations' ? 'fields' : type) as FormArray;
     }
-    getFieldGroup(id: string, type: TableType): FormGroup {
-        const index =(this.formSave.get(type === 'customizations' ? 'fields' : type) as FormArray).controls.findIndex(x => x.get("id").value === id);
+    getFieldGroup(model: LuthierBasicModel, type: TableType): FormGroup {
+        const index =(this.formSave.get(type === 'customizations' ? 'fields' : type) as FormArray).controls.findIndex(x => this.compareCode(x.value, model));
         const fg = (this.formSave.get(type === 'customizations' ? 'fields' : type) as FormArray).at(index) as FormGroup;
         return fg;
     }
@@ -658,7 +658,9 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         const modelFields = type === 'fields' ? this.model.fields : this.model.customFields;
         if (UtilFunctions.isValidStringOrArray(modelFields) === true) {
             modelFields.forEach(x => {
-                x.id = crypto.randomUUID();
+                if (UtilFunctions.isValidStringOrArray(x.id) === false) {
+                    x.id = crypto.randomUUID();
+                }
                 /*
                 if (UtilFunctions.isValidStringOrArray(this.model.customizations) === true) {
                     const index = this.model.customizations.findIndex(y =>
@@ -833,7 +835,6 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         if (index >= 0) {
             return fa.at(index) as FormGroup;
         }
-        console.log('view is null', fa, bodyType);
         const c = this.addViewField(bodyType);
         fa.push(c);
         return c;
@@ -995,10 +996,10 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         editing.dataSource.data[editing.index]['editing'] = true;
     }
 
-    saveRow(id: string, index: number, type: TableType) {
+    saveRow(model: LuthierBasicModel, index: number, type: TableType) {
         const editing = this.getRealIndex(index, type);
         index = editing.index;
-        const fg = this.getFieldGroup(id, type);
+        const fg = this.getFieldGroup(model, type);
         if (fg.invalid) {
             console.log(fg, fg.errors);
             this.messageService.open("Existem campo inválidos!", "Error de Validação", "warning");
@@ -1007,19 +1008,19 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             return;
         }
         if (type === 'fields') {
-            this.fieldsDataSource.data[index] = fg.value;
+            this.fieldsDataSource.data[index] = Object.assign({}, this.fieldsDataSource.data[index], fg.value);
             this.fieldsDataSource._updateChangeSubscription();
             this.customizationsDataSource._updateChangeSubscription();
         }
         else if (type === 'customizations') {
-            this.customizationsDataSource.data[index] = fg.value;
+            this.customizationsDataSource.data[index] = Object.assign({}, this.customizationsDataSource.data[index], fg.value);
             this.customizationsDataSource._updateChangeSubscription();
         }
         else if (type === 'groupInfos') {
-            this.editGroupInfo(id, index, fg.value as LuthierGroupInfoModel);
+            this.editGroupInfo(model, index, fg.value as LuthierGroupInfoModel);
         }
         else {
-            this.customFieldsDataSource.data[index] = fg.value;
+            this.customFieldsDataSource.data[index] = Object.assign({}, this.customFieldsDataSource.data[index], fg.value);
             this.customFieldsDataSource._updateChangeSubscription();
         }
         editing.dataSource[editing.index]['editing'] = false;
@@ -1056,10 +1057,10 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             modal.afterClosed().subscribe((result) =>
             {
                 if ( result === 'ok' ) {
-                    const fg = this.getFieldGroup(model.id, type);
+                    const fg = this.getFieldGroup(model, type);
                     fg.controls = modal.componentInstance.formSave.controls;
                     fg.updateValueAndValidity();
-                    this.saveRow(model.id, index, type);
+                    this.saveRow(model, index, type);
                 }
                 this._changeDetectorRef.detectChanges();
             });
@@ -1118,7 +1119,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 })
         }
         else {
-            if (model.tablePK && model.tablePK.id === this.model.id) {
+            if (model.tablePK && this.compareCode(model.tablePK, this.model)) {
                 this.openModalReference(model, index, this.model.fields);
             }
             else {
@@ -1202,12 +1203,12 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.groupsInfoDataSource._updateChangeSubscription();
         this._changeDetectorRef.detectChanges();
     }
-    deleteGroupInfo(id: string, index: number) {
+    deleteGroupInfo(model: LuthierBasicModel, index: number) {
         index = this.getRealIndex(index, 'groupInfos').index;
         const groupInfo =  this.groupsInfoDataSource.data[index];
         const groupInfoWithGroupInfo = this.groupsInfoDataSource.data
-            .filter(x => x.parent &&  (x.parent.id === groupInfo.id || x.parent.code === groupInfo.code))
-            .map(x => this.groupsInfoDataSource.data.findIndex(y => y.id === x.id));
+            .filter(x => x.parent &&  this.compareCode(x.parent, groupInfo))
+            .map(x => this.groupsInfoDataSource.data.findIndex(y => this.compareCode(x, y)));
         console.log('groupInfoWithGroupInfo', groupInfoWithGroupInfo, groupInfo);
         if (UtilFunctions.isValidStringOrArray(groupInfoWithGroupInfo)) {
             groupInfoWithGroupInfo.forEach(x => {
@@ -1218,33 +1219,33 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.groupsInfoDataSource._updateChangeSubscription();
 
         const fieldsWithGroupInfo = this.fieldsDataSource.data
-            .filter(x => x.groupInfo &&  (x.groupInfo.id === groupInfo.id || x.groupInfo.code === groupInfo.code))
-            .map(x => this.fieldsDataSource.data.findIndex(y => y.id === x.id));
+            .filter(x => x.groupInfo &&  this.compareCode(x.groupInfo, groupInfo))
+            .map(x => this.fieldsDataSource.data.findIndex(y => this.compareCode(x, y)));
         if (UtilFunctions.isValidStringOrArray(fieldsWithGroupInfo)) {
             fieldsWithGroupInfo.forEach(x => {
                 this.fieldsDataSource.data[x].groupInfo = null;
-                this.getFieldGroup(this.fieldsDataSource.data[x].id, 'fields').get('groupInfo').patchValue(new LuthierGroupInfoModel());
+                this.getFieldGroup(this.fieldsDataSource.data[x], 'fields').get('groupInfo').patchValue(new LuthierGroupInfoModel());
             });
             this.fieldsDataSource._updateChangeSubscription();
         }
         const customFieldsWithGroupInfo = this.customFieldsDataSource.data
             .filter(x => x.groupInfo === groupInfo.description)
-            .map(x => this.customFieldsDataSource.data.findIndex(y => y.id === x.id));
+            .map(x => this.customFieldsDataSource.data.findIndex(y => this.compareCode(x, y)));
         if (UtilFunctions.isValidStringOrArray(customFieldsWithGroupInfo)) {
             customFieldsWithGroupInfo.forEach(x => {
                 this.customFieldsDataSource.data[x].groupInfo = null;
-                this.getFieldGroup(this.customFieldsDataSource.data[x].id, 'customFields').get('groupInfo').setValue(null);
+                this.getFieldGroup(this.customFieldsDataSource.data[x], 'customFields').get('groupInfo').setValue(null);
             });
             this.customFieldsDataSource._updateChangeSubscription();
         }
         this._changeDetectorRef.detectChanges();
     }
-    editGroupInfo(id: string, index: number, value: LuthierGroupInfoModel) {
+    editGroupInfo(model: LuthierBasicModel, index: number, value: LuthierGroupInfoModel) {
         index = this.getRealIndex(index, 'groupInfos').index;
         const groupInfo =  this.groupsInfoDataSource.data[index];
         const groupInfoWithGroupInfo = this.groupsInfoDataSource.data
-            .filter(x => x.parent &&  (x.parent.id === groupInfo.id || x.parent.code === groupInfo.code))
-            .map(x => this.groupsInfoDataSource.data.findIndex(y => y.id === x.id));
+            .filter(x => x.parent && this.compareCode(x.parent, groupInfo))
+            .map(x => this.groupsInfoDataSource.data.findIndex(y => this.compareCode(x, y)));
         if (UtilFunctions.isValidStringOrArray(groupInfoWithGroupInfo)) {
             groupInfoWithGroupInfo.forEach(x => {
                 this.groupsInfoDataSource.data[x].parent.description = value.description;
@@ -1252,8 +1253,8 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         }
 
         const fieldsWithGroupInfo = this.fieldsDataSource.data
-            .filter(x => x.groupInfo &&  (x.groupInfo.id === groupInfo.id || x.groupInfo.code === groupInfo.code))
-            .map(x => this.fieldsDataSource.data.findIndex(y => y.id === x.id));
+            .filter(x => x.groupInfo &&  this.compareCode(x.groupInfo, groupInfo))
+            .map(x => this.fieldsDataSource.data.findIndex(y => this.compareCode(x, y)));
         if (UtilFunctions.isValidStringOrArray(fieldsWithGroupInfo)) {
             fieldsWithGroupInfo.forEach(x => {
                 this.fieldsDataSource.data[x].groupInfo.description = value.description;
@@ -1262,15 +1263,15 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         }
         const customFieldsWithGroupInfo = this.customFieldsDataSource.data
             .filter(x => x.groupInfo === groupInfo.description)
-            .map(x => this.customFieldsDataSource.data.findIndex(y => y.id === x.id));
+            .map(x => this.customFieldsDataSource.data.findIndex(y => this.compareCode(x, y)));
         if (UtilFunctions.isValidStringOrArray(customFieldsWithGroupInfo)) {
             customFieldsWithGroupInfo.forEach(x => {
                 this.customFieldsDataSource.data[x].groupInfo = value.description;
-                this.getFieldGroup(this.customFieldsDataSource.data[x].id, 'customFields').get('groupInfo').setValue(value.description);
+                this.getFieldGroup(this.customFieldsDataSource.data[x], 'customFields').get('groupInfo').setValue(value.description);
             });
             this.customFieldsDataSource._updateChangeSubscription();
         }
-        this.groupsInfoDataSource.data[index] = value;
+        this.groupsInfoDataSource.data[index] = Object.assign({}, this.groupsInfoDataSource.data[index], value);
         this.groupsInfoDataSource._updateChangeSubscription();
     }
     filterFields(event: Event) {
@@ -1323,19 +1324,13 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
 
     isGroupInfoAllowed(field: LuthierGroupInfoModel, option: LuthierGroupInfoModel): boolean {
-        if (field.id && field.id === option.id) {
+        if (this.compareCode(field, option) === true) {
             return false;
         }
         if (!option.parent) {
             return true;
         }
-        if (UtilFunctions.isValidStringOrArray(option.parent.id) === true) {
-            return option.parent.id !== field.id;
-        }
-        if (UtilFunctions.isValidStringOrArray(option.parent.code) === true) {
-            return option.parent.code !== field.code;
-        }
-        return true;
+        return !this.compareCode(option.parent, field);
 
     }
 

@@ -32,6 +32,7 @@ import {MatTabChangeEvent, MatTabsModule} from '@angular/material/tabs';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {LuthierDictionaryComponent} from '../luthier-dictionary.component';
 import {
+    LuthierBasicModel,
     LuthierCustomizationModel,
     LuthierFieldCharcaseEnum,
     LuthierFieldCharcaseEnumParser,
@@ -47,6 +48,7 @@ import {
     LuthierSearchFieldOperatorEnum,
     LuthierSearchStatusEnum,
     LuthierSearchTypeEnum,
+    LuthierSubsystemModel,
     LuthierTableModel,
     LuthierTableReferenceModel,
     LuthierVisionDatasetCustomFieldModel,
@@ -54,7 +56,8 @@ import {
     LuthierVisionDatasetFieldTypeEnum,
     LuthierVisionDatasetModel,
     LuthierVisionDatasetSearchModel,
-    LuthierVisionGroupInfoModel
+    LuthierVisionGroupInfoModel,
+    LuthierVisionModel
 } from '../../../../../shared/models/luthier.model';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatSort, MatSortModule, Sort} from '@angular/material/sort';
@@ -76,6 +79,7 @@ import {
     LuthierDictionaryDatasetSearchModalComponent
 } from './modal/search/luthier-dictionary-dataset-search-modal.component';
 import {FilterPredicateUtil} from '../../../../../shared/util/util-classes';
+import {MatMenuModule} from '@angular/material/menu';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -107,7 +111,8 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'group
         MatCheckboxModule,
         SharedPipeModule,
         MatSelectModule,
-        NgTemplateOutlet
+        NgTemplateOutlet,
+        MatMenuModule
     ],
     providers: [
         provideNgxMask(),
@@ -124,7 +129,6 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     public customizationsDataSource = new MatTableDataSource<LuthierVisionDatasetFieldModel>();
     public groupsInfoDataSource = new MatTableDataSource<LuthierVisionGroupInfoModel>();
     currentTab: TableType = 'fields';
-    fieldRowEditing: { [key: string]: string } = {}
     private _cloneModel: LuthierVisionDatasetModel;
     tables: LuthierTableModel[];
     @Input()
@@ -132,7 +136,6 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this._model = value;
         this._cloneModel = cloneDeep(this._model);
         this.tables = cloneDeep(this.parent.tables);
-        this.setParentRelation();
     }
     get model(): LuthierVisionDatasetModel {
         return this._cloneModel;
@@ -172,12 +175,12 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     @HostListener('document:keydown', ['$event'])
     onKeydownHandler(event: KeyboardEvent) {
         if (event.code === 'F8' || event.code === 'Escape') {
-            if (UtilFunctions.isValidStringOrArray(this.fieldRowEditing[this.currentTab]) === true) {
+            const row = this.getRowEditing(this.currentTab);
+            if (row) {
                 event.preventDefault();
-                const field = this.model[this.currentTab][this.fieldRowEditing[this.currentTab]];
-                const fg = this.getFieldGroup(field.id, this.currentTab);
-                fg.patchValue(field);
-                this.fieldRowEditing[this.currentTab] = null;
+                const fg = this.getFieldGroup(row, this.currentTab);
+                fg.patchValue(row);
+                row['editing'] = false;
                 this._changeDetectorRef.detectChanges();
             }
         }
@@ -234,21 +237,21 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             customFilter: this.addCustomizationField(),
             uiConfiguration: ['', []],
             parent: this.formBuilder.group({
-                code: [this.model.code],
-                name: ['', [Validators.required]],
+                code: [null],
+                name: [null],
                 description: ['']
             }),
             table: this.formBuilder.group({
-                code: [this.model.code],
+                code: [null],
                 name: ['', [Validators.required]],
                 description: ['']
-            }),
+            }, {validators: Validators.required}),
             vision: this.formBuilder.group({
-                code: [this.model.code],
+                code: [null],
                 name: ['', [Validators.required]],
                 description: ['']
             }),
-            objectType: [''],
+            objectType: [null],
             groupInfos: this.formBuilder.array([]),
         });
         this.addFields('fields');
@@ -261,6 +264,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this.customFieldsDataSource.data = this.model.customFields;
         this.customizationsDataSource.data = this.model.fields;
         this.groupsInfoDataSource.data = this.model.groupInfos;
+        this.setParentRelation();
     }
 
     setCustomizations() {
@@ -405,11 +409,12 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         }
     }
 
-    delete(id: string, index: number,type: TableType) {
-        const fieldIndex = this.getFields(type).controls.findIndex(x => x.get("id").value === id);
+    delete(model: LuthierBasicModel, index: number,type: TableType) {
+        index = this.getRealIndex(index, type).index;
+        const fieldIndex = this.getFields(type).controls.findIndex(x => this.compareCode(x.value, model));
         this.getFields(type).removeAt(fieldIndex);
         if (type === 'groupInfos') {
-            this.deleteGroupInfo(id, index);
+            this.deleteGroupInfo(model, index);
         }
         else {
             const dataSource = type === 'fields' ? this.fieldsDataSource : this.customFieldsDataSource;
@@ -422,8 +427,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 this.searchsDataSource.data.forEach(search => {
                     if (UtilFunctions.isValidStringOrArray(search.searchFields) === true) {
                         for (let index = 0; index < search.searchFields.length;) {
-                            if (search.searchFields[index].field &&
-                                (search.searchFields[index].field.id === id || search.searchFields[index].field.code === code)) {
+                            if (search.searchFields[index].field && this.compareCode(search.searchFields[index].field, model)) {
                                 search.searchFields.splice(index, 1);
                                 deleted = true;
                                 continue;
@@ -442,9 +446,35 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     }
 
     save() {
-        this.model = Object.assign({}, this.model, this.formSave.value) as LuthierVisionDatasetModel;
+        const basicInfo = this.formSave.value as LuthierVisionDatasetModel;
+        this.model.code = basicInfo.code;
+        this.model.name = basicInfo.name;
+        this.model.description = basicInfo.description;
+        this.model.customDescription = basicInfo.customDescription;
+        this.model.filter = basicInfo.filter;
+        this.model.uiConfiguration = basicInfo.uiConfiguration;
+
         this.saveCustomizations();
-        console.log(this.model, this.formSave.value, this.model.customizations);
+        this.service.saveDataset(this.model)
+            .then(result => {
+                result.id = this.model.id;
+                result.relatives = this.model.relatives;
+                this.model = result;
+                this.refresh();
+                const index = this.parent.tabsOpened.findIndex(x => x.id === this.model.id);
+                this.parent.tabsOpened.splice(index, 1, this.model);
+                this.parent.selectedTab = this.model;
+                this.parent.updateDatasetNode(this.model);
+                this._changeDetectorRef.detectChanges();
+                this.messageService.open(`Dataset salvo com sucesso`, 'SUCESSO', 'success');
+            })
+    }
+
+    canSave(): boolean {
+        if (this.formSave) {
+            return !this.formSave.invalid;
+        }
+        return false;
     }
 
     saveCustomizations() {
@@ -581,7 +611,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                     && UtilFunctions.isValidStringOrArray(searchFieldModel.customLabel) === true
                     && searchFieldModel.customLabel.value !== searchFieldModel.label
                 ) {
-                    const fieldIndex = this.model.fields.findIndex(x => x.id === searchFieldModel.field.id);
+                    const fieldIndex = this.model.fields.findIndex(x => this.compareCode(x, searchFieldModel.field));
                     if (fieldIndex >= 0) {
                         searchFieldModel.customLabel.type = 'SEARCH_FIELD_VISION';
                         searchFieldModel.customLabel.name1 = this.model.vision.name;
@@ -598,16 +628,19 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
 
 
     revert() {
+        console.log(UtilFunctions.getInvalidFields(this.formSave));
+        /*
         this.model = this._model;
         this.refresh();
         this._changeDetectorRef.detectChanges();
+         */
     }
 
     getFields(type: TableType): FormArray {
         return this.formSave.get(type === 'customizations' ? 'fields' : type) as FormArray;
     }
-    getFieldGroup(id: string, type: TableType): FormGroup {
-        const index =(this.formSave.get(type === 'customizations' ? 'fields' : type) as FormArray).controls.findIndex(x => x.get("id").value === id);
+    getFieldGroup(model: LuthierBasicModel, type: TableType): FormGroup {
+        const index =(this.formSave.get(type === 'customizations' ? 'fields' : type) as FormArray).controls.findIndex(x => this.compareCode(x.value, model));
         const fg = (this.formSave.get(type === 'customizations' ? 'fields' : type) as FormArray).at(index) as FormGroup;
         return fg;
     }
@@ -620,7 +653,9 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         const modelFields = type === 'fields' ? this.model.fields : this.model.customFields;
         if (UtilFunctions.isValidStringOrArray(modelFields) === true) {
             modelFields.forEach(x => {
-                x.id = crypto.randomUUID();
+                if (UtilFunctions.isValidStringOrArray(x.id) === false) {
+                    x.id = crypto.randomUUID();
+                }
                 /*
                 if (UtilFunctions.isValidStringOrArray(this.model.customizations) === true) {
                     const index = this.model.customizations.findIndex(y =>
@@ -695,6 +730,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                     description: [null],
                     }),
                 reference: this.addReferenceField(),
+                customLabel: this.addCustomizationField(),
                 customMask: this.addCustomizationField(),
                 customReadOnly: this.addCustomizationField(),
                 customVisible: this.addCustomizationField(),
@@ -823,12 +859,52 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         });
         return c;
     }
-    editRow(index: number, type: TableType) {
-        this.fieldRowEditing[type] = index.toString();
+    getRealIndex(index: number, type: TableType): {index: number, dataSource: MatTableDataSource<any>} {
+        const dataSource = this.getDatasourceFromType(type);
+        if (index < 0) {
+            return {index: index, dataSource: dataSource};
+        }
+        return {index: dataSource.data.indexOf(dataSource.filteredData[index]), dataSource: dataSource};
     }
 
-    saveRow(id: string, index: number, type: TableType) {
-        const fg = this.getFieldGroup(id, type);
+    getDatasourceFromType(type: TableType): MatTableDataSource<any> {
+
+        if (type === 'fields') {
+            return this.fieldsDataSource;
+        }
+        else if (type === 'customFields') {
+            return this.customFieldsDataSource;
+        }
+        else if (type === 'customizations') {
+            return this.customizationsDataSource;
+        }
+        else if (type === 'groupInfos') {
+            return this.groupsInfoDataSource;
+        }
+        else if (type === 'searchs') {
+            return this.searchsDataSource;
+        }
+    }
+
+    getRowEditing(type: TableType): any {
+        const dataSource = this.getDatasourceFromType(type);
+        const index = dataSource.data.findIndex(x => x['editing'] === true);
+        if (index >= 0) {
+            return dataSource.data[index];
+        }
+        return null;
+    }
+
+    editRow(index: number, type: TableType) {
+        const editing = this.getRealIndex(index, type);
+        editing.dataSource.data[editing.index]['editing'] = true;
+    }
+
+    saveRow(model: LuthierBasicModel, index: number, type: TableType) {
+        const editing = this.getRealIndex(index, type);
+        index = editing.index;
+
+        const fg = this.getFieldGroup(model, type);
         if (fg.invalid) {
             this.messageService.open("Existem campo inválidos!", "Error de Validação", "warning");
             fg.updateValueAndValidity();
@@ -836,22 +912,22 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             return;
         }
         if (type === 'fields') {
-            this.fieldsDataSource.data[index] = fg.value;
+            this.fieldsDataSource.data[index] = Object.assign({}, this.fieldsDataSource.data[index], fg.value);
             this.fieldsDataSource._updateChangeSubscription();
             this.customizationsDataSource._updateChangeSubscription();
         }
         else if (type === 'customizations') {
-            this.customizationsDataSource.data[index] = fg.value;
+            this.customizationsDataSource.data[index] = Object.assign({}, this.customizationsDataSource.data[index], fg.value);
             this.customizationsDataSource._updateChangeSubscription();
         }
         else if (type === 'groupInfos') {
-            this.editGroupInfo(id, index, fg.value as LuthierGroupInfoModel);
+            this.editGroupInfo(fg.value as LuthierGroupInfoModel, index);
         }
         else {
-            this.customFieldsDataSource.data[index] = fg.value;
+            this.customFieldsDataSource.data[index] = Object.assign({}, this.customFieldsDataSource.data[index], fg.value);
             this.customFieldsDataSource._updateChangeSubscription();
         }
-        this.fieldRowEditing[type] = null;
+        editing.dataSource.data[editing.index]['editing'] = false;
         this._changeDetectorRef.detectChanges();
     }
 
@@ -876,11 +952,13 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this.editSearch(new LuthierVisionDatasetSearchModel(), -1);
     }
     deleteSearch(index: number) {
+        index = this.getRealIndex(index, 'searchs').index;
         this.searchsDataSource.data.splice(index, 1);
         this.searchsDataSource._updateChangeSubscription();
         this._changeDetectorRef.detectChanges();
     }
     editSearch(model: LuthierVisionDatasetSearchModel, index: number) {
+        index = this.getRealIndex(index, 'searchs').index;
         this._parent.service.getActiveSubsystems().then(subsystems => {
             const fields = this.model.fields.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
             const modal = this._matDialog.open(LuthierDictionaryDatasetSearchModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-dataset-search-modal-container' });
@@ -917,11 +995,12 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this.groupsInfoDataSource._updateChangeSubscription();
         this._changeDetectorRef.detectChanges();
     }
-    deleteGroupInfo(id: string, index: number) {
+    deleteGroupInfo(model: LuthierBasicModel, index: number) {
+        index = this.getRealIndex(index, 'groupInfos').index;
         const groupInfo =  this.groupsInfoDataSource.data[index];
         const groupInfoWithGroupInfo = this.groupsInfoDataSource.data
-            .filter(x => x.parent &&  (x.parent.id === groupInfo.id || x.parent.code === groupInfo.code))
-            .map(x => this.groupsInfoDataSource.data.findIndex(y => y.id === x.id));
+            .filter(x => x.parent &&  (this.compareCode(x.parent, groupInfo)))
+            .map(x => this.groupsInfoDataSource.data.findIndex(y => this.compareCode(x, y)));
         console.log('groupInfoWithGroupInfo', groupInfoWithGroupInfo, groupInfo);
         if (UtilFunctions.isValidStringOrArray(groupInfoWithGroupInfo)) {
             groupInfoWithGroupInfo.forEach(x => {
@@ -932,32 +1011,33 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this.groupsInfoDataSource._updateChangeSubscription();
 
         const fieldsWithGroupInfo = this.fieldsDataSource.data
-            .filter(x => x.groupInfo &&  (x.groupInfo.id === groupInfo.id || x.groupInfo.code === groupInfo.code))
-            .map(x => this.fieldsDataSource.data.findIndex(y => y.id === x.id));
+            .filter(x => x.groupInfo &&  this.compareCode(x.groupInfo, groupInfo))
+            .map(x => this.fieldsDataSource.data.findIndex(y => this.compareCode(x, y)));
         if (UtilFunctions.isValidStringOrArray(fieldsWithGroupInfo)) {
             fieldsWithGroupInfo.forEach(x => {
                 this.fieldsDataSource.data[x].groupInfo = null;
-                this.getFieldGroup(this.fieldsDataSource.data[x].id, 'fields').get('groupInfo').patchValue(new LuthierGroupInfoModel());
+                this.getFieldGroup(this.fieldsDataSource.data[x], 'fields').get('groupInfo').patchValue(new LuthierGroupInfoModel());
             });
             this.fieldsDataSource._updateChangeSubscription();
         }
         const customFieldsWithGroupInfo = this.customFieldsDataSource.data
             .filter(x => x.groupInfo === groupInfo.description)
-            .map(x => this.customFieldsDataSource.data.findIndex(y => y.id === x.id));
+            .map(x => this.customFieldsDataSource.data.findIndex(y => this.compareCode(x, y)));
         if (UtilFunctions.isValidStringOrArray(customFieldsWithGroupInfo)) {
             customFieldsWithGroupInfo.forEach(x => {
                 this.customFieldsDataSource.data[x].groupInfo = null;
-                this.getFieldGroup(this.customFieldsDataSource.data[x].id, 'customFields').get('groupInfo').setValue(null);
+                this.getFieldGroup(this.customFieldsDataSource.data[x] as LuthierBasicModel, 'customFields').get('groupInfo').setValue(null);
             });
             this.customFieldsDataSource._updateChangeSubscription();
         }
         this._changeDetectorRef.detectChanges();
     }
-    editGroupInfo(id: string, index: number, value: LuthierGroupInfoModel) {
+    editGroupInfo(value: LuthierGroupInfoModel, index: number) {
+        index = this.getRealIndex(index, 'groupInfos').index;
         const groupInfo =  this.groupsInfoDataSource.data[index];
         const groupInfoWithGroupInfo = this.groupsInfoDataSource.data
-            .filter(x => x.parent &&  (x.parent.id === groupInfo.id || x.parent.code === groupInfo.code))
-            .map(x => this.groupsInfoDataSource.data.findIndex(y => y.id === x.id));
+            .filter(x => x.parent &&  this.compareCode(x.parent, groupInfo))
+            .map(x => this.groupsInfoDataSource.data.findIndex(y => this.compareCode(x, y)));
         if (UtilFunctions.isValidStringOrArray(groupInfoWithGroupInfo)) {
             groupInfoWithGroupInfo.forEach(x => {
                 this.groupsInfoDataSource.data[x].parent.description = value.description;
@@ -965,8 +1045,8 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         }
 
         const fieldsWithGroupInfo = this.fieldsDataSource.data
-            .filter(x => x.groupInfo &&  (x.groupInfo.id === groupInfo.id || x.groupInfo.code === groupInfo.code))
-            .map(x => this.fieldsDataSource.data.findIndex(y => y.id === x.id));
+            .filter(x => x.groupInfo &&  this.compareCode(x.groupInfo, groupInfo))
+            .map(x => this.fieldsDataSource.data.findIndex(y => this.compareCode(x, y)));
         if (UtilFunctions.isValidStringOrArray(fieldsWithGroupInfo)) {
             fieldsWithGroupInfo.forEach(x => {
                 this.fieldsDataSource.data[x].groupInfo.description = value.description;
@@ -975,15 +1055,15 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         }
         const customFieldsWithGroupInfo = this.customFieldsDataSource.data
             .filter(x => x.groupInfo === groupInfo.description)
-            .map(x => this.customFieldsDataSource.data.findIndex(y => y.id === x.id));
+            .map(x => this.customFieldsDataSource.data.findIndex(y => this.compareCode(x, y)));
         if (UtilFunctions.isValidStringOrArray(customFieldsWithGroupInfo)) {
             customFieldsWithGroupInfo.forEach(x => {
                 this.customFieldsDataSource.data[x].groupInfo = value.description;
-                this.getFieldGroup(this.customFieldsDataSource.data[x].id, 'customFields').get('groupInfo').setValue(value.description);
+                this.getFieldGroup(this.customFieldsDataSource.data[x] as LuthierBasicModel, 'customFields').get('groupInfo').setValue(value.description);
             });
             this.customFieldsDataSource._updateChangeSubscription();
         }
-        this.groupsInfoDataSource.data[index] = value;
+        this.groupsInfoDataSource.data[index] = Object.assign({}, this.groupsInfoDataSource.data[index], value);
         this.groupsInfoDataSource._updateChangeSubscription();
     }
     filterFields(event: Event) {
@@ -1028,19 +1108,13 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     }
 
     isGroupInfoAllowed(field: LuthierGroupInfoModel, option: LuthierGroupInfoModel): boolean {
-        if (field.id && field.id === option.id) {
+        if (this.compareCode(field, option) === true) {
             return false;
         }
         if (!option.parent) {
             return true;
         }
-        if (UtilFunctions.isValidStringOrArray(option.parent.id) === true) {
-            return option.parent.id !== field.id;
-        }
-        if (UtilFunctions.isValidStringOrArray(option.parent.code) === true) {
-            return option.parent.code !== field.code;
-        }
-        return true;
+        return !this.compareCode(field, option.parent);
 
     }
 
@@ -1067,6 +1141,26 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         }
     }
 
+    getDatasetByName(name: string, parent: LuthierVisionDatasetModel | LuthierVisionModel ): LuthierVisionDatasetModel {
+        if (UtilFunctions.isValidStringOrArray(parent.children) === true) {
+            let index = parent.children.findIndex(x => x.name === name);
+            if (index < 0) {
+                for (let child of parent.children) {
+                    const dataset = this.getDatasetByName(name, child);
+                    if (dataset != null) {
+                        return dataset;
+                    }
+                }
+            }
+            else {
+                return parent.children[index];
+            }
+        }
+        else {
+            return null;
+        }
+    }
+
     setParentRelation() {
         this.parentRelation = null;
         if (this.model.parent) {
@@ -1087,7 +1181,8 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     }
 
     hasParentProblem(): boolean {
-        return this.model.table && this.model.parent && this.model.parent.code >= 0 && !this.parentRelation;
+        return this.model.table && this.model.parent && UtilFunctions.isValidStringOrArray(this.model.parent.code) &&
+            parseInt(this.model.parent.code.toString()) >= 0 && !this.parentRelation;
     }
 
     importSearchTable() {
@@ -1162,5 +1257,462 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
 
     changeName(name: string) {
         this.model.name = name;
+    }
+
+    async readDatasetFromClipboard() {
+        try {
+            const text = await navigator.clipboard.readText();
+            const model = JSON.parse(text) as LuthierVisionDatasetModel;
+            setTimeout(() => {
+                this.importTable(model);
+            })
+        } catch (error) {
+            this.messageService.open('Erro ao ler conteúdo do clipboard '+ error, 'ERRO', 'error');
+            console.error('Failed to read clipboard contents: ', error);
+        }
+    }
+
+    readDatasetFromFile(event: Event) {
+        const input = event.target as HTMLInputElement;
+        if (input.files && input.files.length > 0) {
+            const file = input.files[0];
+            // You can further process the selected file here
+            const reader = new FileReader();
+            reader.onload = () => {
+                const text = reader.result as string;
+                const model = JSON.parse(text) as LuthierVisionDatasetModel;
+                setTimeout(() => {
+                    this.importTable(model);
+                });
+
+            };
+            reader.onerror = (error) => {
+                this.messageService.open('Erro ao ler arquivo '+ error, 'ERRO', 'error');
+            };
+            reader.readAsText(file);
+        }
+    }
+
+    importTable(model: LuthierVisionDatasetModel) {
+        if (model) {
+            try {
+                if (UtilFunctions.isValidStringOrArray(model.code) === false) {
+                    throw new Error('Erro ao ler dataset');
+                }
+                if (model.objectType != this.model.objectType) {
+                    throw new Error('Erro ao ler dataset');
+                }
+                model.vision = this.model.vision;
+                model.children = [];
+
+                const indexTable = this.parent.tables.findIndex(x => x.name === model.table.name);
+                if (indexTable < 0) {
+                    throw new Error(`Erro ao ler dataset. A tabela ${model.table.name} precisa ser adicionada antes da importação do dataset`);
+                }
+                if (model.parent && UtilFunctions.isValidStringOrArray(model.parent.code) === true) {
+                    const indexParent = this.model.relatives.findIndex(x => x.name === model.parent.name);
+                    if (indexParent >= 0) {
+                        model.parent = this.model.relatives[indexParent];
+                    }
+                    else {
+                        model.parent = this.model.parent;
+                    }
+
+                }
+                Promise.all(
+                    [
+                        this._parent.service.getActiveSubsystems(),
+                        this.service.getTable(this.parent.tables[indexTable].code)]
+                )
+                .then(async value => {
+                    try {
+                        const subsystems = value[0] as LuthierSubsystemModel[];
+                        const table = value[1] as LuthierTableModel;
+                        if (UtilFunctions.isValidStringOrArray(this.model.code) === false) {
+                            this.model.name = model.name;
+                        }
+                        const importedCode = model.code;
+                        model.table = table;
+                        model.name = this.model.name;
+                        model.code = this.model.code;
+                        model.id = this.model.id;
+                        model.relatives = this.model.relatives;
+
+                        //groupInfos
+                        if (UtilFunctions.isValidStringOrArray(model.groupInfos) === false) {
+                            model.groupInfos = [];
+                        }
+                        if (UtilFunctions.isValidStringOrArray(this.model.groupInfos) === false) {
+                            this.model.groupInfos = [];
+                        }
+
+                        for (let i = 0; i < this.model.groupInfos.length; i++) {
+                            let groupInfo = this.model.groupInfos[i];
+                            let index = model.groupInfos.findIndex(x => x.description.toUpperCase() === groupInfo.description.toUpperCase());
+                            if (index >= 0) {
+                                model.groupInfos[index].code = groupInfo.code;
+                                model.groupInfos[index].id = groupInfo.id;
+
+                                const [item] = model.groupInfos.splice(index, 1);
+                                model.groupInfos.splice(i, 0, item);
+                            } else {
+                                model.groupInfos.splice(i, 0, groupInfo);
+                            }
+                        }
+                        for (let i = this.model.groupInfos.length; i < model.groupInfos.length; i++) {
+                            let groupInfo = model.groupInfos[i];
+                            groupInfo.code = null;
+                            groupInfo.id = crypto.randomUUID();
+                        }
+                        for (let i = 0; i < model.groupInfos.length; i++) {
+                            let groupInfo = model.groupInfos[i];
+                            if (groupInfo.parent) {
+                                const index = model.groupInfos.findIndex(x => x.description === groupInfo.parent.description);
+                                groupInfo.parent = model.groupInfos[index];
+                            }
+                        }
+                        //end groupInfos
+                        const tablesSearched = new Array<LuthierTableModel>;
+                        // field
+                        if (UtilFunctions.isValidStringOrArray(model.fields) === false) {
+                            model.fields = [];
+                        }
+                        if (UtilFunctions.isValidStringOrArray(this.model.fields) === false) {
+                            this.model.fields = [];
+                        }
+                        for (let i = 0; i < this.model.fields.length; i++) {
+                            let datasetField = this.model.fields[i];
+                            let field = datasetField.tableField;
+                            let index = model.fields.findIndex(x =>
+                                x.tableField.name.toUpperCase() === field.name.toUpperCase() &&
+                                x.fieldType === datasetField.fieldType &&
+                                x.tableField.table.name === field.table.name &&
+                                x.reference?.name === datasetField.reference?.name
+                            );
+                            if (index >= 0) {
+                                model.fields[index].code = field.code;
+                                model.fields[index].id = field.id;
+                                const [item] = model.fields.splice(index, 1);
+                                model.fields.splice(i, 0, item);
+                            } else {
+                                model.fields.splice(i, 0, datasetField);
+                            }
+                        }
+                        for (let i = this.model.fields.length; i < model.fields.length;) {
+                            let datasetField = model.fields[i];
+                            let field = datasetField.tableField;
+                            if (datasetField.fieldType === LuthierVisionDatasetFieldTypeEnum.NORMAL) {
+                                const indexTableField = table.fields.findIndex(x => x.name === field.name);
+                                if (indexTableField < 0) {
+                                    model.fields.splice(i, 1);
+                                    continue;
+                                }
+                                datasetField.tableField = table.fields[indexTableField];
+                            } else if (datasetField.fieldType === LuthierVisionDatasetFieldTypeEnum.LOOKUP) {
+
+                                const referenceIndex = table.references?.findIndex(x => x.name.toUpperCase() === datasetField.reference.name.toUpperCase()
+                                    && x.tablePK.name.toUpperCase() === datasetField.reference.tablePK.name.toUpperCase());
+                                if (referenceIndex < 0) {
+                                    model.fields.splice(i, 1);
+                                    continue;
+                                }
+                                const lookupIndex = tablesSearched.findIndex(x => x.code === table.references[referenceIndex].tablePK.code);
+                                const pkTable = lookupIndex >= 0 ? tablesSearched[lookupIndex] : await this.service.getTable(table.references[referenceIndex].tablePK.code);
+                                const indexPKField = pkTable.fields.findIndex(x => x.name.toUpperCase() === field.name.toUpperCase());
+                                if (indexPKField < 0) {
+                                    model.fields.splice(i, 1);
+                                    continue;
+                                }
+                                datasetField.tableField = pkTable.fields[indexPKField];
+                                datasetField.reference = table.references[referenceIndex];
+                            }
+                            datasetField.code = null;
+                            datasetField.id = crypto.randomUUID();
+                            i++;
+                        }
+                        for (let i = 0; i < model.fields.length; i++) {
+                            let field = model.fields[i];
+                            if (field.groupInfo && UtilFunctions.isValidStringOrArray(field.groupInfo.description) === true) {
+                                const index = model.groupInfos.findIndex(x => x.description === field.groupInfo.description);
+                                field.groupInfo = model.groupInfos[index];
+                            } else {
+                                field.groupInfo = null;
+                            }
+                        }
+                        // end fields
+
+                        // customFields
+                        if (UtilFunctions.isValidStringOrArray(model.customFields) === false) {
+                            model.customFields = [];
+                        }
+                        if (UtilFunctions.isValidStringOrArray(this.model.customFields) === false) {
+                            this.model.customFields = [];
+                        }
+                        for (let i = 0; i < this.model.customFields.length; i++) {
+                            let datasetField = this.model.customFields[i];
+                            let field = datasetField.tableField;
+                            let index = model.customFields.findIndex(x =>
+                                x.tableField.name.toUpperCase() === field.name.toUpperCase() &&
+                                x.fieldType === datasetField.fieldType &&
+                                x.reference === datasetField.reference
+                            );
+                            if (index >= 0) {
+                                model.customFields[index].code = field.code;
+                                model.customFields[index].id = field.id;
+                                const [item] = model.customFields.splice(index, 1);
+                                model.customFields.splice(i, 0, item);
+                            } else {
+                                model.customFields.splice(i, 0, datasetField);
+                            }
+                        }
+
+                        for (let i = this.model.customFields.length; i < model.customFields.length;) {
+                            let datasetField = model.customFields[i];
+                            let field = datasetField.tableField;
+                            if (datasetField.fieldType === LuthierVisionDatasetFieldTypeEnum.NORMAL) {
+                                let indexTableField = table.fields.findIndex(x => x.name.toUpperCase() === field.name.toUpperCase());
+                                if (indexTableField < 0) {
+                                    indexTableField = table.customFields.findIndex(x => x.name.toUpperCase() === field.name.toUpperCase());
+                                    if (indexTableField < 0) {
+                                        model.fields.splice(i, 1);
+                                        continue;
+                                    }
+                                    else {
+                                        datasetField.tableField = table.customFields[indexTableField];
+                                    }
+                                }
+                                else {
+                                    datasetField.tableField = table.fields[indexTableField];
+                                }
+                            } else if (datasetField.fieldType === LuthierVisionDatasetFieldTypeEnum.LOOKUP) {
+
+                                const referenceIndex = table.references?.findIndex(x => x.name.toUpperCase() === datasetField.reference.toUpperCase());
+                                if (referenceIndex < 0) {
+                                    model.fields.splice(i, 1);
+                                    continue;
+                                }
+                                const lookupIndex = tablesSearched.findIndex(x => x.code === table.references[referenceIndex].tablePK.code);
+                                const pkTable = lookupIndex >= 0 ? tablesSearched[lookupIndex] : await this.service.getTable(table.references[referenceIndex].tablePK.code);
+                                const indexPKField = pkTable.fields.findIndex(x => x.name.toUpperCase() === field.name.toUpperCase());
+                                if (indexPKField < 0) {
+                                    model.fields.splice(i, 1);
+                                    continue;
+                                }
+                                datasetField.tableField = pkTable.fields[indexPKField];
+                                datasetField.reference = table.references[referenceIndex].name;
+                            }
+                            datasetField.code = null;
+                            datasetField.id = crypto.randomUUID();
+                            i++;
+                        }
+                        for (let i = 0; i < model.customFields.length; i++) {
+                            let field = model.customFields[i];
+                            if (field.groupInfo && UtilFunctions.isValidStringOrArray(field.groupInfo) === true) {
+                                const index = model.groupInfos.findIndex(x => x.description === field.groupInfo);
+                                field.groupInfo = model.groupInfos[index].description;
+                            } else {
+                                field.groupInfo = null;
+                            }
+                        }
+                        // end customFields
+
+                        //searchs
+                        if (UtilFunctions.isValidStringOrArray(model.searchs) === false) {
+                            model.searchs = [];
+                        }
+                        if (UtilFunctions.isValidStringOrArray(this.model.searchs) === false) {
+                            this.model.searchs = [];
+                        }
+
+                        for (let i = 0; i < this.model.searchs.length; i++) {
+                            let search = this.model.searchs[i];
+                            let index = model.searchs.findIndex(x => x.name.toUpperCase() === search.name.toUpperCase());
+                            if (index >= 0) {
+                                model.searchs[index].code = search.code;
+                                model.searchs[index].id = search.id;
+                                if (UtilFunctions.isValidStringOrArray(search.searchFields) === false) {
+                                    search.searchFields = [];
+                                }
+                                if (UtilFunctions.isValidStringOrArray(model.searchs[index].searchFields) === false) {
+                                    model.searchs[index].searchFields = [];
+                                }
+                                for (let j = 0; j < search.searchFields.length; j++) {
+                                    let searchField = search.searchFields[j];
+                                    const searchFieldIndex = model.searchs[index].searchFields.findIndex(x =>
+                                        x.label.toUpperCase() === searchField.label.toUpperCase() &&
+                                        x.dataset.name === searchField.dataset.name &&
+                                        x.field.name === searchField.field.name
+                                    );
+                                    if (searchFieldIndex >= 0) {
+                                        model.searchs[index].searchFields[searchFieldIndex].code = searchField.code;
+                                        model.searchs[index].searchFields[searchFieldIndex].id = searchField.id;
+                                        const [itemSearch] = model.searchs[index].searchFields.splice(searchFieldIndex, 1);
+                                        model.searchs[index].searchFields.splice(j, 0, itemSearch);
+                                    } else {
+                                        model.searchs[index].searchFields.splice(j, 0, searchField);
+                                    }
+                                }
+                                for (let j = search.subsystems.length; j < model.searchs[index].subsystems.length;) {
+                                    let subsystemField = model.searchs[index].subsystems[j];
+
+                                    const indexField = subsystems.findIndex(x => x.code === subsystemField.subsystem.code);
+                                    if (indexField < 0) {
+                                        model.searchs[index].subsystems.splice(j, 1);
+                                        continue;
+                                    }
+                                    j++;
+                                }
+                                for (let j = search.searchFields.length; j < model.searchs[index].searchFields.length;) {
+                                    let searchField = model.searchs[index].searchFields[j];
+                                    if (searchField.dataset && searchField.dataset.code !== importedCode) {
+                                        const indexRelative = this.model.relatives.findIndex(x =>
+                                            x.name === searchField.dataset.name &&
+                                            x.table.name.toUpperCase() === searchField.dataset.table.name.toUpperCase()
+                                        );
+                                        if (indexRelative < 0) {
+                                            search.searchFields.splice(j, 1);
+                                            continue;
+                                        }
+                                        const indexRelativeField = this.model.relatives[indexRelative].fields.findIndex(x =>
+                                            x.tableField.name.toUpperCase() === searchField.field.tableField.name.toUpperCase());
+                                        if (indexRelativeField < 0) {
+                                            search.searchFields.splice(j, 1);
+                                            continue;
+                                        }
+                                        searchField.dataset = this.model.relatives[indexRelative];
+                                        searchField.field = this.model.relatives[indexRelative].fields[indexRelativeField];
+                                    }
+                                    else {
+                                        const indexModelFields = model.fields.findIndex(x =>
+                                            x.tableField.name.toUpperCase() === searchField.field.tableField.name.toUpperCase());
+                                        if (indexModelFields < 0) {
+                                            search.searchFields.splice(j, 1);
+                                            continue;
+                                        }
+                                        searchField.dataset = {code: model.code, id: model.id, name: model.name};
+                                        searchField.field = this.model.fields[indexModelFields];
+                                    }
+
+                                    searchField.code = null;
+                                    searchField.id = crypto.randomUUID();
+                                    j++;
+                                }
+
+                                const [item] = model.searchs.splice(index, 1);
+                                model.searchs.splice(i, 0, item);
+                            } else {
+                                model.searchs.splice(i, 0, search);
+                            }
+                        }
+                        for (let i = this.model.searchs.length; i < model.searchs.length; i++) {
+                            let search = model.searchs[i];
+                            search.code = null;
+                            search.id = crypto.randomUUID();
+                            for (let j = 0; j < search.subsystems.length;) {
+                                let subsystemField = search.subsystems[j];
+
+                                const indexField = subsystems.findIndex(x => x.code === subsystemField.subsystem.code);
+                                if (indexField < 0) {
+                                    search.subsystems.splice(j, 1);
+                                    continue;
+                                }
+                                j++;
+                            }
+                            for (let j = 0; j < search.searchFields.length;) {
+                                let searchField = search.searchFields[j];
+                                searchField.code = null;
+                                searchField.id = crypto.randomUUID();
+
+                                if (searchField.dataset.code && searchField.dataset.code !== importedCode) {
+                                    const indexRelative = this.model.relatives.findIndex(x =>
+                                        x.name === searchField.dataset.name &&
+                                        x.table.name.toUpperCase() === searchField.dataset.table.name.toUpperCase()
+                                    );
+                                    if (indexRelative < 0) {
+                                        search.searchFields.splice(j, 1);
+                                        continue;
+                                    }
+                                    const indexRelativeField = this.model.relatives[indexRelative].fields.findIndex(x =>
+                                        x.tableField.name.toUpperCase() === searchField.field.tableField.name.toUpperCase());
+                                    if (indexRelativeField < 0) {
+                                        search.searchFields.splice(j, 1);
+                                        continue;
+                                    }
+                                    searchField.dataset = this.model.relatives[indexRelative];
+                                    searchField.field = this.model.relatives[indexRelative].fields[indexRelativeField];
+                                }
+                                else {
+                                    const indexModelFields = model.fields.findIndex(x =>
+                                        x.tableField.name.toUpperCase() === searchField.field.tableField.name.toUpperCase());
+                                    if (indexModelFields < 0) {
+                                        search.searchFields.splice(j, 1);
+                                        continue;
+                                    }
+                                    searchField.dataset = {code: model.code, id: model.id, name: model.name};
+                                    searchField.field = model.fields[indexModelFields];
+                                }
+                                searchField.code = null;
+                                searchField.id = crypto.randomUUID();
+                                j++;
+                            }
+
+                        }
+                        //end searchs
+
+                        //customizations
+                        if (UtilFunctions.isValidStringOrArray(model.customizations) === false) {
+                            model.customizations = [];
+                        }
+                        if (UtilFunctions.isValidStringOrArray(this.model.customizations) === false) {
+                            this.model.customizations = [];
+                        }
+                        for (let i = 0; i < model.customizations.length; i++) {
+                            model.customizations[i].name1 = this.model.name;
+                        }
+
+                        for (let i = 0; i < this.model.customizations.length; i++) {
+                            let customization = this.model.customizations[i];
+                            let index = model.customizations.findIndex(x =>
+                                x.name1.toUpperCase() === customization.name1.toUpperCase() &&
+                                x.name2.toUpperCase() === customization.name2.toUpperCase() &&
+                                x.name3.toUpperCase() === customization.name3.toUpperCase() &&
+                                x.name4.toUpperCase() === customization.name4.toUpperCase() &&
+                                x.name5.toUpperCase() === customization.name5.toUpperCase() &&
+                                x.type === customization.type
+                            );
+                            if (index >= 0) {
+                                model.customizations[index].code = customization.code;
+                                model.customizations[index].id = customization.id;
+                                const [item] = model.customizations.splice(index, 1);
+                                model.customizations.splice(i, 0, item);
+                            } else {
+                                model.customizations.splice(i, 0, customization);
+                            }
+                        }
+                        for (let i = this.model.customizations.length; i < model.customizations.length; i++) {
+                            let customization = model.customizations[i];
+                            customization.code = null;
+                            customization.id = crypto.randomUUID();
+                        }
+                        //end customizations
+                        this._cloneModel = model;
+                        this.refresh();
+                        this._changeDetectorRef.detectChanges();
+                        this.messageService.open('Importação realizada com sucesso', 'SUCESSO', 'success');
+
+                    } catch (e) {
+                        console.error(e);
+                        this.messageService.open('Erro na importação : ' + e, 'ERRO', 'error');
+                    }
+
+                });
+
+
+
+            } catch (e) {
+                console.error(e);
+                this.messageService.open('Erro na importação : ' + e, 'ERRO', 'error');
+            }
+        }
     }
 }

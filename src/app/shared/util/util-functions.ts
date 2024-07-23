@@ -1,5 +1,6 @@
 import {MatTableDataSource} from '@angular/material/table';
 import {cloneDeep} from 'lodash-es';
+import {FormArray, FormGroup} from '@angular/forms';
 
 export class UtilFunctions {
 
@@ -168,5 +169,20 @@ export class UtilFunctions {
             errorMessage = 'Erro desconhecido';
         }
         return errorMessage;
+    }
+
+    public static getInvalidFields(form: FormGroup | FormArray, parentKey: string = ''): string[] {
+        const invalid = [];
+        Object.keys(form.controls).forEach(key => {
+            const control = form.get(key);
+            const controlKey = parentKey ? `${parentKey}.${key}` : key;
+
+            if (control instanceof FormGroup || control instanceof FormArray) {
+                invalid.push(...this.getInvalidFields(control, controlKey));
+            } else if (control.invalid) {
+                invalid.push(controlKey);
+            }
+        });
+        return invalid;
     }
 }

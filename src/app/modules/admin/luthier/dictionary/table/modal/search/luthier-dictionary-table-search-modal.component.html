@@ -215,7 +215,7 @@
                             <div class="flex flex-row items-center">
                                 <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                                     <mat-select class="text-sm" [compareWith]="parent.compareCode"
-                                                [formControl]="model.get('tableField')">
+                                                [formGroup]="model.get('tableField')">
                                         <ng-container *ngFor="let t of fields">
                                             <mat-option [value]="{id: !t.id ? '' : t.id, code: !t.code ? '' : t.code, name: t.name, fieldType: t.fieldType, size: t.size}" >
                                                 {{t.name}}

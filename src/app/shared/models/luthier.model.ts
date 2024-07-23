@@ -1,3 +1,7 @@
+export class LuthierBasicModel {
+    id?: string
+    code?: number
+}
 export class LuthierDatabaseModel {
     code: number
     server: string
@@ -476,9 +480,9 @@ export class LuthierVisionDatasetModel {
     code?: number
     name?: string
     description?: string
-    customDescription: LuthierCustomizationModel;
+    customDescription?: LuthierCustomizationModel;
     filter?: string
-    customFilter: LuthierCustomizationModel;
+    customFilter?: LuthierCustomizationModel;
     uiConfiguration?: string
     parent?: LuthierVisionDatasetModel
     children?: LuthierVisionDatasetModel[]
@@ -502,7 +506,7 @@ export class LuthierVisionGroupInfoModel extends LuthierGroupInfoModel {
 }
 export class LuthierVisionDatasetFieldModel {
     code?: number
-    name?: any
+    name?: string
     fieldType?: LuthierVisionDatasetFieldTypeEnum
     size?: number
     search?: boolean
@@ -544,6 +548,7 @@ export class LuthierVisionDatasetFieldModel {
 }
 
 export class LuthierVisionDatasetSearchModel {
+    id?: string;
     code?: number
     datasetCode?: number
     name?: string
@@ -558,6 +563,7 @@ export class LuthierVisionDatasetSearchModel {
 
 }
 export class LuthierVisionDatasetSearchFieldModel {
+    id?: string
     code?: number
     searchCode?: number
     datasetCode?: number

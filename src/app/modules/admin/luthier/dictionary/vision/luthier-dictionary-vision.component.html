@@ -2,6 +2,7 @@
     <div class="flex-none flex mb-2">
         <button class="text-sm min-h-7 h-7"
                 mat-flat-button
+                [disabled]="canSave() === false"
                 color="primary" (click)="save()">
             <mat-icon
                 class="icon-size-4"
@@ -16,6 +17,25 @@
                 svgIcon="mat_solid:undo"></mat-icon>
             <span class="ml-2">Reverter</span>
         </button>
+        <button class="text-sm min-h-7 h-7"
+                mat-flat-button
+                color="warn" [matMenuTriggerFor]="menuImportVision">
+            <mat-icon
+                class="icon-size-4"
+                svgIcon="mat_solid:import_export"></mat-icon>
+            <span class="ml-2">Importar</span>
+        </button>
+        <mat-menu #menuImportVision="matMenu">
+            <button mat-menu-item (click)="readVisionFromClipboard()">
+                <mat-icon [svgIcon]="'mat_outline:content_copy'"></mat-icon>
+                Importar do Clipboard
+            </button>
+            <button mat-menu-item (click)="fileTableInput.click()">
+                <mat-icon [svgIcon]="'mat_solid:file_download'"></mat-icon>
+                Importar de Arquivo
+            </button>
+            <input type="file" #fileTableInput (change)="readVisionFromFile($event)" accept=".json" style="display: none;" />
+        </mat-menu>
     </div>
     <div class="grid sm:grid-cols-12 gap-2 flex-none mb-2 mt-0">
         <div class="sm:col-span-3">
