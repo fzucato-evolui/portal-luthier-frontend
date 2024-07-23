@@ -50,6 +50,7 @@ export class LuthierTableModel {
     customFields?: LuthierCustomFieldModel[]
     customizations?: LuthierCustomizationModel[]
     bonds?: LuthierBondModel[]
+    datasetBonds?: LuthierDatasetBondModel[]
     searchs?: LuthierTableSearchModel[]
 
 }
@@ -74,6 +75,15 @@ export class LuthierBondModel {
     code?: number
     name?: string
     description?: string
+}
+
+export class LuthierDatasetBondModel {
+    code?: number
+    name?: string
+    description?: string
+    visionCode?: number
+    visionName?: string
+    visionDescription?: string
 }
 
 export enum LuthierFieldTypeEnum {

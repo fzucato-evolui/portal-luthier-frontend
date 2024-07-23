@@ -347,7 +347,7 @@ export class LuthierService
 
     getVisions(): Observable<any>
     {
-        this._tables.next([]);
+        this._visions.next([]);
         return this._httpClient.get<LuthierVisionModel[]>(`${this.baseDicUrl}/all-visions`).pipe(
             tap((response: LuthierVisionModel[]) =>
             {
@@ -532,18 +532,12 @@ export class LuthierService
             })));
     }
 
-    deleteDataset(model: LuthierVisionDatasetModel): Promise<any>  {
+    deleteDataset(model: LuthierVisionDatasetModel, vision: LuthierVisionModel): Promise<any>  {
         return firstValueFrom(this._httpClient.delete<any>(`${this.baseDicUrl}/dataset/${model.code}`).pipe(
             switchMap((response: any) => {
-                const indexVision = this._currentVisions.findIndex(x => x.code === model.vision.code);
-                if (model.parent && UtilFunctions.isValidStringOrArray(model.parent.code)) {
-                    const oldParent = this.getDatasetByCode(model.parent.code, this._currentVisions[indexVision]);
-                    oldParent.model.children.splice(oldParent.index, 1);
-                }
-                else {
-                    const indexDataset = this._currentVisions[indexVision].children.findIndex(x => x.code === model.code);
-                    this._currentVisions[indexVision].children.splice(indexDataset, 1);
-                }
+                const indexVision = this._currentVisions.findIndex(x => x.code === vision.code);
+                let parent = this.getDatasetByCode(model.code, this._currentVisions[indexVision], true);
+                parent.model.children.splice(parent.index, 1);
                 this.visions = this._currentVisions;
                 // Return a new observable with the response
                 return of(response);
@@ -564,19 +558,24 @@ export class LuthierService
         return firstValueFrom(this._httpClient.patch<any>(`${this.baseDicUrl}/sync-schemas`, null));
     }
 
-    getDatasetByCode(code: number, parent: LuthierVisionDatasetModel | LuthierVisionModel ): {model :LuthierVisionDatasetModel, index: number} {
+    getDatasetByCode(code: number, parent: LuthierVisionDatasetModel | LuthierVisionModel, returnParent?: boolean ): {model :LuthierVisionDatasetModel, index: number} {
         if (UtilFunctions.isValidStringOrArray(parent.children) === true) {
             let index = parent.children.findIndex(x => x.code === code);
             if (index < 0) {
                 for (let child of parent.children) {
-                    const dataset = this.getDatasetByCode(code, child);
+                    const dataset = this.getDatasetByCode(code, child, returnParent);
                     if (dataset != null) {
                         return dataset;
                     }
                 }
             }
             else {
-                return {model: parent.children[index], index: index};
+                if (!returnParent) {
+                    return {model: parent.children[index], index: index};
+                }
+                else {
+                    return {model: parent, index: index};
+                }
             }
         }
         else {

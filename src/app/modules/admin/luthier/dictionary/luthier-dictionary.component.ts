@@ -397,7 +397,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
     }
 
     refreshScroll() {
-        if (this.cdkVirtualScrollViewPort && this.tables) {
+        if (this.cdkVirtualScrollViewPort) {
             this.filteredObjects.next(null);
             this._changeDetectorRef.detectChanges();
             this.filterObjects();
@@ -408,11 +408,11 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
         }
     }
     hasChild = (_: number, node: LuthierVisionModel | LuthierVisionDatasetModel) => {
-        return !!node.children && node.children.length > 0;
+        return !!node.children && node.children.length > 0 && node.children.filter(x => !x['removed']).length > 0;
     }
 
     removeObject(object: LuthierDictionaryObjectType, vision: LuthierVisionModel) {
-        this.messageService.open('Tem certeza de que deseja remover o objeto?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
+        this.messageService.open('Tem certeza de que deseja remover o objeto?. Todos os vínculos serão removidos.', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
             if (result === 'confirmed') {
                 if (object.objectType === 'TABLE' || object.objectType == 'VIEW') {
                     this.service.deleteTable(object.code)
@@ -448,7 +448,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                         this.filterObjects(null);
                     }
                      */
-                    this.service.deleteDataset(object as LuthierVisionDatasetModel)
+                    this.service.deleteDataset(object as LuthierVisionDatasetModel, vision)
                         .then(result => {
                             let index = this.tabsOpened.findIndex(x => x.objectType === object.objectType && this.compareCode(x, object));
                             this.tabsOpened.splice(index, 1);
@@ -618,16 +618,15 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
         }
         else {
             const dataSource = tree.dataSource as MatTreeNestedDataSource<LuthierVisionModel>;
-
             if (table['removed'] === true) {
-                table['updated'] = false;
                 dataSource.data = null
                 dataSource.disconnect();
+                table['updated'] = false;
             }
             else if (table['updated'] === true) {
-                table['updated'] = false;
-                dataSource.data = null;
+                dataSource.data = null
                 dataSource.data = [table];
+                table['updated'] = false;
             }
             else {
                 dataSource.data = [table];

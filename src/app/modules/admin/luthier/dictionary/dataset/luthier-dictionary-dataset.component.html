@@ -130,7 +130,7 @@
                                 class="evolui-menu-item-icon"
                                 fontSet="fas" fontIcon="fa-t"
                                 matPrefix></mat-icon>
-                            <mat-select class="text-sm" [compareWith]="compareCode" (selectionChange)="parentChanged($event)">
+                            <mat-select class="text-sm" [compareWith]="compareCode" (selectionChange)="parentChanged($event)" [value]="model.parent">
                                 <mat-option [value]="null" >
                                     Nenhum
                                 </mat-option>

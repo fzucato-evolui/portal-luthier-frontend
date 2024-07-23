@@ -506,7 +506,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 model.customLabel.type = 'FIELD_VISION';
                 model.customLabel.name1 = this.model.vision.name;
                 model.customLabel.name2 = this.model.name;
-                model.customLabel.name3 = model.name;
+                model.customLabel.name3 = model.tableField.name;
                 customizations.push(model.customLabel);
             }
             if (model.customMask
@@ -516,7 +516,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 model.customMask.type = 'VISION_FIELD_MASK';
                 model.customMask.name1 = this.model.vision.name;
                 model.customMask.name2 = this.model.name;
-                model.customMask.name3 = model.name;
+                model.customMask.name3 = model.tableField.name;
                 customizations.push(model.customMask);
             }
             if (model.customReadOnly
@@ -526,7 +526,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 model.customReadOnly.type = 'VISION_FIELD_READONLY';
                 model.customReadOnly.name1 = this.model.vision.name;
                 model.customReadOnly.name2 = this.model.name;
-                model.customReadOnly.name3 = model.name;
+                model.customReadOnly.name3 = model.tableField.name;
                 model.customReadOnly.value = UtilFunctions.parseBoolean(model.customReadOnly.value) ? '1' : '0';
                 customizations.push(model.customReadOnly);
             }
@@ -537,7 +537,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 model.customVisible.type = 'VISION_FIELD_VISIBLE';
                 model.customVisible.name1 = this.model.vision.name;
                 model.customVisible.name2 = this.model.name;
-                model.customVisible.name3 = model.name;
+                model.customVisible.name3 = model.tableField.name;
                 model.customVisible.value = UtilFunctions.parseBoolean(model.customVisible.value) ? '1' : '0';
                 customizations.push(model.customVisible);
             }
@@ -548,7 +548,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 model.customNotNull.type = 'VISION_FIELD_REQUIRED';
                 model.customNotNull.name1 = this.model.vision.name;
                 model.customNotNull.name2 = this.model.name;
-                model.customNotNull.name3 = model.name;
+                model.customNotNull.name3 = model.tableField.name;
                 model.customNotNull.value = UtilFunctions.parseBoolean(model.customNotNull.value) ? '1' : '0';
                 customizations.push(model.customNotNull);
             }
@@ -559,6 +559,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 model.customCharCase.type = 'VISION_FIELD_CHARCASE';
                 model.customCharCase.name1 = this.model.vision.name;
                 model.customCharCase.name2 = this.model.name;
+                model.customCharCase.name3 = model.tableField.name;
                 model.customCharCase.value = LuthierFieldCharcaseEnumParser.fromValue(model.customCharCase.value);
                 customizations.push(model.customCharCase);
             }
@@ -569,7 +570,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 model.customEditor.type = 'VISION_FIELD_EDITORTYPE';
                 model.customEditor.name1 = this.model.vision.name;
                 model.customEditor.name2 = this.model.name;
-                model.customEditor.name3 = model.name;
+                model.customEditor.name3 = model.tableField.name;
                 model.customEditor.value = LuthierFieldEditorEnumParser.fromValue(model.customEditor.value);
                 customizations.push(model.customEditor);
             }
@@ -580,7 +581,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 model.customLookupFilter.type = 'VISION_FIELD_LOOKUPFILTER';
                 model.customLookupFilter.name1 = this.model.vision.name;
                 model.customLookupFilter.name2 = this.model.name;
-                model.customLookupFilter.name3 = model.name;
+                model.customLookupFilter.name3 = model.tableField.name;
                 customizations.push(model.customLookupFilter);
             }
             if (model.customUiConfiguration
@@ -590,7 +591,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 model.customUiConfiguration.type = 'VISION_FIELD_UICONFIGURATION';
                 model.customUiConfiguration.name1 = this.model.vision.name;
                 model.customUiConfiguration.name2 = this.model.name;
-                model.customUiConfiguration.name3 = model.name;
+                model.customUiConfiguration.name3 = model.tableField.name;
                 customizations.push(model.customUiConfiguration);
             }
         });
@@ -628,12 +629,10 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
 
 
     revert() {
-        console.log(UtilFunctions.getInvalidFields(this.formSave));
-        /*
+        //console.log(UtilFunctions.getInvalidFields(this.formSave));
         this.model = this._model;
         this.refresh();
         this._changeDetectorRef.detectChanges();
-         */
     }
 
     getFields(type: TableType): FormArray {
@@ -1373,6 +1372,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                         }
                         //end groupInfos
                         const tablesSearched = new Array<LuthierTableModel>;
+                        tablesSearched.push(table);
                         // field
                         if (UtilFunctions.isValidStringOrArray(model.fields) === false) {
                             model.fields = [];
@@ -1417,7 +1417,14 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                                     continue;
                                 }
                                 const lookupIndex = tablesSearched.findIndex(x => x.code === table.references[referenceIndex].tablePK.code);
-                                const pkTable = lookupIndex >= 0 ? tablesSearched[lookupIndex] : await this.service.getTable(table.references[referenceIndex].tablePK.code);
+                                let pkTable = null;
+                                if (lookupIndex >= 0) {
+                                    pkTable = tablesSearched[lookupIndex];
+                                }
+                                else {
+                                    pkTable = await this.service.getTable(table.references[referenceIndex].tablePK.code);
+                                    tablesSearched.push(pkTable);
+                                }
                                 const indexPKField = pkTable.fields.findIndex(x => x.name.toUpperCase() === field.name.toUpperCase());
                                 if (indexPKField < 0) {
                                     model.fields.splice(i, 1);
@@ -1492,7 +1499,14 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                                     continue;
                                 }
                                 const lookupIndex = tablesSearched.findIndex(x => x.code === table.references[referenceIndex].tablePK.code);
-                                const pkTable = lookupIndex >= 0 ? tablesSearched[lookupIndex] : await this.service.getTable(table.references[referenceIndex].tablePK.code);
+                                let pkTable = null;
+                                if (lookupIndex >= 0) {
+                                    pkTable = tablesSearched[lookupIndex];
+                                }
+                                else {
+                                    pkTable = await this.service.getTable(table.references[referenceIndex].tablePK.code);
+                                    tablesSearched.push(pkTable);
+                                }
                                 const indexPKField = pkTable.fields.findIndex(x => x.name.toUpperCase() === field.name.toUpperCase());
                                 if (indexPKField < 0) {
                                     model.fields.splice(i, 1);
@@ -1566,8 +1580,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                                     let searchField = model.searchs[index].searchFields[j];
                                     if (searchField.dataset && searchField.dataset.code !== importedCode) {
                                         const indexRelative = this.model.relatives.findIndex(x =>
-                                            x.name === searchField.dataset.name &&
-                                            x.table.name.toUpperCase() === searchField.dataset.table.name.toUpperCase()
+                                            x.name === searchField.dataset.name
                                         );
                                         if (indexRelative < 0) {
                                             search.searchFields.splice(j, 1);
@@ -1625,8 +1638,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
 
                                 if (searchField.dataset.code && searchField.dataset.code !== importedCode) {
                                     const indexRelative = this.model.relatives.findIndex(x =>
-                                        x.name === searchField.dataset.name &&
-                                        x.table.name.toUpperCase() === searchField.dataset.table.name.toUpperCase()
+                                        x.name === searchField.dataset.name
                                     );
                                     if (indexRelative < 0) {
                                         search.searchFields.splice(j, 1);

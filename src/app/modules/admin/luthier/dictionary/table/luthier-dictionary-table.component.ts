@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-import {NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import {DatePipe, NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
 import {
     FormArray,
     FormBuilder,
@@ -33,8 +33,10 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {LuthierDictionaryComponent} from '../luthier-dictionary.component';
 import {
     LuthierBasicModel,
+    LuthierBondModel,
     LuthierCustomFieldModel,
     LuthierCustomizationModel,
+    LuthierDatasetBondModel,
     LuthierFieldCharcaseEnum,
     LuthierFieldCharcaseEnumParser,
     LuthierFieldEditorEnum,
@@ -116,7 +118,8 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'group
         SharedPipeModule,
         MatSelectModule,
         NgTemplateOutlet,
-        MatMenuModule
+        MatMenuModule,
+        DatePipe
     ],
     providers: [
         provideNgxMask(),
@@ -134,6 +137,10 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     @ViewChild('sortReferences') sortReferences: MatSort;
     public searchsDataSource = new MatTableDataSource<LuthierTableSearchModel>();
     @ViewChild('sortSearchs') sortSearchs: MatSort;
+    public bondsDataSource = new MatTableDataSource<LuthierBondModel>();
+    @ViewChild('sortBonds') sortBonds: MatSort;
+    public bondsDatasetDataSource = new MatTableDataSource<LuthierDatasetBondModel>();
+    @ViewChild('sortDatasetBonds') sortDatasetBonds: MatSort;
     public customFieldsDataSource = new MatTableDataSource<LuthierCustomFieldModel>();
     public customizationsDataSource = new MatTableDataSource<LuthierTableFieldModel>();
     public groupsInfoDataSource = new MatTableDataSource<LuthierGroupInfoModel>();
@@ -185,6 +192,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         'customDefaultValue', 'customPrecision', 'customMaxValue', 'customMinValue', 'customMask',
         'customCharCase', 'customEditor', 'customUiConfiguration'];
     displayedBondColumns = [ 'code', 'name', 'description'];
+    displayedDatasetBondColumns = [ 'code', 'name', 'description', 'visionCode', 'visionName', 'visionDescription'];
     displayedSearchColumns = [ 'buttons', 'code', 'name', 'customName', 'order', 'status', 'type'];
     LuthierFieldTypeEnum = LuthierFieldTypeEnum;
     LuthierFieldModifierEnum = LuthierFieldModifierEnum;
@@ -233,6 +241,8 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.indexesDataSource.sort = this.sortIndexes;
         this.referencesDataSource.sort = this.sortReferences;
         this.searchsDataSource.sort = this.sortSearchs;
+        this.bondsDataSource.sort = this.sortBonds;
+        this.bondsDatasetDataSource.sort = this.sortDatasetBonds;
         this.groupsInfoDataSource.sort = this.sortFields.get(1);
         this.customFieldsDataSource.sort = this.sortFields.get(2);
         this.customizationsDataSource.sort = this.sortFields.get(3);
@@ -273,6 +283,8 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.customFieldsDataSource.data = this.model.customFields;
         this.customizationsDataSource.data = this.model.fields;
         this.groupsInfoDataSource.data = this.model.groupInfos;
+        this.bondsDataSource.data = this.model.bonds;
+        this.bondsDatasetDataSource.data = this.model.datasetBonds;
     }
 
     setCustomizations() {
@@ -1301,6 +1313,14 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     filterGroupsInfo(event: Event) {
         const filterValue = (event.target as HTMLInputElement).value;
         this.groupsInfoDataSource.filter = filterValue.trim().toLowerCase();
+    }
+    filterBonds(event: Event) {
+        const filterValue = (event.target as HTMLInputElement).value;
+        this.bondsDataSource.filter = filterValue.trim().toLowerCase();
+    }
+    filterDatasetBonds(event: Event) {
+        const filterValue = (event.target as HTMLInputElement).value;
+        this.bondsDatasetDataSource.filter = filterValue.trim().toLowerCase();
     }
 
     checkIndeterminate(event: MatCheckboxChange, c: FormControl) {
