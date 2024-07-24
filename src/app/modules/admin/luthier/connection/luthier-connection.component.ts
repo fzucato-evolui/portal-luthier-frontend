@@ -136,7 +136,7 @@ export class LuthierConnectionComponent implements OnInit, OnDestroy, AfterViewI
 
     }
 
-    fastFilter($event: KeyboardEvent) {
+    filter(event) {
         const filterValue = (event.target as HTMLInputElement).value;
         this.databases.filter = filterValue.trim().toLowerCase();
     }

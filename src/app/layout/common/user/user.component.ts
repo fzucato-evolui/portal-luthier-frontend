@@ -14,7 +14,7 @@ import {MatDividerModule} from '@angular/material/divider';
 import {MatIconModule} from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import {Router} from '@angular/router';
-import {Subject, takeUntil} from 'rxjs';
+import {firstValueFrom, Subject, takeUntil} from 'rxjs';
 import {UserModel} from '../../../shared/models/user.model';
 import {UserService} from '../../../shared/services/user/user.service';
 
@@ -86,8 +86,11 @@ export class UserComponent implements OnInit, OnDestroy
      */
     signOut(): void
     {
-        this._userService.signOut();
-        this._router.navigate(['/sign-out']);
-        this.user = null;
+        firstValueFrom(this._userService.signOut())
+            .then(result => {
+                this._router.navigate(['/sign-out']);
+                this.user = null;
+            });
+
     }
 }

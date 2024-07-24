@@ -1,0 +1,78 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden">
+
+    <mat-drawer-container class="flex-auto h-full">
+
+        <!-- Drawer -->
+        <mat-drawer
+            class="w-80 dark:bg-gray-900"
+            [autoFocus]="false"
+            [mode]="drawerMode"
+            [opened]="drawerOpened"
+            #matDrawer>
+            <div class="py-1 h-full flex flex-col overflow-hidden">
+
+                <!-- Header -->
+                <div class="flex flex-col flex-0 p-1 border-b dark:bg-transparent">
+                    <div class="flex items-center justify-between">
+                        <div class="grow px-6 text-3xl font-bold tracking-tighter">Configurações</div>
+                        <div class="flex">
+                            <button (click)="refresh()"
+                                    mat-icon-button>
+                                <mat-icon [svgIcon]="'mat_outline:refresh'"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-auto w-full overflow-y-auto overflow-x-hidden">
+                    <div class="flex flex-col items-center justify-end py-2">
+                        <div class="flex flex-col divide-y border-t border-b w-full">
+                            <ng-container *ngFor="let panel of panels; trackBy: trackByFn">
+                                <div
+                                    class="flex px-8 py-5 cursor-pointer"
+                                    [ngClass]="{'unselected': !selectedPanel || selectedPanel !== panel.id,
+                                    'selected': selectedPanel && selectedPanel === panel.id}"
+                                    (click)="goToPanel(panel.id)">
+                                    <mat-icon *ngIf="!panel.icon.fontSet"
+                                              [svgIcon]="panel.icon"></mat-icon>
+                                    <mat-icon *ngIf="panel.icon.fontSet"
+                                              [fontSet]="panel.icon.fontSet" [fontIcon]="panel.icon.fontIcon"></mat-icon>
+                                    <div class="ml-3">
+                                        <div
+                                            class="font-medium leading-6">
+                                            {{panel.title}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </mat-drawer>
+
+        <!-- Drawer content -->
+        <mat-drawer-content class="flex flex-col overflow-hidden">
+
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-1 border-b bg-card dark:bg-transparent">
+
+                <div class="flex shrink-0 items-center mt-0 sm:mx-2">
+                    <button class="min-h-7 h-7 "
+                        mat-icon-button
+                        (click)="matDrawer.toggle()">
+                        <mat-icon fontSet="fas" fontIcon="fa-cog"></mat-icon>
+                    </button>
+                </div>
+            </div>
+            <div class="h-full max-h-full overflow-x-auto md:overflow-auto bg-white">
+                <div class="h-full">
+                    <portal-config-google [model]="getConfig(SystemConfigModelEnum.GOOGLE)" [ngClass]="selectedPanel !== SystemConfigModelEnum.GOOGLE ? 'hidden' : ''"></portal-config-google>
+                </div>
+            </div>
+        </mat-drawer-content>
+
+    </mat-drawer-container>
+
+</div>

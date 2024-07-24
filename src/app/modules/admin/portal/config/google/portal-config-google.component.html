@@ -1,0 +1,89 @@
+<div class="relative h-full w-full max-h-full sm:p-4 md:overflow-auto">
+  <form  [formGroup]="googleForm">
+
+    <!-- Section -->
+    <div class="w-full">
+      <div class="text-xl">Google</div>
+      <div class="text-secondary">Configurações de Autenticação Google</div>
+    </div>
+    <div class="flex flex-col w-full">
+      <!-- apiKey -->
+      <div class="w-full my-2">
+        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+          <mat-label>API Key</mat-label>
+          <mat-icon
+            class="icon-size-5"
+            fontSet="fas" fontIcon="fa-key"
+            matPrefix></mat-icon>
+          <input
+            [formControlName]="'apiKey'"
+            matInput>
+        </mat-form-field>
+      </div>
+      <!-- clientID -->
+      <div class="w-full my-2">
+        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+          <mat-label>Client ID</mat-label>
+          <mat-icon
+            class="icon-size-5"
+            fontSet="fas" fontIcon="fa-id-badge"
+            matPrefix></mat-icon>
+          <input
+            [formControlName]="'clientID'"
+            matInput>
+        </mat-form-field>
+      </div>
+      <!-- secretKey -->
+      <div class="w-full my-2">
+        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+          <mat-label>Secrete Key</mat-label>
+          <mat-icon
+            class="icon-size-5"
+            fontSet="fas" fontIcon="fa-user-secret"
+            matPrefix></mat-icon>
+          <input
+            [formControlName]="'secretKey'"
+            matInput>
+        </mat-form-field>
+      </div>
+      <!-- serviceAccount -->
+      <div class="w-full my-2">
+        <ngx-file-drop class="mb-4"
+                       [multiple]="false" [accept]="'.json'" dropZoneLabel="Arraste seu arquivo de configuração da conta de serviço aqui"
+                       (onFileDrop)="dropped($event)">
+
+          <ng-template ngx-file-drop-content-tmp let-openFileSelectorDocumentos="openFileSelector">
+            {{"Arraste seu arquivo de configuração da conta de serviço aqui"}}
+            <button
+              class="px-6 ml-3"
+              mat-icon-button
+              [color]="'primary'"
+              (click)="openFileSelectorDocumentos()">
+              <mat-icon class="icon-size-5" fontSet="fas" fontIcon="fa-upload"></mat-icon>
+            </button>
+          </ng-template>
+        </ngx-file-drop>
+      </div>
+      <div class="w-full max-w-full overflow-x-auto bg-gray-200 box-content" *ngIf="googleModel?.serviceAccount">
+        <pre class="text-xs whitespace-pre-line">
+          {{googleModel?.serviceAccount | json}}
+        </pre>
+      </div>
+    </div>
+
+
+    <div class="absolute bottom-0 right-0 z-50">
+
+      <button
+        class="mr-4 mb-4"
+        [disabled]="googleForm.invalid || isValidConfigJson() === false"
+        (click)="salvar()"
+        mat-flat-button
+        type="button"
+        [color]="'primary'">Salvar
+      </button>
+    </div>
+  </form>
+
+</div>
+

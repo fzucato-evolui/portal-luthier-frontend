@@ -1,0 +1,67 @@
+portal-config fuse-vertical-navigation .fuse-vertical-navigation-wrapper {
+    box-shadow: none !important;
+}
+portal-config #component-container > *:first-child {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+portal-config {
+    .mat-drawer-inner-container {
+        overflow: hidden !important;
+    }
+    .example-tree-invisible {
+        display: none;
+    }
+    .cdk-virtual-scroll-content-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .example-tree ul,
+    .example-tree li {
+        margin-top: 0;
+        margin-bottom: 0;
+        list-style-type: none;
+    }
+
+    /*
+     * This padding sets alignment of the nested nodes.
+     */
+    .example-tree .mat-nested-tree-node div[role=group] {
+        padding-left: 20px;
+    }
+
+    /*
+     * Padding for leaf nodes.
+     * Leaf nodes need to have padding so as to align with other non-leaf nodes
+     * under the same parent.
+     */
+    .example-tree div[role=group] > .mat-tree-node {
+        padding-left: 20px;
+    }
+    div.selected {
+        @apply bg-primary-50 #{'!important'};
+        @apply text-primary;
+
+    }
+
+
+    div.unselected:hover {
+        @apply bg-gray-100 #{'!important'};
+        &.darker {
+            @apply text-black #{'!important'};
+        }
+    }
+
+    div.unselected {
+        &.darker {
+            @apply text-gray-200 #{'!important'};
+        }
+    }
+}
+
+
+
+

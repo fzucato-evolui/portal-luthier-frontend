@@ -17,20 +17,20 @@ import {Navigation} from 'app/core/navigation/navigation.types';
 import {LanguagesComponent} from 'app/layout/common/languages/languages.component';
 import {MessagesComponent} from 'app/layout/common/messages/messages.component';
 import {NotificationsComponent} from 'app/layout/common/notifications/notifications.component';
-import {QuickChatComponent} from 'app/layout/common/quick-chat/quick-chat.component';
 import {SearchComponent} from 'app/layout/common/search/search.component';
 import {ShortcutsComponent} from 'app/layout/common/shortcuts/shortcuts.component';
 import {UserComponent} from 'app/layout/common/user/user.component';
 import {Subject, takeUntil} from 'rxjs';
 import {ConnectionsComponent} from '../../../common/connections/connections.component';
 import {UtilFunctions} from '../../../../shared/util/util-functions';
+import {QuickConnectionComponent} from '../../../common/quick-connection/quick-connection.component';
 
 @Component({
     selector     : 'compact-layout',
     templateUrl  : './compact.component.html',
     encapsulation: ViewEncapsulation.None,
     standalone   : true,
-    imports: [FuseLoadingBarComponent, MatButtonModule, MatIconModule, LanguagesComponent, FuseFullscreenComponent, SearchComponent, ShortcutsComponent, MessagesComponent, NotificationsComponent, UserComponent, NgIf, RouterOutlet, QuickChatComponent, FuseVerticalNavigationComponent, FuseHorizontalNavigationComponent, ConnectionsComponent],
+    imports: [FuseLoadingBarComponent, MatButtonModule, MatIconModule, LanguagesComponent, FuseFullscreenComponent, SearchComponent, ShortcutsComponent, MessagesComponent, NotificationsComponent, UserComponent, NgIf, RouterOutlet, QuickConnectionComponent, FuseVerticalNavigationComponent, FuseHorizontalNavigationComponent, ConnectionsComponent],
 })
 export class CompactLayoutComponent implements OnInit, OnDestroy
 {

@@ -70,22 +70,26 @@
         <div class="flex items-center pl-2 ml-auto space-x-0.5 sm:space-x-2">
 
 
+            <!--
             <languages></languages>
-            <fuse-fullscreen class="hidden md:block"></fuse-fullscreen>
             <search [appearance]="'bar'"></search>
             <shortcuts></shortcuts>
             <messages></messages>
-            <!--
             <notifications></notifications>
             !-->
+            <fuse-fullscreen class="hidden md:block"></fuse-fullscreen>
+            <!--
             <connections></connections>
+            !-->
+            <user></user>
+
             <button
                 class="lg:hidden"
                 mat-icon-button
-                (click)="quickChat.toggle()">
-                <mat-icon [svgIcon]="'heroicons_outline:chat-bubble-left-right'"></mat-icon>
+                (click)="quickConnection.toggle()">
+                <mat-icon [svgIcon]="'heroicons_outline:link'"></mat-icon>
             </button>
-            <user></user>
+
         </div>
     </div>
 
@@ -103,5 +107,6 @@
 
 </div>
 
-<!-- Quick chat -->
-<quick-chat #quickChat="quickChat"></quick-chat>
+<!-- Quick Connection-->
+<quick-connection #quickConnection="quickConnection"></quick-connection>
+

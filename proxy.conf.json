@@ -16,5 +16,11 @@
         "secure": false,
         "logLevel": "debug",
         "changeOrigin": true
+    },
+    "/server-files/*": {
+        "target": "http://localhost:8039",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
     }
 }

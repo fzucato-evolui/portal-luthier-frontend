@@ -1,0 +1,239 @@
+<div class="fixed lg:sticky top-0 bottom-0 lg:left-full w-full sm:w-96 lg:w-16 lg:h-screen lg:shadow">
+    <div
+        class="flex flex-col w-full sm:w-96 h-full transition-transform duration-400 ease-drawer bg-card"
+        [ngClass]="{'-translate-x-full sm:-translate-x-96 lg:-translate-x-80 shadow': opened, 'translate-x-0': !opened}">
+
+        <!-- Header -->
+        <div
+            class="quick-connection-header flex flex-0 items-center justify-start">
+
+            <!-- Toggle -->
+            <ng-container *ngIf="!opened || (opened && !selectedLuthierDatabase) || !withLuthier">
+                <div class="flex flex-auto items-center justify-center">
+                    <div class="flex flex-0 items-center justify-center w-16 cursor-pointer" (click)="toggle()">
+                        <mat-icon
+                            class="icon-size-6"
+                            [svgIcon]="'heroicons_outline:link'"></mat-icon>
+                    </div>
+                    <div class="flex flex-col flex-auto ml-4 py-2">
+                        <div class="text-lg font-medium text-secondary">Bancos Luthier</div>
+                    </div>
+                    <button
+                        (click)="toggle()"
+                        class="ml-auto mr-4"
+                        mat-icon-button>
+                        <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                    </button>
+                </div>
+            </ng-container>
+
+            <!-- Contact info -->
+            <ng-container *ngIf="opened && selectedLuthierDatabase && withLuthier">
+                <div class="flex flex-auto items-center ml-3">
+                    <div class="relative flex flex-0 items-center justify-center w-10">
+                        <mat-icon [svgIcon]="'custom:' + selectedLuthierDatabase.databaseType.toLowerCase()"
+                                  class="evolui-menu-item-icon icon-size-8"/>
+                    </div>
+                    <div class="flex flex-col flex-auto ml-4 py-2">
+                        <div
+                            class="font-semibold line-clamp-1 truncate"
+                            [innerHTML]="selectedLuthierDatabase.identifier"></div>
+                        <div
+                            class="line-clamp-2 truncate"
+                            [innerHTML]="selectedLuthierDatabase.description"></div>
+                    </div>
+                    <button
+                        class="ml-auto mr-4"
+                        (click)="toggle()"
+                        mat-icon-button>
+                        <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                    </button>
+                </div>
+            </ng-container>
+        </div>
+
+        <!-- Content -->
+        <div class="flex flex-auto border-t overflow-hidden">
+            <div
+                class="flex-0 w-16 h-full overflow-y-auto overscroll-y-contain sm:overflow-hidden sm:overscroll-auto"
+                fuseScrollbar
+                [fuseScrollbarOptions]="{wheelPropagation: false}">
+                <div class="flex-auto">
+                    <ng-container *ngFor="let database of luthierDatabases; trackBy: trackByFn">
+                        <div #target (mouseenter)="openPanel(target, database)" (mouseleave)="closePanel(target)"
+                            class="flex items-center py-3 px-4 cursor-pointer"
+                            [ngClass]="{'hover:bg-gray-100 dark:hover:bg-hover': !selectedLuthierDatabase || selectedLuthierDatabase.id !== database.id,
+                                        'bg-primary-50 dark:bg-hover': selectedLuthierDatabase && selectedLuthierDatabase.id === database.id}"
+                            (click)="!selectedLuthierDatabase || selectedLuthierDatabase.id !== database.id ? toggleLuthierDatabase(database.id) : toggle(true)">
+                            <div class="relative flex flex-0 items-center justify-center w-8 h-8">
+                                <ng-container *ngIf="selectedLuthierDatabase && selectedLuthierDatabase.id === database.id">
+                                    <div
+                                        class="absolute bottom-0 right-0 flex-0 w-2 h-2 -ml-0.5 rounded-full ring-2 ring-bg-card dark:ring-gray-900 bg-primary dark:bg-primary-500 text-on-primary">
+                                    </div>
+                                </ng-container>
+
+                                <mat-icon [svgIcon]="'custom:' + database.databaseType.toLowerCase()"
+                                          class="evolui-menu-item-icon icon-size-8"/>
+
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+
+            <!-- Conversation -->
+            <div class="flex flex-col flex-auto border-l overflow-hidden bg-gray-50 dark:bg-transparent">
+                <div class="flex-none mx-1.5">
+                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                        <mat-icon
+                            class="icon-size-4"
+                            fontSet="fas" fontIcon="fa-search"
+                            matPrefix></mat-icon>
+                        <input
+                            matInput
+                            [autocomplete]="'off'"
+                            [placeholder]="'Busca'"
+                            [(ngModel)]="filterValue"
+                            (ngModelChange)="filterObjects()"
+                            #filtro>
+                    </mat-form-field>
+                </div>
+                <ng-container *ngIf="selectedLuthierDatabase && withLuthier; else selectLuthierDatabase">
+                    <div class="flex flex-col overflow-y-auto overscroll-y-contain">
+                        <div class="flex flex-col flex-auto shrink p-2">
+                            <ng-container *ngFor="let database of filteredDadosDatabases | async; let i = index; let first = first; let last = last; trackBy: trackByFn">
+                                <div class="flex">
+                                    <div class="flex flex-auto py-2">
+                                        <!-- Icon -->
+                                        <div class="flex shrink-0 items-center justify-center px-4 cursor-pointer"
+                                             [ngClass]="{'hover:bg-gray-100 dark:hover:bg-hover': !selectedDadosDatabase || selectedDadosDatabase.code !== database.id,
+                                        'bg-primary-50 dark:bg-hover': selectedDadosDatabase && selectedDadosDatabase.code === database.code}"
+                                             (click)="toggleDadosDatabase(database.code)">
+                                            <div class="relative flex flex-0 items-center justify-center w-8 h-8">
+                                                <ng-container *ngIf="selectedDadosDatabase && selectedDadosDatabase.code === database.code">
+                                                    <div
+                                                        class="absolute bottom-0 right-0 flex-0 w-2 h-2 -ml-0.5 rounded-full ring-2 ring-bg-card dark:ring-gray-900 bg-primary dark:bg-primary-500 text-on-primary">
+                                                    </div>
+                                                </ng-container>
+
+                                                <mat-icon [svgIcon]="'custom:' + database.dbType.toLowerCase()"
+                                                          class="evolui-menu-item-icon icon-size-8"/>
+
+                                            </div>
+                                        </div>
+
+                                        <!-- Title, description & time -->
+                                        <div class="flex flex-col flex-auto">
+                                            <div
+                                                class="font-semibold line-clamp-1"
+                                                [innerHTML]="database.code + '(' + database.dbType + ')'"></div>
+                                            <div
+                                                [innerHTML]="database.server + '-' + (database.dbType !== 'ORACLE' ? database.database : database.user)"></div>
+
+                                        </div>
+                                        <!-- Actions -->
+                                    </div>
+
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+
+
+                </ng-container>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #selectLuthierDatabase>
+    <div class="flex flex-col overflow-y-auto overscroll-y-contain">
+        <div class="flex flex-col flex-auto shrink p-2">
+            <ng-container *ngFor="let database of filteredLuthierDatabases | async; let i = index; let first = first; let last = last; trackBy: trackByFn">
+                <div class="flex">
+                    <div class="flex flex-auto py-2">
+                        <!-- Icon -->
+                        <div class="flex shrink-0 items-center justify-center px-4 cursor-pointer"
+                             [ngClass]="{'hover:bg-gray-100 dark:hover:bg-hover': !selectedLuthierDatabase || selectedLuthierDatabase.id !== database.id,
+                                        'bg-primary-50 dark:bg-hover': selectedLuthierDatabase && selectedLuthierDatabase.id === database.id}"
+                             (click)="toggleLuthierDatabase(database.id)">
+                            <div class="relative flex flex-0 items-center justify-center w-8 h-8">
+                                <ng-container *ngIf="selectedLuthierDatabase && selectedLuthierDatabase.id === database.id">
+                                    <div
+                                        class="absolute bottom-0 right-0 flex-0 w-2 h-2 -ml-0.5 rounded-full ring-2 ring-bg-card dark:ring-gray-900 bg-primary dark:bg-primary-500 text-on-primary">
+                                    </div>
+                                </ng-container>
+
+                                <mat-icon [svgIcon]="'custom:' + database.databaseType.toLowerCase()"
+                                          class="evolui-menu-item-icon icon-size-8"/>
+
+                            </div>
+                        </div>
+
+                        <!-- Title, description & time -->
+                        <div class="flex flex-col flex-auto">
+                            <div
+                                class="font-semibold line-clamp-1"
+                                [innerHTML]="database.id + '(' + database.identifier + ')'"></div>
+                            <div
+                                [innerHTML]="database.host + '-' + (database.databaseType !== 'ORACLE' ? database.database : database.user)"></div>
+
+                        </div>
+                        <!-- Actions -->
+                    </div>
+
+                </div>
+            </ng-container>
+        </div>
+    </div>
+</ng-template>
+
+<!-- Speech bubble tail SVG -->
+<!-- @formatter:off -->
+<ng-template #speechBubbleExtension>
+    <svg width="100%" height="100%" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+            <path d="M1.01522827,0.516204834 C-8.83532715,54.3062744 61.7609863,70.5215302 64.8009949,64.3061218 C68.8074951,54.8859711 30.1663208,52.9997559 37.5036011,0.516204834 L1.01522827,0.516204834 Z" fill="currentColor" fill-rule="nonzero"></path>
+        </g>
+    </svg>
+</ng-template>
+
+<ng-template #connectionsPanel let-database="database">
+
+    <div class="fixed inset-0 sm:static sm:inset-auto flex flex-col sm:min-w-90 sm:w-90 sm:rounded-2xl overflow-hidden shadow-lg">
+
+        <!-- Content -->
+        <div class="relative flex flex-col flex-auto sm:max-h-120 divide-y overflow-y-auto bg-card">
+            <div class="flex flex-col group">
+                <div
+                    class="flex hover:bg-gray-50 dark:hover:bg-black dark:hover:bg-opacity-5">
+
+                    <div class="flex flex-auto py-2 pl-2 items-center">
+                        <!-- Icon -->
+                        <div class="flex shrink-0 items-center justify-center w-8 h-8 mr-4 rounded-full bg-gray-100 dark:bg-gray-700">
+                            <mat-icon
+                                [svgIcon]="'custom:' + database.databaseType.toLowerCase()" class="evolui-menu-item-icon icon-size-8">
+                            </mat-icon>
+                        </div>
+                        <!-- Title, description & time -->
+                        <div class="flex flex-col flex-auto items-center">
+                            <div
+                                class="font-semibold line-clamp-1"
+                                [innerHTML]="database.identifier"></div>
+                            <div
+                                class="line-clamp-2"
+                                [innerHTML]="database.description"></div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</ng-template>
+<!-- @formatter:on -->

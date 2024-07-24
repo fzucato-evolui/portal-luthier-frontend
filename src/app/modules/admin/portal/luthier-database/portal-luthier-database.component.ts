@@ -19,10 +19,11 @@ import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatDialog} from '@angular/material/dialog';
 import {NgClass} from '@angular/common';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import {AuthService, StorageChange} from '../../../../core/auth/auth.service';
+import {StorageChange} from '../../../../core/auth/auth.service';
 import {UtilFunctions} from '../../../../shared/util/util-functions';
 import {PortalLuthierDatabaseModalComponent} from './modal/portal-luthier-database-modal.component';
 import {MessageDialogService} from '../../../../shared/services/message/message-dialog-service';
+import {UserService} from '../../../../shared/services/user/user.service';
 
 @Component({
     selector     : 'portal-luthier-database',
@@ -56,8 +57,9 @@ export class PortalLuthierDatabaseComponent implements OnInit, OnDestroy, AfterV
     constructor(public service: PortalLuthierDatabaseService,
                 public messageService: MessageDialogService,
                 private _changeDetectorRef: ChangeDetectorRef,
-                private _authService: AuthService,
+                private _userService: UserService,
                 private _matDialog: MatDialog)
+
     {
         //window.addEventListener('storage', this.handleStorageChange);
     }
@@ -82,11 +84,11 @@ export class PortalLuthierDatabaseComponent implements OnInit, OnDestroy, AfterV
                 this.dataSource.data = databases;
                 console.log('databases', this.dataSource);
             });
-        const luthierDatabase = this._authService.luthierDatabase;
+        const luthierDatabase = this._userService.luthierDatabase;
         if (UtilFunctions.isValidStringOrArray(luthierDatabase) === true) {
             this.workDataBase = parseInt(luthierDatabase);
         }
-        this._authService.storageChange$
+        this._userService.storageChange$
             .pipe(takeUntil(this.unsubscribeAll))
             .subscribe((storage: StorageChange) =>
             {
@@ -153,12 +155,13 @@ export class PortalLuthierDatabaseComponent implements OnInit, OnDestroy, AfterV
 
     }
 
-    fastFilter($event: KeyboardEvent) {
-
+    filter(event) {
+        const filterValue = (event.target as HTMLInputElement).value;
+        this.dataSource.filter = filterValue.trim().toLowerCase();
     }
 
     check(id) {
         this.workDataBase = id;
-        this._authService.luthierDatabase = id;
+        this._userService.luthierDatabase = id;
     }
 }

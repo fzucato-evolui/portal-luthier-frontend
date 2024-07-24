@@ -185,4 +185,18 @@ export class UtilFunctions {
         });
         return invalid;
     }
+
+    public static getFileExtension(fileName: string): string {
+        if (UtilFunctions.isValidStringOrArray(fileName)) {
+            const ext = fileName.split('.').pop();
+            return '.' + ext;
+        }
+        return null;
+    }
+
+    public static arrayBufferToString(buffer) {
+        let text = '';
+        const bytes = new Uint8Array(buffer);
+        return new TextDecoder().decode(bytes);;
+    }
 }

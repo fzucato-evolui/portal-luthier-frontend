@@ -39,29 +39,6 @@ export class UserService
     get storageChange$(): Observable<StorageChange> {
         return this._storageChange$.asObservable();
     }
-    set accessToken(token: string)
-    {
-        if (UtilFunctions.isValidStringOrArray(token) === true) {
-            const oldValue = this.accessToken;
-            localStorage.setItem('accessToken', token);
-        }
-        else {
-            localStorage.removeItem('accessToken')
-        }
-        /*
-        this._storageChange$.next({
-            value: token,
-            oldValue: oldValue,
-            storageArea: 'sessionStorage',
-            key: 'accessToken'
-        });
-         */
-    }
-
-    get accessToken(): string
-    {
-        return localStorage.getItem('accessToken') ?? '';
-    }
     set luthierDatabase(id: string)
     {
         const oldValue = this.luthierDatabase;
@@ -154,9 +131,6 @@ export class UserService
         return this._httpClient.post('/api/public/auth/login', credentials).pipe(
             switchMap((response: any) => {
 
-                // Store the access token in the local storage
-                this.accessToken = response.accessToken;
-
                 // Store the user on the user service
                 this.user = response.user;
                 this.rootService.user = response.user;
@@ -189,12 +163,19 @@ export class UserService
 
     signOut(): Observable<any>
     {
-        // Remove the access token from the local storage
-        this.accessToken = null;
-        this.luthierDatabase = null;
-        this.dadosDatabase = null;
-        this.user = null;
-        this.rootService.user = null;
-        return of(true);
+        return this._httpClient.post('/api/public/auth/logoff', null).pipe(
+            switchMap((response: any) => {
+
+                // Remove the access token from the local storage
+                this.luthierDatabase = null;
+                this.dadosDatabase = null;
+                this.user = null;
+                this.rootService.user = null;
+
+                // Return a new observable with the response
+                return of(response);
+            })
+        );
+
     }
 }

@@ -48,10 +48,6 @@ export const authInterceptor = (req: HttpRequest<unknown>, next: HttpHandlerFn):
 
     let headers = req.headers;
 
-    if ( authService.accessToken )
-    {
-        headers = headers.set('Authorization', 'Bearer ' + authService.accessToken);
-    }
     const luthierDatabase = authService.luthierDatabase;
     if ( UtilFunctions.isValidStringOrArray(luthierDatabase) === true)
     {
@@ -64,7 +60,10 @@ export const authInterceptor = (req: HttpRequest<unknown>, next: HttpHandlerFn):
         headers = headers.set('X-DadosDatabaseID', dadosDatabase);
     }
 
-    let newReq = req.clone({headers});
+    let newReq = req.clone({
+        headers: headers,
+        withCredentials: true
+    });
     // Response
     return next(newReq).pipe(
         catchError((error) =>

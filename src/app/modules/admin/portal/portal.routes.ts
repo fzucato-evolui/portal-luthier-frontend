@@ -8,7 +8,8 @@ export default [
         path: "",
         children: [
             {path: "", component: Error404Component},
-            {path: "luthier-database", loadChildren: () => import('app/modules/admin/portal/luthier-database/portal-luthier-database.routes')}
+            {path: "luthier-database", loadChildren: () => import('app/modules/admin/portal/luthier-database/portal-luthier-database.routes')},
+            {path: "config", loadChildren: () => import('app/modules/admin/portal/config/portal-config.routes')}
         ]
     },
 ] as Routes;

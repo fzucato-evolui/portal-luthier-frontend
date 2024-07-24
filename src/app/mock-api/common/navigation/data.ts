@@ -72,6 +72,7 @@ export const mainNavigation: FuseNavigationItem[] = [
                 id   : 'luthier.manager',
                 title: 'Manager',
                 type : 'basic',
+                hidden  : item => {return true},
                 awesomeIcon    : {fontSet: 'fab', fontIcon: 'fa-markdown'},
                 link : '/luthier/manager',
             },
@@ -82,6 +83,7 @@ export const mainNavigation: FuseNavigationItem[] = [
         title   : 'Licenças',
         subtitle: '',
         type    : 'basic',
+        hidden  : item => {return true},
         awesomeIcon    : {fontSet: 'fas', fontIcon: 'fa-key'},
         link    : '/license'
     },
@@ -90,6 +92,7 @@ export const mainNavigation: FuseNavigationItem[] = [
         title   : 'Context',
         subtitle: '',
         type    : 'basic',
+        hidden  : item => {return true},
         awesomeIcon    : {fontSet: 'fas', fontIcon: 'fa-arrows-to-circle'},
         link    : '/context'
     },
