@@ -741,7 +741,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 mask: [null],
                 charCase: [LuthierFieldCharcaseEnum.NORMAL],
                 order: [
-                    this.model.fields.reduce((max, field) => field.order > max ? field.order : max, this.model.fields[0].order) + 1,
+                    UtilFunctions.isValidStringOrArray(this.model.fields) === true ? this.model.fields.reduce((max, field) => field.order > max ? field.order : max, this.model.fields[0].order) + 1 : 1,
                     [Validators.required]
                 ],
                 autoInc: [false],
