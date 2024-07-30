@@ -156,11 +156,16 @@ export class QuickConnectionComponent implements OnInit, AfterViewInit, OnDestro
             .subscribe((storage: StorageChange) =>
             {
                 if (storage.key === 'luthierDatabase') {
-                    this.selectedLuthierDatabase = this.luthierDatabases.filter(x =>x.id.toString() === storage.value)[0];
-                    this._userService.dadosDatabase = '';
                     if (UtilFunctions.isValidStringOrArray(storage.value) === true) {
-                        firstValueFrom(this._luthierService.getDatabases());
-                        firstValueFrom(this._luthierService.checkUser());
+                        this.selectedLuthierDatabase = this.luthierDatabases.filter(x => x.id.toString() === storage.value.toString())[0];
+                        this._userService.dadosDatabase = '';
+                        if (UtilFunctions.isValidStringOrArray(storage.value) === true) {
+                            firstValueFrom(this._luthierService.getDatabases());
+                            firstValueFrom(this._luthierService.checkUser());
+                        }
+                    }
+                    else {
+                        this.selectedLuthierDatabase = null;
                     }
 
                 }
@@ -412,7 +417,7 @@ export class QuickConnectionComponent implements OnInit, AfterViewInit, OnDestro
         this.filteredLuthierDatabases.next(this.luthierDatabases.filter(x => {
             const model = x;
             let valid = true;
-            if (children.length > 0 && x.id === this.selectedLuthierDatabase.id) {
+            if (children.length > 0 && this.selectedLuthierDatabase && x.id === this.selectedLuthierDatabase.id) {
                 return true
             }
             if (UtilFunctions.isValidStringOrArray(filterText) === true) {

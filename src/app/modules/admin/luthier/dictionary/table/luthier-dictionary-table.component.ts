@@ -1035,7 +1035,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             this.customFieldsDataSource.data[index] = Object.assign({}, this.customFieldsDataSource.data[index], fg.value);
             this.customFieldsDataSource._updateChangeSubscription();
         }
-        editing.dataSource[editing.index]['editing'] = false;
+        editing.dataSource.data[editing.index]['editing'] = false;
         this._changeDetectorRef.detectChanges();
     }
 
@@ -1153,7 +1153,6 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             modal.componentInstance.tables.unshift(this.model);
         }
         modal.componentInstance.fieldsPK = fieldsPK;
-        console.log('openModalReference', fieldsPK, modal.componentInstance.tables, model);
         modal.afterClosed().subscribe((result) =>
         {
             if ( result === 'ok' ) {

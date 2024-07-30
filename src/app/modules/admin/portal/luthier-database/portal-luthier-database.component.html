@@ -60,7 +60,9 @@
                                 <button mat-icon-button aria-label="Check" (click)="check(model.id)" matTooltip="Setar Banco de Trabalho">
                                     <mat-icon class="icon-size-5" [ngClass]="workDataBase === model.id ? 'text-green-500' : 'text-gray-500'" fontSet="fas" fontIcon="fa-circle-check"></mat-icon>
                                 </button>
-
+                                <button mat-icon-button *ngIf="workDataBase && workDataBase !== model.id" aria-label="Check" (click)="copy(model.id)" matTooltip="Copiar os metadados luthier desse banco para o banco de trabalho">
+                                    <mat-icon class="icon-size-5 text-primary" fontSet="fas" fontIcon="fa-clone"></mat-icon>
+                                </button>
                             </div>
                         </td>
                     </ng-container>

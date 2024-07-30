@@ -82,4 +82,8 @@ export class PortalLuthierDatabaseService
                 return of(response);
             })));
     }
+
+    copy(id: number) : Promise<any> {
+        return firstValueFrom(this._httpClient.patch<any>(`${this.baseRestUrl}/copy/${id}`, null));
+    }
 }

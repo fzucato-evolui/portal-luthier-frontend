@@ -197,6 +197,16 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
 
                         },
                     },
+                    {
+                        id      : 'luthier.dictionary.tools.check-objects',
+                        title   : 'Checar Objetos na Base de Dados',
+                        type    : 'basic',
+                        awesomeIcon : {fontSet: 'fas', fontIcon: 'fa-list-check'},
+                        function: item => {
+                            this.checkObjects();
+
+                        },
+                    },
                 ],
             }
         ];
@@ -558,6 +568,19 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 this.service.syncSchemas()
                     .then(result => {
                         this.messageService.open('Schemas sincronizados com sucesso', 'SUCESSO', 'success');
+                    })
+
+            }
+        });
+
+    }
+
+    checkObjects() {
+        this.messageService.open('Tem certeza de que deseja checar os objetos do banco de trabalho Luthier atual na base de dados atual?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
+            if (result === 'confirmed') {
+                this.service.checkObjects()
+                    .then(result => {
+                        this.messageService.open('Objetos checados com sucesso', 'SUCESSO', 'success');
                     })
 
             }

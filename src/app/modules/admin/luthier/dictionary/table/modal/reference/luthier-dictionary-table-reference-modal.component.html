@@ -271,11 +271,11 @@
                     </ng-container>
                     <ng-container matColumnDef="fieldPK.name">
                         <th mat-header-cell *matHeaderCellDef> Campo PK</th>
-                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                        <td mat-cell *matCellDef="let model; let i = index">
                             <div class="flex flex-row items-center">
                                 <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                                     <mat-select class="text-sm" [compareWith]="parent.compareCode" (openedChange)="filterFieldsPK.value =null"
-                                                [formGroup]="model.get('fieldPK')">
+                                                [formControl]="model.get('fieldPK')">
                                         <div class="flex flex-col h-full w-full">
                                             <div class="flex-none">
                                                 <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
@@ -302,11 +302,11 @@
                     </ng-container>
                     <ng-container matColumnDef="fieldFK.name">
                         <th mat-header-cell *matHeaderCellDef> Campo FK</th>
-                        <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
+                        <td mat-cell *matCellDef="let model; let i = index">
                             <div class="flex flex-row items-center">
                                 <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                                     <mat-select class="text-sm" [compareWith]="parent.compareCode" (openedChange)="filterFieldsFK.value =null"
-                                                [formGroup]="model.get('fieldFK')">
+                                                [formControl]="model.get('fieldFK')">
                                         <div class="flex flex-col h-full w-full">
                                             <div class="flex-none">
                                                 <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">

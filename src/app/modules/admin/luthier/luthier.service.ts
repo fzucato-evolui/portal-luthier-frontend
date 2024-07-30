@@ -558,6 +558,10 @@ export class LuthierService
         return firstValueFrom(this._httpClient.patch<any>(`${this.baseDicUrl}/sync-schemas`, null));
     }
 
+    checkObjects(): Promise<any> {
+        return firstValueFrom(this._httpClient.patch<any>(`${this.baseDicUrl}/check-objects`, null));
+    }
+
     getDatasetByCode(code: number, parent: LuthierVisionDatasetModel | LuthierVisionModel, returnParent?: boolean ): {model :LuthierVisionDatasetModel, index: number} {
         if (UtilFunctions.isValidStringOrArray(parent.children) === true) {
             let index = parent.children.findIndex(x => x.code === code);

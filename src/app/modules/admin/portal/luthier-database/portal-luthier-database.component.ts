@@ -17,7 +17,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatTable, MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatDialog} from '@angular/material/dialog';
-import {NgClass} from '@angular/common';
+import {NgClass, NgIf} from '@angular/common';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {StorageChange} from '../../../../core/auth/auth.service';
 import {UtilFunctions} from '../../../../shared/util/util-functions';
@@ -39,7 +39,8 @@ import {UserService} from '../../../../shared/services/user/user.service';
         MatTableModule,
         MatSortModule,
         MatTooltipModule,
-        NgClass
+        NgClass,
+        NgIf
 
     ],
 })
@@ -163,5 +164,21 @@ export class PortalLuthierDatabaseComponent implements OnInit, OnDestroy, AfterV
     check(id) {
         this.workDataBase = id;
         this._userService.luthierDatabase = id;
+    }
+
+    copy(id) {
+        this.messageService.open('Deseja realmente copiar os metatados desse banco para o banco de trabalho? Todos os dados atuais serão apagados.', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
+            if (result === 'confirmed') {
+                const index = this.dataSource.data.findIndex(r => r.id === id);
+                if (index >= 0) {
+                    this.service.copy(id).then(value => {
+                        this.workDataBase = null;
+                        this._userService.luthierDatabase = "";
+                        this.messageService.open('Dados copiados com sucesso', 'SUCESSO', 'success');
+                    });
+                }
+            }
+        });
+
     }
 }
