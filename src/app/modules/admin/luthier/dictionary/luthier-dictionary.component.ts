@@ -583,7 +583,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
     checkObjects() {
         this.messageService.open('Tem certeza de que deseja checar os objetos do banco de trabalho Luthier atual na base de dados atual?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
             if (result === 'confirmed') {
-                /*
+
                 this.service.checkObjects()
                     .then(result => {
                         const modal = this._matDialog.open(LuthierDictionaryCheckObjectsModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-check-objects-modal-container' });
@@ -593,7 +593,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                         //this.messageService.open('Objetos checados com sucesso', 'SUCESSO', 'success');
                     })
 
-                 */
+                /*
                 this.service.getJSON('changes.json')
                     .then(result => {
                         const modal = this._matDialog.open(LuthierDictionaryCheckObjectsModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-check-objects-modal-container' });
@@ -601,7 +601,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                         modal.componentInstance.parent = this;
                         modal.componentInstance.model = result;
                     })
-
+                */
 
             }
         });
