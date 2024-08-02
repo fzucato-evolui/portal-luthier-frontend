@@ -45,8 +45,12 @@ import {NestedTreeControl} from '@angular/cdk/tree';
 import {LuthierDictionaryVisionComponent} from './vision/luthier-dictionary-vision.component';
 import {LuthierDictionaryDatasetComponent} from './dataset/luthier-dictionary-dataset.component';
 import {Clipboard, ClipboardModule} from '@angular/cdk/clipboard';
-import * as FileSaver from 'file-saver';
+import {saveAs} from 'file-saver';
 import {cloneDeep} from 'lodash-es';
+import {MatDialog} from '@angular/material/dialog';
+import {
+    LuthierDictionaryCheckObjectsModalComponent
+} from './modal/check-objects/luthier-dictionary-check-objects-modal.component';
 
 @Component({
     selector     : 'luthier-dictionary',
@@ -118,6 +122,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 private _changeDetectorRef: ChangeDetectorRef,
                 public messageService: MessageDialogService,
                 private _parent: LuthierComponent,
+                private _matDialog: MatDialog,
                 public clipboard: Clipboard)
     {
     }
@@ -578,10 +583,25 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
     checkObjects() {
         this.messageService.open('Tem certeza de que deseja checar os objetos do banco de trabalho Luthier atual na base de dados atual?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
             if (result === 'confirmed') {
+                /*
                 this.service.checkObjects()
                     .then(result => {
-                        this.messageService.open('Objetos checados com sucesso', 'SUCESSO', 'success');
+                        const modal = this._matDialog.open(LuthierDictionaryCheckObjectsModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-check-objects-modal-container' });
+                        modal.componentInstance.title = "Resumo das Alterações";
+                        modal.componentInstance.parent = this;
+                        modal.componentInstance.model = result;
+                        //this.messageService.open('Objetos checados com sucesso', 'SUCESSO', 'success');
                     })
+
+                 */
+                this.service.getJSON('changes.json')
+                    .then(result => {
+                        const modal = this._matDialog.open(LuthierDictionaryCheckObjectsModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-check-objects-modal-container' });
+                        modal.componentInstance.title = "Resumo das Alterações";
+                        modal.componentInstance.parent = this;
+                        modal.componentInstance.model = result;
+                    })
+
 
             }
         });
@@ -615,7 +635,8 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                         this.messageService.open('Dados copiados para o clipboard', 'SUCESSO', 'success');
                     }
                     else {
-                        FileSaver.saveAs(JSON.stringify(result), `${object.objectType}_${object.name}.json`);
+                        const blob = new Blob([JSON.stringify(result)], {type: "text/plain;charset=utf-8"});
+                        saveAs(blob, `${object.objectType}_${object.name}.json`);
                     }
                 })
         }
@@ -627,7 +648,8 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                         this.messageService.open('Dados copiados para o clipboard', 'SUCESSO', 'success');
                     }
                     else {
-                        FileSaver.saveAs(JSON.stringify(result), `${object.objectType}_${object.name}.json`);
+                        const blob = new Blob([JSON.stringify(result)], {type: "text/plain;charset=utf-8"});
+                        saveAs(blob, `${object.objectType}_${object.name}.json`);
                     }
                 })
         }
@@ -677,5 +699,10 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
         else {
             return v1 === v2;
         }
+    }
+
+    downloadFile(model: any, filename: string) {
+        const blob = new Blob([JSON.stringify(model)], {type: "text/plain;charset=utf-8"});
+        saveAs(blob, filename);
     }
 }

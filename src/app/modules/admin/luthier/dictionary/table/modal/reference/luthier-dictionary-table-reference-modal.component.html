@@ -288,7 +288,7 @@
                                             </div>
                                             <div class="flex-1 overflow-auto">
                                                 <ng-container *ngFor="let t of getKeyFieldsPK() | filterJson : {name: filterFieldsPK.value}">
-                                                    <mat-option [value]="{code: t.code, name: t.name, id: t.id}" >
+                                                    <mat-option [value]="{code: !t.code ? '' : t.code, name: t.name, id: !t.id? '' : t.id}" >
                                                         {{t.name}}
                                                     </mat-option>
                                                 </ng-container>
@@ -319,7 +319,7 @@
                                             </div>
                                             <div class="flex-1 overflow-auto">
                                                 <ng-container *ngFor="let t of fields | filterJson : {name: filterFieldsFK.value}">
-                                                    <mat-option [value]="{code: t.code, name: t.name, id: t.id}" >
+                                                    <mat-option [value]="{code: !t.code ? '' : t.code, name: t.name, id: !t.id ? '' : t.id}" >
                                                         {{t.name}}
                                                     </mat-option>
                                                 </ng-container>

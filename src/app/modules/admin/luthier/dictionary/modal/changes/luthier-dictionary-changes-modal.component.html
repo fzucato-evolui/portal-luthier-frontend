@@ -1,0 +1,35 @@
+<div class="inset-0 w-full h-full flex flex-col min-w-0 md:overflow-y-auto relative">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-2 sm:py-4 sm:px-4 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="flex flex-row flex-row-reverse mt-2 items-center">
+                <div class="mr-2">
+                    <button
+                        mat-icon-button aria-label="close dialog" mat-dialog-close>
+                        <mat-icon
+                            class="icon-size-4"
+                            fontSet="fas" fontIcon="fa-times"></mat-icon>
+                    </button>
+                </div>
+                <div class="w-full">
+                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        {{title}}
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="flex-auto p-2  overflow-y-hidden flex flex-row">
+        <div class="flex-none p-2">
+            <button mat-menu-item (click)="copy()" matTooltip="Copiar para o clipboard">
+                <mat-icon [svgIcon]="'mat_outline:content_copy'"></mat-icon>
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-3"
+             cdkScrollable>
+            <pre style="font-size: 0.75rem; white-space: pre-wrap;">{{ model | json}}</pre>
+        </div>
+    </div>
+
+</div>

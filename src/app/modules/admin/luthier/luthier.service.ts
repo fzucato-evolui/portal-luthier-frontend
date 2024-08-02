@@ -2,6 +2,7 @@ import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, catchError, firstValueFrom, Observable, of, switchMap, tap} from 'rxjs';
 import {
+    LuthierCheckObjectsSummaryModel,
     LuthierDatabaseModel,
     LuthierProjectModel,
     LuthierResourceModel,
@@ -558,8 +559,12 @@ export class LuthierService
         return firstValueFrom(this._httpClient.patch<any>(`${this.baseDicUrl}/sync-schemas`, null));
     }
 
-    checkObjects(): Promise<any> {
-        return firstValueFrom(this._httpClient.patch<any>(`${this.baseDicUrl}/check-objects`, null));
+    checkObjects(): Promise<LuthierCheckObjectsSummaryModel> {
+        return firstValueFrom(this._httpClient.patch<LuthierCheckObjectsSummaryModel>(`${this.baseDicUrl}/check-objects`, null));
+    }
+
+    getJSON(jsonName: string): Promise<any> {
+        return firstValueFrom(this._httpClient.get<any>(`assets/json/${jsonName}`));
     }
 
     getDatasetByCode(code: number, parent: LuthierVisionDatasetModel | LuthierVisionModel, returnParent?: boolean ): {model :LuthierVisionDatasetModel, index: number} {

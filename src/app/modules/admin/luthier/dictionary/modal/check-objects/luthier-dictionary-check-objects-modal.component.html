@@ -1,0 +1,257 @@
+<div class="inset-0 w-full h-full flex flex-col min-w-0 md:overflow-y-auto relative">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-2 sm:py-4 sm:px-4 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="flex flex-row flex-row-reverse mt-2 items-center">
+                <div class="mr-2">
+                    <button
+                        mat-icon-button aria-label="close dialog" mat-dialog-close>
+                        <mat-icon
+                            class="evolui-menu-item-icon"
+                            fontSet="fas" fontIcon="fa-times"></mat-icon>
+                    </button>
+                </div>
+                <div class="w-full">
+                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        {{title}}
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div
+        class="flex-auto p-2  overflow-y-hidden">
+
+        <div class="flex flex-col h-full overflow-hidden">
+            <div class="flex-none flex justify-between items-center py-1">
+                <div class="flex-none flex">
+
+                </div>
+                <div class="flex-none flex md:w-1/3 md:pr-1">
+                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                        <mat-icon
+                            class="evolui-menu-item-icon"
+                            fontSet="fas" fontIcon="fa-search"
+                            matPrefix></mat-icon>
+                        <input
+                            [autocomplete]="'off'"
+                            class="text-sm"
+                            [(ngModel)]="filterModel.text"
+                            (ngModelChange)="filter()"
+                            matInput>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto" cdkScrollable>
+                <table mat-table matSort [dataSource]="dataSource" class="table-auto flex-1 w-full">
+                    <ng-container matColumnDef="buttons" sticky>
+                        <th mat-header-cell *matHeaderCellDef>
+                            <div class="flex flex-row items-center">
+                                <button mat-icon-button aria-label="Add" (click)="download()" matTooltip="Download do Resumo">
+                                    <mat-icon class="evolui-menu-item-icon text-blue-500" fontSet="fas" fontIcon="fa-download"></mat-icon>
+                                </button>
+                            </div>
+                        </th>
+                        <td mat-cell *matCellDef="let model; let i = index">
+                            <div class="flex flex-row items-center">
+                                <button mat-icon-button aria-label="Delete" (click)="viewTable(model)" matTooltip="Ver Tabela da Base Luthier">
+                                    <mat-icon class="evolui-menu-item-icon text-blue-500" fontSet="fas" fontIcon="fa-guitar"></mat-icon>
+                                </button>
+                                <button mat-icon-button aria-label="Edit" (click)="viewMeta(model, i)" matTooltip="Ver os dados que estavam salvos na base dedados">
+                                    <mat-icon class="evolui-menu-item-icon text-gray-500" fontSet="fas" fontIcon="fa-database"></mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                        <td mat-footer-cell *matFooterCellDef>
+                            <span>Totalizador:</span>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="table.code">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                            <div class="flex flex-row items-center">ID</div>
+                        </th>
+                        <td mat-cell *matCellDef="let model; let i = index"> {{model.table.code}} </td>
+                        <td mat-footer-cell *matFooterCellDef>
+                            <span>Tempo:{{model.totalTime}}s</span>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="table.name">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                            <div class="flex flex-row items-center">Nome</div>
+                        </th>
+                        <td mat-cell *matCellDef="let model; let i = index"> {{model.table.name}} </td>
+                        <td mat-footer-cell *matFooterCellDef> {{model.total}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="table.objectType">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                            <div class="flex flex-row items-center">Tipo</div>
+                        </th>
+                        <td mat-cell *matCellDef="let model; let i = index"> {{model.table.objectType}} </td>
+                        <td mat-footer-cell *matFooterCellDef>
+                            <span>TABLE:{{model.totalTables}}</span><br>
+                            <span>VIEW:{{model.totalViews}}</span>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="new">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <div class="flex flex-row items-center">
+                                <span>Nova</span>
+                                <mat-checkbox (change)="changeBoolean($event, 'new')"
+                                              [indeterminate]="filterModel.new === null">
+                                </mat-checkbox>
+                            </div>
+
+                        </th>
+                        <td mat-cell *matCellDef="let model; let i = index"> {{model.new}} </td>
+                        <td mat-footer-cell *matFooterCellDef> {{model.totalNew}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="changed">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <div class="flex flex-row items-center">
+                                <span>Alterado</span>
+                                <mat-checkbox (change)="changeBoolean($event, 'changed')"
+                                              [indeterminate]="filterModel.changed === null">
+                                </mat-checkbox>
+                            </div>
+                        </th>
+                        <td mat-cell *matCellDef="let model; let i = index"> {{model.changed}} </td>
+                        <td mat-footer-cell *matFooterCellDef> {{model.totalChanges}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="done">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <div class="flex flex-row items-center">
+                                <span>Sucesso</span>
+                                <mat-checkbox (change)="changeBoolean($event, 'done')"
+                                              [indeterminate]="filterModel.done === null">
+                                </mat-checkbox>
+                            </div>
+                        </th>
+                        <td mat-cell *matCellDef="let model; let i = index"> {{model.done}} </td>
+                        <td mat-footer-cell *matFooterCellDef> {{model.totalDone}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="hasError">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <div class="flex flex-row items-center">
+                                <span>Erro</span>
+                                <mat-checkbox (change)="changeBoolean($event, 'hasError')"
+                                              [indeterminate]="filterModel.hasError === null">
+                                </mat-checkbox>
+                            </div>
+                        </th>
+                        <td mat-cell *matCellDef="let model; let i = index">
+                            <div class="flex flex-row items-center">
+                                <span>{{model.hasError}}</span>
+                                <button *ngIf="model.hasError" mat-icon-button aria-label="Edit" (click)="viewError(model, i)" matTooltip="Ver o stacktrace do erro">
+                                    <mat-icon class="evolui-menu-item-icon text-red-500" fontSet="fas" fontIcon="fa-eye"></mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                        <td mat-footer-cell *matFooterCellDef> {{model.totalErrors}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="changedFields">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <div class="flex flex-row items-center">
+                                <span>Campos</span>
+                                <mat-checkbox (change)="changeBoolean($event, 'changedFields')"
+                                              [indeterminate]="filterModel.changedFields === null">
+                                </mat-checkbox>
+                            </div>
+                        </th>
+                        <td mat-cell *matCellDef="let model; let i = index">
+                            <div class="flex flex-row items-center">
+                                <span>{{model.changedFields}}</span>
+                                <button *ngIf="model.changedFields" mat-icon-button aria-label="Edit" (click)="viewChangedFields(model, i)" matTooltip="Ver os campos alterados">
+                                    <mat-icon class="evolui-menu-item-icon text-blue-500" fontSet="fas" fontIcon="fa-eye"></mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                        <td mat-footer-cell *matFooterCellDef> {{model.totalChangesFields}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="changedPKs">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <div class="flex flex-row items-center">
+                                <span>PKs</span>
+                                <mat-checkbox (change)="changeBoolean($event, 'changedPKs')"
+                                              [indeterminate]="filterModel.changedPKs === null">
+
+                                </mat-checkbox>
+                            </div>
+                        </th>
+                        <td mat-cell *matCellDef="let model; let i = index">
+                            <div class="flex flex-row items-center">
+                                <span>{{model.changedPKs}}</span>
+                                <button *ngIf="model.changedPKs" mat-icon-button aria-label="Edit" (click)="viewChangedPKs(model, i)" matTooltip="Ver as PKs alteradas">
+                                    <mat-icon class="evolui-menu-item-icon text-blue-500" fontSet="fas" fontIcon="fa-eye"></mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                        <td mat-footer-cell *matFooterCellDef> {{model.totalChangesPKs}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="changedReferences">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <div class="flex flex-row items-center">
+                                <span>Referências</span>
+                                <mat-checkbox (change)="changeBoolean($event, 'changedReferences')"
+                                              [indeterminate]="filterModel.changedReferences === null">
+                                </mat-checkbox>
+                            </div>
+                        </th>
+                        <td mat-cell *matCellDef="let model; let i = index">
+                            <div class="flex flex-row items-center">
+                                <span>{{model.changedReferences}}</span>
+                                <button *ngIf="model.changedReferences" mat-icon-button aria-label="Edit" (click)="viewChangedReferences(model, i)" matTooltip="Ver as referências alteradas">
+                                    <mat-icon class="evolui-menu-item-icon text-blue-500" fontSet="fas" fontIcon="fa-eye"></mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                        <td mat-footer-cell *matFooterCellDef> {{model.totalChangesReferences}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="changedIndexes">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <div class="flex flex-row items-center">
+                                <span>Índices</span>
+                                <mat-checkbox (change)="changeBoolean($event, 'changedIndexes')"
+                                              [indeterminate]="filterModel.changedIndexes === null">
+                                </mat-checkbox>
+                            </div>
+                        </th>
+                        <td mat-cell *matCellDef="let model; let i = index"> {{model.changedIndexes}}
+                            <div class="flex flex-row items-center">
+                                <span>{{model.changedIndexes}}</span>
+                                <button *ngIf="model.changedIndexes" mat-icon-button aria-label="Edit" (click)="viewChangedIndexes(model, i)" matTooltip="Ver as índices alterados">
+                                    <mat-icon class="evolui-menu-item-icon text-blue-500" fontSet="fas" fontIcon="fa-eye"></mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                        <td mat-footer-cell *matFooterCellDef> {{model.totalChangesIndexes}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="changedViews">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <div class="flex flex-row items-center">
+                                <span>Views</span>
+                                <mat-checkbox (change)="changeBoolean($event, 'changedViews')"
+                                              [indeterminate]="filterModel.changedViews === null">
+                                </mat-checkbox>
+                            </div>
+                        </th>
+                        <td mat-cell *matCellDef="let model; let i = index">
+                            <div class="flex flex-row items-center">
+                                <span>{{model.changedViews}}</span>
+                                <button *ngIf="model.changedViews" mat-icon-button aria-label="Edit" (click)="viewChangedViews(model, i)" matTooltip="Ver as views alteradas">
+                                    <mat-icon class="evolui-menu-item-icon text-blue-500" fontSet="fas" fontIcon="fa-eye"></mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                        <td mat-footer-cell *matFooterCellDef> {{model.totalChangesViews}} </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                    <tr mat-footer-row *matFooterRowDef="displayedColumns; sticky: true"></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

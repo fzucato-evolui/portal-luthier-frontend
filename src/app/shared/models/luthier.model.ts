@@ -686,3 +686,47 @@ export class LuthierUserGroupModel {
     group?: LuthierUserModel
 }
 
+export class LuthierCheckObjectsSummaryModel {
+    totalTime?: number
+    total?: number
+    totalChanges?: number
+    totalNew?: number
+    totalChangesFields?: number
+    totalChangesPKs?: number
+    totalChangesReferences?: number
+    totalChangesIndexes?: number
+    totalChangesViews?: number
+    totalTables?: number
+    totalViews?: number
+    totalDone?: number
+    totalErrors?: number
+    changes?: LuthierChangesOfTableModel[]
+}
+export class LuthierChangesOfTableModel {
+    needPK?: boolean
+    changed?: boolean
+    changedFields?: boolean
+    changedPKs?: boolean
+    changedReferences?: boolean
+    changedIndexes?: boolean
+    changedViews?: boolean
+    hasError?: boolean
+    done?: boolean
+    new?: boolean
+    nativeViewBody?: string
+    error?: string
+    meta?: LuthierTableModel
+    table?: LuthierTableModel
+    deletedFields?: Array<LuthierTableFieldModel | LuthierCustomFieldModel>
+    insertedFields?: Array<LuthierTableFieldModel | LuthierCustomFieldModel>
+    updatedFields?: Array<LuthierTableFieldModel | LuthierCustomFieldModel>
+    deletedPks?: string[]
+    deletedReferences?: string[]
+    insertedReferences?: LuthierTableReferenceModel[]
+    updatedReferences?: LuthierTableReferenceModel[]
+    deletedIndexes?: string[]
+    insertedIndexes?: LuthierTableIndexModel[]
+    updatedIndexes?: LuthierTableIndexModel[]
+    views?: LuthierViewModel[]
+}
+

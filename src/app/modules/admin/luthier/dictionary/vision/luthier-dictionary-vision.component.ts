@@ -88,10 +88,10 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy
 
 
     save() {
-        this.model = Object.assign({}, this.model, this.formSave.value) as LuthierVisionModel;
-        this.service.saveVision(this.model)
+        this._cloneModel = Object.assign({}, this.model, this.formSave.value) as LuthierVisionModel;
+        this.service.saveVision(this._cloneModel)
             .then(result => {
-                result.id = this.model.id;
+                result.id = this._cloneModel.id;
                 this.model = result;
                 this.refresh();
                 const index = this._parent.tabsOpened.findIndex(x => x.id === this.model.id);

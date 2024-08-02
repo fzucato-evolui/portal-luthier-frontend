@@ -447,18 +447,18 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
 
     save() {
         const basicInfo = this.formSave.value as LuthierVisionDatasetModel;
-        this.model.code = basicInfo.code;
-        this.model.name = basicInfo.name;
-        this.model.description = basicInfo.description;
-        this.model.customDescription = basicInfo.customDescription;
-        this.model.filter = basicInfo.filter;
-        this.model.uiConfiguration = basicInfo.uiConfiguration;
+        this._cloneModel.code = basicInfo.code;
+        this._cloneModel.name = basicInfo.name;
+        this._cloneModel.description = basicInfo.description;
+        this._cloneModel.customDescription = basicInfo.customDescription;
+        this._cloneModel.filter = basicInfo.filter;
+        this._cloneModel.uiConfiguration = basicInfo.uiConfiguration;
 
         this.saveCustomizations();
-        this.service.saveDataset(this.model)
+        this.service.saveDataset(this._cloneModel)
             .then(result => {
-                result.id = this.model.id;
-                result.relatives = this.model.relatives;
+                result.id = this._cloneModel.id;
+                result.relatives = this._cloneModel.relatives;
                 this.model = result;
                 this.refresh();
                 const index = this.parent.tabsOpened.findIndex(x => x.id === this.model.id);

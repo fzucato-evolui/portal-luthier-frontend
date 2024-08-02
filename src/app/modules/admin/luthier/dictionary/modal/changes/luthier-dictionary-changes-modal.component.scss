@@ -1,0 +1,14 @@
+:host {
+    width: 100% !important;
+    height: 100% !important;
+}
+.luthier-dictionary-changes-modal-container {
+    max-width: 90vw !important;
+    width: 90vw !important;
+    max-height: 95vh !important;
+    height: 95vh !important;
+
+    mat-dialog-container {
+        padding: 10px !important;
+    }
+}
