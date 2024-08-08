@@ -687,19 +687,20 @@ export class LuthierUserGroupModel {
 }
 
 export class LuthierCheckObjectsSummaryModel {
-    totalTime?: number
-    total?: number
-    totalChanges?: number
-    totalNew?: number
-    totalChangesFields?: number
-    totalChangesPKs?: number
-    totalChangesReferences?: number
-    totalChangesIndexes?: number
-    totalChangesViews?: number
-    totalTables?: number
-    totalViews?: number
-    totalDone?: number
-    totalErrors?: number
+    id?: string
+    totalTime?: number = 0
+    total?: number = 0
+    totalChanges?: number = 0
+    totalNew?: number = 0
+    totalChangesFields?: number = 0
+    totalChangesPKs?: number = 0
+    totalChangesReferences?: number = 0
+    totalChangesIndexes?: number = 0
+    totalChangesViews?: number = 0
+    totalTables?: number = 0
+    totalViews?: number = 0
+    totalDone?: number = 0
+    totalErrors?: number = 0
     changes?: LuthierChangesOfTableModel[]
 }
 export class LuthierChangesOfTableModel {
@@ -712,7 +713,7 @@ export class LuthierChangesOfTableModel {
     changedViews?: boolean
     hasError?: boolean
     done?: boolean
-    new?: boolean
+    isNew?: boolean
     nativeViewBody?: string
     error?: string
     meta?: LuthierTableModel

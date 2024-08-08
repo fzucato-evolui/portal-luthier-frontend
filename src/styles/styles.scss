@@ -10,6 +10,17 @@
     pointer-events: none;
     opacity: 60%;
 }
+.overlayBusy {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0); /* Fully transparent */
+    opacity: 20%;
+    z-index: 9999; /* Ensure it's above all other elements */
+    display: none; /* Hidden by default */
+}
 /*
 td {
     mat-form-field {

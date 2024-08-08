@@ -70,7 +70,7 @@ export class LuthierConnectionModalComponent implements OnInit, OnDestroy
     ngOnInit(): void {
 
         this.formSave = this._formBuilder.group({
-            code: [this.model.code],
+            code: [this.model.code, [Validators.required]],
             dbType: [DatabaseTypeEnum.MSSQL, [Validators.required]],
             server: ['', [Validators.required]],
             database: [''],

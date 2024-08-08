@@ -2,6 +2,7 @@ import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, catchError, firstValueFrom, Observable, of, switchMap, tap} from 'rxjs';
 import {
+    LuthierChangesOfTableModel,
     LuthierCheckObjectsSummaryModel,
     LuthierDatabaseModel,
     LuthierProjectModel,
@@ -561,6 +562,18 @@ export class LuthierService
 
     checkObjects(): Promise<LuthierCheckObjectsSummaryModel> {
         return firstValueFrom(this._httpClient.patch<LuthierCheckObjectsSummaryModel>(`${this.baseDicUrl}/check-objects`, null));
+    }
+
+    checkObjectsTableChanges(id: String, tableName: String): Promise<LuthierChangesOfTableModel> {
+        return firstValueFrom(this._httpClient.get<LuthierChangesOfTableModel>(`${this.baseDicUrl}/check-objects-changes/${id}/${tableName}`));
+    }
+
+    checkObjectsAllChanges(id: String): Promise<LuthierCheckObjectsSummaryModel> {
+        return firstValueFrom(this._httpClient.get<LuthierCheckObjectsSummaryModel>(`${this.baseDicUrl}/check-objects-changes/${id}`));
+    }
+
+    checkObjectsDeleteChanges(id: String): Promise<any> {
+        return firstValueFrom(this._httpClient.delete<LuthierChangesOfTableModel>(`${this.baseDicUrl}/check-objects-changes/${id}`));
     }
 
     getJSON(jsonName: string): Promise<any> {

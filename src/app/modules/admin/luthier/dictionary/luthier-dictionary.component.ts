@@ -15,7 +15,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {FuseMediaWatcherService} from '@fuse/services/media-watcher';
-import {debounceTime, firstValueFrom, ReplaySubject, takeUntil} from 'rxjs';
+import {debounceTime, firstValueFrom, ReplaySubject, Subject, takeUntil} from 'rxjs';
 import {
     FuseNavigationItem,
     FuseNavigationService,
@@ -88,6 +88,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
 {
     drawerMode: 'over' | 'side' = 'side';
     drawerOpened: boolean = true;
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
     private databases: LuthierDatabaseModel[];
     tables: LuthierTableModel[];
     visions: LuthierVisionModel[];
@@ -216,7 +217,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             }
         ];
         this._parent.page$
-            .pipe(takeUntil(this._parent.unsubscribeAll))
+            .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((page: string) =>
             {
                 if (page === 'dictionary') {
@@ -227,7 +228,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 }
             });
         this._parent.workDataBase$
-            .pipe(takeUntil(this._parent.unsubscribeAll), debounceTime(100))
+            .pipe(takeUntil(this._unsubscribeAll), debounceTime(100))
             .subscribe((workDataBase: number) =>
             {
                 if (workDataBase !== null) {
@@ -238,7 +239,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 }
             });
         this._parent.luthierDataBase$
-            .pipe(takeUntil(this._parent.unsubscribeAll), debounceTime(100))
+            .pipe(takeUntil(this._unsubscribeAll), debounceTime(100))
             .subscribe((luthierDataBase: number) =>
             {
                 if (luthierDataBase !== null) {
@@ -262,14 +263,14 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
         }
 
         this._parent.service.tables$
-            .pipe(takeUntil(this._parent.unsubscribeAll))
+            .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((tables: LuthierTableModel[]) =>
             {
                 this.tables = tables;
                 this.filterObjects();
             });
         this._parent.service.visions$
-            .pipe(takeUntil(this._parent.unsubscribeAll))
+            .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((visions: LuthierVisionDatasetModel[]) =>
             {
                 this.visions = visions;
@@ -277,7 +278,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             });
         // Subscribe to media changes
         this._fuseMediaWatcherService.onMediaChange$
-            .pipe(takeUntil(this._parent.unsubscribeAll))
+            .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(({matchingAliases}) =>
             {
                 // Set the drawerMode and drawerOpened
@@ -300,7 +301,8 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
      */
     ngOnDestroy(): void
     {
-
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
     }
 
     filterObjects(item?: FuseNavigationItem) {
@@ -372,6 +374,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 if (table.objectType === 'TABLE' || table.objectType === 'VIEW') {
                     this._parent.service.getTable(table.code)
                         .then(response => {
+                            response.id = crypto.randomUUID();
                             this.tabsOpened.push(response);
                             this.selectedTab = response;
                             this._changeDetectorRef.markForCheck();
@@ -380,6 +383,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 else if (table.objectType === 'VISION') {
                     this._parent.service.getVision(table.code)
                         .then(response => {
+                            response.id = crypto.randomUUID();
                             this.tabsOpened.push(response);
                             this.selectedTab = response;
                             this._changeDetectorRef.markForCheck();
@@ -388,6 +392,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 else if (table.objectType === 'VISION_DATASET') {
                     this._parent.service.getDataset(table.code)
                         .then(response => {
+                            response.id = crypto.randomUUID();
                             this.tabsOpened.push(response);
                             this.selectedTab = response;
                             this._changeDetectorRef.markForCheck();

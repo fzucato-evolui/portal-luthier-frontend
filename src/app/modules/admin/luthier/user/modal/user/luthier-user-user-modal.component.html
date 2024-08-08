@@ -194,7 +194,9 @@
                         </div>
 
                     </div>
+                    <!--
                     <pre style="font-size: 1rem; white-space: pre-wrap;">{{ formSave.value | json}}</pre>
+                    !-->
                 </div>
             </mat-tab>
             <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="groups" label="Grupos" bodyClass="table-tab">
@@ -276,7 +278,9 @@
                         <tr mat-header-row *matHeaderRowDef="displayedGroupColumns; sticky: true"></tr>
                         <tr mat-row *matRowDef="let row; columns: displayedGroupColumns;"></tr>
                     </table>
+                    <!--
                     <pre style="font-size: 1rem; white-space: pre-wrap;">{{ selectedGroups.selected | json}}</pre>
+                    !-->
                 </div>
             </mat-tab>
             <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="subsystems" label="Subsistemas" bodyClass="table-tab">
@@ -351,8 +355,9 @@
                         <tr mat-header-row *matHeaderRowDef="displayedSubsystemsColumns; sticky: true"></tr>
                         <tr mat-row *matRowDef="let row; columns: displayedSubsystemsColumns;"></tr>
                     </table>
-
+                    <!--
                     <pre style="font-size: 1rem; white-space: pre-wrap;">{{ selectedSubsystems.selected | json}}</pre>
+                    !-->
 
                 </div>
             </mat-tab>

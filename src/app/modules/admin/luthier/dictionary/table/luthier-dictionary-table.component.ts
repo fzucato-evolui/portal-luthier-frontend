@@ -85,7 +85,7 @@ import {
     LuthierDictionaryTableSearchModalComponent
 } from './modal/search/luthier-dictionary-table-search-modal.component';
 import {DatabaseTypeEnum} from '../../../../../shared/models/portal-luthier-database.model';
-import {debounceTime, takeUntil} from 'rxjs';
+import {debounceTime, Subject, takeUntil} from 'rxjs';
 import {MatMenuModule} from '@angular/material/menu';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
@@ -129,6 +129,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 {
 
     private _model: LuthierTableModel;
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
     public fieldsDataSource = new MatTableDataSource<LuthierTableFieldModel>();
     @ViewChildren('sortFields') sortFields: QueryList<MatSort>;
     public indexesDataSource = new MatTableDataSource<LuthierTableIndexModel>();
@@ -225,7 +226,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     ngOnInit(): void {
         this.refresh();
         this._parent.parent.workDataBase$
-            .pipe(takeUntil(this._parent.parent.unsubscribeAll), debounceTime(100))
+            .pipe(takeUntil(this._unsubscribeAll), debounceTime(100))
             .subscribe((workDataBase: number) =>
             {
                 this._changeDetectorRef.detectChanges();
@@ -233,7 +234,8 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
 
     ngOnDestroy(): void {
-
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
     }
 
     ngAfterViewInit() {
@@ -483,7 +485,6 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
 
     canSave(): boolean {
-        return true;
         if (this.formSave) {
             return !this.formSave.invalid;
         }

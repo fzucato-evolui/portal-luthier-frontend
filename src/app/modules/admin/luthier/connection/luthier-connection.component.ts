@@ -46,7 +46,7 @@ export class LuthierConnectionComponent implements OnInit, OnDestroy, AfterViewI
 
     @ViewChild(MatSort) sort: MatSort;
     @ViewChild(MatTable) table: MatTable<any>;
-    public unsubscribeAll: Subject<any> = new Subject<any>();
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
     public databases = new MatTableDataSource<LuthierDatabaseModel>();
     displayedColumns = ['buttons', 'code', 'server', 'dbType', 'database', 'user'];
     get workDataBase(): number {
@@ -73,13 +73,13 @@ export class LuthierConnectionComponent implements OnInit, OnDestroy, AfterViewI
     ngOnInit(): void
     {
         this._parent.service.databases$
-            .pipe(takeUntil(this.unsubscribeAll))
+            .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((databases: LuthierDatabaseModel[]) =>
             {
                 this.databases.data = databases;
             });
         this._parent.workDataBase$
-            .pipe(takeUntil(this._parent.unsubscribeAll))
+            .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((workDataBase: number) =>
             {
                 setTimeout(() => {
@@ -95,8 +95,8 @@ export class LuthierConnectionComponent implements OnInit, OnDestroy, AfterViewI
     ngOnDestroy(): void
     {
         // Unsubscribe from all subscriptions
-        this.unsubscribeAll.next(null);
-        this.unsubscribeAll.complete();
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
     }
 
     ngAfterViewInit(): void {

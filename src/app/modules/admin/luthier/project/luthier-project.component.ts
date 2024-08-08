@@ -80,14 +80,14 @@ export class LuthierProjectComponent implements OnInit, OnDestroy
         });
 
         this._parent.service.project$
-            .pipe(takeUntil(this._parent.unsubscribeAll))
+            .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((project: LuthierProjectModel) =>
             {
                 this.model = project;
                 this.formSave.patchValue(this.model);
             });
         this._parent.workDataBase$
-            .pipe(takeUntil(this._parent.unsubscribeAll))
+            .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((workDataBase: number) =>
             {
                 setTimeout(() => {

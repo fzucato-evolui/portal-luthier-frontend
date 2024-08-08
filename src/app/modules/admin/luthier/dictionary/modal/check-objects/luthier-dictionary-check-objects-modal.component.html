@@ -24,9 +24,16 @@
         class="flex-auto p-2  overflow-y-hidden">
 
         <div class="flex flex-col h-full overflow-hidden">
-            <div class="flex-none flex justify-between items-center py-1">
-                <div class="flex-none flex">
-
+            <div class="flex-none flex justify-end items-center py-1">
+                <div class="flex-none flex mx-1">
+                    <button class="text-sm min-h-7 h-7"
+                            mat-flat-button
+                            color="accent" (click)="cleanFilter()">
+                        <mat-icon
+                            class="icon-size-4"
+                            svgIcon="mat_solid:undo"></mat-icon>
+                        <span class="ml-2">Limpar Filtros</span>
+                    </button>
                 </div>
                 <div class="flex-none flex md:w-1/3 md:pr-1">
                     <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
@@ -38,7 +45,7 @@
                             [autocomplete]="'off'"
                             class="text-sm"
                             [(ngModel)]="filterModel.text"
-                            (ngModelChange)="filter()"
+                            (ngModelChange)="filterText()"
                             matInput>
                     </mat-form-field>
                 </div>
@@ -55,10 +62,13 @@
                         </th>
                         <td mat-cell *matCellDef="let model; let i = index">
                             <div class="flex flex-row items-center">
-                                <button mat-icon-button aria-label="Delete" (click)="viewTable(model)" matTooltip="Ver Tabela da Base Luthier">
-                                    <mat-icon class="evolui-menu-item-icon text-blue-500" fontSet="fas" fontIcon="fa-guitar"></mat-icon>
+                                <button mat-icon-button aria-label="Add" (click)="downloadChange(model)" matTooltip="Download do Alteração da Tabela">
+                                    <mat-icon class="evolui-menu-item-icon text-blue-500" fontSet="fas" fontIcon="fa-download"></mat-icon>
                                 </button>
-                                <button mat-icon-button aria-label="Edit" (click)="viewMeta(model, i)" matTooltip="Ver os dados que estavam salvos na base dedados">
+                                <button mat-icon-button aria-label="View Table" (click)="viewTable(model)" matTooltip="Ver Tabela da Base Luthier">
+                                    <mat-icon class="evolui-menu-item-icon text-warn" fontSet="fas" fontIcon="fa-guitar"></mat-icon>
+                                </button>
+                                <button mat-icon-button aria-label="Vuew Meta" (click)="viewMeta(model, i)" matTooltip="Ver os dados que estavam salvos na base dedados">
                                     <mat-icon class="evolui-menu-item-icon text-gray-500" fontSet="fas" fontIcon="fa-database"></mat-icon>
                                 </button>
                             </div>
@@ -73,7 +83,7 @@
                         </th>
                         <td mat-cell *matCellDef="let model; let i = index"> {{model.table.code}} </td>
                         <td mat-footer-cell *matFooterCellDef>
-                            <span>Tempo:{{model.totalTime}}s</span>
+                            <span>Tempo:{{summaryFooter.totalTime}}s</span>
                         </td>
                     </ng-container>
                     <ng-container matColumnDef="table.name">
@@ -81,7 +91,7 @@
                             <div class="flex flex-row items-center">Nome</div>
                         </th>
                         <td mat-cell *matCellDef="let model; let i = index"> {{model.table.name}} </td>
-                        <td mat-footer-cell *matFooterCellDef> {{model.total}} </td>
+                        <td mat-footer-cell *matFooterCellDef> {{summaryFooter.total}} </td>
                     </ng-container>
                     <ng-container matColumnDef="table.objectType">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>
@@ -89,22 +99,22 @@
                         </th>
                         <td mat-cell *matCellDef="let model; let i = index"> {{model.table.objectType}} </td>
                         <td mat-footer-cell *matFooterCellDef>
-                            <span>TABLE:{{model.totalTables}}</span><br>
-                            <span>VIEW:{{model.totalViews}}</span>
+                            <span>TABLE:{{summaryFooter.totalTables}}</span><br>
+                            <span>VIEW:{{summaryFooter.totalViews}}</span>
                         </td>
                     </ng-container>
-                    <ng-container matColumnDef="new">
+                    <ng-container matColumnDef="isNew">
                         <th mat-header-cell *matHeaderCellDef>
                             <div class="flex flex-row items-center">
                                 <span>Nova</span>
-                                <mat-checkbox (change)="changeBoolean($event, 'new')"
-                                              [indeterminate]="filterModel.new === null">
+                                <mat-checkbox (change)="changeBoolean($event, 'isNew')"
+                                              [indeterminate]="filterModel.isNew === null">
                                 </mat-checkbox>
                             </div>
 
                         </th>
-                        <td mat-cell *matCellDef="let model; let i = index"> {{model.new}} </td>
-                        <td mat-footer-cell *matFooterCellDef> {{model.totalNew}} </td>
+                        <td mat-cell *matCellDef="let model; let i = index"> {{model.isNew}} </td>
+                        <td mat-footer-cell *matFooterCellDef> {{summaryFooter.totalNew}} </td>
                     </ng-container>
                     <ng-container matColumnDef="changed">
                         <th mat-header-cell *matHeaderCellDef>
@@ -116,7 +126,7 @@
                             </div>
                         </th>
                         <td mat-cell *matCellDef="let model; let i = index"> {{model.changed}} </td>
-                        <td mat-footer-cell *matFooterCellDef> {{model.totalChanges}} </td>
+                        <td mat-footer-cell *matFooterCellDef> {{summaryFooter.totalChanges}} </td>
                     </ng-container>
                     <ng-container matColumnDef="done">
                         <th mat-header-cell *matHeaderCellDef>
@@ -128,7 +138,7 @@
                             </div>
                         </th>
                         <td mat-cell *matCellDef="let model; let i = index"> {{model.done}} </td>
-                        <td mat-footer-cell *matFooterCellDef> {{model.totalDone}} </td>
+                        <td mat-footer-cell *matFooterCellDef> {{summaryFooter.totalDone}} </td>
                     </ng-container>
                     <ng-container matColumnDef="hasError">
                         <th mat-header-cell *matHeaderCellDef>
@@ -147,7 +157,7 @@
                                 </button>
                             </div>
                         </td>
-                        <td mat-footer-cell *matFooterCellDef> {{model.totalErrors}} </td>
+                        <td mat-footer-cell *matFooterCellDef> {{summaryFooter.totalErrors}} </td>
                     </ng-container>
                     <ng-container matColumnDef="changedFields">
                         <th mat-header-cell *matHeaderCellDef>
@@ -166,7 +176,7 @@
                                 </button>
                             </div>
                         </td>
-                        <td mat-footer-cell *matFooterCellDef> {{model.totalChangesFields}} </td>
+                        <td mat-footer-cell *matFooterCellDef> {{summaryFooter.totalChangesFields}} </td>
                     </ng-container>
                     <ng-container matColumnDef="changedPKs">
                         <th mat-header-cell *matHeaderCellDef>
@@ -186,7 +196,7 @@
                                 </button>
                             </div>
                         </td>
-                        <td mat-footer-cell *matFooterCellDef> {{model.totalChangesPKs}} </td>
+                        <td mat-footer-cell *matFooterCellDef> {{summaryFooter.totalChangesPKs}} </td>
                     </ng-container>
                     <ng-container matColumnDef="changedReferences">
                         <th mat-header-cell *matHeaderCellDef>
@@ -205,7 +215,7 @@
                                 </button>
                             </div>
                         </td>
-                        <td mat-footer-cell *matFooterCellDef> {{model.totalChangesReferences}} </td>
+                        <td mat-footer-cell *matFooterCellDef> {{summaryFooter.totalChangesReferences}} </td>
                     </ng-container>
                     <ng-container matColumnDef="changedIndexes">
                         <th mat-header-cell *matHeaderCellDef>
@@ -216,7 +226,7 @@
                                 </mat-checkbox>
                             </div>
                         </th>
-                        <td mat-cell *matCellDef="let model; let i = index"> {{model.changedIndexes}}
+                        <td mat-cell *matCellDef="let model; let i = index">
                             <div class="flex flex-row items-center">
                                 <span>{{model.changedIndexes}}</span>
                                 <button *ngIf="model.changedIndexes" mat-icon-button aria-label="Edit" (click)="viewChangedIndexes(model, i)" matTooltip="Ver as índices alterados">
@@ -224,7 +234,7 @@
                                 </button>
                             </div>
                         </td>
-                        <td mat-footer-cell *matFooterCellDef> {{model.totalChangesIndexes}} </td>
+                        <td mat-footer-cell *matFooterCellDef> {{summaryFooter.totalChangesIndexes}} </td>
                     </ng-container>
                     <ng-container matColumnDef="changedViews">
                         <th mat-header-cell *matHeaderCellDef>
@@ -243,7 +253,7 @@
                                 </button>
                             </div>
                         </td>
-                        <td mat-footer-cell *matFooterCellDef> {{model.totalChangesViews}} </td>
+                        <td mat-footer-cell *matFooterCellDef> {{summaryFooter.totalChangesViews}} </td>
                     </ng-container>
 
                     <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
