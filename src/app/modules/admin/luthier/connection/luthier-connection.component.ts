@@ -21,6 +21,7 @@ import {LuthierConnectionModalComponent} from './modal/luthier-connection-modal.
 import {LuthierDatabaseModel} from '../../../../shared/models/luthier.model';
 import {LuthierComponent} from '../luthier.component';
 import {LuthierService} from '../luthier.service';
+import {MessageDialogService} from '../../../../shared/services/message/message-dialog-service';
 
 @Component({
     selector     : 'luthier-connection',
@@ -66,6 +67,7 @@ export class LuthierConnectionComponent implements OnInit, OnDestroy, AfterViewI
      */
     constructor(public _parent: LuthierComponent,
                 private _changeDetectorRef: ChangeDetectorRef,
+                private _messageService: MessageDialogService,
                 private _matDialog: MatDialog)
     {
     }
@@ -129,7 +131,15 @@ export class LuthierConnectionComponent implements OnInit, OnDestroy, AfterViewI
     }
 
     delete(id) {
+        this._messageService.open('Tem certeza de que deseja remover a conexão?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
+            if (result === 'confirmed') {
+                this.service.deleteDatabase(id)
+                    .then(result => {
+                        this._messageService.open('Conexão removida com sucesso', 'SUCESSO', 'success');
+                    })
 
+            }
+        });
     }
 
     announceSortChange($event: any) {

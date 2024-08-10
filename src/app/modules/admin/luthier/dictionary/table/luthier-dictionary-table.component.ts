@@ -1402,6 +1402,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                             }
                         });
                     }
+                    this.messageService.open('Campos importados com sucesso', 'SUCESSO', 'success');
                 })
         }
     }

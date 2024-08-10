@@ -141,6 +141,7 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
 
     filter(value: FilterCheckObjectsModel) {
         this.summaryFooter = new LuthierCheckObjectsSummaryModel();
+        this.summaryFooter.totalTime = this.model.totalTime;
 
         this.dataSource.data = this.model.changes.filter(x => {
             for (const key in value) {

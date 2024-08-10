@@ -522,7 +522,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 const newModel = new LuthierVisionDatasetModel();
                 newModel.vision = cloneDeep(vision);
                 newModel.vision.children = null;
-                newModel.name = 'Novo Dataset';
+                newModel.name = 'Novo_Dataset';
                 newModel.id = crypto.randomUUID();
                 newModel.objectType = 'VISION_DATASET';
                 newModel.parent = model.objectType === 'VISION_DATASET' ? model as LuthierVisionDatasetModel : null;
@@ -549,14 +549,14 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
     addObject() {
         if (this.objectType === 'VISION') {
             const newModel = new LuthierVisionModel();
-            newModel.name = 'Nova Visão';
+            newModel.name = 'Nova_Visao';
             newModel.id = crypto.randomUUID();
             newModel.objectType = 'VISION';
             this.addTab(newModel);
         }
         else {
             const newModel = new LuthierTableModel();
-            newModel.name = this.objectType === 'TABLE' ? 'Nova Tabela' : 'Nova View';
+            newModel.name = this.objectType === 'TABLE' ? 'Nova_Tabela' : 'Nova_View';
             newModel.id = crypto.randomUUID();
             newModel.objectType = this.objectType;
             newModel.fields = [];
