@@ -242,6 +242,8 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             .pipe(takeUntil(this._unsubscribeAll), debounceTime(100))
             .subscribe((luthierDataBase: number) =>
             {
+                this.tabsOpened = [];
+                this.selectedTab = null;
                 if (luthierDataBase !== null) {
                     firstValueFrom(this.service.getTables());
                     firstValueFrom(this.service.getVisions());
@@ -368,7 +370,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
         if (UtilFunctions.isValidStringOrArray(table.code) === true) {
             const index = this.tabsOpened.findIndex(x =>  x.code === table.code && x.objectType === table.objectType);
             if (index >= 0) {
-                this.selectedTab = table;
+                this.selectedTab = this.tabsOpened[index];
             }
             else {
                 if (table.objectType === 'TABLE' || table.objectType === 'VIEW') {
