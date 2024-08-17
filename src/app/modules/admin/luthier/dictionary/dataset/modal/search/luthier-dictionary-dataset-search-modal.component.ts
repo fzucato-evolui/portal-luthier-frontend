@@ -28,7 +28,8 @@ import {
     LuthierTableSearchSubsystemModel,
     LuthierVisionDatasetFieldModel,
     LuthierVisionDatasetModel,
-    LuthierVisionDatasetSearchModel
+    LuthierVisionDatasetSearchModel,
+    LuthierVisionDatasetSearchSubsystemModel
 } from '../../../../../../../shared/models/luthier.model';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
@@ -186,6 +187,27 @@ export class LuthierDictionaryDatasetSearchModalComponent implements OnInit, OnD
             this._changeDetectorRef.detectChanges();
             this.parent.messageService.open("Já existe uma pesquisa com o mesmo nome", "Erro de Validação", "warning");
             return;
+        }
+        const fa = this.getSubsystems();
+        const selectedSubsystems = fa.value as LuthierVisionDatasetSearchSubsystemModel[];
+        if (UtilFunctions.isValidStringOrArray(selectedSubsystems)) {
+            let selectedAll = false;
+            for (const sub of selectedSubsystems) {
+                if (sub.subsystem.code === -1) {
+                    selectedAll = true;
+                    break;
+                }
+            }
+            if (selectedAll) {
+                fa.clear();
+                this.subsystems.forEach(x => {
+                    if (x.code != -1) {
+                        const c = this.parent.addSearchSubsystem();
+                        c.get('subsystem').patchValue(x);
+                        fa.push(c);
+                    }
+                });
+            }
         }
         this.dialogRef.close('ok');
     }

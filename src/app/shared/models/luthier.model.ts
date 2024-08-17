@@ -27,6 +27,7 @@ export class LuthierTableModel {
     id?: string;
     code?: number
     name?: string
+    previousName?: string
     description?: string
     customDescription?: LuthierCustomizationModel
     creationDate?: Date
@@ -135,8 +136,8 @@ export enum LuthierFieldEditorEnum {
     SUBSISTEMA = ("SUBSISTEMA")
 }
 export class LuthierFieldEditorEnumParser {
-    public static fromValue(value: LuthierFieldEditorEnum | string): number {
-        return Object.keys(LuthierFieldEditorEnum).indexOf(value);
+    public static fromValue(value: LuthierFieldEditorEnum | string): string {
+        return Object.keys(LuthierFieldEditorEnum).indexOf(value).toString();
     }
     public static toValue(value: number | string): LuthierFieldEditorEnum {
         return Object.keys(LuthierFieldEditorEnum)[value];
@@ -148,8 +149,8 @@ export  enum LuthierFieldCharcaseEnum {
     LOWERCASE = ("LOWERCASE")
 }
 export class LuthierFieldCharcaseEnumParser {
-    public static fromValue(value: LuthierFieldCharcaseEnum | string): number {
-        return Object.keys(LuthierFieldCharcaseEnum).indexOf(value);
+    public static fromValue(value: LuthierFieldCharcaseEnum | string): string {
+        return Object.keys(LuthierFieldCharcaseEnum).indexOf(value).toString();
     }
     public static toValue(value: number | string): LuthierFieldCharcaseEnum {
         return Object.keys(LuthierFieldCharcaseEnum)[value];
@@ -159,6 +160,7 @@ export class LuthierTableFieldModel {
     id?: string
     code?: number
     name?: string
+    previousName?: string
     fieldType?: LuthierFieldTypeEnum | string
     size?: number
     customSize?: LuthierCustomizationModel

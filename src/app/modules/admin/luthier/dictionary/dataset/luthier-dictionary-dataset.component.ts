@@ -259,11 +259,13 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this.addGroupInfos();
         this.setCustomizations();
         this.formSave.patchValue(this.model);
+        //Essa ordem é importante para ordenação do @ViewChildren('sortFields') sortFields: QueryList<MatSort>;
         this.fieldsDataSource.data = this.model.fields;
-        this.searchsDataSource.data = this.model.searchs;
+        this.groupsInfoDataSource.data = this.model.groupInfos;
         this.customFieldsDataSource.data = this.model.customFields;
         this.customizationsDataSource.data = this.model.fields;
-        this.groupsInfoDataSource.data = this.model.groupInfos;
+        this.searchsDataSource.data = this.model.searchs;
+
         this.setParentRelation();
     }
 
@@ -462,8 +464,8 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 this.model = result;
                 this.refresh();
                 const index = this.parent.tabsOpened.findIndex(x => x.id === this.model.id);
-                this.parent.tabsOpened.splice(index, 1, this.model);
-                this.parent.selectedTab = this.model;
+                this._parent.tabsOpened[index].name = this.model.name;
+                //this.parent.selectedTab = this.model;
                 this.parent.updateDatasetNode(this.model);
                 this._changeDetectorRef.detectChanges();
                 this.messageService.open(`Dataset salvo com sucesso`, 'SUCESSO', 'success');
@@ -595,7 +597,6 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 customizations.push(model.customUiConfiguration);
             }
         });
-
         this.model.searchs.forEach(model => {
             if (model.customName
                 && UtilFunctions.isValidStringOrArray(model.customName.value) === true
@@ -609,7 +610,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             }
             model.searchFields.forEach(searchFieldModel => {
                 if (searchFieldModel.customLabel
-                    && UtilFunctions.isValidStringOrArray(searchFieldModel.customLabel) === true
+                    && UtilFunctions.isValidStringOrArray(searchFieldModel.customLabel.value) === true
                     && searchFieldModel.customLabel.value !== searchFieldModel.label
                 ) {
                     const fieldIndex = this.model.fields.findIndex(x => this.compareCode(x, searchFieldModel.field));
@@ -624,7 +625,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 }
             });
         });
-
+        this.model.customizations = customizations;
     }
 
 
@@ -1004,6 +1005,8 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         if (UtilFunctions.isValidStringOrArray(groupInfoWithGroupInfo)) {
             groupInfoWithGroupInfo.forEach(x => {
                 this.groupsInfoDataSource.data[x].parent = null;
+                const fg = this.getFieldGroup(this.groupsInfoDataSource.data[x], 'groupInfos');
+                fg.get('parent').setValue(null);
             });
         }
         this.groupsInfoDataSource.data.splice(index, 1);

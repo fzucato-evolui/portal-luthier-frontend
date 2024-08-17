@@ -95,8 +95,8 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy
                 this.model = result;
                 this.refresh();
                 const index = this._parent.tabsOpened.findIndex(x => x.id === this.model.id);
-                this._parent.tabsOpened.splice(index, 1, this.model);
-                this._parent.selectedTab = this.model;
+                this._parent.tabsOpened[index].name = this.model.name;
+                //this._parent.selectedTab = this.model;
                 this._changeDetectorRef.detectChanges();
                 this.messageService.open(`Visão salva com sucesso`, 'SUCESSO', 'success')
             })

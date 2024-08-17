@@ -278,13 +278,14 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.addViews();
         this.setCustomizations();
         this.formSave.patchValue(this.model);
+        //Essa ordem é importante para ordenação do @ViewChildren('sortFields') sortFields: QueryList<MatSort>;
         this.fieldsDataSource.data = this.model.fields;
+        this.groupsInfoDataSource.data = this.model.groupInfos;
+        this.customFieldsDataSource.data = this.model.customFields;
+        this.customizationsDataSource.data = this.model.fields;
         this.indexesDataSource.data = this.model.indexes;
         this.referencesDataSource.data = this.model.references;
         this.searchsDataSource.data = this.model.searchs;
-        this.customFieldsDataSource.data = this.model.customFields;
-        this.customizationsDataSource.data = this.model.fields;
-        this.groupsInfoDataSource.data = this.model.groupInfos;
         this.bondsDataSource.data = this.model.bonds;
         this.bondsDatasetDataSource.data = this.model.datasetBonds;
     }
@@ -474,11 +475,13 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.service.saveTable(this._cloneModel)
             .then(result => {
                 result.id = this._cloneModel.id;
+                result.bonds = this._cloneModel.bonds;
+                result.datasetBonds = this._cloneModel.datasetBonds;
                 this.model = result;
                 this.refresh();
                 const index = this._parent.tabsOpened.findIndex(x => x.id === this.model.id);
-                this._parent.tabsOpened.splice(index, 1, this.model);
-                this._parent.selectedTab = this.model;
+                this._parent.tabsOpened[index].name = this.model.name;
+                //this._parent.selectedTab = this._parent.tabsOpened[index];
                 this._changeDetectorRef.detectChanges();
                 this.messageService.open(`${this.model.objectType === 'TABLE' ? 'Tabela' : 'View'} salva com sucesso`, 'SUCESSO', 'success')
             })
@@ -576,6 +579,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 model.customMask.name2 = model.name;
                 customizations.push(model.customMask);
             }
+            console.log('custom charcase');
             if (model.customCharCase
                 && UtilFunctions.isValidStringOrArray(model.customCharCase.value) === true
                 && model.customCharCase.value !== model.charCase
@@ -607,7 +611,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             }
             model.staticFields.forEach(staticModel => {
                 if (staticModel.customCaption
-                    && UtilFunctions.isValidStringOrArray(staticModel.customCaption) === true
+                    && UtilFunctions.isValidStringOrArray(staticModel.customCaption.value) === true
                     && staticModel.customCaption.value !== staticModel.caption
                 ) {
                     staticModel.customCaption.type = 'STATIC_VALUE';
@@ -631,7 +635,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             }
             model.searchFields.forEach(searchFieldModel => {
                 if (searchFieldModel.customLabel
-                    && UtilFunctions.isValidStringOrArray(searchFieldModel.customLabel) === true
+                    && UtilFunctions.isValidStringOrArray(searchFieldModel.customLabel.value) === true
                     && searchFieldModel.customLabel.value !== searchFieldModel.label
                 ) {
                     const fieldIndex = this.model.fields.findIndex(x => this.compareCode(x, searchFieldModel.tableField));
@@ -646,6 +650,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             });
         });
 
+        this.model.customizations = customizations;
     }
 
 
@@ -1171,7 +1176,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         });
     }
     newSearch() {
-        this.editIndex(new LuthierTableSearchModel(), -1);
+        this.editSearch(new LuthierTableSearchModel(), -1);
     }
     deleteSearch(index: number) {
         index = this.getRealIndex(index, 'searchs').index;
@@ -1226,6 +1231,8 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         if (UtilFunctions.isValidStringOrArray(groupInfoWithGroupInfo)) {
             groupInfoWithGroupInfo.forEach(x => {
                 this.groupsInfoDataSource.data[x].parent = null;
+                const fg = this.getFieldGroup(this.groupsInfoDataSource.data[x], 'groupInfos');
+                fg.get('parent').setValue(null);
             });
         }
         this.groupsInfoDataSource.data.splice(index, 1);
