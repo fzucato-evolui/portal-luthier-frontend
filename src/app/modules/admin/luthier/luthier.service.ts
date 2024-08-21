@@ -353,6 +353,9 @@ export class LuthierService
         return this._httpClient.get<LuthierVisionModel[]>(`${this.baseDicUrl}/all-visions`).pipe(
             tap((response: LuthierVisionModel[]) =>
             {
+                response.forEach(vision => {
+                    this.sortVisionChildren(vision);
+                })
                 this.visions = response;
             }),
         );
@@ -475,6 +478,7 @@ export class LuthierService
                     this._currentVisions[indexVision].children = new Array<LuthierVisionDatasetModel>();
                 }
                 let parent: {model: LuthierVisionDatasetModel, index: number} = null;
+                let oldParent = this.getDatasetByCode(response.code, this._currentVisions[indexVision], true);
                 if (response.parent && UtilFunctions.isValidStringOrArray(response.parent.code) === true) {
                     parent = this.getDatasetByCode(response.parent.code, this._currentVisions[indexVision]);
                     if (UtilFunctions.isValidStringOrArray(parent.model.children) === false) {
@@ -484,8 +488,7 @@ export class LuthierService
                 if (model.code && model.code > 0) {
                     if (parent === null) {
                         //Tinha pai e agora nao tem mais, precisa remover do antigo
-                        if (model.parent && UtilFunctions.isValidStringOrArray(model.parent.code)) {
-                            const oldParent = this.getDatasetByCode(model.parent.code, this._currentVisions[indexVision]);
+                        if (oldParent != null) {
                             oldParent.model.children.splice(oldParent.index, 1);
                             this._currentVisions[indexVision].children.push(response);
                         }
@@ -500,14 +503,14 @@ export class LuthierService
 
                     } else {
                         //Tinha pai e permanece tendo
-                        if (model.parent && UtilFunctions.isValidStringOrArray(model.parent.code)) {
+                        if (oldParent != null) {
                             // Continua com o mesmo pai
-                            if (model.parent.code === parent.model.code) {
-                                parent.model.children[parent.index] = response
+                            if (oldParent.model.code === parent.model.code) {
+                                const index = parent.model.children.findIndex(child => child.code === model.code);
+                                parent.model.children[index] = response
                             }
                             // Mudou de pai. , precisa remover do antigo
                             else {
-                                const oldParent = this.getDatasetByCode(model.parent.code, this._currentVisions[indexVision]);
                                 oldParent.model.children.splice(oldParent.index, 1);
                                 parent.model.children.push(response);
                             }
@@ -609,6 +612,23 @@ export class LuthierService
         }
         else {
             return null;
+        }
+    }
+
+    sortVisionChildren(parent: LuthierVisionDatasetModel | LuthierVisionModel) {
+        if (UtilFunctions.isValidStringOrArray(parent.children) === true) {
+            parent.children.sort((a, b) => {
+                return a.name.localeCompare(b.name);
+            });
+            for (let child of parent.children) {
+                const dataset = this.sortVisionChildren(child);
+                if (dataset != null) {
+                    return dataset;
+                }
+            }
+        }
+        else {
+            return;
         }
     }
 
