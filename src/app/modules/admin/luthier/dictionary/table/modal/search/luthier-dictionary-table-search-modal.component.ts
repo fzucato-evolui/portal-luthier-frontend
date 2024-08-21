@@ -259,4 +259,8 @@ export class LuthierDictionaryTableSearchModalComponent implements OnInit, OnDes
         }
         return UtilFunctions.isValidStringOrArray(value) === true && value.findIndex(x => x.subsystem.code === -1) >= 0;
     }
+
+    changeField(event: MatSelectChange, model: FormGroup) {
+        model.get('label').setValue(event.value['label']);
+    }
 }

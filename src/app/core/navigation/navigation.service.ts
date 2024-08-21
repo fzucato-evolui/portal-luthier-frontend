@@ -39,6 +39,14 @@ export const mainNavigation: FuseNavigationItem[] = [
                 link : '/portal/users',
                 roles : ['ROLE_SUPER', 'ROLE_HYPER']
             },
+            {
+                id   : 'portal.history',
+                title: 'Histórico',
+                type : 'basic',
+                awesomeIcon : {fontSet:"fas", fontIcon:"fa-clock-rotate-left"},
+                link : '/portal/historical',
+                roles : ['ROLE_SUPER', 'ROLE_HYPER']
+            },
 
         ]
     },

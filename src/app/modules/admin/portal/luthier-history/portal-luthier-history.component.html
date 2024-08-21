@@ -1,0 +1,228 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden bg-transparent z-50">
+
+    <mat-drawer-container class="flex-auto h-full">
+
+        <!-- Drawer -->
+        <mat-drawer
+            class="w-80 dark:bg-gray-900"
+            [autoFocus]="false"
+            [mode]="drawerMode"
+            [opened]="drawerOpened"
+            #matDrawer>
+            <div class="py-1 h-full flex flex-col overflow-hidden">
+
+                <!-- Header -->
+                <div class="flex flex-col flex-0 p-1 border-b dark:bg-transparent">
+                    <div class="flex items-center justify-between">
+                        <div class="grow px-6 text-3xl font-bold tracking-tighter">Filtro</div>
+                        <div class="flex">
+                            <button (click)="cleanFilter()"
+                                    mat-icon-button>
+                                <mat-icon fontSet="fas" fontIcon="fa-eraser"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-auto w-full overflow-y-auto overflow-x-hidden">
+                    <div class="flex flex-col items-center justify-end py-1">
+                        <div class="flex flex-col w-full px-2 py-1">
+                            <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                <mat-label>ID</mat-label>
+                                <input class="text-sm" matInput [autocomplete]="'off'"
+                                       [(ngModel)]="filterModel.id">
+                            </mat-form-field>
+                        </div>
+                        <div class="flex flex-col w-full px-2 py-1">
+                            <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                <mat-label>Data</mat-label>
+                                <mat-icon
+                                    class="icon-size-5 cursor-pointer"
+                                    fontSet="fas" fontIcon="fa-calendar"
+                                    matPrefix (click)="picker.open()"></mat-icon>
+                                <mat-date-range-input [rangePicker]="picker">
+                                    <input matStartDate placeholder="De" [(ngModel)]="filterModel.dateFrom">
+                                    <input matEndDate placeholder="Até" [(ngModel)]="filterModel.dateTo">
+                                </mat-date-range-input>
+
+                                <mat-date-range-picker #picker></mat-date-range-picker>
+                            </mat-form-field>
+                        </div>
+                        <div class="flex flex-col w-full px-2 py-1">
+                            <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                <mat-label>Usuário</mat-label>
+                                <input class="text-sm" matInput [autocomplete]="'off'"
+                                       [(ngModel)]="filterModel.user">
+                            </mat-form-field>
+                        </div>
+                        <div class="flex flex-col w-full px-2 py-1">
+                            <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                <mat-label>Banco de Dados</mat-label>
+                                <input class="text-sm" matInput
+                                       [(ngModel)]="filterModel.database">
+                            </mat-form-field>
+                        </div>
+                        <div class="flex flex-col w-full px-2 py-1">
+                            <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                <mat-label>Tipo</mat-label>
+                                <mat-select [(ngModel)]="filterModel.historyType">
+
+                                    <mat-option [value]="null" >
+                                    </mat-option>
+                                    <mat-option *ngFor="let t of PortalHistoryPersistTypeEnum | enumArray" [value]="t.key" >
+                                        {{t.key}}
+
+                                    </mat-option>
+                                </mat-select>
+
+
+                            </mat-form-field>
+                        </div>
+                        <div class="flex flex-col w-full px-2 py-1">
+                            <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                <mat-label>Classe</mat-label>
+                                <input class="text-sm" matInput [autocomplete]="'off'"
+                                       [(ngModel)]="filterModel.classDecription">
+                            </mat-form-field>
+                        </div>
+                        <div class="flex flex-col w-full px-2 py-1">
+                            <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                <mat-label>Chave</mat-label>
+                                <input class="text-sm" matInput [autocomplete]="'off'"
+                                       [(ngModel)]="filterModel.classKey">
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+
+                </div>
+
+            </div>
+        </mat-drawer>
+
+        <!-- Drawer content -->
+        <mat-drawer-content class="flex flex-col overflow-hidden bg-white">
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row flex-0 sm:justify-between p-1 border-b">
+                <div class="flex shrink-0 mt-0 sm:mx-2">
+                    <button class="min-h-7 h-7 "
+                            mat-icon-button
+                            (click)="matDrawer.toggle()">
+                        <mat-icon fontSet="fas" fontIcon="fa-search"></mat-icon>
+                    </button>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <!-- Title -->
+                    <div class="mt-0">
+                        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                            Histórico de Alterações Luthier
+                        </h2>
+                        <div class="text-secondary">Os históricos ficam salvos por 30 dias</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main -->
+            <div
+                class="flex-auto p-2  overflow-y-hidden">
+
+                <div class="flex flex-col h-full overflow-hidden">
+                    <div class="flex-none flex justify-between items-center py-1">
+                        <div class="flex-none flex">
+
+                        </div>
+                        <div class="flex-none flex md:w-1/3 md:pr-1">
+                            <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                                <mat-icon
+                                    class="evolui-menu-item-icon"
+                                    fontSet="fas" fontIcon="fa-search"
+                                    matPrefix></mat-icon>
+                                <input
+                                    [autocomplete]="'off'"
+                                    class="text-sm"
+                                    (input)="filter($event)"
+                                    matInput>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-y-auto" cdkScrollable>
+                        <table #table mat-table matSort [dataSource]="dataSource" class="table-auto" (matSortChange)="announceSortChange($event)">
+
+                            <ng-container matColumnDef="buttons">
+                                <th mat-header-cell *matHeaderCellDef>
+                                    <div class="flex flex-row items-center">
+                                        <button mat-icon-button aria-label="Add" (click)="refresh()">
+                                            <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-sync"></mat-icon>
+                                        </button>
+                                    </div>
+                                </th>
+                                <td mat-cell *matCellDef="let model">
+                                    <div class="flex flex-row items-center">
+                                        <button mat-icon-button aria-label="Delete" (click)="delete(model.id)" matTooltip="Remover Banco">
+                                            <mat-icon class="icon-size-5 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
+                                        </button>
+                                        <!--
+                                        <button mat-icon-button aria-label="Check" (click)="check(model.id)" matTooltip="Setar Banco de Trabalho">
+                                            <mat-icon class="icon-size-5" [ngClass]="workDataBase === model.id ? 'text-green-500' : 'text-gray-500'" fontSet="fas" fontIcon="fa-circle-check"></mat-icon>
+                                        </button>
+                                        <button mat-icon-button *ngIf="workDataBase && workDataBase !== model.id" aria-label="Check" (click)="copy(model.id)" matTooltip="Copiar os metadados luthier desse banco para o banco de trabalho">
+                                            <mat-icon class="icon-size-5 text-primary" fontSet="fas" fontIcon="fa-clone"></mat-icon>
+                                        </button>
+                                        !-->
+                                    </div>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="user.image">
+                                <th mat-header-cell *matHeaderCellDef></th>
+                                <td mat-cell *matCellDef="let model">
+                                    <div *ngIf="model.user.image"  class="flex w-16 h-16 items-center">
+                                        <img (error)="clearImage(model)" [src]="model.user.image" class="max-w-full max-h-full rounded-full" />
+                                    </div>
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="id">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+                                <td mat-cell *matCellDef="let model"> {{ model.id }} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="persistDate">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Data </th>
+                                <td mat-cell *matCellDef="let model"> {{ model.persistDate | date: 'dd/MM/yyyy HH:mm:ss'}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="user.name">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Usuário </th>
+                                <td mat-cell *matCellDef="let model"> {{ model.user.name }} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="luthierDatabase.identifier">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Banco de Dados </th>
+                                <td mat-cell *matCellDef="let model"> {{ model.luthierDatabase.identifier }} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="persistType">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
+                                <td mat-cell *matCellDef="let model"> {{ model.persistType }} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="classDescription">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Classe </th>
+                                <td mat-cell *matCellDef="let model"> {{ model.classDescription }} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="classKey">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Chave </th>
+                                <td mat-cell *matCellDef="let model"> {{ model.classKey }} </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                        </table>
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+        </mat-drawer-content>
+
+    </mat-drawer-container>
+
+</div>

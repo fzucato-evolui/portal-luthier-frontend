@@ -172,7 +172,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             return this.dadosDatabaseType;
         }
     }
-
+    public customPatterns = { 'I': { pattern: new RegExp('\[a-zA-Z0-9_\]')}, 'J': { pattern: new RegExp('\[a-zA-Z0-9_\.\]')} };
     formSave: FormGroup;
     displayedFieldColumns = ['buttons', 'order', 'code', 'key', 'name', 'label', 'customLabel', 'fieldType', 'modifyType',
         'attributeName', 'autoInc', 'size', 'groupInfo.description', 'search', 'notNull',
@@ -261,8 +261,8 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             objectType: [''],
             technicalDescription: ['', []],
             userDescription: ['', []],
-            className: ['', []],
-            namespace: ['', []],
+            className: ['', [Validators.required]],
+            namespace: ['', [Validators.required]],
             logins: [false],
             logup: [false],
             logdel: [false],
@@ -489,8 +489,19 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
     canSave(): boolean {
         if (this.formSave) {
-            return !this.formSave.invalid;
+            if (this.formSave.invalid) {
+                return false;
+            }
+            else if (this.model.objectType === 'VIEW') {
+                return UtilFunctions.isValidStringOrArray(this.getView(this.dadosViewBodyType).value['body']) === true ||
+                UtilFunctions.isValidStringOrArray(this.getView(LuthierViewBodyEnum.GENERICO).value['body']) === true ||
+                UtilFunctions.isValidStringOrArray(this.getView(LuthierViewBodyEnum.CUSTOM).value['body']) === true;
+            }
+            else {
+                return true;
+            }
         }
+
         return false;
     }
 
@@ -760,10 +771,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 layoutSize: [LuthierFieldLayoutEnum.NAO_DEFINIDO],
                 uiConfiguration: [null],
                 staticFields: this.formBuilder.array([])
-            },
-            {
-                validators: LuthierFieldValidator.validate(this.getFields(type)),
-            },
+            }
         );
         if (type === 'fields') {
             const allFields = this.formBuilder.group ({
@@ -781,6 +789,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 customEditor: this.addCustomizationField(),
                 customUiConfiguration: this.addCustomizationField()
             });
+            allFields.setValidators(LuthierFieldValidator.validate(this.getFields(type)));
             return allFields;
         }
         else {
@@ -788,6 +797,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 ...c.controls,
                 groupInfo: [null]
             });
+            allFields.setValidators(LuthierFieldValidator.validate(this.getFields(type)));
             return allFields;
         }
 
@@ -954,6 +964,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                     code: [null],
                     name: ['', [Validators.required]],
                     fieldType: [],
+                    label: [''],
                     size: []
                 }, { validators: [Validators.required]}
             )
@@ -1016,9 +1027,10 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
 
     saveRow(model: LuthierBasicModel, index: number, type: TableType) {
+        const fg = this.getFieldGroup(model, type);
+        fg.updateValueAndValidity();
         const editing = this.getRealIndex(index, type);
         index = editing.index;
-        const fg = this.getFieldGroup(model, type);
         if (fg.invalid) {
             console.log(fg, fg.errors);
             this.messageService.open("Existem campo inválidos!", "Error de Validação", "warning");
@@ -1099,7 +1111,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         index = this.getRealIndex(index, 'indexes').index;
         const fields = this.model.fields.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
         const modal = this._matDialog.open(LuthierDictionaryTableIndexModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-index-modal-container' });
-        modal.componentInstance.title = "Index da Tabela " + this.model.name;
+        modal.componentInstance.title = "Índice da Tabela " + this.model.name;
         modal.componentInstance.parent = this;
         modal.componentInstance.indexModel = model;
         modal.componentInstance.fields = fields;
@@ -1879,4 +1891,5 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 });
         }
     }
+
 }

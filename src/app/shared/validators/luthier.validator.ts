@@ -9,6 +9,8 @@ export class LuthierFieldValidator {
             const precisionControl = formGroup.get('precision');
             const sizeControl = formGroup.get('size');
             const nameControl = formGroup.get('name');
+            const pkControl = formGroup.get('key');
+            const notNullControl = formGroup.get('notNull');
 
             const errors = [];
             if (fieldType === LuthierFieldTypeEnum.FLOAT || fieldType === LuthierFieldTypeEnum.MONEY) {
@@ -42,6 +44,19 @@ export class LuthierFieldValidator {
                     if ( sizeControl.hasError('sizeBiggerThan0') === true ) {
                         delete sizeControl.errors.sizeBiggerThan0;
                         sizeControl.updateValueAndValidity();
+                    }
+                }
+            }
+            if (pkControl && notNullControl) {
+                if (UtilFunctions.parseBoolean(pkControl.value) && !UtilFunctions.parseBoolean(notNullControl.value)) {
+                    notNullControl.setErrors({
+                        'forbiddenValue': true
+                    });
+                    errors.push({forbiddenValue: true});
+                } else {
+                    if (notNullControl.hasError('forbiddenValue') === true) {
+                        delete notNullControl.errors.forbiddenValue;
+                        notNullControl.updateValueAndValidity();
                     }
                 }
             }

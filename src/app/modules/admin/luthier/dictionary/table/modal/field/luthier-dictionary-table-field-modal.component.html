@@ -256,7 +256,20 @@
                                 matInput>
                         </mat-form-field>
                     </div>
-                    <div class="sm:col-span-6">
+                    <div class="sm:col-span-3">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Nome Atributo</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-database"
+                                matPrefix></mat-icon>
+                            <input
+                                [patterns]="customPatterns" mask="I*"
+                                [formControlName]="'attributeName'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-3">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
                             <mat-label>Valor Padrão</mat-label>
                             <mat-icon

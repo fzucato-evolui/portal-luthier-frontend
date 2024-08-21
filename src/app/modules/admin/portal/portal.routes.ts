@@ -9,7 +9,9 @@ export default [
         children: [
             {path: "", component: Error404Component},
             {path: "luthier-database", loadChildren: () => import('app/modules/admin/portal/luthier-database/portal-luthier-database.routes')},
-            {path: "config", loadChildren: () => import('app/modules/admin/portal/config/portal-config.routes')}
+            {path: "config", loadChildren: () => import('app/modules/admin/portal/config/portal-config.routes')},
+            {path: "historical", loadChildren: () => import('app/modules/admin/portal/luthier-history/portal-luthier-history.routes')},
+
         ]
     },
 ] as Routes;

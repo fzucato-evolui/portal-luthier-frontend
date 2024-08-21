@@ -2,6 +2,9 @@
     width: 100% !important;
     height: 100% !important;
 }
+.mat-column-tableField-name {
+    min-width: 250px !important;
+}
 .luthier-dictionary-table-search-modal-container {
     max-width: 70vw !important;
     width: 70vw !important;
@@ -21,6 +24,7 @@
     .mat-card-header-text {
         @apply w-full #{'!important'};
     }
+
     .mat-mdc-header-cell,
     .mat-mdc-cell {
         padding: 0px 10px 0px 10px !important;
@@ -44,4 +48,5 @@
             margin: 0px !important;
         }
     }
+
 }

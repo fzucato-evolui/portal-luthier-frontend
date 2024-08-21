@@ -199,7 +199,7 @@ export class LuthierUserUserModalComponent implements OnInit, OnDestroy, AfterVi
                 this.userModel = result;
                 this.ngOnInit();
                 this._changeDetectorRef.detectChanges();
-                this.parent.messageService.open('Grupo de usuário salvo com sucesso', 'SUCESSO', 'success');
+                this.parent.messageService.open('Usuário salvo com sucesso', 'SUCESSO', 'success');
             });
     }
 

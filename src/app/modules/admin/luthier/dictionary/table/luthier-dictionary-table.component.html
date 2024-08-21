@@ -123,6 +123,7 @@
                                 matPrefix></mat-icon>
                             <input
                                 class="text-sm"
+                                [patterns]="customPatterns" mask="I*"
                                 [formControlName]="'className'"
                                 matInput>
                         </mat-form-field>
@@ -136,6 +137,7 @@
                                 matPrefix></mat-icon>
                             <input
                                 class="text-sm"
+                                [patterns]="customPatterns" mask="J*"
                                 [formControlName]="'namespace'"
                                 matInput>
                         </mat-form-field>
@@ -887,7 +889,7 @@
                     </div>
                     <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
-                            <input [name]="'attributeNameField'+i" class="text-sm" matInput
+                            <input [name]="'attributeNameField'+i" class="text-sm" matInput [patterns]="customPatterns" mask="I*"
                                    formControlName="attributeName">
                         </mat-form-field>
                     </div>
@@ -942,9 +944,7 @@
                         {{ field.notNull }}
                     </div>
                     <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)" #group="ngForm">
-                        <mat-checkbox (change)="checkIndeterminate($event, group.form.get('notNull'))"
-                                      [indeterminate]="group.form.get('notNull').value === null"
-                                      [name]="'notNullField'+i" class="text-sm" formControlName="notNull"></mat-checkbox>
+                        <mat-checkbox [name]="'notNullField'+i" class="text-sm" formControlName="notNull"></mat-checkbox>
                     </div>
 
                 </td>

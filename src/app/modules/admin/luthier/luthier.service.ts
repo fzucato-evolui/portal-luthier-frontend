@@ -403,6 +403,9 @@ export class LuthierService
                     }
                 } else {
                     this._currentTables.push(response);
+                    this._currentTables.sort((a, b) => {
+                        return a.name.localeCompare(b.name);
+                    });
                 }
                 this.tables = this._currentTables;
                 // Return a new observable with the response
@@ -438,6 +441,10 @@ export class LuthierService
                     }
                 } else {
                     this._currentVisions.push(response);
+                    this._currentVisions.sort((a, b) => {
+                        return a.name.localeCompare(b.name);
+                    });
+
                 }
                 this.visions = this._currentVisions;
                 return of(response);

@@ -372,13 +372,15 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 if ( result === 'ok' ) {
                     modal.componentInstance.model.fields.selected.forEach(x => {
                         let dsField: LuthierVisionDatasetFieldModel | LuthierVisionDatasetCustomFieldModel;
+                        x.groupInfo = null;
                         if (type === 'customFields') {
-                            dsField = x as LuthierVisionDatasetCustomFieldModel;
+                            dsField = cloneDeep(x) as LuthierVisionDatasetCustomFieldModel;
                         }
                         else {
-                            dsField = x as LuthierVisionDatasetFieldModel;
+                            dsField = cloneDeep(x) as LuthierVisionDatasetFieldModel;
                         }
-                        x.groupInfo = null;
+                        dsField.groupInfo = null;
+                        dsField.code = null;
                         dsField.tableField = x;
                         dsField.id = crypto.randomUUID();
                         dsField.fieldType = modal.componentInstance.model.fieldType;
@@ -716,10 +718,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                     size: [null],
                     fieldType: [null]
                 })
-            },
-            {
-                validators: LuthierFieldValidator.validate(this.getFields(type)),
-            },
+            }
         );
         if (type === 'fields') {
             const allFields = this.formBuilder.group ({
@@ -740,6 +739,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 customLookupFilter: this.addCustomizationField(),
                 customUiConfiguration: this.addCustomizationField()
             });
+            allFields.setValidators(LuthierFieldValidator.validate(this.getFields(type)));
             return allFields;
         }
         else {
@@ -748,6 +748,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 groupInfo: [null],
                 reference: [null]
             });
+            allFields.setValidators(LuthierFieldValidator.validate(this.getFields(type)));
             return allFields;
         }
 
@@ -901,10 +902,10 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     }
 
     saveRow(model: LuthierBasicModel, index: number, type: TableType) {
+        const fg = this.getFieldGroup(model, type);
+        fg.updateValueAndValidity();
         const editing = this.getRealIndex(index, type);
         index = editing.index;
-
-        const fg = this.getFieldGroup(model, type);
         if (fg.invalid) {
             this.messageService.open("Existem campo inválidos!", "Error de Validação", "warning");
             fg.updateValueAndValidity();
@@ -1205,8 +1206,8 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                                 x.searchFields.splice(i, 1);
                                 continue;
                             }
-                            searchField['dataset'] = this.model;
-                            searchField['field'] = this.model.fields[fieldIndex];
+                            searchField['dataset'] = cloneDeep(this.model);
+                            searchField['field'] = cloneDeep(this.model.fields[fieldIndex]);
                             i++;
                         }
                         // Tem que voltar pois apagou o campo code
