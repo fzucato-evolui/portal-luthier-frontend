@@ -21,6 +21,15 @@ luthier-connection {
         background-color: whitesmoke !important;
     }
 
+    .dark & {
+        .mat-mdc-row:nth-child(odd){
+            background-color: inherit !important;
+        }
+        .mat-mdc-row:hover .mat-mdc-cell {
+            @apply bg-hover;
+        }
+
+    }
     .mat-mdc-row.checked {
         background-color: darkseagreen !important;
     }

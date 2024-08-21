@@ -43,6 +43,16 @@
         background-color: whitesmoke !important;
     }
 
+    .dark & {
+        .mat-mdc-row:nth-child(odd){
+            background-color: inherit !important;
+        }
+        .mat-mdc-row:hover .mat-mdc-cell {
+            @apply bg-hover;
+        }
+
+    }
+
     .mat-mdc-cell {
         .mdc-text-field {
             margin: 0px !important;

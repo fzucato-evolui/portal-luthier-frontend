@@ -248,6 +248,20 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.groupsInfoDataSource.sort = this.sortFields.get(1);
         this.customFieldsDataSource.sort = this.sortFields.get(2);
         this.customizationsDataSource.sort = this.sortFields.get(3);
+        if (UtilFunctions.isValidStringOrArray(this.model.code)) {
+            // Mark all controls as dirty
+            Object.keys(this.formSave.controls).forEach(field => {
+                const control = this.formSave.get(field);
+                control?.markAsDirty({ onlySelf: true });
+                control?.markAsTouched({ onlySelf: true });
+                control?.updateValueAndValidity(); // Trigger validation
+            });
+
+            // Optionally mark the form itself as dirty
+            this.formSave.markAsDirty();
+            this.formSave.markAsTouched();
+            this.formSave.updateValueAndValidity();
+        }
 
     }
 

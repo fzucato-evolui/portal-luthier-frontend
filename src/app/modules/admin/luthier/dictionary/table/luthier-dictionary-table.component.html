@@ -137,6 +137,7 @@
                                 matPrefix></mat-icon>
                             <input
                                 class="text-sm"
+                                [dropSpecialCharacters]="false"
                                 [patterns]="customPatterns" mask="J*"
                                 [formControlName]="'namespace'"
                                 matInput>
@@ -763,7 +764,7 @@
                         <mat-icon class="icon-size-4 text-green-500" fontSet="fas" fontIcon="fa-save"></mat-icon>
                     </button>
                     <button *ngIf="!field['editing'] && (fieldtype === 'fields' || fieldtype === 'customFields')" mat-icon-button aria-label="Detail" (click)="detailField(field, i, fieldtype)" matTooltip="Detalhes do Campo">
-                        <mat-icon class="icon-size-4 text-accent" fontSet="fas" fontIcon="fa-glasses"></mat-icon>
+                        <mat-icon class="icon-size-4 text-accent dark:text-primary" fontSet="fas" fontIcon="fa-glasses"></mat-icon>
                     </button>
                 </div>
             </td>

@@ -1,13 +1,16 @@
-import { NgClass, NgFor } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { Router } from '@angular/router';
-import { FuseDrawerComponent } from '@fuse/components/drawer';
-import { FuseConfig, FuseConfigService, Scheme, Theme, Themes } from '@fuse/services/config';
+import {NgClass, NgFor, NgIf} from '@angular/common';
+import {Component, OnDestroy, OnInit, ViewEncapsulation} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {Router} from '@angular/router';
+import {FuseDrawerComponent} from '@fuse/components/drawer';
+import {FuseConfig, FuseConfigService, Scheme, Theme, Themes} from '@fuse/services/config';
 
-import { Subject, takeUntil } from 'rxjs';
+import {firstValueFrom, Subject, takeUntil} from 'rxjs';
+import {UserService} from '../../../shared/services/user/user.service';
+import {UserModel} from '../../../shared/models/user.model';
+import {UtilFunctions} from '../../../shared/util/util-functions';
 
 @Component({
     selector     : 'settings',
@@ -31,7 +34,7 @@ import { Subject, takeUntil } from 'rxjs';
     ],
     encapsulation: ViewEncapsulation.None,
     standalone   : true,
-    imports      : [MatIconModule, FuseDrawerComponent, MatButtonModule, NgFor, NgClass, MatTooltipModule],
+    imports: [MatIconModule, FuseDrawerComponent, MatButtonModule, NgFor, NgClass, MatTooltipModule, NgIf],
 })
 export class SettingsComponent implements OnInit, OnDestroy
 {
@@ -48,6 +51,7 @@ export class SettingsComponent implements OnInit, OnDestroy
     constructor(
         private _router: Router,
         private _fuseConfigService: FuseConfigService,
+        private _userService: UserService,
     )
     {
     }
@@ -68,6 +72,25 @@ export class SettingsComponent implements OnInit, OnDestroy
             {
                 // Store the config
                 this.config = config;
+            });
+
+        this._userService.user$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((user: UserModel) =>
+            {
+                if (user && user.config) {
+                    if (UtilFunctions.isValidStringOrArray(user.config.theme) === true) {
+                        this.config.theme = user.config.theme;
+                        const theme: Theme = this.config.theme;
+                        this._fuseConfigService.config = {theme};
+                    }
+                    if (UtilFunctions.isValidStringOrArray(user.config.scheme) === true) {
+                        this.config.scheme = user.config.scheme;
+                        const scheme: Scheme = this.config.scheme;
+                        this._fuseConfigService.config = {scheme};
+                    }
+                }
+
             });
     }
 
@@ -113,6 +136,10 @@ export class SettingsComponent implements OnInit, OnDestroy
     setScheme(scheme: Scheme): void
     {
         this._fuseConfigService.config = {scheme};
+        firstValueFrom(this._userService.saveConfig({
+            theme: this.config.theme,
+            scheme: scheme
+        }));
     }
 
     /**
@@ -123,5 +150,9 @@ export class SettingsComponent implements OnInit, OnDestroy
     setTheme(theme: Theme): void
     {
         this._fuseConfigService.config = {theme};
+        firstValueFrom(this._userService.saveConfig({
+            theme: theme,
+            scheme: this.config.scheme
+        }));
     }
 }

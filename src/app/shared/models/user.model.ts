@@ -1,7 +1,16 @@
+import {Scheme} from '../../../@fuse/services/config';
+
 export class LoginModel {
   public login: string;
   public password: string;
 }
+
+export class UserConfigModel {
+    public lang?: string;
+    public theme?: string;
+    public scheme?: Scheme;
+}
+
 export class UserModel {
     public id: number;
     public name: string;
@@ -14,6 +23,7 @@ export class UserModel {
     public base64Image: string;
     public userType: TipoUsuarioEnum;
     public newPassword: string;
+    public config: UserConfigModel;
 }
 
 

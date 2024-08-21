@@ -1,7 +1,6 @@
 import {MatTableDataSource} from '@angular/material/table';
 import {cloneDeep} from 'lodash-es';
 import {FormArray, FormGroup} from '@angular/forms';
-import {parse, stringify} from 'flatted';
 
 export class UtilFunctions {
 
@@ -201,9 +200,4 @@ export class UtilFunctions {
         return new TextDecoder().decode(bytes);;
     }
 
-    public static removeCircularReference(model: any): any {
-        const jsonString = stringify(model);
-        const parsedObject = parse(jsonString);
-        return parsedObject;
-    }
 }

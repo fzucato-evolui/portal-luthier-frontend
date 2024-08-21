@@ -1,4 +1,5 @@
 import {
+    AfterViewInit,
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
@@ -44,7 +45,7 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'group
         provideNgxMask(),
     ],
 })
-export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy
+export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy, AfterViewInit
 {
     private _model: LuthierVisionModel;
     private _cloneModel: LuthierVisionModel;
@@ -75,6 +76,23 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy
 
     ngOnDestroy(): void {
 
+    }
+
+    ngAfterViewInit() {
+        if (UtilFunctions.isValidStringOrArray(this.model.code)) {
+            // Mark all controls as dirty
+            Object.keys(this.formSave.controls).forEach(field => {
+                const control = this.formSave.get(field);
+                control?.markAsDirty({ onlySelf: true });
+                control?.markAsTouched({ onlySelf: true });
+                control?.updateValueAndValidity(); // Trigger validation
+            });
+
+            // Optionally mark the form itself as dirty
+            this.formSave.markAsDirty();
+            this.formSave.markAsTouched();
+            this.formSave.updateValueAndValidity();
+        }
     }
 
     refresh() {

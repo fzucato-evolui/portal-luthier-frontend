@@ -5,7 +5,7 @@ import {UtilFunctions} from "../../util/util-functions";
 import {catchError, switchMap} from "rxjs/operators";
 import {of} from "rxjs/internal/observable/of";
 import {RootService} from "../root/root.service";
-import {UserModel} from '../../models/user.model';
+import {UserConfigModel, UserModel} from '../../models/user.model';
 
 export interface StorageChange {
     key: string;
@@ -171,6 +171,21 @@ export class UserService
                 this.dadosDatabase = null;
                 this.user = null;
                 this.rootService.user = null;
+
+                // Return a new observable with the response
+                return of(response);
+            })
+        );
+
+    }
+
+    saveConfig(config: UserConfigModel): Observable<UserModel>
+    {
+        return this._httpClient.post<UserModel>('/api/admin/portal/user/config', config).pipe(
+            switchMap((response: UserModel) => {
+
+                this.user = response;
+                this.rootService.user = response;
 
                 // Return a new observable with the response
                 return of(response);
