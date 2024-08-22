@@ -126,11 +126,19 @@ export class LuthierDictionaryDatasetSearchModalComponent implements OnInit, OnD
                 this.getSearchFields().push(this.parent.addSearchField());
             });
         }
-        if (UtilFunctions.isValidStringOrArray(this.searchModel.subsystems)) {
-            this.searchModel.subsystems.forEach(y => {
-                this.getSubsystems().push(this.parent.addSearchSubsystem());
-            });
+        if (UtilFunctions.isValidStringOrArray(this.searchModel.subsystems) === false) {
+            this.searchModel.subsystems = [];
+            this.subsystems.forEach(x => {
+                if (x.code > 0) {
+                    const model = new LuthierVisionDatasetSearchSubsystemModel();
+                    model.subsystem = x;
+                    this.searchModel.subsystems.push(model);
+                }
+            })
         }
+        this.searchModel.subsystems.forEach(y => {
+            this.getSubsystems().push(this.parent.addSearchSubsystem());
+        });
         this.formSave.patchValue(this.searchModel);
         this.dataSource.data = this.getSearchFields().controls as (FormGroup[]);
     }
@@ -288,6 +296,7 @@ export class LuthierDictionaryDatasetSearchModalComponent implements OnInit, OnD
                 id: '',
                 code: null,
                 name: '',
+                label: '',
                 size: null,
                 fieldType: null
             }
@@ -296,7 +305,7 @@ export class LuthierDictionaryDatasetSearchModalComponent implements OnInit, OnD
     }
 
     fieldChanged(model: FormGroup, event: MatSelectChange) {
-        model.get('label').setValue(event.value.tableField.name);
+        model.get('label').setValue(event.value.tableField.label);
         this._changeDetectorRef.detectChanges();
 
     }

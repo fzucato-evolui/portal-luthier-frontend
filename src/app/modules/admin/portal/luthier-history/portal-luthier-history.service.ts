@@ -6,6 +6,7 @@ import {
     PortalLuthierHistoryFilterModel,
     PortalLuthierHistoryModel
 } from '../../../../shared/models/portal_luthier_history.model';
+import {PortalLuthierHistoryConfigModel} from '../../../../shared/models/system-config.model';
 
 
 @Injectable({providedIn: 'root'})
@@ -13,6 +14,7 @@ export class PortalLuthierHistoryService
 {
     private baseRestUrl = 'api/admin/portal/luthier-history';
     private _model: BehaviorSubject<PortalLuthierHistoryModel[]> = new BehaviorSubject(null);
+    private _config: BehaviorSubject<PortalLuthierHistoryConfigModel> = new BehaviorSubject(null);
     private _currentModel: PortalLuthierHistoryModel[] = [];
 
     /**
@@ -28,6 +30,12 @@ export class PortalLuthierHistoryService
         // Store the value
         this._model.next(value);
     }
+
+    private set config(value: PortalLuthierHistoryConfigModel)
+    {
+        // Store the value
+        this._config.next(value);
+    }
     // -----------------------------------------------------------------------------------------------------
     // @ Accessors
     // -----------------------------------------------------------------------------------------------------
@@ -36,12 +44,26 @@ export class PortalLuthierHistoryService
         return this._model.asObservable();
     }
 
+    get config$(): Observable<PortalLuthierHistoryConfigModel> {
+        return this._config.asObservable();
+    }
+
     getAll(): Observable<any>
     {
         return this._httpClient.get<PortalLuthierHistoryModel[]>(`${this.baseRestUrl}/all`).pipe(
             tap((response: PortalLuthierHistoryModel[]) =>
             {
                 this.model = response;
+            }),
+        );
+    }
+
+    getConfig(): Observable<any>
+    {
+        return this._httpClient.get<PortalLuthierHistoryConfigModel>(`${this.baseRestUrl}/config`).pipe(
+            tap((response: PortalLuthierHistoryConfigModel) =>
+            {
+                this.config = response;
             }),
         );
     }

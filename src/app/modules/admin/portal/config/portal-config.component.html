@@ -29,7 +29,7 @@
                         <div class="flex flex-col divide-y border-t border-b w-full">
                             <ng-container *ngFor="let panel of panels; trackBy: trackByFn">
                                 <div
-                                    class="flex px-8 py-5 cursor-pointer"
+                                    class="flex px-8 py-5"
                                     [ngClass]="{'unselected': !selectedPanel || selectedPanel !== panel.id,
                                     'selected': selectedPanel && selectedPanel === panel.id}"
                                     (click)="goToPanel(panel.id)">
@@ -69,6 +69,7 @@
             <div class="h-full max-h-full overflow-x-auto md:overflow-auto">
                 <div class="h-full">
                     <portal-config-google [model]="getConfig(SystemConfigModelEnum.GOOGLE)" [ngClass]="selectedPanel !== SystemConfigModelEnum.GOOGLE ? 'hidden' : ''"></portal-config-google>
+                    <portal-config-luthier-history [model]="getConfig(SystemConfigModelEnum.LUTHIER_HISTORY)" [ngClass]="selectedPanel !== SystemConfigModelEnum.LUTHIER_HISTORY ? 'hidden' : ''"></portal-config-luthier-history>
                 </div>
             </div>
         </mat-drawer-content>

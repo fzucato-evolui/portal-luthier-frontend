@@ -327,10 +327,10 @@
                             </th>
                             <td mat-cell *matCellDef="let model; let i = index">
                                 <div class="flex flex-row items-center">
-                                    <button mat-icon-button aria-label="Delete" (click)="deleteSearch(i)" matTooltip="Remover Pesquisa">
+                                    <button mat-icon-button aria-label="Delete" (click)="deleteSearch(model)" matTooltip="Remover Pesquisa">
                                         <mat-icon class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
                                     </button>
-                                    <button mat-icon-button aria-label="Edit" (click)="editSearch(model, i)" matTooltip="Editar Pesquisa">
+                                    <button mat-icon-button aria-label="Edit" (click)="editSearch(model)" matTooltip="Editar Pesquisa">
                                         <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
                                     </button>
                                 </div>
@@ -461,13 +461,13 @@
             </th>
             <td mat-cell *matCellDef="let field; let i = index">
                 <div class="flex flex-row items-center">
-                    <button mat-icon-button aria-label="Delete" *ngIf="fieldtype !== 'customizations'" (click)="delete(field, i, fieldtype)" matTooltip="Remover">
+                    <button mat-icon-button aria-label="Delete" *ngIf="fieldtype !== 'customizations'" (click)="delete(field, fieldtype)" matTooltip="Remover">
                         <mat-icon class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
                     </button>
-                    <button *ngIf="!field['editing']" mat-icon-button aria-label="Edit" (click)="editRow(i, fieldtype)" matTooltip="Editar">
+                    <button *ngIf="!field['editing']" mat-icon-button aria-label="Edit" (click)="editRow(field, fieldtype)" matTooltip="Editar">
                         <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
                     </button>
-                    <button *ngIf="field['editing']" mat-icon-button aria-label="Save" (click)="saveRow(field, i, fieldtype)" matTooltip="Salvar">
+                    <button *ngIf="field['editing']" mat-icon-button aria-label="Save" (click)="saveRow(field, fieldtype)" matTooltip="Salvar">
                         <mat-icon class="icon-size-4 text-green-500" fontSet="fas" fontIcon="fa-save"></mat-icon>
                     </button>
                 </div>
@@ -609,9 +609,7 @@
                         {{ field.readOnly }}
                     </div>
                     <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)" #group="ngForm">
-                        <mat-checkbox (change)="checkIndeterminate($event, group.form.get('readOnly'))"
-                                      [indeterminate]="group.form.get('readOnly').value === null"
-                                      [name]="'readOnlyField'+i" class="text-sm" formControlName="readOnly"></mat-checkbox>
+                        <mat-checkbox [name]="'readOnlyField'+i" class="text-sm" formControlName="readOnly"></mat-checkbox>
                     </div>
 
                 </td>
@@ -623,9 +621,7 @@
                         {{ field.visible }}
                     </div>
                     <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)" #group="ngForm">
-                        <mat-checkbox (change)="checkIndeterminate($event, group.form.get('visible'))"
-                                      [indeterminate]="group.form.get('visible').value === null"
-                                      [name]="'visibleField'+i" class="text-sm" formControlName="visible"></mat-checkbox>
+                        <mat-checkbox [name]="'visibleField'+i" class="text-sm" formControlName="visible"></mat-checkbox>
                     </div>
 
                 </td>
@@ -638,9 +634,6 @@
                     </div>
                     <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)" #group="ngForm">
                         <mat-checkbox [name]="'notNullField'+i" class="text-sm" formControlName="notNull"></mat-checkbox>
-                        <mat-checkbox (change)="checkIndeterminate($event, group.form.get('notNull'))"
-                                      [indeterminate]="group.form.get('notNull').value === null"
-                                      [name]="'notNullField'+i" class="text-sm" formControlName="notNull"></mat-checkbox>
                     </div>
 
                 </td>
@@ -926,9 +919,7 @@
                         {{ field.readOnly }}
                     </div>
                     <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)" #group="ngForm">
-                        <mat-checkbox (change)="checkIndeterminate($event, group.form.get('readOnly'))"
-                                      [indeterminate]="group.form.get('readOnly').value === null"
-                                      [name]="'readOnlyField'+i" class="text-sm" formControlName="readOnly"></mat-checkbox>
+                        <mat-checkbox [name]="'readOnlyField'+i" class="text-sm" formControlName="readOnly"></mat-checkbox>
                     </div>
 
                 </td>
@@ -940,9 +931,7 @@
                         {{ field.visible }}
                     </div>
                     <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)" #group="ngForm">
-                        <mat-checkbox (change)="checkIndeterminate($event, group.form.get('visible'))"
-                                      [indeterminate]="group.form.get('visible').value === null"
-                                      [name]="'visibleField'+i" class="text-sm" formControlName="visible"></mat-checkbox>
+                        <mat-checkbox [name]="'visibleField'+i" class="text-sm" formControlName="visible"></mat-checkbox>
                     </div>
 
                 </td>
@@ -954,9 +943,7 @@
                         {{ field.notNull }}
                     </div>
                     <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype)" #group="ngForm">
-                        <mat-checkbox (change)="checkIndeterminate($event, group.form.get('notNull'))"
-                                      [indeterminate]="group.form.get('notNull').value === null"
-                                      [name]="'notNullField'+i" class="text-sm" formControlName="notNull"></mat-checkbox>
+                        <mat-checkbox [name]="'notNullField'+i" class="text-sm" formControlName="notNull"></mat-checkbox>
                     </div>
 
                 </td>
@@ -1237,9 +1224,7 @@
                         {{ field.customReadOnly?.value }}
                     </div>
                     <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customReadOnly')" #group="ngForm">
-                        <mat-checkbox (change)="checkIndeterminate($event, group.form.get('value'))"
-                                      [indeterminate]="group.form.get('value').value === null"
-                                      [name]="'customReadOnlyField'+i" class="text-sm" formControlName="value"></mat-checkbox>
+                        <mat-checkbox [name]="'customReadOnlyField'+i" class="text-sm" formControlName="value"></mat-checkbox>
                     </div>
 
                 </td>
@@ -1251,9 +1236,7 @@
                         {{ field.customVisible?.value }}
                     </div>
                     <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customVisible')" #group="ngForm">
-                        <mat-checkbox (change)="checkIndeterminate($event, group.form.get('value'))"
-                                      [indeterminate]="group.form.get('value').value === null"
-                                      [name]="'customVisibleField'+i" class="text-sm" formControlName="value"></mat-checkbox>
+                        <mat-checkbox [name]="'customVisibleField'+i" class="text-sm" formControlName="value"></mat-checkbox>
                     </div>
 
                 </td>
@@ -1265,9 +1248,7 @@
                         {{ field.customNotNull?.value }}
                     </div>
                     <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customNotNull')" #group="ngForm">
-                        <mat-checkbox (change)="checkIndeterminate($event, group.form.get('value'))"
-                                      [indeterminate]="group.form.get('value').value === null"
-                                      [name]="'customNotNullField'+i" class="text-sm" formControlName="value"></mat-checkbox>
+                        <mat-checkbox [name]="'customNotNullField'+i" class="text-sm" formControlName="value"></mat-checkbox>
                     </div>
 
                 </td>

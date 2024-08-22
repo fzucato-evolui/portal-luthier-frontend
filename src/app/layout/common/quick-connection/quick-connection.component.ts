@@ -148,14 +148,12 @@ export class QuickConnectionComponent implements OnInit, AfterViewInit, OnDestro
     ngOnInit(): void
     {
 
-        const luthierDatabase = this._userService.luthierDatabase;
-        const dadosDatabase = this._userService.dadosDatabase;
-
         this._userService.storageChange$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((storage: StorageChange) =>
             {
                 if (storage.key === 'luthierDatabase') {
+                    this.selectedDadosDatabase = null;
                     if (UtilFunctions.isValidStringOrArray(storage.value) === true) {
                         this.selectedLuthierDatabase = this.luthierDatabases.filter(x => x.id.toString() === storage.value.toString())[0];
                         this._userService.dadosDatabase = '';
@@ -172,6 +170,7 @@ export class QuickConnectionComponent implements OnInit, AfterViewInit, OnDestro
                 else if (storage.key === 'dadosDatabase') {
                     this.selectedDadosDatabase = UtilFunctions.isValidStringOrArray(storage.value) ? this.dadosDatabases.filter(x => x.code.toString() === storage.value)[0] : null;
                 }
+                this._changeDetectorRef.detectChanges();
             });
         this._portalDatabaseService.model$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -179,6 +178,7 @@ export class QuickConnectionComponent implements OnInit, AfterViewInit, OnDestro
             {
                 // Load the connections
                 this.luthierDatabases = databases;
+                const luthierDatabase = this._userService.luthierDatabase;
                 if (UtilFunctions.isValidStringOrArray(luthierDatabase)) {
                     this.selectedLuthierDatabase = this.luthierDatabases.filter(x =>x.id.toString() === luthierDatabase)[0];
                 }
@@ -194,6 +194,7 @@ export class QuickConnectionComponent implements OnInit, AfterViewInit, OnDestro
             {
                 // Load the connections
                 this.dadosDatabases = databases;
+                const dadosDatabase = this._userService.dadosDatabase;
                 if (UtilFunctions.isValidStringOrArray(dadosDatabase)) {
                     this.selectedDadosDatabase = this.dadosDatabases.filter(x => x.code.toString() === dadosDatabase)[0];
                 }

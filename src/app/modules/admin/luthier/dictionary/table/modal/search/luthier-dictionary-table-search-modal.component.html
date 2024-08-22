@@ -98,7 +98,7 @@
                                 class="icon-size-5"
                                 fontSet="fas" fontIcon="fa-t"
                                 matPrefix></mat-icon>
-                            <mat-select #selectSubsystem multiple [compareWith]="compareSubsytemsCode" (openedChange)="filterSubsystem.value =null"
+                            <mat-select required #selectSubsystem multiple [compareWith]="compareSubsytemsCode" (openedChange)="filterSubsystem.value =null"
                                         (selectionChange)="onSelectionChange($event)"
                                         [value]="formSave.get('subsystems').value">
                                 <div class="flex flex-col h-full w-full">

@@ -2,13 +2,13 @@ import {ActivatedRouteSnapshot, RouterStateSnapshot, Routes} from '@angular/rout
 import {inject} from '@angular/core';
 import {PortalLuthierHistoryComponent} from './portal-luthier-history.component';
 import {FuseNavigationService, FuseVerticalNavigationComponent} from '../../../../../@fuse/components/navigation';
-import {of} from 'rxjs';
+import {PortalLuthierHistoryService} from './portal-luthier-history.service';
 
 const portalLuthierDatabaseResolver = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
     const navigationService = inject(FuseNavigationService);
     // Get the component -> navigation data -> item
     const navComponent = navigationService.getComponent<FuseVerticalNavigationComponent>('secondaryNavigation');
-
+    const service = inject(PortalLuthierHistoryService);
     // Return if the navigation component does not exist
     if ( navComponent )
     {
@@ -16,7 +16,7 @@ const portalLuthierDatabaseResolver = (route: ActivatedRouteSnapshot, state: Rou
         navComponent.refresh();
     }
 
-    return of(null);
+    return service.getConfig();
 }
 export default [
 

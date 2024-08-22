@@ -114,11 +114,20 @@ export class LuthierDictionaryTableSearchModalComponent implements OnInit, OnDes
                 this.getSearchFields().push(this.parent.addSearchField());
             });
         }
-        if (UtilFunctions.isValidStringOrArray(this.searchModel.subsystems)) {
-            this.searchModel.subsystems.forEach(y => {
-                this.getSubsystems().push(this.parent.addSearchSubsystem());
-            });
+        if (UtilFunctions.isValidStringOrArray(this.searchModel.subsystems) === false) {
+            this.searchModel.subsystems = [];
+            this.subsystems.forEach(x => {
+                if (x.code > 0) {
+                    const model = new LuthierTableSearchSubsystemModel();
+                    model.subsystem = x;
+                    this.searchModel.subsystems.push(model);
+                }
+            })
         }
+        this.searchModel.subsystems.forEach(y => {
+            this.getSubsystems().push(this.parent.addSearchSubsystem());
+        });
+
         this.formSave.patchValue(this.searchModel);
         this.dataSource.data = this.getSearchFields().controls as (FormGroup[]);
     }

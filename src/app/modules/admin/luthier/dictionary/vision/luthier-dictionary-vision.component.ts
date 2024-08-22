@@ -80,18 +80,7 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy, Afte
 
     ngAfterViewInit() {
         if (UtilFunctions.isValidStringOrArray(this.model.code)) {
-            // Mark all controls as dirty
-            Object.keys(this.formSave.controls).forEach(field => {
-                const control = this.formSave.get(field);
-                control?.markAsDirty({ onlySelf: true });
-                control?.markAsTouched({ onlySelf: true });
-                control?.updateValueAndValidity(); // Trigger validation
-            });
-
-            // Optionally mark the form itself as dirty
-            this.formSave.markAsDirty();
-            this.formSave.markAsTouched();
-            this.formSave.updateValueAndValidity();
+            UtilFunctions.forceValidations(this.formSave);
         }
     }
 

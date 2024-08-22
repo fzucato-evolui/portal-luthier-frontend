@@ -15,6 +15,7 @@ import {SystemConfigModel, SystemConfigModelEnum} from '../../../../shared/model
 import {PortalConfigService} from './portal-config.service';
 import {MatIconModule} from '@angular/material/icon';
 import {PortalConfigGoogleComponent} from './google/portal-config-google.component';
+import {PortalConfigLuthierHistoryComponent} from './luthier-history/portal-config-luthier-history.component';
 
 @Component({
     selector     : 'portal-config',
@@ -31,6 +32,7 @@ import {PortalConfigGoogleComponent} from './google/portal-config-google.compone
         NgForOf,
         NgIf,
         PortalConfigGoogleComponent,
+        PortalConfigLuthierHistoryComponent,
     ],
 })
 export class PortalConfigComponent implements OnInit, OnDestroy
@@ -61,6 +63,12 @@ export class PortalConfigComponent implements OnInit, OnDestroy
                 icon       : {fontSet:"fab", fontIcon:"fa-google"},
                 title      : 'Google',
                 description: "Autenticação Google"
+            },
+            {
+                id         : SystemConfigModelEnum.LUTHIER_HISTORY,
+                icon       : {fontSet:"fas", fontIcon:"fa-clock-rotate-left"},
+                title      : 'Histórico Luthier',
+                description: "Histórico Luthier"
             },
         ];
         // Subscribe to media changes

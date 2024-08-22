@@ -98,7 +98,7 @@
                                 class="icon-size-5"
                                 fontSet="fas" fontIcon="fa-t"
                                 matPrefix></mat-icon>
-                            <mat-select #selectSubsystem multiple [compareWith]="compareSubsytemsCode" (openedChange)="filterSubsystem.value =null"
+                            <mat-select required #selectSubsystem multiple [compareWith]="compareSubsytemsCode" (openedChange)="filterSubsystem.value =null"
                                         (selectionChange)="onSelectionChange($event)"
                                         [value]="formSave.get('subsystems').value">
                                 <div class="flex flex-col h-full w-full">
@@ -236,8 +236,14 @@
                                                 [formControl]="model.get('field')">
                                         <ng-container *ngFor="let t of getDatasetFields(model)">
                                             <mat-option [value]="{
-                                            id: !t.id ? '': t.id, code: !t.code ? '' : t.code, name: t.name,
-                                            tableField: { id: t.tableField?.id, code: t.tableField?.code, fieldType: t.tableField?.fieldType,  name: t.tableField?.name, size: t.tableField?.size}
+                                            id: !t.id ? '': t.id, code: !t.code ? '' : t.code, name: !t.name ? '' : t.name,
+                                            tableField: {
+                                            id: !t.tableField?.id ? '': t.tableField?.id ,
+                                            code: !t.tableField?.code ? '' : t.tableField?.code,
+                                            fieldType: t.tableField?.fieldType,
+                                            name: t.tableField?.name,
+                                            size: t.tableField?.size,
+                                            label: t.tableField?.label}
                                             }" >
                                                 {{t.tableField?.name}}
                                             </mat-option>

@@ -200,4 +200,22 @@ export class UtilFunctions {
         return new TextDecoder().decode(bytes);;
     }
 
+    public static forceValidations(fg: FormGroup | FormArray) {
+        Object.keys(fg.controls).forEach(field => {
+            const control = fg.get(field);
+            if (control instanceof FormGroup || control instanceof FormArray) {
+                UtilFunctions.forceValidations(control);
+            } else {
+                control?.markAsDirty({ onlySelf: true });
+                control?.markAsTouched({ onlySelf: true });
+                control?.updateValueAndValidity(); // Trigger validation
+            }
+        });
+
+        // Optionally mark the form itself as dirty
+        fg.markAsDirty();
+        fg.markAsTouched();
+        fg.updateValueAndValidity()
+    }
+
 }

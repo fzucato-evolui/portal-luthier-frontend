@@ -320,10 +320,10 @@
                             </th>
                             <td mat-cell *matCellDef="let model; let i = index">
                                 <div class="flex flex-row items-center">
-                                    <button mat-icon-button aria-label="Delete" (click)="deleteIndex(i)" matTooltip="Remover Índice">
+                                    <button mat-icon-button aria-label="Delete" (click)="deleteIndex(model)" matTooltip="Remover Índice">
                                         <mat-icon class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
                                     </button>
-                                    <button mat-icon-button aria-label="Edit" (click)="editIndex(model, i)" matTooltip="Editar Índice">
+                                    <button mat-icon-button aria-label="Edit" (click)="editIndex(model)" matTooltip="Editar Índice">
                                         <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
                                     </button>
                                 </div>
@@ -397,10 +397,10 @@
                             </th>
                             <td mat-cell *matCellDef="let model; let i = index">
                                 <div class="flex flex-row items-center">
-                                    <button mat-icon-button aria-label="Delete" (click)="deleteReference(i)" matTooltip="Remover Referência">
+                                    <button mat-icon-button aria-label="Delete" (click)="deleteReference(model)" matTooltip="Remover Referência">
                                         <mat-icon class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
                                     </button>
-                                    <button mat-icon-button aria-label="Edit" (click)="editReference(model, i)" matTooltip="Editar Referência">
+                                    <button mat-icon-button aria-label="Edit" (click)="editReference(model)" matTooltip="Editar Referência">
                                         <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
                                     </button>
                                 </div>
@@ -489,10 +489,10 @@
                             </th>
                             <td mat-cell *matCellDef="let model; let i = index">
                                 <div class="flex flex-row items-center">
-                                    <button mat-icon-button aria-label="Delete" (click)="deleteSearch(i)" matTooltip="Remover Pesquisa">
+                                    <button mat-icon-button aria-label="Delete" (click)="deleteSearch(model)" matTooltip="Remover Pesquisa">
                                         <mat-icon class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
                                     </button>
-                                    <button mat-icon-button aria-label="Edit" (click)="editSearch(model, i)" matTooltip="Editar Pesquisa">
+                                    <button mat-icon-button aria-label="Edit" (click)="editSearch(model)" matTooltip="Editar Pesquisa">
                                         <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
                                     </button>
                                 </div>
@@ -754,16 +754,16 @@
             </th>
             <td mat-cell *matCellDef="let field; let i = index">
                 <div class="flex flex-row items-center">
-                    <button mat-icon-button aria-label="Delete" *ngIf="fieldtype !== 'customizations'" (click)="delete(field, i, fieldtype)" matTooltip="Remover">
+                    <button mat-icon-button aria-label="Delete" *ngIf="fieldtype !== 'customizations'" (click)="delete(field, fieldtype)" matTooltip="Remover">
                         <mat-icon class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
                     </button>
-                    <button *ngIf="!field['editing']" mat-icon-button aria-label="Edit" (click)="editRow(i, fieldtype)" matTooltip="Editar">
+                    <button *ngIf="!field['editing']" mat-icon-button aria-label="Edit" (click)="editRow(field, fieldtype)" matTooltip="Editar">
                         <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
                     </button>
-                    <button *ngIf="field['editing']" mat-icon-button aria-label="Save" (click)="saveRow(field, i, fieldtype)" matTooltip="Salvar">
+                    <button *ngIf="field['editing']" mat-icon-button aria-label="Save" (click)="saveRow(field, fieldtype)" matTooltip="Salvar">
                         <mat-icon class="icon-size-4 text-green-500" fontSet="fas" fontIcon="fa-save"></mat-icon>
                     </button>
-                    <button *ngIf="!field['editing'] && (fieldtype === 'fields' || fieldtype === 'customFields')" mat-icon-button aria-label="Detail" (click)="detailField(field, i, fieldtype)" matTooltip="Detalhes do Campo">
+                    <button *ngIf="!field['editing'] && (fieldtype === 'fields' || fieldtype === 'customFields')" mat-icon-button aria-label="Detail" (click)="detailField(field, fieldtype)" matTooltip="Detalhes do Campo">
                         <mat-icon class="icon-size-4 text-accent dark:text-primary" fontSet="fas" fontIcon="fa-glasses"></mat-icon>
                     </button>
                 </div>
@@ -772,7 +772,7 @@
         <!-- code -->
         <ng-container matColumnDef="code">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
-            <td mat-cell *matCellDef="let field let i = index">
+            <td mat-cell *matCellDef="let field; let i = index">
                 <div>
                     {{ field.code }}
                 </div>
@@ -782,7 +782,7 @@
             <!-- order -->
             <ng-container matColumnDef="order">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> # </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.order }}
                     </div>
@@ -799,7 +799,7 @@
             <!-- key -->
             <ng-container matColumnDef="key">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> PK </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.key }}
                     </div>
@@ -812,7 +812,7 @@
             <!-- name -->
             <ng-container matColumnDef="name">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.name }}
                     </div>
@@ -827,7 +827,7 @@
             <!-- label -->
             <ng-container matColumnDef="label">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Rótulo </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.label }}
                     </div>
@@ -842,7 +842,7 @@
             <!-- fieldType -->
             <ng-container matColumnDef="fieldType">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.fieldType }}
                     </div>
@@ -863,7 +863,7 @@
             <!-- modifyType -->
             <ng-container matColumnDef="modifyType">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Modificador </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.modifyType }}
                     </div>
@@ -884,7 +884,7 @@
             <!-- attributeName -->
             <ng-container matColumnDef="attributeName">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome Atributo </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.attributeName }}
                     </div>
@@ -899,7 +899,7 @@
             <!-- autoInc -->
             <ng-container matColumnDef="autoInc">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> AutoInc </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.autoInc }}
                     </div>
@@ -912,7 +912,7 @@
             <!-- size -->
             <ng-container matColumnDef="size">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tamanho </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.size }}
                     </div>
@@ -927,7 +927,7 @@
             <!-- search -->
             <ng-container matColumnDef="search">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Busca </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.search }}
                     </div>
@@ -940,7 +940,7 @@
             <!-- notNull -->
             <ng-container matColumnDef="notNull">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Obrigatório </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.notNull }}
                     </div>
@@ -953,7 +953,7 @@
             <!-- defaultValue -->
             <ng-container matColumnDef="defaultValue">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Valor Default </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.defaultValue }}
                     </div>
@@ -968,7 +968,7 @@
             <!-- precision -->
             <ng-container matColumnDef="precision">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Precisão </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.precision }}
                     </div>
@@ -983,7 +983,7 @@
             <!-- maxValue -->
             <ng-container matColumnDef="maxValue">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Valor Max. </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.maxValue }}
                     </div>
@@ -998,7 +998,7 @@
             <!-- minValue -->
             <ng-container matColumnDef="minValue">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Valor Min. </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.minValue }}
                     </div>
@@ -1013,7 +1013,7 @@
             <!-- mask -->
             <ng-container matColumnDef="mask">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Máscara </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.mask }}
                     </div>
@@ -1028,7 +1028,7 @@
             <!-- charCase -->
             <ng-container matColumnDef="charCase">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> CharCase </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.charCase }}
                     </div>
@@ -1049,7 +1049,7 @@
             <!-- editor -->
             <ng-container matColumnDef="editor">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo Editor </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.editor }}
                     </div>
@@ -1070,7 +1070,7 @@
             <!-- uiConfiguration -->
             <ng-container matColumnDef="uiConfiguration">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Config. Visual </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.uiConfiguration }}
                     </div>
@@ -1085,7 +1085,7 @@
             <!-- layoutSize -->
             <ng-container matColumnDef="layoutSize">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tamanho Layout </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.layoutSize }}
                     </div>
@@ -1108,7 +1108,7 @@
             <!-- customLabel -->
             <ng-container matColumnDef="customLabel">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Rótulo Customizado </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.customLabel?.value }}
                     </div>
@@ -1123,7 +1123,7 @@
             <!-- groupInfoCode -->
             <ng-container matColumnDef="groupInfo.description">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Grupo de Info. </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.groupInfo?.description }}
                     </div>
@@ -1146,7 +1146,7 @@
         <ng-container *ngIf="fieldtype === 'customFields'">
             <ng-container matColumnDef="groupInfo">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Grupo de Info. </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.groupInfo }}
                     </div>
@@ -1170,7 +1170,7 @@
             <!-- name -->
             <ng-container matColumnDef="name">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div>
                         {{ field.name }}
                     </div>
@@ -1179,7 +1179,7 @@
             <!-- customSize -->
             <ng-container matColumnDef="customSize">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tamanho </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.customSize?.value }}
                     </div>
@@ -1194,7 +1194,7 @@
             <!-- customNotNull -->
             <ng-container matColumnDef="customNotNull">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Obrigatório </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.customNotNull?.value }}
                     </div>
@@ -1209,7 +1209,7 @@
             <!-- customDefaultValue -->
             <ng-container matColumnDef="customDefaultValue">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Valor Default </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.customDefaultValue?.value }}
                     </div>
@@ -1224,7 +1224,7 @@
             <!-- customPrecision -->
             <ng-container matColumnDef="customPrecision">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Precisão </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.customPrecision?.value }}
                     </div>
@@ -1239,7 +1239,7 @@
             <!-- customMaxValue -->
             <ng-container matColumnDef="customMaxValue">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Valor Max. </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.customMaxValue?.value }}
                     </div>
@@ -1254,7 +1254,7 @@
             <!-- customMinValue -->
             <ng-container matColumnDef="customMinValue">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Valor Min. </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.customMinValue?.value }}
                     </div>
@@ -1269,7 +1269,7 @@
             <!-- customMask -->
             <ng-container matColumnDef="customMask">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Máscara </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.customMask?.value }}
                     </div>
@@ -1284,7 +1284,7 @@
             <!-- customCharCase -->
             <ng-container matColumnDef="customCharCase">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> CharCase </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.customCharCase?.value }}
                     </div>
@@ -1308,7 +1308,7 @@
             <!-- customEditor -->
             <ng-container matColumnDef="customEditor">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo Editor </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.customEditor?.value }}
                     </div>
@@ -1332,7 +1332,7 @@
             <!-- customUiConfiguration -->
             <ng-container matColumnDef="customUiConfiguration">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Config. Visual </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.customUiConfiguration?.value }}
                     </div>
@@ -1349,7 +1349,7 @@
             <!-- description -->
             <ng-container matColumnDef="description">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Descrição </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.description }}
                     </div>
@@ -1364,7 +1364,7 @@
             <!-- groupInfoType -->
             <ng-container matColumnDef="groupInfoType">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.groupInfoType }}
                     </div>
@@ -1385,7 +1385,7 @@
             <!-- parent.description -->
             <ng-container matColumnDef="parent.description">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Grupo Pai </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.parent?.description }}
                     </div>

@@ -3,11 +3,12 @@ import {UtilFunctions} from '../util/util-functions';
 export class SystemConfigModel {
     public id: number;
     public configType: SystemConfigModelEnum;
-    public config: GoogleConfigModel;
+    public config: GoogleConfigModel | PortalLuthierHistoryConfigModel;
 }
 
 export enum SystemConfigModelEnum {
   GOOGLE = 'GOOGLE',
+  LUTHIER_HISTORY = 'LUTHIER_HISTORY'
 }
 
 export class GoogleServiceAccountModel {
@@ -42,6 +43,11 @@ export class GoogleConfigModel {
   public clientID: string;
   public secretKey: string;
   public serviceAccount: GoogleServiceAccountModel;
+}
+
+export class PortalLuthierHistoryConfigModel {
+    enabled: boolean = true;
+    daysToKeep: number = 30;
 }
 
 export class AnotherConfigModel {

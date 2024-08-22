@@ -42,24 +42,16 @@ portal-config {
         padding-left: 20px;
     }
     div.selected {
-        @apply bg-primary-50 #{'!important'};
-        @apply text-primary;
-
-    }
-
-
-    div.unselected:hover {
-        @apply bg-gray-100 #{'!important'};
-        &.darker {
-            @apply text-black #{'!important'};
-        }
+        @apply bg-primary-400 #{'!important'};
     }
 
     div.unselected {
-        &.darker {
-            @apply text-gray-200 #{'!important'};
-        }
+        @apply cursor-pointer #{'!important'};
     }
+    div.unselected:hover {
+        @apply bg-hover #{'!important'};
+    }
+
 }
 
 

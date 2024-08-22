@@ -1,0 +1,47 @@
+<div class="relative h-full w-full max-h-full sm:p-4 md:overflow-auto">
+  <form  [formGroup]="luthierHistoryForm">
+
+    <!-- Section -->
+    <div class="w-full">
+      <div class="text-xl">Histórico Luthier</div>
+      <div class="text-secondary">Configurações de Histórico do Luthier</div>
+    </div>
+    <div class="flex flex-col w-full">
+      <div class="w-full my-2">
+          <mat-slide-toggle
+              [color]="'primary'"
+              [formControlName]="'enabled'">
+              Habilitar
+          </mat-slide-toggle>
+      </div>
+      <div class="w-full my-2">
+        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense max-w-64">
+          <mat-label>Manter por (dias)</mat-label>
+          <mat-icon
+            class="icon-size-5"
+            fontSet="fas" fontIcon="fa-calendar-xmark"
+            matPrefix></mat-icon>
+          <input
+            mask="9*"
+            [formControlName]="'daysToKeep'"
+            matInput matTooltip="Quantidade de dias que os históricos serão mantidos. Deixe em branco ou coloque 0 dias se os históricos nunca serão apagados">
+        </mat-form-field>
+      </div>
+    </div>
+
+
+    <div class="absolute bottom-0 right-0 z-50">
+
+      <button
+        class="mr-4 mb-4"
+        [disabled]="luthierHistoryForm.invalid"
+        (click)="salvar()"
+        mat-flat-button
+        type="button"
+        [color]="'primary'">Salvar
+      </button>
+    </div>
+  </form>
+
+</div>
+

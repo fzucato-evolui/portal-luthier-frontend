@@ -33,6 +33,7 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatSelectModule} from '@angular/material/select';
 import {SharedPipeModule} from '../../../../shared/pipes/shared-pipe.module';
 import {FilterPredicateUtil} from '../../../../shared/util/util-classes';
+import {PortalLuthierHistoryConfigModel} from '../../../../shared/models/system-config.model';
 
 export const FORMAT = {
     parse: {
@@ -83,6 +84,7 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
     workDataBase: number;
     filterModel: PortalLuthierHistoryFilterModel = new PortalLuthierHistoryFilterModel();
     PortalHistoryPersistTypeEnum = PortalHistoryPersistTypeEnum;
+    config: PortalLuthierHistoryConfigModel;
     /**
      * Constructor
      */
@@ -114,7 +116,12 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
             .subscribe((databases: PortalLuthierHistoryModel[]) =>
             {
                 this.dataSource.data = databases;
-                console.log('databases', this.dataSource);
+            });
+        this.service.config$
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(config =>
+            {
+                this.config = config;
             });
         const luthierDatabase = this._userService.luthierDatabase;
         if (UtilFunctions.isValidStringOrArray(luthierDatabase) === true) {
@@ -208,5 +215,17 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
 
     cleanFilter() {
         this.filterModel = new PortalLuthierHistoryFilterModel();
+    }
+
+    getHistoryDescription(): string {
+        if (this.config == null) {
+            this.config = new PortalLuthierHistoryConfigModel();
+        }
+        if (this.config.enabled) {
+            return `Os históricos ficam salvos por ${this.config.daysToKeep} dias`;
+        }
+        else {
+            return `A gravação de históricos está desabilitada`;
+        }
     }
 }
