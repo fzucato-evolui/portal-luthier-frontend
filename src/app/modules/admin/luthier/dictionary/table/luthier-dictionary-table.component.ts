@@ -1116,7 +1116,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
     editIndex(model: LuthierTableIndexModel) {
         const index = this.getRealIndex(model, 'indexes').index;
-        const fields = this.model.fields.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
+        const fields = this.model.fields;//.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
         const modal = this._matDialog.open(LuthierDictionaryTableIndexModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-index-modal-container' });
         modal.componentInstance.title = "Índice da Tabela " + this.model.name;
         modal.componentInstance.parent = this;
@@ -1167,7 +1167,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         }
     }
     openModalReference(model: LuthierTableReferenceModel, index: number, fieldsPK: LuthierTableFieldModel[]) {
-        const fields = this.model.fields.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
+        const fields = this.model.fields;//.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
         const modal = this._matDialog.open(LuthierDictionaryTableReferenceModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-reference-modal-container' });
         modal.componentInstance.title = "Referência da Tabela " + this.model.name;
         modal.componentInstance.parent = this;
@@ -1206,7 +1206,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     editSearch(model: LuthierTableSearchModel) {
         const index = this.getRealIndex(model, 'searchs').index;
         this._parent.service.getActiveSubsystems().then(subsystems => {
-            const fields = this.model.fields.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
+            const fields = this.model.fields;//.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
             const modal = this._matDialog.open(LuthierDictionaryTableSearchModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-search-modal-container' });
             modal.componentInstance.title = "Pesquisa da Tabela " + this.model.name;
             modal.componentInstance.parent = this;
