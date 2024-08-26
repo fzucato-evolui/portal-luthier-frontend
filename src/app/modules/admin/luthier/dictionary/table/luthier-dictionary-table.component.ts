@@ -87,6 +87,7 @@ import {
 import {DatabaseTypeEnum} from '../../../../../shared/models/portal-luthier-database.model';
 import {debounceTime, Subject, takeUntil} from 'rxjs';
 import {MatMenuModule} from '@angular/material/menu';
+import {Clipboard} from '@angular/cdk/clipboard';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -163,6 +164,9 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
     get dadosDatabaseType(): DatabaseTypeEnum | string {
         return this._parent.currentDataBase?.dbType;
+    }
+    get clipboard(): Clipboard {
+        return this._parent.clipboard;
     }
     get dadosViewBodyType(): LuthierViewBodyEnum | string {
         if (this.dadosDatabaseType === 'MSSQL') {
@@ -1895,4 +1899,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         }
     }
 
+    showValidationsError(): string {
+        return JSON.stringify(UtilFunctions.getInvalidFields(this.formSave), null, 2);
+    }
 }

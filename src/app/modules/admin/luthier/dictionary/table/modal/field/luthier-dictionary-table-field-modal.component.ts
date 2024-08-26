@@ -29,13 +29,15 @@ import {
     LuthierGroupInfoModel,
     LuthierPermissionTypeEnum,
     LuthierResourceModel,
-    LuthierTableFieldModel
+    LuthierTableFieldModel,
+    LuthierTableStaticFieldModel
 } from '../../../../../../../shared/models/luthier.model';
 import {LuthierDictionaryTableComponent, TableType} from '../../luthier-dictionary-table.component';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatSort, MatSortModule, Sort} from '@angular/material/sort';
 import {UtilFunctions} from '../../../../../../../shared/util/util-functions';
+import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
 
 @Component({
     selector       : 'luthier-dictionary-table-field-modal',
@@ -48,6 +50,7 @@ import {UtilFunctions} from '../../../../../../../shared/util/util-functions';
         MatSelectModule,
         MatButtonModule,
         MatFormFieldModule,
+        MatSnackBarModule,
         ReactiveFormsModule,
         NgFor,
         MatDialogModule,
@@ -108,6 +111,7 @@ export class LuthierDictionaryTableFieldModalComponent implements OnInit, OnDest
         return this._parent.model.groupInfos;
     }
     constructor(private _changeDetectorRef: ChangeDetectorRef,
+                private _snackBar: MatSnackBar,
                 public dialogRef: MatDialogRef<LuthierDictionaryTableFieldModalComponent>)
     {
     }
@@ -191,10 +195,12 @@ export class LuthierDictionaryTableFieldModalComponent implements OnInit, OnDest
     }
 
 
-    add() {
-        this.getStaticFields().push(this.parent.addStaticField(this._fieldType));
+    add(): FormGroup {
+        const fg = this.parent.addStaticField(this._fieldType);
+        this.getStaticFields().push(fg);
         this.dataSource.data = this.getStaticFields().controls as (FormGroup[]);
         this._changeDetectorRef.detectChanges();
+        return fg;
     }
 
     delete(i: number) {
@@ -246,5 +252,60 @@ export class LuthierDictionaryTableFieldModalComponent implements OnInit, OnDest
     }
     compareImageName(v1: string , v2: string): boolean {
         return v1 === v2;
+    }
+
+    openSnackBar(message: string, action: string, panelClass?: string) {
+        this._snackBar.open(message, action, {
+            duration: 5000,
+            panelClass: UtilFunctions.isValidStringOrArray(panelClass) ? panelClass : ''
+        });
+    }
+
+    copyStaticValues() {
+        this.parent.clipboard.copy(JSON.stringify(this.getStaticFields().value));
+        this.openSnackBar("Valores estáticos copiados para o clipboard", "Fechar")
+    }
+
+    async pasteStaticValues() {
+        try {
+            const text = await navigator.clipboard.readText();
+            const model = JSON.parse(text) as LuthierTableStaticFieldModel[];
+            if (UtilFunctions.isValidStringOrArray(model)) {
+                const fa = this.getStaticFields();
+                const current = fa.value as LuthierTableStaticFieldModel[];
+                if (!UtilFunctions.isValidStringOrArray(current)) {
+                    model.forEach(staticValue => {
+                        staticValue.code = null;
+                        staticValue.tableField = null;
+                        staticValue.tableFieldCode = null;
+                        const fg = this.add()
+                    });
+                    this.getStaticFields().patchValue(model);
+                } else {
+                    model.forEach(staticValue => {
+                        const index = current.findIndex(field => field.value.toUpperCase() === staticValue.value.toUpperCase());
+                        if (index < 0) {
+                            staticValue.code = null;
+                            staticValue.tableField = null;
+                            staticValue.tableFieldCode = null;
+                            const fg = this.add();
+                            fg.patchValue(staticValue);
+                        }
+                        else {
+                            staticValue.code = current[index].code;
+                            staticValue.tableField = current[index].tableField;
+                            staticValue.tableFieldCode = current[index].tableFieldCode;
+                            fa.at(index).patchValue(staticValue);
+                        }
+
+                    });
+                }
+            } else {
+                throw new Error("Valor em branco");
+            }
+        }
+        catch (e) {
+            this.openSnackBar("Valores estáticos inválidos", "Fechar");
+        }
     }
 }

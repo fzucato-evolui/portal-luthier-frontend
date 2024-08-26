@@ -2,6 +2,12 @@
     width: 100% !important;
     height: 100% !important;
 }
+.mat-mdc-snack-bar-action {
+    @apply text-primary #{'!important'};
+}
+.bg-warning .mat-mdc-snack-bar-action {
+    @apply text-default #{'!important'};
+}
 .luthier-dictionary-table-field-modal-container {
     max-width: 60vw !important;
     width: 60vw !important;

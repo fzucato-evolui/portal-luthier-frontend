@@ -63,6 +63,7 @@ export class PortalLuthierHistoryService
         return this._httpClient.get<PortalLuthierHistoryConfigModel>(`${this.baseRestUrl}/config`).pipe(
             tap((response: PortalLuthierHistoryConfigModel) =>
             {
+                this.model = [];
                 this.config = response;
             }),
         );
