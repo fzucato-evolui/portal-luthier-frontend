@@ -122,4 +122,11 @@ export class PortalLuthierHistoryService
     copy(id: number) : Promise<any> {
         return firstValueFrom(this._httpClient.patch<any>(`${this.baseRestUrl}/copy/${id}`, null));
     }
+
+    applyHistorical(model: PortalLuthierHistoryModel[]) : Promise<any> {
+        return firstValueFrom(this._httpClient.patch<any>(`${this.baseRestUrl}/apply`, model).pipe(
+            switchMap((response: any) => {
+                return of(response);
+            })));
+    }
 }

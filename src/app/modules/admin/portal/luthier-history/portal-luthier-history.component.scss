@@ -13,7 +13,10 @@ portal-luthier-history {
     .mat-mdc-row {
         cursor: pointer;
     }
-
+    .readOnly {
+        pointer-events: none;
+        opacity: 60%;
+    }
     .mat-mdc-row:nth-child(even){
         background-color: inherit !important;
     }

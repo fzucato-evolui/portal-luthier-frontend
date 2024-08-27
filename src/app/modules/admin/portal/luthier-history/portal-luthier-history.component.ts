@@ -34,6 +34,8 @@ import {MatSelectModule} from '@angular/material/select';
 import {SharedPipeModule} from '../../../../shared/pipes/shared-pipe.module';
 import {FilterPredicateUtil} from '../../../../shared/util/util-classes';
 import {PortalLuthierHistoryConfigModel} from '../../../../shared/models/system-config.model';
+import {SelectionModel} from '@angular/cdk/collections';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 export const FORMAT = {
     parse: {
@@ -68,7 +70,8 @@ export const FORMAT = {
         MatDatepickerModule,
         MatSelectModule,
         SharedPipeModule,
-        NgForOf
+        NgForOf,
+        MatCheckboxModule
 
     ]
 })
@@ -82,9 +85,11 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
     public dataSource = new MatTableDataSource<PortalLuthierHistoryModel>();
     displayedColumns = ['buttons', 'user.image', 'id', 'persistDate', 'user.name', 'luthierDatabase.identifier', 'persistType', 'classDescription', 'classKey'];
     workDataBase: number;
+    dadosDataBase: number;
     filterModel: PortalLuthierHistoryFilterModel = new PortalLuthierHistoryFilterModel();
     PortalHistoryPersistTypeEnum = PortalHistoryPersistTypeEnum;
     config: PortalLuthierHistoryConfigModel;
+    historical = new SelectionModel<PortalLuthierHistoryModel>(true, []);
     /**
      * Constructor
      */
@@ -127,12 +132,30 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
         if (UtilFunctions.isValidStringOrArray(luthierDatabase) === true) {
             this.workDataBase = parseInt(luthierDatabase);
         }
+        const dadosDatabase = this._userService.dadosDatabase;
+        if (UtilFunctions.isValidStringOrArray(dadosDatabase) === true) {
+            this.dadosDataBase = parseInt(dadosDatabase);
+        }
         this._userService.storageChange$
             .pipe(takeUntil(this.unsubscribeAll))
             .subscribe((storage: StorageChange) =>
             {
                 if (storage.key === 'luthierDatabase') {
-                    this.workDataBase = parseInt(storage.value);
+                    this.dadosDataBase = null;
+                    if (UtilFunctions.isValidStringOrArray(storage.value) === true) {
+                        this.workDataBase = parseInt(storage.value);
+                    }
+                    else {
+                        this.workDataBase = null;
+                    }
+                }
+                else if (storage.key === 'dadosDatabase') {
+                    if (UtilFunctions.isValidStringOrArray(storage.value) === true) {
+                        this.dadosDataBase = parseInt(storage.value);
+                    }
+                    else {
+                        this.dadosDataBase = null;
+                    }
                 }
             });
     }
@@ -227,5 +250,41 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
         else {
             return `A gravação de históricos está desabilitada`;
         }
+    }
+
+
+    isAllSelected() {
+        const numSelected = this.historical.selected.length;
+        const numRows = this.dataSource.data.filter(x => x['forbidden'] !== true).length;
+        return numSelected === numRows;
+    }
+
+    /** Selects all rows if they are not all selected; otherwise clear selection. */
+    toggleAllRows() {
+        if (this.isAllSelected()) {
+            this.historical.clear();
+            return;
+        }
+
+        this.historical.select(...this.dataSource.data.filter(x => x['forbidden'] !== true));
+    }
+
+    applyHistory() {
+        const sameDatabase = this.historical.selected.filter(x => x.luthierDatabase.id === this.workDataBase);
+        let message = 'Deseja realmente aplicar os históricos escolhidos? Eles serão aplicados na ordem crescente de data.'
+        if (UtilFunctions.isValidStringOrArray(sameDatabase)) {
+            message += ' EXISTEM HISTÓRICOS DA MESMA BASE LUTHIER CONECTADA.'
+        }
+        this.messageService.open(message, 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
+            if (result === 'confirmed') {
+                this.service.applyHistorical(this.historical.selected).then(value => {
+                    this.messageService.open('Históricos aplicados com sucesso', 'SUCESSO', 'success');
+                });
+            }
+        });
+    }
+
+    canApply(): boolean {
+        return this.historical.selected.length > 0 && UtilFunctions.isValidStringOrArray(this.workDataBase) && UtilFunctions.isValidStringOrArray(this.dadosDataBase);
     }
 }
