@@ -27,7 +27,7 @@ const luthierResolver = (route: ActivatedRouteSnapshot, state: RouterStateSnapsh
 
 export function luthierMatcher(url: UrlSegment[]) {
     return url.length === 1 && (url[0].path == 'project' || url[0].path == 'connection' || url[0].path == 'dictionary'
-        || url[0].path == 'manager' || url[0].path === 'users' )
+        || url[0].path == 'manager' || url[0].path === 'users' ||   url[0].path === 'resources')
         ? { consumed: url }
         : null;
 }

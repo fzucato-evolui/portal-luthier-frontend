@@ -561,6 +561,20 @@ export class LuthierService
         return firstValueFrom(this._httpClient.get<LuthierResourceModel[]>(`${this.baseCommonUrl}/get-images-resources`));
     }
 
+    getResources(): Promise<LuthierResourceModel[]> {
+
+        return firstValueFrom(this._httpClient.get<LuthierResourceModel[]>(`${this.baseCommonUrl}/all-resources`));
+    }
+    getResource(id: number): Promise<any> {
+        return firstValueFrom(this._httpClient.get(`${this.baseCommonUrl}/resource/${id}`));
+    }
+    deleteResource(id: number): Promise<any> {
+        return firstValueFrom(this._httpClient.delete(`${this.baseCommonUrl}/resource/${id}`));
+    }
+    saveResource(model: LuthierResourceModel): Promise<LuthierResourceModel> {
+        return firstValueFrom(this._httpClient.post<LuthierResourceModel>(`${this.baseCommonUrl}/resource`, model));
+    }
+
     getActiveSubsystems(): Promise<LuthierSubsystemModel[]> {
 
         return firstValueFrom(this._httpClient.get<LuthierSubsystemModel[]>(`${this.baseCommonUrl}/get-active-subsystems`));

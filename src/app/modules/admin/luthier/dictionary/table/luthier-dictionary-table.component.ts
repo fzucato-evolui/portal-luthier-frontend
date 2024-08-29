@@ -1900,6 +1900,19 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
 
     showValidationsError(): string {
-        return JSON.stringify(UtilFunctions.getInvalidFields(this.formSave), null, 2);
+        const errors = UtilFunctions.getInvalidFields(this.formSave);
+        /*
+        if (UtilFunctions.isValidStringOrArray(errors) === true) {
+            errors.forEach(value => {
+                if (value.startsWith('fields')) {
+                    const path = value.split('.');
+                    const model = this.fieldsDataSource.data[parseInt(path[1])][path[2]];
+                    console.log(path, model);
+                }
+
+            })
+        }
+         */
+        return JSON.stringify(errors, null, 2);
     }
 }

@@ -98,6 +98,14 @@ export const mainNavigation: FuseNavigationItem[] = [
                 awesomeIcon    : {fontSet: 'fab', fontIcon: 'fa-markdown'},
                 link : '/luthier/manager',
             },
+            {
+                id   : 'luthier.resources',
+                title: 'Recursos',
+                type : 'basic',
+                awesomeIcon : {fontSet:"fas", fontIcon:"fa-paperclip"},
+                link : '/luthier/resources',
+                roles : ['ROLE_SUPER', 'ROLE_HYPER']
+            },
         ]
     },
     {
@@ -148,6 +156,9 @@ export class NavigationService
     {
         const items = cloneDeep(mainNavigation);
         items.forEach(item => {
+            if(item.id === 'luthier') {
+                item.children.sort((a,b) => a.title.localeCompare(b.title));
+            }
             this.setRoles(item);
         });
         const navigation: Navigation = {

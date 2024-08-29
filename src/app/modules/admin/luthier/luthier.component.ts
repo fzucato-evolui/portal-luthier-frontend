@@ -12,6 +12,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {LuthierDatabaseModel} from '../../../shared/models/luthier.model';
 import {StorageChange, UserService} from '../../../shared/services/user/user.service';
 import {LuthierUserComponent} from './user/luthier-user.component';
+import {LuthierResourceComponent} from './resource/luthier-resource.component';
 
 @Component({
     selector     : 'luthier',
@@ -26,7 +27,8 @@ import {LuthierUserComponent} from './user/luthier-user.component';
         LuthierConnectionComponent,
         LuthierProjectComponent,
         MatIconModule,
-        LuthierUserComponent
+        LuthierUserComponent,
+        LuthierResourceComponent
     ],
 })
 export class LuthierComponent implements OnInit, OnDestroy

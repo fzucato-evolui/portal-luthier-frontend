@@ -278,16 +278,34 @@ export class LuthierDictionaryTableFieldModalComponent implements OnInit, OnDest
                         staticValue.code = null;
                         staticValue.tableField = null;
                         staticValue.tableFieldCode = null;
+                        if (staticValue.customCaption && UtilFunctions.isValidStringOrArray(staticValue.customCaption.code)) {
+                            staticValue.customCaption.code = null;
+                        }
+                        if (staticValue.resource && UtilFunctions.isValidStringOrArray(staticValue.resource.code)) {
+                            const resourceIndex = this.resources.findIndex(x => x.code === staticValue.resource.code);
+                            if (resourceIndex < 0) {
+                                staticValue.resource = null;
+                            }
+                        }
                         const fg = this.add()
                     });
                     this.getStaticFields().patchValue(model);
                 } else {
                     model.forEach(staticValue => {
                         const index = current.findIndex(field => field.value.toUpperCase() === staticValue.value.toUpperCase());
+                        if (staticValue.resource && UtilFunctions.isValidStringOrArray(staticValue.resource.code)) {
+                            const resourceIndex = this.resources.findIndex(x => x.code === staticValue.resource.code);
+                            if (resourceIndex < 0) {
+                                staticValue.resource = null;
+                            }
+                        }
                         if (index < 0) {
                             staticValue.code = null;
                             staticValue.tableField = null;
                             staticValue.tableFieldCode = null;
+                            if (staticValue.customCaption && UtilFunctions.isValidStringOrArray(staticValue.customCaption.code)) {
+                                staticValue.customCaption.code = null;
+                            }
                             const fg = this.add();
                             fg.patchValue(staticValue);
                         }
@@ -295,6 +313,14 @@ export class LuthierDictionaryTableFieldModalComponent implements OnInit, OnDest
                             staticValue.code = current[index].code;
                             staticValue.tableField = current[index].tableField;
                             staticValue.tableFieldCode = current[index].tableFieldCode;
+                            if (current[index].customCaption) {
+                                if (staticValue.customCaption && UtilFunctions.isValidStringOrArray(staticValue.customCaption.code)) {
+                                    staticValue.customCaption.code = current[index].customCaption.code;
+                                }
+                                else {
+                                    staticValue.customCaption = current[index].customCaption;
+                                }
+                            }
                             fa.at(index).patchValue(staticValue);
                         }
 

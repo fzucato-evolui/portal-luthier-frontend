@@ -6,7 +6,7 @@
             <!-- Title -->
             <div>
                 <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
-                    Cadastro das Bases de Dados
+                    Cadastro dos Recursos do Luthier
                 </h2>
             </div>
         </div>
@@ -36,7 +36,7 @@
                 </div>
             </div>
             <div class="flex-1 overflow-y-auto" cdkScrollable>
-                <table #table mat-table matSort [dataSource]="databases" class="table-auto" (matSortChange)="announceSortChange($event)">
+                <table #table mat-table matSort [dataSource]="datasource" class="table-auto" (matSortChange)="announceSortChange($event)">
 
                     <ng-container matColumnDef="buttons">
                         <th mat-header-cell *matHeaderCellDef>
@@ -67,33 +67,33 @@
                         </td>
                     </ng-container>
 
-                    <!-- code -->
                     <ng-container matColumnDef="code">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
                         <td mat-cell *matCellDef="let model"> {{ model.code }} </td>
                     </ng-container>
-                    <!-- server -->
-                    <ng-container matColumnDef="server">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header> URL </th>
-                        <td mat-cell *matCellDef="let model"> {{ model.server }} </td>
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome </th>
+                        <td mat-cell *matCellDef="let model"> {{ model.name }} </td>
                     </ng-container>
-                    <!-- dbType -->
-                    <ng-container matColumnDef="dbType">
+                    <ng-container matColumnDef="identifier">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Categoria </th>
+                        <td mat-cell *matCellDef="let model"> {{ model.identifier }} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="resourceType">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
-                        <td mat-cell *matCellDef="let model">
-                            <mat-icon [svgIcon]="'custom:' + model.dbType.toLowerCase()"
-                                      class="evolui-menu-item-icon icon-size-8"/>
-                        </td>
+                        <td mat-cell *matCellDef="let model">{{ model.resourceType }}</td>
                     </ng-container>
-                    <!-- database -->
-                    <ng-container matColumnDef="database">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Banco </th>
-                        <td mat-cell *matCellDef="let model"> {{ model.database }} </td>
+                    <ng-container matColumnDef="description">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Descrição </th>
+                        <td mat-cell *matCellDef="let model"> {{ model.description }} </td>
                     </ng-container>
-                    <!-- user -->
-                    <ng-container matColumnDef="user">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Usuário </th>
-                        <td mat-cell *matCellDef="let model"> {{ model.user }} </td>
+                    <ng-container matColumnDef="height">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Altura </th>
+                        <td mat-cell *matCellDef="let model"> {{ model.height }} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="width">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Largura </th>
+                        <td mat-cell *matCellDef="let model"> {{ model.width }} </td>
                     </ng-container>
 
                     <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
