@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-import {DatePipe, NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import {DatePipe, JsonPipe, NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
 import {
     FormArray,
     FormBuilder,
@@ -71,7 +71,7 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {MatCheckboxChange, MatCheckboxModule} from '@angular/material/checkbox';
 import {SharedPipeModule} from '../../../../../shared/pipes/shared-pipe.module';
 import {MatSelectModule} from '@angular/material/select';
-import {LuthierFieldValidator} from '../../../../../shared/validators/luthier.validator';
+import {LuthierValidator} from '../../../../../shared/validators/luthier.validator';
 import {MatDialog} from '@angular/material/dialog';
 import {LuthierDictionaryTableFieldModalComponent} from './modal/field/luthier-dictionary-table-field-modal.component';
 import {LuthierDictionaryTableIndexModalComponent} from './modal/index/luthier-dictionary-table-index-modal.component';
@@ -88,6 +88,7 @@ import {DatabaseTypeEnum} from '../../../../../shared/models/portal-luthier-data
 import {debounceTime, Subject, takeUntil} from 'rxjs';
 import {MatMenuModule} from '@angular/material/menu';
 import {Clipboard} from '@angular/cdk/clipboard';
+import {SharedDirectiveModule} from '../../../../../shared/directives/shared-directive.module';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -120,7 +121,9 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'group
         MatSelectModule,
         NgTemplateOutlet,
         MatMenuModule,
-        DatePipe
+        DatePipe,
+        SharedDirectiveModule,
+        JsonPipe
     ],
     providers: [
         provideNgxMask(),
@@ -229,6 +232,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
     ngOnInit(): void {
         this.refresh();
+
         this._parent.parent.workDataBase$
             .pipe(takeUntil(this._unsubscribeAll), debounceTime(100))
             .subscribe((workDataBase: number) =>
@@ -255,6 +259,63 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         if (UtilFunctions.isValidStringOrArray(this.model.code)) {
             UtilFunctions.forceValidations(this.formSave);
         }
+        this.model.currentViewBodyType = this.dadosViewBodyType;
+        LuthierValidator.validateTable(this.model)
+
+        this.fieldsDataSource.connect()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(data => {
+                this.model.currentViewBodyType = this.dadosViewBodyType;
+                if (LuthierValidator.validateTable(this.model)) {
+                    this.fieldsDataSource._updateChangeSubscription();
+                }
+
+            });
+        this.customFieldsDataSource.connect()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(data => {
+                this.model.currentViewBodyType = this.dadosViewBodyType;
+                if (LuthierValidator.validateTable(this.model)) {
+                    this.customFieldsDataSource._updateChangeSubscription();
+                }
+
+            });
+        this.referencesDataSource.connect()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(data => {
+                this.model.currentViewBodyType = this.dadosViewBodyType;
+                if (LuthierValidator.validateTable(this.model)) {
+                    this.referencesDataSource._updateChangeSubscription();
+                }
+
+            });
+        this.indexesDataSource.connect()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(data => {
+                this.model.currentViewBodyType = this.dadosViewBodyType;
+                if (LuthierValidator.validateTable(this.model)) {
+                    this.indexesDataSource._updateChangeSubscription();
+                }
+
+            });
+        this.searchsDataSource.connect()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(data => {
+                this.model.currentViewBodyType = this.dadosViewBodyType;
+                if (LuthierValidator.validateTable(this.model)) {
+                    this.searchsDataSource._updateChangeSubscription();
+                }
+
+            });
+        this.groupsInfoDataSource.connect()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(data => {
+                this.model.currentViewBodyType = this.dadosViewBodyType;
+                if (LuthierValidator.validateTable(this.model)) {
+                    this.groupsInfoDataSource._updateChangeSubscription();
+                }
+
+            });
 
     }
 
@@ -496,7 +557,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
     canSave(): boolean {
         if (this.formSave) {
-            if (this.formSave.invalid) {
+            if (this.formSave.invalid || UtilFunctions.isValidObject(this.model.invalidFields)) {
                 return false;
             }
             else if (this.model.objectType === 'VIEW') {
@@ -796,7 +857,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 customEditor: this.addCustomizationField(),
                 customUiConfiguration: this.addCustomizationField()
             });
-            allFields.setValidators(LuthierFieldValidator.validate(this.getFields(type)));
+            allFields.setValidators(LuthierValidator.validate(this.getFields(type)));
             return allFields;
         }
         else {
@@ -804,7 +865,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 ...c.controls,
                 groupInfo: [null]
             });
-            allFields.setValidators(LuthierFieldValidator.validate(this.getFields(type)));
+            allFields.setValidators(LuthierValidator.validate(this.getFields(type)));
             return allFields;
         }
 
@@ -1039,11 +1100,10 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         const editing = this.getRealIndex(model, type);
         const index = editing.index;
         if (fg.invalid) {
-            console.log(fg, fg.errors);
             this.messageService.open("Existem campo inválidos!", "Error de Validação", "warning");
             fg.updateValueAndValidity();
             this._changeDetectorRef.detectChanges();
-            return;
+            //return;
         }
         if (type === 'fields') {
             this.fieldsDataSource.data[index] = Object.assign({}, this.fieldsDataSource.data[index], fg.value);
@@ -1913,6 +1973,16 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             })
         }
          */
-        return JSON.stringify(errors, null, 2);
+        return JSON.stringify(this.model.invalidFields, null, 2);
+    }
+
+    viewChanged($event: Event) {
+        this._cloneModel.views = this.formSave.get('views').value;
+        this.model.currentViewBodyType = this.dadosViewBodyType;
+        LuthierValidator.validateTable(this.model);
+    }
+
+    hasViewProblem(): boolean {
+        return UtilFunctions.isValidObject(this.model.invalidFields) && UtilFunctions.isValidStringOrArray(this.model.invalidFields['views']);
     }
 }

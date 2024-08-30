@@ -9,7 +9,7 @@
             [mode]="drawerMode"
             [opened]="drawerOpened"
             #matDrawer>
-            <div class="py-1 h-full flex flex-col overflow-hidden">
+            <div class="absolute py-1 h-full w-full flex flex-col overflow-hidden">
 
                 <!-- Header -->
                 <div class="flex flex-col flex-0 p-1 border-b dark:bg-transparent">
@@ -95,6 +95,16 @@
                     </div>
 
 
+                </div>
+                <div class="absolute bottom-0 right-0 z-50">
+
+                    <button
+                        class="mr-4 mb-4"
+                        (click)="refresh()"
+                        mat-flat-button
+                        type="button"
+                        [color]="'primary'">Filtrar
+                    </button>
                 </div>
 
             </div>

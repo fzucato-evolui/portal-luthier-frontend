@@ -68,7 +68,7 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {MatCheckboxChange, MatCheckboxModule} from '@angular/material/checkbox';
 import {SharedPipeModule} from '../../../../../shared/pipes/shared-pipe.module';
 import {MatSelectChange, MatSelectModule} from '@angular/material/select';
-import {LuthierFieldValidator} from '../../../../../shared/validators/luthier.validator';
+import {LuthierValidator} from '../../../../../shared/validators/luthier.validator';
 import {MatDialog} from '@angular/material/dialog';
 import {LuthierService} from '../../luthier.service';
 import {MessageDialogService} from '../../../../../shared/services/message/message-dialog-service';
@@ -80,6 +80,7 @@ import {
 } from './modal/search/luthier-dictionary-dataset-search-modal.component';
 import {FilterPredicateUtil} from '../../../../../shared/util/util-classes';
 import {MatMenuModule} from '@angular/material/menu';
+import {Subject, takeUntil} from 'rxjs';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -121,6 +122,7 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'group
 export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, AfterViewInit
 {
     private _model: LuthierVisionDatasetModel;
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
     public fieldsDataSource = new MatTableDataSource<LuthierVisionDatasetFieldModel>();
     @ViewChildren('sortFields') sortFields: QueryList<MatSort>;
     public searchsDataSource = new MatTableDataSource<LuthierVisionDatasetSearchModel>();
@@ -197,7 +199,8 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     }
 
     ngOnDestroy(): void {
-
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
     }
 
     ngAfterViewInit() {
@@ -228,6 +231,41 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         if (UtilFunctions.isValidStringOrArray(this.model.code)) {
             UtilFunctions.forceValidations(this.formSave);
         }
+
+        LuthierValidator.validateDataset(this.model)
+
+        this.fieldsDataSource.connect()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(data => {
+                if (LuthierValidator.validateDataset(this.model)) {
+                    this.fieldsDataSource._updateChangeSubscription();
+                }
+
+            });
+        this.customFieldsDataSource.connect()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(data => {
+                if (LuthierValidator.validateDataset(this.model)) {
+                    this.customFieldsDataSource._updateChangeSubscription();
+                }
+
+            });
+        this.searchsDataSource.connect()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(data => {
+                if (LuthierValidator.validateDataset(this.model)) {
+                    this.searchsDataSource._updateChangeSubscription();
+                }
+
+            });
+        this.groupsInfoDataSource.connect()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(data => {
+                if (LuthierValidator.validateDataset(this.model)) {
+                    this.groupsInfoDataSource._updateChangeSubscription();
+                }
+
+            });
     }
 
     refresh() {
@@ -479,9 +517,11 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
 
     canSave(): boolean {
         if (this.formSave) {
-            return !this.formSave.invalid;
+            if (this.formSave.invalid || UtilFunctions.isValidObject(this.model.invalidFields)) {
+                return false;
+            }
         }
-        return false;
+        return true;
     }
 
     saveCustomizations() {
@@ -742,7 +782,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 customLookupFilter: this.addCustomizationField(),
                 customUiConfiguration: this.addCustomizationField()
             });
-            allFields.setValidators(LuthierFieldValidator.validate(this.getFields(type)));
+            allFields.setValidators(LuthierValidator.validate(this.getFields(type)));
             return allFields;
         }
         else {
@@ -751,7 +791,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 groupInfo: [null],
                 reference: [null]
             });
-            allFields.setValidators(LuthierFieldValidator.validate(this.getFields(type)));
+            allFields.setValidators(LuthierValidator.validate(this.getFields(type)));
             return allFields;
         }
 
@@ -914,7 +954,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             this.messageService.open("Existem campo inválidos!", "Error de Validação", "warning");
             fg.updateValueAndValidity();
             this._changeDetectorRef.detectChanges();
-            return;
+            //return;
         }
         if (type === 'fields') {
             this.fieldsDataSource.data[index] = Object.assign({}, this.fieldsDataSource.data[index], fg.value);
@@ -1734,5 +1774,21 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 this.messageService.open('Erro na importação : ' + e, 'ERRO', 'error');
             }
         }
+    }
+    showValidationsError(): string {
+        const errors = UtilFunctions.getInvalidFields(this.formSave);
+        /*
+        if (UtilFunctions.isValidStringOrArray(errors) === true) {
+            errors.forEach(value => {
+                if (value.startsWith('fields')) {
+                    const path = value.split('.');
+                    const model = this.fieldsDataSource.data[parseInt(path[1])][path[2]];
+                    console.log(path, model);
+                }
+
+            })
+        }
+         */
+        return JSON.stringify(this.model.invalidFields, null, 2);
     }
 }

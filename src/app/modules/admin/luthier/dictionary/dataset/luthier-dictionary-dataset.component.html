@@ -333,6 +333,8 @@
                                     <button mat-icon-button aria-label="Edit" (click)="editSearch(model)" matTooltip="Editar Pesquisa">
                                         <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
                                     </button>
+                                    <mat-icon *ngIf="model.invalidFields | isValidObject" [matTooltip]="model.invalidFields | json"
+                                              class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>
                                 </div>
                             </td>
                         </ng-container>
@@ -344,7 +346,7 @@
                         <!-- name -->
                         <ng-container matColumnDef="name">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome </th>
-                            <td mat-cell *matCellDef="let model"> {{ model.name }} </td>
+                            <td mat-cell [evoluiMatCell]="model" *matCellDef="let model"> {{ model.name }} </td>
                         </ng-container>
                         <ng-container matColumnDef="customName">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome Customizado </th>
@@ -353,17 +355,17 @@
                         <!-- order -->
                         <ng-container matColumnDef="order">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Order </th>
-                            <td mat-cell *matCellDef="let model"> {{ model.order }} </td>
+                            <td mat-cell [evoluiMatCell]="model" *matCellDef="let model"> {{ model.order }} </td>
                         </ng-container>
                         <!-- status -->
                         <ng-container matColumnDef="status">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
-                            <td mat-cell *matCellDef="let model"> {{ model.status }} </td>
+                            <td mat-cell [evoluiMatCell]="model" *matCellDef="let model"> {{ model.status }} </td>
                         </ng-container>
                         <!-- type -->
                         <ng-container matColumnDef="type">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
-                            <td mat-cell *matCellDef="let model"> {{ model.type }} </td>
+                            <td mat-cell [evoluiMatCell]="model" *matCellDef="let model"> {{ model.type }} </td>
                         </ng-container>
 
                         <tr mat-header-row *matHeaderRowDef="displayedSearchColumns; sticky: true"></tr>
@@ -470,6 +472,8 @@
                     <button *ngIf="field['editing']" mat-icon-button aria-label="Save" (click)="saveRow(field, fieldtype)" matTooltip="Salvar">
                         <mat-icon class="icon-size-4 text-green-500" fontSet="fas" fontIcon="fa-save"></mat-icon>
                     </button>
+                    <mat-icon *ngIf="model.invalidFields | isValidObject" [matTooltip]="model.invalidFields | json"
+                              class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>
                 </div>
             </td>
         </ng-container>
@@ -487,7 +491,7 @@
             <!-- order -->
             <ng-container matColumnDef="order">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> # </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.order }}
                     </div>
@@ -501,7 +505,7 @@
             </ng-container>
             <ng-container matColumnDef="fieldType">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo de Campo </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div>
                         {{ field.fieldType }}
                     </div>
@@ -509,7 +513,7 @@
             </ng-container>
             <ng-container matColumnDef="tableField.key">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> PK </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div>
                         {{ field.tableField?.key }}
                     </div>
@@ -517,7 +521,7 @@
             </ng-container>
             <ng-container matColumnDef="tableField.name">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div>
                         {{ field.tableField?.name }}
                     </div>
@@ -525,7 +529,7 @@
             </ng-container>
             <ng-container matColumnDef="label">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Rótulo </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.label }}
                     </div>
@@ -588,7 +592,7 @@
             </ng-container>
             <ng-container matColumnDef="tableField.fieldType">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div>
                         {{ field.tableField?.fieldType }}
                     </div>
@@ -596,7 +600,7 @@
             </ng-container>
             <ng-container matColumnDef="tableField.size">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tamanho </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div>
                         {{ field.tableField?.size }}
                     </div>
@@ -738,7 +742,7 @@
             </ng-container>
             <ng-container matColumnDef="reference.name">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Referência </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div>
                         {{ field.reference?.name }}
                     </div>
@@ -811,7 +815,7 @@
         <ng-container *ngIf="fieldtype === 'customFields'">
             <ng-container matColumnDef="order">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> # </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.order }}
                     </div>
@@ -825,7 +829,7 @@
             </ng-container>
             <ng-container matColumnDef="fieldType">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo de Campo </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div>
                         {{ field.fieldType }}
                     </div>
@@ -833,7 +837,7 @@
             </ng-container>
             <ng-container matColumnDef="tableField.key">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> PK </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div>
                         {{ field.tableField?.key }}
                     </div>
@@ -841,7 +845,7 @@
             </ng-container>
             <ng-container matColumnDef="tableField.name">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div>
                         {{ field.tableField?.name }}
                     </div>
@@ -849,7 +853,7 @@
             </ng-container>
             <ng-container matColumnDef="label">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Rótulo </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.label }}
                     </div>
@@ -898,7 +902,7 @@
             </ng-container>
             <ng-container matColumnDef="tableField.fieldType">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div>
                         {{ field.tableField?.fieldType }}
                     </div>
@@ -906,7 +910,7 @@
             </ng-container>
             <ng-container matColumnDef="tableField.size">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tamanho </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div>
                         {{ field.tableField?.size }}
                     </div>
@@ -1122,7 +1126,7 @@
             <!-- order -->
             <ng-container matColumnDef="order">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> # </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.order }}
                     </div>
@@ -1137,7 +1141,7 @@
             <!-- description -->
             <ng-container matColumnDef="description">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Descrição </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.description }}
                     </div>
@@ -1152,7 +1156,7 @@
             <!-- groupInfoType -->
             <ng-container matColumnDef="groupInfoType">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
-                <td mat-cell *matCellDef="let field let i = index">
+                <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.groupInfoType }}
                     </div>

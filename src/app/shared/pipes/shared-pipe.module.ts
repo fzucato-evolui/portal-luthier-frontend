@@ -1,15 +1,17 @@
 import {NgModule} from '@angular/core';
-import {EnumToArrayPipe, FilterJsonPipe, IsValidStringOrArrayPipe} from './util-functions.pipe';
+import {EnumToArrayPipe, FilterJsonPipe, IsValidObjectPipe, IsValidStringOrArrayPipe} from './util-functions.pipe';
 
 @NgModule({
     declarations : [
         EnumToArrayPipe,
         IsValidStringOrArrayPipe,
+        IsValidObjectPipe,
         FilterJsonPipe
     ],
     exports : [
         EnumToArrayPipe,
         IsValidStringOrArrayPipe,
+        IsValidObjectPipe,
         FilterJsonPipe
     ]
 })

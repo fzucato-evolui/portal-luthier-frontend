@@ -48,7 +48,7 @@ export class UtilFunctions {
     }
 
     public static isValidObject(value: any): boolean {
-        return !!(value !== null && value !== undefined && value);
+        return !!(value !== null && value !== undefined && JSON.stringify(value) !== '{}' && value);
 
     }
 

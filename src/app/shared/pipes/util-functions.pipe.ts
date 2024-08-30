@@ -12,6 +12,16 @@ export class IsValidStringOrArrayPipe implements PipeTransform{
 }
 
 @Pipe({
+    name: 'isValidObject'
+})
+export class IsValidObjectPipe implements PipeTransform{
+    transform(value: string | any[]): boolean {
+        return UtilFunctions.isValidObject(value);
+    }
+
+}
+
+@Pipe({
     name: 'enumArray'
 })
 export class EnumToArrayPipe implements PipeTransform {

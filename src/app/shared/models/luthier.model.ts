@@ -1,6 +1,7 @@
 export class LuthierBasicModel {
     id?: string
     code?: number
+    invalidFields?: {[key: string]: any}
 }
 export class LuthierDatabaseModel {
     code: number
@@ -22,8 +23,8 @@ export class LuthierProjectModel extends LuthierDatabaseModel{
     protocol?: string
 }
 export type LuthierObjectType = 'UNKNOW' | 'TABLE' | 'VIEW' | 'VISION' | 'PROCEDURE' | 'JUST_RUNTIME' | 'VISION_DATASET';
-
-export class LuthierTableModel {
+export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
+export class LuthierTableModel extends LuthierBasicModel {
     id?: string;
     code?: number
     name?: string
@@ -48,6 +49,7 @@ export class LuthierTableModel {
     references?: LuthierTableReferenceModel[]
     indexes?: LuthierTableIndexModel[]
     views?: LuthierViewModel[]
+    currentViewBodyType?: LuthierViewBodyEnum | string
     customFields?: LuthierCustomFieldModel[]
     customizations?: LuthierCustomizationModel[]
     bonds?: LuthierBondModel[]
@@ -61,7 +63,7 @@ export enum LuthierGroupInfoTypeEnum {
     VERTICAL_GRID = ("VERTICAL_GRID"),
     GROUP_IN_VERTICAL_GRID = ("GROUP_IN_VERTICAL_GRID")
 }
-export class LuthierGroupInfoModel {
+export class LuthierGroupInfoModel extends LuthierBasicModel{
     id?: string
     code?: number
     description?: string
@@ -156,7 +158,7 @@ export class LuthierFieldCharcaseEnumParser {
         return Object.keys(LuthierFieldCharcaseEnum)[value];
     }
 }
-export class LuthierTableFieldModel {
+export class LuthierTableFieldModel extends LuthierBasicModel{
     id?: string
     code?: number
     name?: string
@@ -204,7 +206,7 @@ export enum LuthierPermissionTypeEnum {
     USER =  ("USER"),
     ONLY_SYSTEM =  ("ONLY_SYSTEM")
 }
-export class LuthierTableStaticFieldModel {
+export class LuthierTableStaticFieldModel extends LuthierBasicModel{
     id?: string
     code?: number
     value?: string
@@ -227,7 +229,7 @@ export enum LuthierReferenceStatusEnum {
     INACTIVE = ("INACTIVE"),
     ACTIVE = ("ACTIVE")
 }
-export class LuthierTableReferenceModel {
+export class LuthierTableReferenceModel extends LuthierBasicModel{
     id?: string
     code?: number
     name?: string
@@ -247,7 +249,7 @@ export class LuthierTableReferenceModel {
     lookupFastField?: LuthierTableFieldModel
     lookupDescriptionField?: LuthierTableFieldModel
 }
-export class LuthierTableReferenceFieldModel {
+export class LuthierTableReferenceFieldModel extends LuthierBasicModel{
     id?: string
     code?: number
     status?: number
@@ -262,7 +264,7 @@ export enum LuthierIndexSortEnum {
     ASC = ("ASC"),
     DESC = ("DESC")
 }
-export class LuthierTableIndexModel {
+export class LuthierTableIndexModel extends LuthierBasicModel{
     id?: string
     code?: number
     name?: string
@@ -286,14 +288,14 @@ export class LuthierViewModel {
     databaseType?: LuthierViewBodyEnum | string
     body?: string
 }
-export class LuthierTableIndexFieldModel {
+export class LuthierTableIndexFieldModel extends LuthierBasicModel{
     tableFieldCode?: number
     indexCode?: number
     order?: number
     tableField?: LuthierTableFieldModel
     index?: LuthierTableIndexModel
 }
-export class LuthierCustomFieldModel {
+export class LuthierCustomFieldModel extends LuthierBasicModel{
     id?: string
     code?: number
     tableName?: string
@@ -324,7 +326,7 @@ export class LuthierCustomFieldModel {
     staticFields?: LuthierTableStaticCustomFieldModel[]
     realName?: string
 }
-export class LuthierTableStaticCustomFieldModel {
+export class LuthierTableStaticCustomFieldModel extends LuthierBasicModel{
     id?: string
     code?: number
     tableCustomFieldCode?: number
@@ -384,7 +386,7 @@ export enum LuthierSearchStatusEnum {
     INACTIVE = ("INACTIVE"),
     ACTIVE = ("ACTIVE")
 }
-export class LuthierTableSearchModel {
+export class LuthierTableSearchModel extends LuthierBasicModel{
     id?: string
     code?: number
     tableCode?: number
@@ -419,7 +421,7 @@ export enum LuthierSearchFieldOperatorEnum {
     NULL = ("NULL"),
     NOT_NULL = ("NOT_NULL")
 }
-export class LuthierTableSearchFieldModel {
+export class LuthierTableSearchFieldModel extends LuthierBasicModel{
     id?: string
     code?: number
     searchCode?: number
@@ -487,7 +489,7 @@ export class LuthierVisionModel {
 
 }
 
-export class LuthierVisionDatasetModel {
+export class LuthierVisionDatasetModel extends LuthierBasicModel{
     id?: string
     code?: number
     name?: string
@@ -516,7 +518,7 @@ export enum LuthierVisionDatasetFieldTypeEnum {
 export class LuthierVisionGroupInfoModel extends LuthierGroupInfoModel {
 
 }
-export class LuthierVisionDatasetFieldModel {
+export class LuthierVisionDatasetFieldModel extends LuthierBasicModel{
     code?: number
     name?: string
     fieldType?: LuthierVisionDatasetFieldTypeEnum
@@ -559,7 +561,7 @@ export class LuthierVisionDatasetFieldModel {
     id?: string
 }
 
-export class LuthierVisionDatasetSearchModel {
+export class LuthierVisionDatasetSearchModel extends LuthierBasicModel{
     id?: string;
     code?: number
     datasetCode?: number
@@ -574,7 +576,7 @@ export class LuthierVisionDatasetSearchModel {
 
 
 }
-export class LuthierVisionDatasetSearchFieldModel {
+export class LuthierVisionDatasetSearchFieldModel extends LuthierBasicModel {
     id?: string
     code?: number
     searchCode?: number

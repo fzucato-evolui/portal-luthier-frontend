@@ -21,6 +21,14 @@
     z-index: 9999; /* Ensure it's above all other elements */
     display: none; /* Hidden by default */
 }
+.invalid-cell-border > .ng-star-inserted {
+    border: 2px solid red !important; /* Change the color and thickness as needed */
+    padding: 3px;
+    min-height: 20px;
+}
+.mat-mdc-checkbox.ng-invalid .mdc-checkbox__background {
+    background-color: red !important;
+}
 /*
 td {
     mat-form-field {
