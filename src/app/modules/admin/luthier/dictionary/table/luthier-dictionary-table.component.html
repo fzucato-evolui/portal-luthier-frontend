@@ -264,7 +264,14 @@
             </mat-panel-description>
         </mat-expansion-panel-header>
         <mat-tab-group class="h-full overflow-hidden" (selectedTabChange)="changeTab($event)">
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="fields" label="Campos" bodyClass="table-tab">
+            <mat-tab [labelClass]="['text-sm', 'font-bold', hasValidationProblem('fields') ? 'invalid-tab' : '']" aria-label="fields" label="Campos" bodyClass="table-tab">
+                <ng-template mat-tab-label>
+                    <label *ngIf="hasValidationProblem('fields')" [matTooltip]="model.invalidFields['fields'] | json">
+                        <span><mat-icon class="icon-size-3 text-red-500 mr-1" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>Campos
+                        </span>
+                    </label>
+                    <label *ngIf="!hasValidationProblem('fields')">Campos</label>
+                </ng-template>
                 <div class="flex-none flex justify-between items-center pt-1">
                     <div class="flex-none flex">
 
@@ -291,7 +298,14 @@
                 </div>
 
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="indexes" label="Índices" bodyClass="table-tab" *ngIf="model.objectType === 'TABLE'">
+            <mat-tab [labelClass]="['text-sm', 'font-bold', hasValidationProblem('indexes') ? 'invalid-tab' : '']" aria-label="indexes" label="Índices" bodyClass="table-tab" *ngIf="model.objectType === 'TABLE'">
+                <ng-template mat-tab-label>
+                    <label *ngIf="hasValidationProblem('indexes')" [matTooltip]="model.invalidFields['indexes'] | json">
+                        <span><mat-icon class="icon-size-3 text-red-500 mr-1" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>Índices
+                        </span>
+                    </label>
+                    <label *ngIf="!hasValidationProblem('indexes')">Índices</label>
+                </ng-template>
                 <div class="flex-none flex justify-between items-center pt-1">
                     <div class="flex-none flex">
 
@@ -328,7 +342,7 @@
                                     <button mat-icon-button aria-label="Edit" (click)="editIndex(model)" matTooltip="Editar Índice">
                                         <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
                                     </button>
-                                    <mat-icon *ngIf="model.invalidFields | isValidObject" [matTooltip]="model.invalidFields | json"
+                                    <mat-icon *ngIf="!model.pending && model.invalidFields | isValidObject" [matTooltip]="model.invalidFields | json"
                                               class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>
                                 </div>
                             </td>
@@ -370,7 +384,14 @@
                     </table>
                 </div>
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="references" label="Referências" bodyClass="table-tab">
+            <mat-tab [labelClass]="['text-sm', 'font-bold', hasValidationProblem('references') ? 'invalid-tab' : '']" aria-label="references" label="Referências" bodyClass="table-tab">
+                <ng-template mat-tab-label>
+                    <label *ngIf="hasValidationProblem('references')" [matTooltip]="model.invalidFields['references'] | json">
+                        <span><mat-icon class="icon-size-3 text-red-500 mr-1" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>Referências
+                        </span>
+                    </label>
+                    <label *ngIf="!hasValidationProblem('references')">Referências</label>
+                </ng-template>
                 <div class="flex-none flex justify-between items-center pt-1">
                     <div class="flex-none flex">
 
@@ -407,7 +428,7 @@
                                     <button mat-icon-button aria-label="Edit" (click)="editReference(model)" matTooltip="Editar Referência">
                                         <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
                                     </button>
-                                    <mat-icon *ngIf="model.invalidFields | isValidObject" [matTooltip]="model.invalidFields | json"
+                                    <mat-icon *ngIf="!model.pending && model.invalidFields | isValidObject" [matTooltip]="model.invalidFields | json"
                                               class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>
                                 </div>
                             </td>
@@ -464,7 +485,14 @@
                     </table>
                 </div>
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="searchs" label="Pesquisas" bodyClass="table-tab">
+            <mat-tab [labelClass]="['text-sm', 'font-bold', hasValidationProblem('searchs') ? 'invalid-tab' : '']" aria-label="searchs" label="Pesquisas" bodyClass="table-tab">
+                <ng-template mat-tab-label>
+                    <label *ngIf="hasValidationProblem('searchs')" [matTooltip]="model.invalidFields['searchs'] | json">
+                        <span><mat-icon class="icon-size-3 text-red-500 mr-1" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>Pesquisas
+                        </span>
+                    </label>
+                    <label *ngIf="!hasValidationProblem('searchs')">Pesquisas</label>
+                </ng-template>
                 <div class="flex-none flex justify-between items-center pt-1">
                     <div class="flex-none flex">
 
@@ -501,7 +529,7 @@
                                     <button mat-icon-button aria-label="Edit" (click)="editSearch(model)" matTooltip="Editar Pesquisa">
                                         <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
                                     </button>
-                                    <mat-icon *ngIf="model.invalidFields | isValidObject" [matTooltip]="model.invalidFields | json"
+                                    <mat-icon *ngIf="!model.pending && model.invalidFields | isValidObject" [matTooltip]="model.invalidFields | json"
                                               class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>
                                 </div>
                             </td>
@@ -542,7 +570,14 @@
                 </div>
 
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="groupInfos" label="Grupos de Informações" bodyClass="table-tab" *ngIf="model.objectType === 'TABLE'">
+            <mat-tab [labelClass]="['text-sm', 'font-bold', hasValidationProblem('groupInfos') ? 'invalid-tab' : '']" aria-label="groupInfos" label="Grupos de Informações" bodyClass="table-tab" *ngIf="model.objectType === 'TABLE'">
+                <ng-template mat-tab-label>
+                    <label *ngIf="hasValidationProblem('groupInfos')" [matTooltip]="model.invalidFields['groupInfos'] | json">
+                        <span><mat-icon class="icon-size-3 text-red-500 mr-1" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>Grupos de Informações
+                        </span>
+                    </label>
+                    <label *ngIf="!hasValidationProblem('groupInfos')">Grupos de Informações</label>
+                </ng-template>
                 <div class="flex-none flex justify-between items-center pt-1">
                     <div class="flex-none flex">
 
@@ -567,7 +602,14 @@
                     </ng-container>
                 </div>
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="customFields" label="Campos Adicionais" bodyClass="table-tab">
+            <mat-tab [labelClass]="['text-sm', 'font-bold', hasValidationProblem('customFields') ? 'invalid-tab' : '']" aria-label="customFields" label="Campos Adicionais" bodyClass="table-tab">
+                <ng-template mat-tab-label>
+                    <label *ngIf="hasValidationProblem('customFields')" [matTooltip]="model.invalidFields['customFields'] | json">
+                        <span><mat-icon class="icon-size-3 text-red-500 mr-1" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>Campos Adicionais
+                        </span>
+                    </label>
+                    <label *ngIf="!hasValidationProblem('customFields')">Campos Adicionais</label>
+                </ng-template>
                 <div class="flex-none flex justify-between items-center pt-1">
                     <div class="flex-none flex">
 
@@ -593,7 +635,14 @@
 
                 </div>
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="customizations" label="Customizações" bodyClass="table-tab">
+            <mat-tab [labelClass]="['text-sm', 'font-bold', hasValidationProblem('customizations') ? 'invalid-tab' : '']" aria-label="customizations" label="Customizações" bodyClass="table-tab">
+                <ng-template mat-tab-label>
+                    <label *ngIf="hasValidationProblem('customizations')" [matTooltip]="model.invalidFields['customizations'] | json">
+                        <span><mat-icon class="icon-size-3 text-red-500 mr-1" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>Customizações
+                        </span>
+                    </label>
+                    <label *ngIf="!hasValidationProblem('customizations')">Customizações</label>
+                </ng-template>
                 <div class="flex-none flex justify-between items-center pt-1">
                     <div class="flex-none flex">
 
@@ -619,10 +668,14 @@
 
                 </div>
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold', hasViewProblem() ? 'bg-red-400' : '']"
+            <mat-tab [labelClass]="['text-sm', 'font-bold', hasValidationProblem('views') ? 'invalid-tab' : '']"
                      aria-label="views" label="SQL" bodyClass="table-tab" *ngIf="model.objectType === 'VIEW'">
                 <ng-template mat-tab-label>
-                    <label [matTooltip]="hasViewProblem() ? (model.invalidFields['views'] | json) : ''">SQL</label>
+                    <label *ngIf="hasValidationProblem('views')" [matTooltip]="model.invalidFields['views'] | json">
+                        <span><mat-icon class="icon-size-3 text-red-500 mr-1" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>SQL
+                        </span>
+                    </label>
+                    <label *ngIf="!hasValidationProblem('views')">SQL</label>
                 </ng-template>
                 <mat-tab-group>
                     <ng-container *ngFor="let t of LuthierViewBodyEnum | enumArray">
@@ -778,7 +831,7 @@
                     <button *ngIf="!field['editing'] && (fieldtype === 'fields' || fieldtype === 'customFields')" mat-icon-button aria-label="Detail" (click)="detailField(field, fieldtype)" matTooltip="Detalhes do Campo">
                         <mat-icon class="icon-size-4 text-accent dark:text-primary" fontSet="fas" fontIcon="fa-glasses"></mat-icon>
                     </button>
-                    <mat-icon *ngIf="field.invalidFields | isValidObject" [matTooltip]="field.invalidFields | json"
+                    <mat-icon *ngIf="!field.pending && field.invalidFields | isValidObject" [matTooltip]="field.invalidFields | json"
                               class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>
                 </div>
             </td>

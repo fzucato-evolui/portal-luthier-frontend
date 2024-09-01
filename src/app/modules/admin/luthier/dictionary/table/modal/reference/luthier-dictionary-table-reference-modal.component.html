@@ -288,7 +288,7 @@
                                             </div>
                                             <div class="flex-1 overflow-auto">
                                                 <ng-container *ngFor="let t of getKeyFieldsPK() | filterJson : {name: filterFieldsPK.value}">
-                                                    <mat-option [value]="{code: !t.code ? '' : t.code, name: t.name, id: !t.id? '' : t.id}" >
+                                                    <mat-option [value]="{code: !t.code ? '' : t.code, name: t.name, id: !t.id? '' : t.id, fieldType: t.fieldType}" >
                                                         {{t.name}}
                                                     </mat-option>
                                                 </ng-container>
@@ -304,7 +304,7 @@
                         <th mat-header-cell *matHeaderCellDef> Campo FK</th>
                         <td mat-cell *matCellDef="let model; let i = index">
                             <div class="flex flex-row items-center">
-                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                                <mat-form-field *ngIf="model.get('fieldPK').value.name | isValidStringOrArray" [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                                     <mat-select class="text-sm" [compareWith]="parent.compareCode" (openedChange)="filterFieldsFK.value =null"
                                                 [formControl]="model.get('fieldFK')">
                                         <div class="flex flex-col h-full w-full">
@@ -319,7 +319,7 @@
                                             </div>
                                             <div class="flex-1 overflow-auto">
                                                 <ng-container *ngFor="let t of fields | filterJson : {name: filterFieldsFK.value}">
-                                                    <mat-option [value]="{code: !t.code ? '' : t.code, name: t.name, id: !t.id ? '' : t.id}" >
+                                                    <mat-option *ngIf="model.get('fieldPK').value.fieldType === t.fieldType" [value]="{code: !t.code ? '' : t.code, name: t.name, id: !t.id ? '' : t.id, fieldType: t.fieldType}" >
                                                         {{t.name}}
                                                     </mat-option>
                                                 </ng-container>

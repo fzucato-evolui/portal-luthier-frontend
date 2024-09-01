@@ -36,7 +36,7 @@ export class EvoluiMatcellDirective implements OnInit, OnDestroy {
         this.datasource.connect()
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
-                if (UtilFunctions.isValidStringOrArray(this.row.invalidFields) === true &&
+                if (!this.row.pending && UtilFunctions.isValidStringOrArray(this.row.invalidFields) === true &&
                     UtilFunctions.isValidStringOrArray(this.row.invalidFields[this.matColumnDef.name])) {
                     this.renderer.addClass(this.el.nativeElement, 'invalid-cell-border');
                     if (this.tooltip) {

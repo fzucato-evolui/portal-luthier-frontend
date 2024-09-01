@@ -1,6 +1,8 @@
 export class LuthierBasicModel {
     id?: string
     code?: number
+    pending?: boolean = false
+    editing?: boolean = false
     invalidFields?: {[key: string]: any}
 }
 export class LuthierDatabaseModel {
@@ -599,7 +601,7 @@ export class LuthierVisionDatasetSearchSubsystemModel {
     subsystem?: LuthierSubsystemModel
 }
 
-export class LuthierVisionDatasetCustomFieldModel {
+export class LuthierVisionDatasetCustomFieldModel extends LuthierBasicModel{
     id?: string
     code?: number
     visionName?: string

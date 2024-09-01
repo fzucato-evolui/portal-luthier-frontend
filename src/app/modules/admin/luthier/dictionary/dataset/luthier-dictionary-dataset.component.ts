@@ -177,12 +177,16 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     @HostListener('document:keydown', ['$event'])
     onKeydownHandler(event: KeyboardEvent) {
         if (event.code === 'F8' || event.code === 'Escape') {
-            const row = this.getRowEditing(this.currentTab);
-            if (row) {
-                event.preventDefault();
-                const fg = this.getFieldGroup(row, this.currentTab);
-                fg.patchValue(row);
-                row['editing'] = false;
+            const rows = this.getRowEditing(this.currentTab);
+            if (UtilFunctions.isValidStringOrArray(rows)) {
+                rows.rows.forEach(row =>  {
+                    event.preventDefault();
+                    const fg = this.getFieldGroup(row, this.currentTab);
+                    fg.patchValue(row);
+                    row.editing = false;
+                    row.pending = false;
+                });
+                rows.datasource._updateChangeSubscription();
                 this._changeDetectorRef.detectChanges();
             }
         }
@@ -931,13 +935,9 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         }
     }
 
-    getRowEditing(type: TableType): any {
+    getRowEditing(type: TableType): {datasource:MatTableDataSource<any>, rows: LuthierBasicModel[]} {
         const dataSource = this.getDatasourceFromType(type);
-        const index = dataSource.data.findIndex(x => x['editing'] === true);
-        if (index >= 0) {
-            return dataSource.data[index];
-        }
-        return null;
+        return {datasource: dataSource, rows: dataSource.data.filter(x => x['editing'] === true)};
     }
 
     editRow(model: LuthierBasicModel, type: TableType) {
@@ -948,6 +948,8 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     saveRow(model: LuthierBasicModel, type: TableType) {
         const fg = this.getFieldGroup(model, type);
         UtilFunctions.forceValidations(fg);
+        const saved = fg.value as LuthierBasicModel;
+        saved.pending = false;
         const editing = this.getRealIndex(model, type);
         const index = editing.index;
         if (fg.invalid) {
@@ -957,19 +959,19 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             //return;
         }
         if (type === 'fields') {
-            this.fieldsDataSource.data[index] = Object.assign({}, this.fieldsDataSource.data[index], fg.value);
+            this.fieldsDataSource.data[index] = Object.assign({}, this.fieldsDataSource.data[index], saved);
             this.fieldsDataSource._updateChangeSubscription();
             this.customizationsDataSource._updateChangeSubscription();
         }
         else if (type === 'customizations') {
-            this.customizationsDataSource.data[index] = Object.assign({}, this.customizationsDataSource.data[index], fg.value);
+            this.customizationsDataSource.data[index] = Object.assign({}, this.customizationsDataSource.data[index], saved);
             this.customizationsDataSource._updateChangeSubscription();
         }
         else if (type === 'groupInfos') {
-            this.editGroupInfo(fg.value as LuthierGroupInfoModel);
+            this.editGroupInfo(saved as LuthierGroupInfoModel);
         }
         else {
-            this.customFieldsDataSource.data[index] = Object.assign({}, this.customFieldsDataSource.data[index], fg.value);
+            this.customFieldsDataSource.data[index] = Object.assign({}, this.customFieldsDataSource.data[index], saved);
             this.customFieldsDataSource._updateChangeSubscription();
         }
         editing.dataSource.data[editing.index]['editing'] = false;
@@ -1005,7 +1007,6 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     editSearch(model: LuthierVisionDatasetSearchModel) {
         const index = this.getRealIndex(model, 'searchs').index;
         this._parent.service.getActiveSubsystems().then(subsystems => {
-            const fields = this.model.fields.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
             const modal = this._matDialog.open(LuthierDictionaryDatasetSearchModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-dataset-search-modal-container' });
             modal.componentInstance.title = "Pesquisa do Dataset " + this.model.name;
             modal.componentInstance.parent = this;
@@ -1036,6 +1037,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this.getFields('groupInfos').push(fg);
         const newField = fg.value as LuthierGroupInfoModel;
         newField['pending'] = true;
+        newField['editing'] = true;
         this.groupsInfoDataSource.data.push(newField);
         this.groupsInfoDataSource._updateChangeSubscription();
         this._changeDetectorRef.detectChanges();
@@ -1789,6 +1791,15 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             })
         }
          */
-        return JSON.stringify(this.model.invalidFields, null, 2);
+        if (UtilFunctions.isValidObject(this.model.invalidFields) === true) {
+            return JSON.stringify(this.model.invalidFields, null, 2);
+        }
+        else {
+            return JSON.stringify(errors, null, 2);
+        }
+    }
+
+    hasValidationProblem(type: TableType): boolean {
+        return UtilFunctions.isValidObject(this.model.invalidFields) && UtilFunctions.isValidStringOrArray(this.model.invalidFields[type]);
     }
 }

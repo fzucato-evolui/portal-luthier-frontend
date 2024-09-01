@@ -326,8 +326,8 @@ export class LuthierValidator {
                         errors['size'].push('Tamanho deve ser maior que 0');
                     }
                 }
-                if (UtilFunctions.parseBoolean(field.key) && !UtilFunctions.parseBoolean(field.notNull)) {
-                    errors['notNull'] = ['Campos chave devem ser obrigatórios'];
+                if (UtilFunctions.parseBoolean(field.key)) {
+                    errors['key'] = ['Campos customizados não podem ser PK'];
                 }
                 if (UtilFunctions.isValidStringOrArray(field.staticFields)) {
                     field.staticFields.forEach((child, indexChild) => {
@@ -416,6 +416,14 @@ export class LuthierValidator {
                         if (!child.fieldFK || UtilFunctions.isValidStringOrArray(child.fieldFK.name) === false) {
                             errorsChild['fieldPK'] = ['Campo fk é obrigatório'];
                         }
+                        if (child.fieldPK && UtilFunctions.isValidStringOrArray(child.fieldPK.name) === true &&
+                            child.fieldFK && UtilFunctions.isValidStringOrArray(child.fieldFK.name) === true) {
+                            console.log(child.fieldFK, child.fieldPK);
+                            if (child.fieldPK.fieldType !== child.fieldFK.fieldType) {
+                                errorsChild['fieldPK'] = ['Campos pk e fk devem ser do mesmo tipo'];
+                                errorsChild['fieldFK'] = ['Campos pk e fk devem ser do mesmo tipo'];
+                            }
+                        }
 
                         if (UtilFunctions.isValidObject(errorsChild) === true) {
                             child.invalidFields = errorsChild;
@@ -479,6 +487,17 @@ export class LuthierValidator {
                         const errorsChild : {[key: string]: any} = {};
                         if (!child.tableField || UtilFunctions.isValidStringOrArray(child.tableField.name) === false) {
                             errorsChild['tableField'] = ['Campo da tabela é obrigatório'];
+                        }
+                        else {
+                            const tableFieldIndex = table.fields.findIndex(tableField =>
+                                (UtilFunctions.isValidStringOrArray(tableField.code) && tableField.code === child.tableField.code) ||
+                                (UtilFunctions.isValidStringOrArray(tableField.id) && tableField.id === child.tableField.id));
+                            if (tableFieldIndex < 0) {
+                                errorsChild['tableField'] = ['Campo da tabela não encontrado'];
+                            }
+                            else if (UtilFunctions.parseBoolean(table.fields[tableFieldIndex].key) === true) {
+                                errorsChild['tableField'] = ['Campo do índice não pode ser uma coluna PK da tabela'];
+                            }
                         }
                         if (UtilFunctions.isValidStringOrArray(child.order) === false) {
                             errorsChild['order'] = ['Campo ordem é obrigatório'];
@@ -713,7 +732,7 @@ export class LuthierValidator {
             })
         }
         if (UtilFunctions.isValidStringOrArray(dataset.customFields) === true) {
-            dataset.fields.forEach((field, index) => {
+            dataset.customFields.forEach((field, index) => {
 
                 const errors : {[key: string]: any} = {};
 
@@ -739,8 +758,8 @@ export class LuthierValidator {
                 }
 
                 if (field.fieldType === LuthierVisionDatasetFieldTypeEnum.LOOKUP) {
-                    if (!field.reference || !UtilFunctions.isValidStringOrArray(field.reference.name)) {
-                        errors['reference.name'] = ['Campo chave é obrigatório'];
+                    if (!field.reference || !UtilFunctions.isValidStringOrArray(field.reference)) {
+                        errors['reference.name'] = ['Campo referência é obrigatório'];
                     }
                 }
                 if (_.isEqual(field.invalidFields, errors) === false ) {
@@ -753,6 +772,7 @@ export class LuthierValidator {
                         dataset.invalidFields['customFields'] = {};
                     }
                     dataset.invalidFields['customFields'][index] = errors;
+                    console.log(errors);
                 }
 
             })
@@ -771,7 +791,7 @@ export class LuthierValidator {
                     errors['type'] = ['Campo tipo é obrigatório'];
                 }
                 if (UtilFunctions.isValidStringOrArray(field.subsystems) === false) {
-                    errors['type'] = ['Campo subsistemas é obrigatório'];
+                    errors['subsystems'] = ['Campo subsistemas é obrigatório'];
                 }
 
                 if (UtilFunctions.isValidStringOrArray(field.searchFields)) {
