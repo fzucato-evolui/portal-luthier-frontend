@@ -265,6 +265,19 @@ export class LuthierValidator {
                     }
 
                 }
+                if (UtilFunctions.isValidStringOrArray(field.attributeName) === true) {
+                    const totalSameName = table.fields.filter(x =>
+                        UtilFunctions.isValidStringOrArray(x.attributeName) &&
+                        x.attributeName.toUpperCase() === field.attributeName.toUpperCase()).length;
+                    if (totalSameName > 1) {
+
+                        if (UtilFunctions.isValidStringOrArray(errors['attributeName']) === false) {
+                            errors['attributeName'] = [];
+                        }
+                        errors['attributeName'].push('Nomes dos atributos não podem ser repetidos');
+                    }
+
+                }
                 if (_.isEqual(field.invalidFields, errors) === false ) {
                     field.invalidFields = errors;
                     //datasource[index] = field;
@@ -364,6 +377,19 @@ export class LuthierValidator {
                             errors['name'] = [];
                         }
                         errors['name'].push('Nomes não podem ser repetidos');
+                    }
+
+                }
+                if (UtilFunctions.isValidStringOrArray(field.attributeName) === true) {
+                    const totalSameName = table.customFields.filter(x =>
+                        UtilFunctions.isValidStringOrArray(x.attributeName) &&
+                        x.attributeName.toUpperCase() === field.attributeName.toUpperCase()).length;
+                    if (totalSameName > 1) {
+
+                        if (UtilFunctions.isValidStringOrArray(errors['attributeName']) === false) {
+                            errors['attributeName'] = [];
+                        }
+                        errors['attributeName'].push('Nomes dos atributos não podem ser repetidos');
                     }
 
                 }

@@ -47,13 +47,16 @@ import {
     LuthierGroupInfoModel,
     LuthierGroupInfoTypeEnum,
     LuthierIndexSortEnum,
+    LuthierMetadataHistoryChangeModel,
     LuthierPermissionTypeEnum,
     LuthierReferenceActionEnum,
     LuthierReferenceStatusEnum,
+    LuthierResourceModel,
     LuthierSearchFieldEditorEnum,
     LuthierSearchFieldOperatorEnum,
     LuthierSearchStatusEnum,
     LuthierSearchTypeEnum,
+    LuthierSubsystemModel,
     LuthierTableFieldModel,
     LuthierTableIndexModel,
     LuthierTableModel,
@@ -89,6 +92,7 @@ import {debounceTime, Subject, takeUntil} from 'rxjs';
 import {MatMenuModule} from '@angular/material/menu';
 import {Clipboard} from '@angular/cdk/clipboard';
 import {SharedDirectiveModule} from '../../../../../shared/directives/shared-directive.module';
+import {FilterPredicateUtil} from '../../../../../shared/util/util-classes';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -146,6 +150,8 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     @ViewChild('sortBonds') sortBonds: MatSort;
     public bondsDatasetDataSource = new MatTableDataSource<LuthierDatasetBondModel>();
     @ViewChild('sortDatasetBonds') sortDatasetBonds: MatSort;
+    public historicalDataSource = new MatTableDataSource<LuthierMetadataHistoryChangeModel>();
+    @ViewChild('sortHistorical') sortHistorical: MatSort;
     public customFieldsDataSource = new MatTableDataSource<LuthierCustomFieldModel>();
     public customizationsDataSource = new MatTableDataSource<LuthierTableFieldModel>();
     public groupsInfoDataSource = new MatTableDataSource<LuthierGroupInfoModel>();
@@ -202,6 +208,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     displayedBondColumns = [ 'code', 'name', 'description'];
     displayedDatasetBondColumns = [ 'code', 'name', 'description', 'visionCode', 'visionName', 'visionDescription'];
     displayedSearchColumns = [ 'buttons', 'code', 'name', 'customName', 'order', 'status', 'type'];
+    displayedHistoricalColumns = [ 'code', 'user.name', 'date', 'type'];
     LuthierFieldTypeEnum = LuthierFieldTypeEnum;
     LuthierFieldModifierEnum = LuthierFieldModifierEnum;
     LuthierFieldLayoutEnum = LuthierFieldLayoutEnum;
@@ -257,6 +264,12 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.searchsDataSource.sort = this.sortSearchs;
         this.bondsDataSource.sort = this.sortBonds;
         this.bondsDatasetDataSource.sort = this.sortDatasetBonds;
+
+        UtilFunctions.setSortingDataAccessor(this.historicalDataSource);
+        const filterPredicateHistorical = FilterPredicateUtil.withColumns(this.displayedHistoricalColumns);
+        this.historicalDataSource.filterPredicate = filterPredicateHistorical.instance.bind(filterPredicateHistorical);
+        this.historicalDataSource.sort = this.sortHistorical;
+
         this.groupsInfoDataSource.sort = this.sortFields.get(1);
         this.customFieldsDataSource.sort = this.sortFields.get(2);
         this.customizationsDataSource.sort = this.sortFields.get(3);
@@ -360,6 +373,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.searchsDataSource.data = this.model.searchs;
         this.bondsDataSource.data = this.model.bonds;
         this.bondsDatasetDataSource.data = this.model.datasetBonds;
+        this.historicalDataSource.data = this.model.historical;
     }
 
     setCustomizations() {
@@ -1417,6 +1431,11 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.bondsDatasetDataSource.filter = filterValue.trim().toLowerCase();
     }
 
+    filterHistorical(event: Event) {
+        const filterValue = (event.target as HTMLInputElement).value;
+        this.historicalDataSource.filter = filterValue.trim().toLowerCase();
+    }
+
     checkIndeterminate(event: MatCheckboxChange, c: FormControl) {
         if (!event.source.indeterminate) {
             if (UtilFunctions.parseBoolean(c.value) === false) {
@@ -1536,9 +1555,15 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
     importTable(model: LuthierTableModel) {
         if (model) {
-            this.service.getActiveSubsystems()
-                .then(subsystems => {
+            Promise.all(
+                [
+                    this._parent.service.getActiveSubsystems(),
+                    this._parent.service.getImagesResources()]
+            )
+                .then(async value => {
                     try {
+                        const subsystems = value[0] as LuthierSubsystemModel[];
+                        const resources = value[1] as LuthierResourceModel[];
                         if (UtilFunctions.isValidStringOrArray(model.code) === false) {
                             this.messageService.open('Erro ao ler tabela', 'ERRO', 'error');
                             return;
@@ -1552,6 +1577,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                         }
                         const importedCode = model.code;
                         model.name = this.model.name;
+                        model.previousName = this.model.previousName;
                         model.code = this.model.code;
                         model.id = this.model.id;
                         model.bonds = this.model.bonds;
@@ -1605,6 +1631,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                             if (index >= 0) {
                                 model.fields[index].code = field.code;
                                 model.fields[index].id = field.id;
+                                model.fields[index].previousName = field.previousName;
                                 if (UtilFunctions.isValidStringOrArray(field.staticFields) === false) {
                                     field.staticFields = [];
                                 }
@@ -1641,6 +1668,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                             let field = model.fields[i];
                             field.code = null;
                             field.id = crypto.randomUUID();
+                            field.previousName = null;
                             field.staticFields.forEach(x => {
                                 x.code = null;
                                 x.id = crypto.randomUUID();
@@ -1654,6 +1682,20 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                             }
                             else {
                                 field.groupInfo = null;
+                            }
+                            if (UtilFunctions.isValidStringOrArray(field.staticFields) === true) {
+                                for (let j = 0; j < field.staticFields.length; j++) {
+                                    let staticField = field.staticFields[j];
+                                    if (staticField.resource && UtilFunctions.isValidStringOrArray(staticField.resource.name) === true) {
+                                        const indexResource = resources.findIndex(resource => resource.name === staticField.resource.name);
+                                        if (indexResource >= 0) {
+                                            staticField.resource = resources[indexResource];
+                                        }
+                                        else {
+                                            staticField.resource = null;
+                                        }
+                                    }
+                                }
                             }
                         }
                         // end fields
@@ -1671,6 +1713,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                             if (index >= 0) {
                                 model.customFields[index].code = field.code;
                                 model.customFields[index].id = field.id;
+                                model.customFields[index].previousName = field.previousName;
                                 if (UtilFunctions.isValidStringOrArray(field.staticFields) === false) {
                                     field.staticFields = [];
                                 }
@@ -1707,6 +1750,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                             let field = model.customFields[i];
                             field.code = null;
                             field.id = crypto.randomUUID();
+                            field.previousName = null;
                             field.staticFields.forEach(x => {
                                 x.code = null;
                                 x.id = crypto.randomUUID();
@@ -1720,6 +1764,20 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                             }
                             else {
                                 field.groupInfo = null;
+                            }
+                            if (UtilFunctions.isValidStringOrArray(field.staticFields) === true) {
+                                for (let j = 0; j < field.staticFields.length; j++) {
+                                    let staticField = field.staticFields[j];
+                                    if (UtilFunctions.isValidStringOrArray(staticField.resource) === true) {
+                                        const indexResource = resources.findIndex(resource => resource.name === staticField.resource);
+                                        if (indexResource >= 0) {
+                                            staticField.resource = resources[indexResource].name;
+                                        }
+                                        else {
+                                            staticField.resource = null;
+                                        }
+                                    }
+                                }
                             }
                         }
                         // end customFields

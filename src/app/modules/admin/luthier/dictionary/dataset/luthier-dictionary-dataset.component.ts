@@ -133,6 +133,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     currentTab: TableType = 'fields';
     private _cloneModel: LuthierVisionDatasetModel;
     tables: LuthierTableModel[];
+    public customPatterns = { 'I': { pattern: new RegExp('\[a-zA-Z0-9_\]')}};
     @Input()
     set model(value: LuthierVisionDatasetModel) {
         this._model = value;
@@ -1313,7 +1314,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             const text = await navigator.clipboard.readText();
             const model = JSON.parse(text) as LuthierVisionDatasetModel;
             setTimeout(() => {
-                this.importTable(model);
+                this.importDataset(model);
             })
         } catch (error) {
             this.messageService.open('Erro ao ler conteúdo do clipboard '+ error, 'ERRO', 'error');
@@ -1331,7 +1332,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 const text = reader.result as string;
                 const model = JSON.parse(text) as LuthierVisionDatasetModel;
                 setTimeout(() => {
-                    this.importTable(model);
+                    this.importDataset(model);
                 });
 
             };
@@ -1342,7 +1343,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         }
     }
 
-    importTable(model: LuthierVisionDatasetModel) {
+    importDataset(model: LuthierVisionDatasetModel) {
         if (model) {
             try {
                 if (UtilFunctions.isValidStringOrArray(model.code) === false) {
@@ -1383,6 +1384,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                         const importedCode = model.code;
                         model.table = table;
                         model.name = this.model.name;
+                        model.previousName = this.model.previousName;
                         model.code = this.model.code;
                         model.id = this.model.id;
                         model.relatives = this.model.relatives;

@@ -57,6 +57,7 @@ export class LuthierTableModel extends LuthierBasicModel {
     bonds?: LuthierBondModel[]
     datasetBonds?: LuthierDatasetBondModel[]
     searchs?: LuthierTableSearchModel[]
+    historical?: LuthierMetadataHistoryChangeModel[]
 
 }
 export enum LuthierGroupInfoTypeEnum {
@@ -302,6 +303,7 @@ export class LuthierCustomFieldModel extends LuthierBasicModel{
     code?: number
     tableName?: string
     name?: string
+    previousName?: string
     size?: number
     notNull?: boolean
     defaultValue?: string
@@ -334,7 +336,7 @@ export class LuthierTableStaticCustomFieldModel extends LuthierBasicModel{
     tableCustomFieldCode?: number
     value?: string
     caption?: string
-    resource?: any
+    resource?: string
     permissionType?: number
     permissionMessage?: string
 }
@@ -485,6 +487,7 @@ export class LuthierVisionModel {
     id?: string;
     code?: number
     name?: string
+    previousName?: string
     description?: string
     children?: LuthierVisionDatasetModel[]
     objectType?: LuthierObjectType
@@ -495,6 +498,7 @@ export class LuthierVisionDatasetModel extends LuthierBasicModel{
     id?: string
     code?: number
     name?: string
+    previousName?: string
     description?: string
     customDescription?: LuthierCustomizationModel;
     filter?: string
@@ -511,6 +515,7 @@ export class LuthierVisionDatasetModel extends LuthierBasicModel{
     customizations?: LuthierCustomizationModel[]
     customFields?: LuthierVisionDatasetCustomFieldModel[]
     relatives?: LuthierVisionDatasetModel[]
+    historical?: LuthierMetadataHistoryChangeModel[]
 }
 export enum LuthierVisionDatasetFieldTypeEnum {
     NORMAL = ("NORMAL"),
@@ -735,5 +740,25 @@ export class LuthierChangesOfTableModel {
     insertedIndexes?: LuthierTableIndexModel[]
     updatedIndexes?: LuthierTableIndexModel[]
     views?: LuthierViewModel[]
+}
+
+export class LuthierMetadataHistoryChangeModel extends LuthierBasicModel {
+    code?: number
+    userCode?: number
+    date?: Date
+    tableCode?: number
+    datasetCode?: number
+    type?: LuthierMetadataHistoryChangeTypeEnum
+    changes?: string
+    user?: LuthierUserModel
+    table?: LuthierTableModel
+    dataset?: LuthierVisionDatasetModel
+}
+
+export enum LuthierMetadataHistoryChangeTypeEnum {
+    NONE = ("NONE"),
+    DELETE = ("DELETE"),
+    CREATE = ("CREATE"),
+    UPDATE = ("UPDATE")
 }
 

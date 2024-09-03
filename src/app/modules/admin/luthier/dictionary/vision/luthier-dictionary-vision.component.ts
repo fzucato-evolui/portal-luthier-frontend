@@ -49,6 +49,7 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy, Afte
 {
     private _model: LuthierVisionModel;
     private _cloneModel: LuthierVisionModel;
+    public customPatterns = { 'I': { pattern: new RegExp('\[a-zA-Z0-9_\]')}};
     @Input()
     set model(value: LuthierVisionModel) {
         this._model = value;
@@ -171,6 +172,7 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy, Afte
                     this.model.name = model.name;
                 }
                 model.name = this.model.name;
+                model.previousName = this.model.previousName;
                 model.code = this.model.code;
                 model.id = this.model.id;
 

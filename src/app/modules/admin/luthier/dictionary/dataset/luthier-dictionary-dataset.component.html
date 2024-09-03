@@ -120,6 +120,7 @@
                                 matPrefix></mat-icon>
                             <input
                                 class="text-sm"
+                                [patterns]="customPatterns" mask="I*"
                                 [formControlName]="'name'" (ngModelChange)="changeName($event)"
                                 required
                                 matInput>

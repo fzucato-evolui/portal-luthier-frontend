@@ -111,6 +111,7 @@
                                 matPrefix></mat-icon>
                             <input
                                 class="text-sm"
+                                [patterns]="customPatterns" mask="I*"
                                 [formControlName]="'name'"
                                 required
                                 matInput>
@@ -244,10 +245,48 @@
                 </div>
 
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold']" label="Histórico">
+            <mat-tab [labelClass]="['text-sm', 'font-bold']" label="Histórico" bodyClass="table-tab">
 
-                <div class="grid sm:grid-cols-12 gap-2">
+                <div class="flex-none flex justify-between items-center pt-1">
+                    <div class="flex-none flex">
+                        <div class="pl-2 text-secondary">São mostradas as 100 últimas alterações</div>
+                    </div>
+                    <div class="flex-none flex md:w-1/3 md:pr-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-search"
+                                matPrefix></mat-icon>
+                            <input
+                                [autocomplete]="'off'"
+                                class="text-sm"
+                                (input)="filterHistorical($event)"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto" cdkScrollable>
+                    <table #table mat-table matSort #sortHistorical="matSort" [dataSource]="historicalDataSource" class="table-auto" (matSortChange)="announceSortChange($event)">
+                        <ng-container matColumnDef="code">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+                            <td mat-cell *matCellDef="let model"> {{ model.code }} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="user.name">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Usuário </th>
+                            <td mat-cell *matCellDef="let model"> {{ model.user?.name }} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="date">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Data </th>
+                            <td mat-cell *matCellDef="let model"> {{ model.date | date: 'dd/MM/yyyy HH:mm:ss'}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="type">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
+                            <td mat-cell *matCellDef="let model"> {{ model.type }} </td>
+                        </ng-container>
 
+                        <tr mat-header-row *matHeaderRowDef="displayedHistoricalColumns; sticky: true"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedHistoricalColumns;"></tr>
+                    </table>
                 </div>
 
             </mat-tab>
