@@ -86,6 +86,13 @@ export class PortalLuthierHistoryService
             })));
     }
 
+    download(id: number) : Promise<{ file: string }> {
+        return firstValueFrom(this._httpClient.get<{ file: string }>(`${this.baseRestUrl}/download/${id}`).pipe(
+            switchMap((response: { file: string }) => {
+                return of(response);
+            })));
+    }
+
     save(model: PortalLuthierHistoryModel) : Promise<PortalLuthierHistoryModel> {
         return firstValueFrom(this._httpClient.post<PortalLuthierHistoryModel>(`${this.baseRestUrl}`, model).pipe(
             switchMap((response: PortalLuthierHistoryModel) => {

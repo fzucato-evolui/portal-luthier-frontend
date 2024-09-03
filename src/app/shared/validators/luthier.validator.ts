@@ -263,7 +263,18 @@ export class LuthierValidator {
                         }
                         errors['name'].push('Nomes não podem ser repetidos');
                     }
+                    if (UtilFunctions.isValidStringOrArray(field.code) === false) {
+                        const totalSamePreviousName = table.fields.filter(x =>
+                            UtilFunctions.isValidStringOrArray(x.previousName) &&
+                            x.previousName.toUpperCase() === field.name.toUpperCase()).length;
+                        if (totalSamePreviousName > 0) {
 
+                            if (UtilFunctions.isValidStringOrArray(errors['name']) === false) {
+                                errors['name'] = [];
+                            }
+                            errors['name'].push('Novos campos não podem ter o mesmo nome de campos já existentes na tabela');
+                        }
+                    }
                 }
                 if (UtilFunctions.isValidStringOrArray(field.attributeName) === true) {
                     const totalSameName = table.fields.filter(x =>
@@ -377,6 +388,18 @@ export class LuthierValidator {
                             errors['name'] = [];
                         }
                         errors['name'].push('Nomes não podem ser repetidos');
+                    }
+                    if (UtilFunctions.isValidStringOrArray(field.code) === false) {
+                        const totalSamePreviousName = table.customFields.filter(x =>
+                            UtilFunctions.isValidStringOrArray(x.previousName) &&
+                            x.previousName.toUpperCase() === field.name.toUpperCase()).length;
+                        if (totalSamePreviousName > 0) {
+
+                            if (UtilFunctions.isValidStringOrArray(errors['name']) === false) {
+                                errors['name'] = [];
+                            }
+                            errors['name'].push('Novos campos customizados não podem ter o mesmo nome de campos já existentes na tabela');
+                        }
                     }
 
                 }
@@ -823,7 +846,7 @@ export class LuthierValidator {
                 if (UtilFunctions.isValidStringOrArray(field.searchFields)) {
                     field.searchFields.forEach((child, indexChild) => {
                         const errorsChild : {[key: string]: any} = {};
-                        if (!child.field || UtilFunctions.isValidStringOrArray(child.field.name) === false) {
+                        if (!child.field || !child.field.tableField || UtilFunctions.isValidStringOrArray(child.field.tableField.name) === false) {
                             errorsChild['field'] = ['Campo da tabela é obrigatório'];
                         }
                         if (!child.dataset || UtilFunctions.isValidStringOrArray(child.dataset.name) === false) {

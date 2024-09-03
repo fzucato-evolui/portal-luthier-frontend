@@ -911,7 +911,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     }
     getRealIndex(model: LuthierBasicModel, type: TableType): {index: number, dataSource: MatTableDataSource<any>} {
         const dataSource = this.getDatasourceFromType(type);
-        if (!model || (UtilFunctions.isValidStringOrArray(model.code) === false && UtilFunctions.isValidStringOrArray(model.id) === false)) {
+        if (!model) {
             return {index: -1, dataSource: dataSource};
         }
         return {index: dataSource.data.indexOf(model), dataSource: dataSource};

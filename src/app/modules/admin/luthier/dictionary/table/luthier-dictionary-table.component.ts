@@ -564,6 +564,13 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 result.id = this._cloneModel.id;
                 result.bonds = this._cloneModel.bonds;
                 result.datasetBonds = this._cloneModel.datasetBonds;
+                result.previousName = result.name;
+                result.fields.forEach(field => {
+                    field.previousName = field.realName;
+                })
+                result.customFields.forEach(field => {
+                    field.previousName = field.realName;
+                })
                 this.model = result;
                 this.refresh();
                 const index = this._parent.tabsOpened.findIndex(x => x.id === this.model.id);
@@ -832,6 +839,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 id: [crypto.randomUUID()],
                 code: [null],
                 name: [null, [Validators.required]],
+                previousName: [''],
                 fieldType: [null, [Validators.required]],
                 size: [0, [Validators.required]],
                 key: [false, [Validators.required]],
@@ -1071,7 +1079,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
     getRealIndex(model: LuthierBasicModel, type: TableType): {index: number, dataSource: MatTableDataSource<any>} {
         const dataSource = this.getDatasourceFromType(type);
-        if (!model || (UtilFunctions.isValidStringOrArray(model.code) === false && UtilFunctions.isValidStringOrArray(model.id) === false)) {
+        if (!model) {
             return {index: -1, dataSource: dataSource};
         }
         return {index: dataSource.data.indexOf(model), dataSource: dataSource};
@@ -1562,6 +1570,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             )
                 .then(async value => {
                     try {
+                        const tablesSearched = new Array<LuthierTableModel>();
                         const subsystems = value[0] as LuthierSubsystemModel[];
                         const resources = value[1] as LuthierResourceModel[];
                         if (UtilFunctions.isValidStringOrArray(model.code) === false) {
@@ -1831,9 +1840,26 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                                 }
 
                             }
-                            else if (this._parent.tables.findIndex(x => x.code === reference.tablePK.code) < 0) {
-                                model.references.splice(i, 1);
-                                continue;
+                            else {
+                                const referenceIndex =  this._parent.tables.findIndex(x => x.name.toUpperCase() === reference.tablePK.name.toUpperCase());
+                                if (referenceIndex < 0) {
+                                    model.references.splice(i, 1);
+                                    continue;
+                                }
+                                else {
+                                    const table = this._parent.tables[referenceIndex];
+                                    const lookupIndex = tablesSearched.findIndex(x => x.code === table.code);
+                                    let pkTable = null;
+                                    if (lookupIndex >= 0) {
+                                        pkTable = tablesSearched[lookupIndex];
+                                    }
+                                    else {
+                                        pkTable = await this.service.getTable(table.code);
+                                        tablesSearched.push(pkTable);
+                                    }
+                                    reference.tablePK = pkTable;
+                                }
+
                             }
                             if (UtilFunctions.isValidStringOrArray(reference.fieldsReference) === false) {
                                 reference.fieldsReference = [];
@@ -1842,6 +1868,8 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                                 let referenceField = reference.fieldsReference[j];
                                 const indexField = model.fields.findIndex(x => x.name.toUpperCase() === referenceField.fieldFK.name.toUpperCase());
                                 referenceField.fieldFK = model.fields[indexField];
+                                const indexPkField = reference.tablePK.fields.findIndex(x => x.name.toUpperCase() === referenceField.fieldPK.name.toUpperCase());
+                                referenceField.fieldPK = reference.tablePK.fields[indexPkField];
                             }
                             i++;
                         }

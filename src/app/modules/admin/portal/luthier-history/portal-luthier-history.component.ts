@@ -36,6 +36,7 @@ import {FilterPredicateUtil} from '../../../../shared/util/util-classes';
 import {PortalLuthierHistoryConfigModel} from '../../../../shared/models/system-config.model';
 import {SelectionModel} from '@angular/cdk/collections';
 import {MatCheckboxModule} from '@angular/material/checkbox';
+import {saveAs} from 'file-saver';
 
 export const FORMAT = {
     parse: {
@@ -287,4 +288,14 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
     canApply(): boolean {
         return this.historical.selected.length > 0 && UtilFunctions.isValidStringOrArray(this.workDataBase) && UtilFunctions.isValidStringOrArray(this.dadosDataBase);
     }
+
+    download(model: PortalLuthierHistoryModel) {
+        this.service.download(model.id).then(value => {
+            const blob = new Blob([value.file], {type: "text/plain;charset=utf-8"});
+            const filename = `history_${model.id}.json`;
+            saveAs(blob, filename);
+        });
+
+    }
+
 }
