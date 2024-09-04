@@ -1,4 +1,14 @@
-import {Directive, ElementRef, HostListener, Input, OnDestroy, OnInit, Renderer2} from '@angular/core';
+import {
+    Directive,
+    ElementRef,
+    HostListener,
+    Input,
+    OnChanges,
+    OnDestroy,
+    OnInit,
+    Renderer2,
+    SimpleChanges
+} from '@angular/core';
 import {MatColumnDef, MatTable, MatTableDataSource} from '@angular/material/table';
 import {LuthierBasicModel} from '../models/luthier.model';
 import {UtilFunctions} from '../util/util-functions';
@@ -9,7 +19,7 @@ import {MatTooltip} from '@angular/material/tooltip';
     selector: '[evoluiMatCell]',
     providers: [MatTooltip]
 })
-export class EvoluiMatcellDirective implements OnInit, OnDestroy {
+export class EvoluiMatcellDirective implements OnInit, OnChanges, OnDestroy {
     @Input('evoluiMatCell') row: LuthierBasicModel;
     datasource: MatTableDataSource<LuthierBasicModel>;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -57,5 +67,8 @@ export class EvoluiMatcellDirective implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
+    }
+    ngOnChanges(changes: SimpleChanges) {
+
     }
 }

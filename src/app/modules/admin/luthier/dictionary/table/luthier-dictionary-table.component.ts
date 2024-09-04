@@ -277,13 +277,13 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             UtilFunctions.forceValidations(this.formSave);
         }
         this.model.currentViewBodyType = this.dadosViewBodyType;
-        LuthierValidator.validateTable(this.model)
+        LuthierValidator.validateTable(this.model,this._model)
 
         this.fieldsDataSource.connect()
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
                 this.model.currentViewBodyType = this.dadosViewBodyType;
-                if (LuthierValidator.validateTable(this.model)) {
+                if (LuthierValidator.validateTable(this.model, this._model)) {
                     this.fieldsDataSource._updateChangeSubscription();
                 }
 
@@ -292,7 +292,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
                 this.model.currentViewBodyType = this.dadosViewBodyType;
-                if (LuthierValidator.validateTable(this.model)) {
+                if (LuthierValidator.validateTable(this.model, this._model)) {
                     this.customFieldsDataSource._updateChangeSubscription();
                 }
 
@@ -301,7 +301,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
                 this.model.currentViewBodyType = this.dadosViewBodyType;
-                if (LuthierValidator.validateTable(this.model)) {
+                if (LuthierValidator.validateTable(this.model, this._model)) {
                     this.referencesDataSource._updateChangeSubscription();
                 }
 
@@ -310,7 +310,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
                 this.model.currentViewBodyType = this.dadosViewBodyType;
-                if (LuthierValidator.validateTable(this.model)) {
+                if (LuthierValidator.validateTable(this.model, this._model)) {
                     this.indexesDataSource._updateChangeSubscription();
                 }
 
@@ -319,7 +319,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
                 this.model.currentViewBodyType = this.dadosViewBodyType;
-                if (LuthierValidator.validateTable(this.model)) {
+                if (LuthierValidator.validateTable(this.model, this._model)) {
                     this.searchsDataSource._updateChangeSubscription();
                 }
 
@@ -328,7 +328,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
                 this.model.currentViewBodyType = this.dadosViewBodyType;
-                if (LuthierValidator.validateTable(this.model)) {
+                if (LuthierValidator.validateTable(this.model, this._model)) {
                     this.groupsInfoDataSource._updateChangeSubscription();
                 }
 
@@ -571,6 +571,9 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 result.customFields.forEach(field => {
                     field.previousName = field.realName;
                 })
+                if (UtilFunctions.isValidStringOrArray(this.model.historical) === true) {
+                    result.historical.push(... this.model.historical);
+                }
                 this.model = result;
                 this.refresh();
                 const index = this._parent.tabsOpened.findIndex(x => x.id === this.model.id);
@@ -684,7 +687,6 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 model.customMask.name2 = model.name;
                 customizations.push(model.customMask);
             }
-            console.log('custom charcase');
             if (model.customCharCase
                 && UtilFunctions.isValidStringOrArray(model.customCharCase.value) === true
                 && model.customCharCase.value !== model.charCase
@@ -1133,7 +1135,6 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             //return;
         }
         if (type === 'fields') {
-            console.log(saved, Object.assign({}, this.fieldsDataSource.data[index], saved));
             this.fieldsDataSource.data[index] = Object.assign({}, this.fieldsDataSource.data[index], saved);
             this.fieldsDataSource._updateChangeSubscription();
             this.customizationsDataSource._updateChangeSubscription();
@@ -1335,7 +1336,6 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         const groupInfoWithGroupInfo = this.groupsInfoDataSource.data
             .filter(x => x.parent &&  this.compareCode(x.parent, groupInfo))
             .map(x => this.groupsInfoDataSource.data.findIndex(y => this.compareCode(x, y)));
-        console.log('groupInfoWithGroupInfo', groupInfoWithGroupInfo, groupInfo);
         if (UtilFunctions.isValidStringOrArray(groupInfoWithGroupInfo)) {
             groupInfoWithGroupInfo.forEach(x => {
                 this.groupsInfoDataSource.data[x].parent = null;
@@ -1462,6 +1462,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
     changeTab(event: MatTabChangeEvent) {
         this.currentTab = event.tab.ariaLabel as TableType;
+        this.getDatasourceFromType(this.currentTab)._updateChangeSubscription();
     }
 
     isGroupInfoAllowed(field: LuthierGroupInfoModel, option: LuthierGroupInfoModel): boolean {
@@ -1481,7 +1482,6 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         if (model && UtilFunctions.isValidStringOrArray(model.body) === true) {
             this.service.parseView(this.model.name, model)
                 .then(table => {
-                    console.log(table);
                     if (UtilFunctions.isValidStringOrArray(table.fields) === true) {
                         table.fields.forEach(x => {
                             const index = this.fieldsDataSource.data.findIndex(y => y.name.toUpperCase() === x.name.toUpperCase());
@@ -1590,6 +1590,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                         model.code = this.model.code;
                         model.id = this.model.id;
                         model.bonds = this.model.bonds;
+                        model.historical = this.model.historical;
 
                         //groupInfos
                         if (UtilFunctions.isValidStringOrArray(model.groupInfos) === false) {
@@ -2017,11 +2018,11 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                         for(let i = 0; i < this.model.customizations.length; i++) {
                             let customization = this.model.customizations[i];
                             let index = model.customizations.findIndex(x =>
-                                x.name1.toUpperCase() === customization.name1.toUpperCase() &&
-                                x.name2.toUpperCase() === customization.name2.toUpperCase() &&
-                                x.name3.toUpperCase() === customization.name3.toUpperCase() &&
-                                x.name4.toUpperCase() === customization.name4.toUpperCase() &&
-                                x.name5.toUpperCase() === customization.name5.toUpperCase() &&
+                                UtilFunctions.equalsIgnoreCase(x.name1, customization.name1) &&
+                                UtilFunctions.equalsIgnoreCase(x.name2, customization.name2) &&
+                                UtilFunctions.equalsIgnoreCase(x.name3, customization.name3) &&
+                                UtilFunctions.equalsIgnoreCase(x.name4, customization.name4) &&
+                                UtilFunctions.equalsIgnoreCase(x.name5, customization.name5) &&
                                 x.type === customization.type
                             );
                             if (index >= 0) {
@@ -2047,6 +2048,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
                     } catch (e) {
                         this.messageService.open('Erro na importação : ' + e, 'ERRO', 'error');
+                        console.error(e);
                     }
                 });
         }
@@ -2072,7 +2074,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     viewChanged($event: Event) {
         this._cloneModel.views = this.formSave.get('views').value;
         this.model.currentViewBodyType = this.dadosViewBodyType;
-        LuthierValidator.validateTable(this.model);
+        LuthierValidator.validateTable(this.model, this._model);
     }
 
     hasValidationProblem(type: TableType): boolean {

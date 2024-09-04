@@ -218,4 +218,12 @@ export class UtilFunctions {
         fg.updateValueAndValidity()
     }
 
+    public static equalsIgnoreCase(str1: any, str2: any): boolean {
+        if (UtilFunctions.isValidStringOrArray(str1) === false || UtilFunctions.isValidStringOrArray(str2) === false) {
+            return str1 === str2;
+        }
+        return str1.toString().toUpperCase() === str2.toString().toUpperCase();
+    }
+
+
 }

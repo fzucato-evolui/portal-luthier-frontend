@@ -159,8 +159,6 @@ export class LuthierValidator {
                     }
 
                 }
-                console.log('validation');
-                console.log(errors);
                 if (_.isEqual(field.invalidFields, errors) === false ) {
                     field.invalidFields = errors;
                     //datasource[index] = field;
@@ -172,7 +170,8 @@ export class LuthierValidator {
         }
 
     }
-    static validateTable(table: LuthierTableModel) : boolean {
+    static validateTable(table: LuthierTableModel, previousTable: LuthierTableModel) : boolean {
+        previousTable = previousTable && UtilFunctions.isValidStringOrArray(previousTable.code) ? previousTable : null;
         let needUpdate = false;
         table.invalidFields = {};
 
@@ -263,18 +262,6 @@ export class LuthierValidator {
                         }
                         errors['name'].push('Nomes não podem ser repetidos');
                     }
-                    if (UtilFunctions.isValidStringOrArray(field.code) === false) {
-                        const totalSamePreviousName = table.fields.filter(x =>
-                            UtilFunctions.isValidStringOrArray(x.previousName) &&
-                            x.previousName.toUpperCase() === field.name.toUpperCase()).length;
-                        if (totalSamePreviousName > 0) {
-
-                            if (UtilFunctions.isValidStringOrArray(errors['name']) === false) {
-                                errors['name'] = [];
-                            }
-                            errors['name'].push('Novos campos não podem ter o mesmo nome de campos já existentes na tabela');
-                        }
-                    }
                 }
                 if (UtilFunctions.isValidStringOrArray(field.attributeName) === true) {
                     const totalSameName = table.fields.filter(x =>
@@ -288,6 +275,107 @@ export class LuthierValidator {
                         errors['attributeName'].push('Nomes dos atributos não podem ser repetidos');
                     }
 
+                }
+                if (previousTable) {
+                    if (UtilFunctions.isValidStringOrArray(field.code) === false) {
+                        if (UtilFunctions.isValidStringOrArray(field.name) === true) {
+                            const totalSamePreviousName = previousTable.fields.filter(x =>
+                                x.name.toUpperCase() === field.name.toUpperCase()).length;
+                            if (totalSamePreviousName > 0) {
+                                if (UtilFunctions.isValidStringOrArray(errors['name']) === false) {
+                                    errors['name'] = [];
+                                }
+                                errors['name'].push('Novos campos não podem ter o mesmo nome de campos já existentes na tabela');
+                            }
+                        }
+
+                    }
+                    else {
+                        if (UtilFunctions.isValidStringOrArray(previousTable.references) === true && UtilFunctions.isValidStringOrArray(table.references) === true) {
+                            previousTable.references.forEach((child, index) => {
+                                if (table.references.findIndex(tableChild => tableChild.code === child.code) >= 0) {
+                                    if (child.fieldsReference.findIndex(childField => childField.fieldPK.code === field.code || childField.fieldFK.code === field.code) >= 0) {
+                                        const tableFieldIndex = previousTable.fields.findIndex(tableField => tableField.code === field.code);
+                                        if (tableFieldIndex >= 0) {
+                                            const previousName = previousTable.fields[tableFieldIndex].name;
+                                            const previousSize = previousTable.fields[tableFieldIndex].size;
+                                            const previousNotNull = previousTable.fields[tableFieldIndex].notNull;
+                                            const previousType = previousTable.fields[tableFieldIndex].fieldType;
+                                            if (UtilFunctions.isValidStringOrArray(field.name)) {
+                                                if (previousName.toUpperCase() != field.name.toUpperCase()) {
+                                                    if (UtilFunctions.isValidStringOrArray(errors['name']) === false) {
+                                                        errors['name'] = [];
+                                                    }
+                                                    errors['name'].push('Campos que participam de referências já salvas, não podem sem alterados');
+                                                }
+                                            }
+                                            if (previousSize != field.size) {
+                                                if (UtilFunctions.isValidStringOrArray(errors['size']) === false) {
+                                                    errors['size'] = [];
+                                                }
+                                                errors['size'].push('Campos que participam de referências já salvas, não podem sem alterados');
+                                            }
+                                            if (previousNotNull != field.notNull) {
+                                                if (UtilFunctions.isValidStringOrArray(errors['notNull']) === false) {
+                                                    errors['notNull'] = [];
+                                                }
+                                                errors['size'].push('Campos que participam de referências já salvas, não podem sem alterados');
+                                            }
+                                            if (previousType != field.fieldType) {
+                                                if (UtilFunctions.isValidStringOrArray(errors['fieldType']) === false) {
+                                                    errors['fieldType'] = [];
+                                                }
+                                                errors['fieldType'].push('Campos que participam de referências já salvas, não podem sem alterados');
+                                            }
+
+                                        }
+                                    }
+                                }
+                            })
+                        }
+                        if (UtilFunctions.isValidStringOrArray(previousTable.indexes) === true && UtilFunctions.isValidStringOrArray(table.indexes) === true) {
+                            previousTable.indexes.forEach((child, index) => {
+                                if (table.indexes.findIndex(tableChild => tableChild.code === child.code) >= 0) {
+                                    if (child.indexFields.findIndex(childField => childField.tableField.code === field.code) >= 0) {
+                                        const tableFieldIndex = previousTable.fields.findIndex(tableField => tableField.code === field.code);
+                                        if (tableFieldIndex >= 0) {
+                                            const previousName = previousTable.fields[tableFieldIndex].name;
+                                            const previousSize = previousTable.fields[tableFieldIndex].size;
+                                            const previousNotNull = previousTable.fields[tableFieldIndex].notNull;
+                                            const previousType = previousTable.fields[tableFieldIndex].fieldType;
+                                            if (UtilFunctions.isValidStringOrArray(field.name)) {
+                                                if (previousName.toUpperCase() != field.name.toUpperCase()) {
+                                                    if (UtilFunctions.isValidStringOrArray(errors['name']) === false) {
+                                                        errors['name'] = [];
+                                                    }
+                                                    errors['name'].push('Campos que participam de índices já salvos, não podem sem alterados');
+                                                }
+                                            }
+                                            if (previousSize != field.size) {
+                                                if (UtilFunctions.isValidStringOrArray(errors['size']) === false) {
+                                                    errors['size'] = [];
+                                                }
+                                                errors['size'].push('Campos que participam de índices já salvos, não podem sem alterados');
+                                            }
+                                            if (previousNotNull != field.notNull) {
+                                                if (UtilFunctions.isValidStringOrArray(errors['notNull']) === false) {
+                                                    errors['notNull'] = [];
+                                                }
+                                                errors['size'].push('Campos que participam de índices já salvos, não podem sem alterados');
+                                            }
+                                            if (previousType != field.fieldType) {
+                                                if (UtilFunctions.isValidStringOrArray(errors['fieldType']) === false) {
+                                                    errors['fieldType'] = [];
+                                                }
+                                                errors['fieldType'].push('Campos que participam de índices já salvos, não podem sem alterados');
+                                            }
+
+                                        }
+                                    }
+                                }
+                            })
+                        }
+                    }
                 }
                 if (_.isEqual(field.invalidFields, errors) === false ) {
                     field.invalidFields = errors;
@@ -389,18 +477,6 @@ export class LuthierValidator {
                         }
                         errors['name'].push('Nomes não podem ser repetidos');
                     }
-                    if (UtilFunctions.isValidStringOrArray(field.code) === false) {
-                        const totalSamePreviousName = table.customFields.filter(x =>
-                            UtilFunctions.isValidStringOrArray(x.previousName) &&
-                            x.previousName.toUpperCase() === field.name.toUpperCase()).length;
-                        if (totalSamePreviousName > 0) {
-
-                            if (UtilFunctions.isValidStringOrArray(errors['name']) === false) {
-                                errors['name'] = [];
-                            }
-                            errors['name'].push('Novos campos customizados não podem ter o mesmo nome de campos já existentes na tabela');
-                        }
-                    }
 
                 }
                 if (UtilFunctions.isValidStringOrArray(field.attributeName) === true) {
@@ -415,6 +491,21 @@ export class LuthierValidator {
                         errors['attributeName'].push('Nomes dos atributos não podem ser repetidos');
                     }
 
+                }
+                if (previousTable) {
+                    if (UtilFunctions.isValidStringOrArray(field.code) === false) {
+                        if (UtilFunctions.isValidStringOrArray(field.name) === true) {
+                            const totalSamePreviousName = previousTable.customFields.filter(x =>
+                                x.name.toUpperCase() === field.name.toUpperCase()).length;
+                            if (totalSamePreviousName > 0) {
+                                if (UtilFunctions.isValidStringOrArray(errors['name']) === false) {
+                                    errors['name'] = [];
+                                }
+                                errors['name'].push('Novos campos customizados não podem ter o mesmo nome de campos já existentes na tabela\'');
+                            }
+                        }
+
+                    }
                 }
                 if (_.isEqual(field.invalidFields, errors) === false ) {
                     field.invalidFields = errors;
@@ -467,7 +558,6 @@ export class LuthierValidator {
                         }
                         if (child.fieldPK && UtilFunctions.isValidStringOrArray(child.fieldPK.name) === true &&
                             child.fieldFK && UtilFunctions.isValidStringOrArray(child.fieldFK.name) === true) {
-                            console.log(child.fieldFK, child.fieldPK);
                             if (child.fieldPK.fieldType !== child.fieldFK.fieldType) {
                                 errorsChild['fieldPK'] = ['Campos pk e fk devem ser do mesmo tipo'];
                                 errorsChild['fieldFK'] = ['Campos pk e fk devem ser do mesmo tipo'];
@@ -821,7 +911,6 @@ export class LuthierValidator {
                         dataset.invalidFields['customFields'] = {};
                     }
                     dataset.invalidFields['customFields'][index] = errors;
-                    console.log(errors);
                 }
 
             })

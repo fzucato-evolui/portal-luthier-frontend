@@ -43,6 +43,7 @@ import {
     LuthierFieldTypeEnum,
     LuthierGroupInfoModel,
     LuthierGroupInfoTypeEnum,
+    LuthierMetadataHistoryChangeModel,
     LuthierReferenceStatusEnum,
     LuthierSearchFieldEditorEnum,
     LuthierSearchFieldOperatorEnum,
@@ -127,6 +128,8 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     @ViewChildren('sortFields') sortFields: QueryList<MatSort>;
     public searchsDataSource = new MatTableDataSource<LuthierVisionDatasetSearchModel>();
     @ViewChild('sortSearchs') sortSearchs: MatSort;
+    public historicalDataSource = new MatTableDataSource<LuthierMetadataHistoryChangeModel>();
+    @ViewChild('sortHistorical') sortHistorical: MatSort;
     public customFieldsDataSource = new MatTableDataSource<LuthierVisionDatasetCustomFieldModel>();
     public customizationsDataSource = new MatTableDataSource<LuthierVisionDatasetFieldModel>();
     public groupsInfoDataSource = new MatTableDataSource<LuthierVisionGroupInfoModel>();
@@ -166,6 +169,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     displayedCustomizationsColumns = ['buttons', 'code', 'tableField.name', 'customMask', 'customReadOnly',
         'customVisible', 'customNotNull', 'customCharCase', 'customEditor', 'customLookupFilter', 'customUiConfiguration'];
     displayedSearchColumns = [ 'buttons', 'code', 'name', 'customName', 'order', 'status', 'type'];
+    displayedHistoricalColumns = [ 'code', 'user.name', 'date', 'type'];
     LuthierVisionDatasetFieldTypeEnum = LuthierVisionDatasetFieldTypeEnum;
     LuthierFieldTypeEnum = LuthierFieldTypeEnum;
     LuthierFieldModifierEnum = LuthierFieldModifierEnum;
@@ -219,6 +223,11 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this.searchsDataSource.filterPredicate = filterPredicateSearchs.instance.bind(filterPredicateSearchs);
         this.searchsDataSource.sort = this.sortSearchs;
 
+        UtilFunctions.setSortingDataAccessor(this.historicalDataSource);
+        const filterPredicateHistorical = FilterPredicateUtil.withColumns(this.displayedHistoricalColumns);
+        this.historicalDataSource.filterPredicate = filterPredicateHistorical.instance.bind(filterPredicateHistorical);
+        this.historicalDataSource.sort = this.sortHistorical;
+
         UtilFunctions.setSortingDataAccessor(this.groupsInfoDataSource);
         const filterPredicateGroupsInfo = FilterPredicateUtil.withColumns(this.displayedGroupInfoColumns);
         this.groupsInfoDataSource.filterPredicate = filterPredicateGroupsInfo.instance.bind(filterPredicateGroupsInfo);
@@ -233,6 +242,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         const filterPredicateCustomizations = FilterPredicateUtil.withColumns(this.displayedCustomizationsColumns);
         this.customizationsDataSource.filterPredicate = filterPredicateCustomizations.instance.bind(filterPredicateCustomizations);
         this.customizationsDataSource.sort = this.sortFields.get(3);
+
         if (UtilFunctions.isValidStringOrArray(this.model.code)) {
             UtilFunctions.forceValidations(this.formSave);
         }
@@ -311,7 +321,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this.customFieldsDataSource.data = this.model.customFields;
         this.customizationsDataSource.data = this.model.fields;
         this.searchsDataSource.data = this.model.searchs;
-
+        this.historicalDataSource.data = this.model.historical;
         this.setParentRelation();
     }
 
@@ -509,6 +519,10 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             .then(result => {
                 result.id = this._cloneModel.id;
                 result.relatives = this._cloneModel.relatives;
+                if (UtilFunctions.isValidStringOrArray(this.model.historical) === true) {
+                    result.historical.push(... this.model.historical);
+                }
+
                 this.model = result;
                 this.refresh();
                 const index = this.parent.tabsOpened.findIndex(x => x.id === this.model.id);
@@ -1124,6 +1138,10 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         const filterValue = (event.target as HTMLInputElement).value;
         this.searchsDataSource.filter = filterValue.trim().toLowerCase();
     }
+    filterHistorical(event: Event) {
+        const filterValue = (event.target as HTMLInputElement).value;
+        this.historicalDataSource.filter = filterValue.trim().toLowerCase();
+    }
     filterCustomFields(event: Event) {
         const filterValue = (event.target as HTMLInputElement).value;
         this.customFieldsDataSource.filter = filterValue.trim().toLowerCase();
@@ -1155,6 +1173,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
 
     changeTab(event: MatTabChangeEvent) {
         this.currentTab = event.tab.ariaLabel as TableType;
+        this.getDatasourceFromType(this.currentTab)._updateChangeSubscription();
     }
 
     isGroupInfoAllowed(field: LuthierGroupInfoModel, option: LuthierGroupInfoModel): boolean {
@@ -1388,6 +1407,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                         model.code = this.model.code;
                         model.id = this.model.id;
                         model.relatives = this.model.relatives;
+                        model.historical = this.model.historical;
 
                         //groupInfos
                         if (UtilFunctions.isValidStringOrArray(model.groupInfos) === false) {
@@ -1737,11 +1757,11 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                         for (let i = 0; i < this.model.customizations.length; i++) {
                             let customization = this.model.customizations[i];
                             let index = model.customizations.findIndex(x =>
-                                x.name1.toUpperCase() === customization.name1.toUpperCase() &&
-                                x.name2.toUpperCase() === customization.name2.toUpperCase() &&
-                                x.name3.toUpperCase() === customization.name3.toUpperCase() &&
-                                x.name4.toUpperCase() === customization.name4.toUpperCase() &&
-                                x.name5.toUpperCase() === customization.name5.toUpperCase() &&
+                                UtilFunctions.equalsIgnoreCase(x.name1, customization.name1) &&
+                                UtilFunctions.equalsIgnoreCase(x.name2, customization.name2) &&
+                                UtilFunctions.equalsIgnoreCase(x.name3, customization.name3) &&
+                                UtilFunctions.equalsIgnoreCase(x.name4, customization.name4) &&
+                                UtilFunctions.equalsIgnoreCase(x.name5, customization.name5) &&
                                 x.type === customization.type
                             );
                             if (index >= 0) {
