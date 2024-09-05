@@ -1829,7 +1829,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                         for(let i = 0; i < model.references.length;) {
                             let reference = model.references[i];
                             if (reference.tablePK.code === importedCode) {
-                                reference.tablePK = {id: model.id, code: model.code, name: model.name};
+                                reference.tablePK = cloneDeep(model);
                                 reference.fieldsReference.forEach(referenceField => {
                                     const indexField = model.fields.findIndex(x => x.name.toUpperCase() === referenceField.fieldPK.name.toUpperCase());
                                     referenceField.fieldPK = model.fields[indexField];
@@ -1862,6 +1862,14 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                                         tablesSearched.push(pkTable);
                                     }
                                     reference.tablePK = pkTable;
+                                    {
+                                        const indexField = reference.tablePK.fields.findIndex(x => x.name.toUpperCase() === reference.lookupFastField.name.toUpperCase());
+                                        reference.lookupFastField = reference.tablePK.fields[indexField];
+                                    }
+                                    {
+                                        const indexField = reference.tablePK.fields.findIndex(x => x.name.toUpperCase() === reference.lookupDescriptionField.name.toUpperCase());
+                                        reference.lookupDescriptionField = reference.tablePK.fields[indexField];
+                                    }
                                 }
 
                             }
