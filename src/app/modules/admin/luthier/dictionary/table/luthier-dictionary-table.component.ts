@@ -486,6 +486,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         }
         else {
             const fg = this.addField(type);
+            fg.get('order').setValue(UtilFunctions.getNextValue(this.getDatasourceFromType(type).data, 'order'));
             this.getFields(type).push(fg);
             const newField = fg.value;
             newField['pending'] = true;
@@ -855,10 +856,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 maxValue: ["0"],
                 mask: [null],
                 charCase: [LuthierFieldCharcaseEnum.NORMAL],
-                order: [
-                    UtilFunctions.isValidStringOrArray(this.model.fields) === true ? this.model.fields.reduce((max, field) => field.order > max ? field.order : max, this.model.fields[0].order) + 1 : 1,
-                    [Validators.required]
-                ],
+                order: [null, [Validators.required]],
                 autoInc: [false],
                 editor: [LuthierFieldEditorEnum.AUTO],
                 modifyType: [LuthierFieldModifierEnum.INTERNO],
@@ -911,7 +909,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         });
         return c;
     }
-    addGroupInfoField(): any {
+    addGroupInfoField(): FormGroup {
         const c = this.formBuilder.group({
             id: [crypto.randomUUID()],
             code: [null],
@@ -1195,7 +1193,9 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
     }
     newIndex() {
-        this.editIndex(new LuthierTableIndexModel());
+        const model = new LuthierTableIndexModel();
+        model.creationOrder = UtilFunctions.getNextValue(this.indexesDataSource.data, 'creationOrder');
+        this.editIndex(model);
     }
     deleteIndex(model: LuthierBasicModel) {
         const index = this.getRealIndex(model, 'indexes').index;
@@ -1284,7 +1284,9 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         });
     }
     newSearch() {
-        this.editSearch(new LuthierTableSearchModel());
+        const model = new LuthierTableSearchModel();
+        model.order = UtilFunctions.getNextValue(this.searchsDataSource.data, 'order');
+        this.editSearch(model);
     }
     deleteSearch(model: LuthierBasicModel) {
         const index = this.getRealIndex(model, 'searchs').index;
@@ -1322,6 +1324,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
     newGroupInfo() {
         const fg = this.addGroupInfoField();
+        fg.get('order').setValue(UtilFunctions.getNextValue(this.groupsInfoDataSource.data, 'order'));
         this.getFields('groupInfos').push(fg);
         const newField = fg.value as LuthierGroupInfoModel;
         newField['pending'] = true;

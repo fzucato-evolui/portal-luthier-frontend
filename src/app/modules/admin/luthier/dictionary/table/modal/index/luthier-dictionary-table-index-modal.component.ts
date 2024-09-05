@@ -9,7 +9,7 @@ import {
     ViewEncapsulation
 } from "@angular/core";
 import {Subject} from 'rxjs';
-import {FormArray, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormArray, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
@@ -135,7 +135,9 @@ export class LuthierDictionaryTableIndexModalComponent implements OnInit, OnDest
 
 
     add() {
-        this.getIndexFields().push(this.parent.addIndexField());
+        const fg = this.parent.addIndexField();
+        fg.get('order').setValue(UtilFunctions.getNextValue(this.getIndexFields().value, 'order'));
+        this.getIndexFields().push(fg);
         this.dataSource.data = this.getIndexFields().controls as (FormGroup[]);
         this._changeDetectorRef.detectChanges();
     }

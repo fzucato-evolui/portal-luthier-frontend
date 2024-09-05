@@ -219,7 +219,9 @@ export class LuthierDictionaryTableSearchModalComponent implements OnInit, OnDes
 
 
     add() {
-        this.getSearchFields().push(this.parent.addSearchField());
+        const fg = this.parent.addSearchField();
+        fg.get('order').setValue(UtilFunctions.getNextValue(this.getSearchFields().value, 'order'));
+        this.getSearchFields().push(fg);
         this.dataSource.data = this.getSearchFields().controls as (FormGroup[]);
         this._changeDetectorRef.detectChanges();
     }

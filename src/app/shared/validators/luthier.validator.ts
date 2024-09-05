@@ -309,12 +309,6 @@ export class LuthierValidator {
                                                     errors['name'].push('Campos que participam de referências já salvas, não podem sem alterados');
                                                 }
                                             }
-                                            if (previousSize != field.size) {
-                                                if (UtilFunctions.isValidStringOrArray(errors['size']) === false) {
-                                                    errors['size'] = [];
-                                                }
-                                                errors['size'].push('Campos que participam de referências já salvas, não podem sem alterados');
-                                            }
                                             if (previousNotNull != field.notNull) {
                                                 if (UtilFunctions.isValidStringOrArray(errors['notNull']) === false) {
                                                     errors['notNull'] = [];
@@ -326,6 +320,12 @@ export class LuthierValidator {
                                                     errors['fieldType'] = [];
                                                 }
                                                 errors['fieldType'].push('Campos que participam de referências já salvas, não podem sem alterados');
+                                            }
+                                            else if (previousSize != field.size && field.fieldType === LuthierFieldTypeEnum.STRING) {
+                                                if (UtilFunctions.isValidStringOrArray(errors['size']) === false) {
+                                                    errors['size'] = [];
+                                                }
+                                                errors['size'].push('Campos que participam de referências já salvas, não podem sem alterados');
                                             }
 
                                         }
@@ -351,12 +351,6 @@ export class LuthierValidator {
                                                     errors['name'].push('Campos que participam de índices já salvos, não podem sem alterados');
                                                 }
                                             }
-                                            if (previousSize != field.size) {
-                                                if (UtilFunctions.isValidStringOrArray(errors['size']) === false) {
-                                                    errors['size'] = [];
-                                                }
-                                                errors['size'].push('Campos que participam de índices já salvos, não podem sem alterados');
-                                            }
                                             if (previousNotNull != field.notNull) {
                                                 if (UtilFunctions.isValidStringOrArray(errors['notNull']) === false) {
                                                     errors['notNull'] = [];
@@ -368,6 +362,12 @@ export class LuthierValidator {
                                                     errors['fieldType'] = [];
                                                 }
                                                 errors['fieldType'].push('Campos que participam de índices já salvos, não podem sem alterados');
+                                            }
+                                            else if (previousSize != field.size && field.fieldType === LuthierFieldTypeEnum.STRING) {
+                                                if (UtilFunctions.isValidStringOrArray(errors['size']) === false) {
+                                                    errors['size'] = [];
+                                                }
+                                                errors['size'].push('Campos que participam de índices já salvos, não podem sem alterados');
                                             }
 
                                         }
@@ -847,13 +847,11 @@ export class LuthierValidator {
                     errors['tableField.name'] = ['Campo nome é obrigatório'];
                     errors['tableField.fieldType'] = ['Campo tipo é obrigatório'];
                     errors['tableField.size'] = ['Campo tamanho é obrigatório'];
-                    errors['tableField.key'] = ['Campo chave é obrigatório'];
-                    errors['tableField.key'] = ['Campo chave é obrigatório'];
                 }
 
                 if (field.fieldType === LuthierVisionDatasetFieldTypeEnum.LOOKUP) {
                     if (!field.reference || !UtilFunctions.isValidStringOrArray(field.reference.name)) {
-                        errors['reference.name'] = ['Campo chave é obrigatório'];
+                        errors['reference.name'] = ['Campo referência é obrigatório'];
                     }
                 }
                 if (_.isEqual(field.invalidFields, errors) === false ) {
@@ -892,8 +890,6 @@ export class LuthierValidator {
                     errors['tableField.name'] = ['Campo nome é obrigatório'];
                     errors['tableField.fieldType'] = ['Campo tipo é obrigatório'];
                     errors['tableField.size'] = ['Campo tamanho é obrigatório'];
-                    errors['tableField.key'] = ['Campo chave é obrigatório'];
-                    errors['tableField.key'] = ['Campo chave é obrigatório'];
                 }
 
                 if (field.fieldType === LuthierVisionDatasetFieldTypeEnum.LOOKUP) {

@@ -38,7 +38,7 @@ export default [
         matcher     : luthierMatcher,
         component: LuthierComponent,
         data: {authorities: ['ROLE_SUPER', 'ROLE_HYPER']},
-        resolve  : {
+        resolve : {
             data: luthierResolver,
         }
     },

@@ -225,5 +225,17 @@ export class UtilFunctions {
         return str1.toString().toUpperCase() === str2.toString().toUpperCase();
     }
 
+    public static getNextValue(modelArray: Array<any>, fieldName: string): number {
+        try {
+            if (UtilFunctions.isValidStringOrArray(modelArray) === true) {
+                return modelArray.reduce((max, field) => field[fieldName] > max ? field[fieldName] : max, modelArray[0][fieldName]) + 1;
+            }
+            return 1;
+        }
+        catch (e) {
+            return 1;
+        }
+    }
+
 
 }

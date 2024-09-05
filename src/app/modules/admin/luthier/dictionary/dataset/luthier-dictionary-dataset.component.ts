@@ -450,6 +450,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                         }
                         const c = this.addField(type);
                         c.patchValue(dsField);
+                        c.get('order').setValue(UtilFunctions.getNextValue(this.getDatasourceFromType(type).data, 'order'));
                         const fields = this.getFields(type);
                         fields.push(c);
                         if (type === 'customFields') {
@@ -845,6 +846,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     addReferenceField(): FormGroup {
         const c = this.formBuilder.group({
             code: [null],
+            name: [null],
             status: [LuthierReferenceStatusEnum.ACTIVE],
             fieldPK: this.formBuilder.group(
                 {
@@ -1011,7 +1013,9 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         }
     }
     newSearch() {
-        this.editSearch(new LuthierVisionDatasetSearchModel());
+        const model = new LuthierVisionDatasetSearchModel();
+        model.order = UtilFunctions.getNextValue(this.searchsDataSource.data, 'order');
+        this.editSearch(model);
     }
     deleteSearch(model: LuthierBasicModel) {
         const index = this.getRealIndex(model, 'searchs').index;
@@ -1049,6 +1053,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
 
     newGroupInfo() {
         const fg = this.addGroupInfoField();
+        fg.get('order').setValue(UtilFunctions.getNextValue(this.groupsInfoDataSource.data, 'order'));
         this.getFields('groupInfos').push(fg);
         const newField = fg.value as LuthierGroupInfoModel;
         newField['pending'] = true;
