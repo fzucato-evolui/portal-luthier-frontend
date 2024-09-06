@@ -1487,8 +1487,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                                 datasetField.tableField = table.fields[indexTableField];
                             } else if (datasetField.fieldType === LuthierVisionDatasetFieldTypeEnum.LOOKUP) {
 
-                                const referenceIndex = table.references?.findIndex(x => x.name.toUpperCase() === datasetField.reference.name.toUpperCase()
-                                    && x.tablePK.name.toUpperCase() === datasetField.reference.tablePK.name.toUpperCase());
+                                const referenceIndex = table.references?.findIndex(x => x.name.toUpperCase() === datasetField.reference.name.toUpperCase());
                                 if (referenceIndex < 0) {
                                     model.fields.splice(i, 1);
                                     continue;
