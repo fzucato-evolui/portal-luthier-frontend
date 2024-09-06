@@ -218,11 +218,14 @@ export class UtilFunctions {
         fg.updateValueAndValidity()
     }
 
-    public static equalsIgnoreCase(str1: any, str2: any): boolean {
+    public static equalsIgnoreCase(str1: any, str2: any, ignoreCase?: boolean): boolean {
         if (UtilFunctions.isValidStringOrArray(str1) === false || UtilFunctions.isValidStringOrArray(str2) === false) {
-            return str1 === str2;
+            return UtilFunctions.isValidStringOrArray(str1) === UtilFunctions.isValidStringOrArray(str2);
         }
-        return str1.toString().toUpperCase() === str2.toString().toUpperCase();
+        if (UtilFunctions.isValidStringOrArray(ignoreCase) === false) {
+            return str1?.toString().toUpperCase() === str2?.toString().toUpperCase();
+        }
+        return str1?.toString() === str2?.toString();
     }
 
     public static getNextValue(modelArray: Array<any>, fieldName: string): number {

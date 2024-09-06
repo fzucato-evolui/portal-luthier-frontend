@@ -122,6 +122,7 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'group
 })
 export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, AfterViewInit
 {
+    private hasChanged = false;
     private _model: LuthierVisionDatasetModel;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     public fieldsDataSource = new MatTableDataSource<LuthierVisionDatasetFieldModel>();
@@ -140,6 +141,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     @Input()
     set model(value: LuthierVisionDatasetModel) {
         this._model = value;
+        this.setCustomizations();
         this._cloneModel = cloneDeep(this._model);
         this.tables = cloneDeep(this.parent.tables);
     }
@@ -247,12 +249,14 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             UtilFunctions.forceValidations(this.formSave);
         }
 
-        LuthierValidator.validateDataset(this.model)
+        this.hasChanged = !LuthierValidator.validateDataset(this.model, this._model).isSame;
 
         this.fieldsDataSource.connect()
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
-                if (LuthierValidator.validateDataset(this.model)) {
+                const ret = LuthierValidator.validateDataset(this.model, this._model);
+                this.hasChanged = !ret.isSame;
+                if (ret.needUpdate) {
                     this.fieldsDataSource._updateChangeSubscription();
                 }
 
@@ -260,7 +264,9 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this.customFieldsDataSource.connect()
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
-                if (LuthierValidator.validateDataset(this.model)) {
+                const ret = LuthierValidator.validateDataset(this.model, this._model);
+                this.hasChanged = !ret.isSame;
+                if (ret.needUpdate) {
                     this.customFieldsDataSource._updateChangeSubscription();
                 }
 
@@ -268,7 +274,9 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this.searchsDataSource.connect()
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
-                if (LuthierValidator.validateDataset(this.model)) {
+                const ret = LuthierValidator.validateDataset(this.model, this._model);
+                this.hasChanged = !ret.isSame;
+                if (ret.needUpdate) {
                     this.searchsDataSource._updateChangeSubscription();
                 }
 
@@ -276,11 +284,38 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this.groupsInfoDataSource.connect()
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
-                if (LuthierValidator.validateDataset(this.model)) {
+                const ret = LuthierValidator.validateDataset(this.model, this._model);
+                this.hasChanged = !ret.isSame;
+                if (ret.needUpdate) {
                     this.groupsInfoDataSource._updateChangeSubscription();
                 }
 
             });
+
+        this.customizationsDataSource.connect()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(data => {
+                const ret = LuthierValidator.validateDataset(this.model, this._model);
+                this.hasChanged = !ret.isSame;
+                if (ret.needUpdate) {
+                    this.customizationsDataSource._updateChangeSubscription();
+                }
+
+            });
+        this.formSave.valueChanges
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(value => {
+                const basicInfo = this.formSave.value as LuthierVisionDatasetModel;
+                this._cloneModel.code = basicInfo.code;
+                this._cloneModel.name = basicInfo.name;
+                this._cloneModel.description = basicInfo.description;
+                this._cloneModel.customDescription = basicInfo.customDescription;
+                this._cloneModel.filter = basicInfo.filter;
+                this._cloneModel.uiConfiguration = basicInfo.uiConfiguration;
+                const ret = LuthierValidator.validateDataset(this.model, this._model);
+                this.hasChanged = !ret.isSame;
+        });
+
     }
 
     refresh() {
@@ -313,7 +348,6 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this.addFields('fields');
         this.addFields('customFields');
         this.addGroupInfos();
-        this.setCustomizations();
         this.formSave.patchValue(this.model);
         //Essa ordem é importante para ordenação do @ViewChildren('sortFields') sortFields: QueryList<MatSort>;
         this.fieldsDataSource.data = this.model.fields;
@@ -323,27 +357,43 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this.searchsDataSource.data = this.model.searchs;
         this.historicalDataSource.data = this.model.historical;
         this.setParentRelation();
+        this.hasChanged = false;
+        this.formSave.valueChanges
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(value => {
+                const basicInfo = this.formSave.value as LuthierVisionDatasetModel;
+                this._cloneModel.code = basicInfo.code;
+                this._cloneModel.name = basicInfo.name;
+                this._cloneModel.description = basicInfo.description;
+                this._cloneModel.customDescription = basicInfo.customDescription;
+                this._cloneModel.filter = basicInfo.filter;
+                this._cloneModel.customFilter = basicInfo.customFilter;
+                this._cloneModel.uiConfiguration = basicInfo.uiConfiguration;
+                const ret = LuthierValidator.validateDataset(this.model, this._model);
+                this.hasChanged = !ret.isSame;
+            });
+
     }
 
     setCustomizations() {
-        if (UtilFunctions.isValidStringOrArray(this.model.customizations)) {
-            this.model.customizations.forEach(x => {
+        if (UtilFunctions.isValidStringOrArray(this._model.customizations)) {
+            this._model.customizations.forEach(x => {
                 if ( x.type === 'FIELD_VISION') {
-                    const index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name3?.toUpperCase());
+                    const index = this._model.fields.findIndex(y => y.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
-                        this.model.fields[index].customLabel = x;
+                        this._model.fields[index].customLabel = x;
                     }
                 }
                 else if ( x.type === 'SEARCH_VISION') {
-                    const index = this.model.searchs.findIndex(y => y.name?.toUpperCase() === x.name3?.toUpperCase());
+                    const index = this._model.searchs.findIndex(y => y.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
-                        this.model.searchs[index].customName = x;
+                        this._model.searchs[index].customName = x;
                     }
                 }
                 else if ( x.type === 'SEARCH_FIELD_VISION') {
-                    let index = this.model.searchs.findIndex(y => y.name?.toUpperCase() === x.name3?.toUpperCase());
+                    let index = this._model.searchs.findIndex(y => y.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
-                        const search = this.model.searchs[index];
+                        const search = this._model.searchs[index];
                         index = search.searchFields.findIndex(y => y.field.name?.toUpperCase() === x.name4?.toUpperCase());
                         if (index >= 0) {
                             search.searchFields[index].customLabel = x;
@@ -351,63 +401,63 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                     }
                 }
                 else if ( x.type === 'VISION_FIELD_MASK') {
-                    let index = this.model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
-                        this.model.fields[index].customMask = x;
+                        this._model.fields[index].customMask = x;
                     }
                 }
                 else if ( x.type === 'VISION_FIELD_READONLY') {
-                    let index = this.model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
                         x.value = UtilFunctions.parseBoolean(x.value);
-                        this.model.fields[index].customReadOnly = x;
+                        this._model.fields[index].customReadOnly = x;
                     }
                 }
                 else if ( x.type === 'VISION_FIELD_VISIBLE') {
-                    let index = this.model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
                         x.value = UtilFunctions.parseBoolean(x.value);
-                        this.model.fields[index].customVisible = x;
+                        this._model.fields[index].customVisible = x;
                     }
                 }
                 else if ( x.type === 'VISION_FIELD_REQUIRED') {
-                    let index = this.model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3.toUpperCase());
                     if (index >= 0) {
                         x.value = UtilFunctions.parseBoolean(x.value);
-                        this.model.fields[index].customNotNull = x;
+                        this._model.fields[index].customNotNull = x;
                     }
                 }
 
                 else if ( x.type === 'VISION_FIELD_CHARCASE') {
-                    let index = this.model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
                         x.value = LuthierFieldCharcaseEnumParser.toValue(x.value);
-                        this.model.fields[index].customCharCase = x;
+                        this._model.fields[index].customCharCase = x;
                     }
                 }
                 else if ( x.type === 'VISION_FIELD_EDITORTYPE') {
-                    let index = this.model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
                         x.value = LuthierFieldEditorEnumParser.toValue(x.value);
-                        this.model.fields[index].customEditor = x;
+                        this._model.fields[index].customEditor = x;
                     }
                 }
                 else if ( x.type === 'VISION_FIELD_LOOKUPFILTER') {
-                    let index = this.model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
-                        this.model.fields[index].customLookupFilter = x;
+                        this._model.fields[index].customLookupFilter = x;
                     }
                 }
                 else if ( x.type === 'VISION_DATASET_DESCRIPTION') {
-                    this.model.customDescription = x;
+                    this._model.customDescription = x;
                 }
                 else if ( x.type === 'VISION_DATASET_FILTER') {
-                    this.model.customFilter = x;
+                    this._model.customFilter = x;
                 }
                 else if ( x.type === 'VISION_FIELD_UICONFIGURATION') {
-                    let index = this.model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.tableField?.name?.toUpperCase() === x.name3?.toUpperCase());
                     if (index >= 0) {
-                        this.model.fields[index].customUiConfiguration = x;
+                        this._model.fields[index].customUiConfiguration = x;
                     }
                 }
             });
@@ -541,7 +591,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 return false;
             }
         }
-        return true;
+        return this.hasChanged === true;
     }
 
     saveCustomizations() {

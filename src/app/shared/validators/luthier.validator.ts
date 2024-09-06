@@ -821,7 +821,7 @@ export class LuthierValidator {
         return needUpdate;
 
     }
-    static validateDataset(dataset: LuthierVisionDatasetModel) : boolean {
+    static validateDataset(dataset: LuthierVisionDatasetModel, previousDataset: LuthierVisionDatasetModel) : {needUpdate: boolean, isSame: boolean} {
         let needUpdate = false;
         dataset.invalidFields = {};
 
@@ -1027,7 +1027,10 @@ export class LuthierValidator {
 
             })
         }
-        return needUpdate;
+        const isSame = LuthierVisionDatasetModel.equals(dataset, previousDataset);
+        //console.log('isSame', isSame);
+
+        return {needUpdate: needUpdate, isSame: isSame};
 
     }
 }
