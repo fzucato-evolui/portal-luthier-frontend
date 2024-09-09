@@ -15,15 +15,7 @@ import {
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {CommonModule, NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
-import {
-    FormArray,
-    FormBuilder,
-    FormControl,
-    FormGroup,
-    FormsModule,
-    ReactiveFormsModule,
-    Validators
-} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -122,7 +114,7 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'group
 })
 export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, AfterViewInit
 {
-    private hasChanged = false;
+    protected hasChanged = false;
     private _model: LuthierVisionDatasetModel;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     public fieldsDataSource = new MatTableDataSource<LuthierVisionDatasetFieldModel>();
@@ -342,12 +334,8 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 name: ['', [Validators.required]],
                 description: ['']
             }),
-            objectType: [null],
-            groupInfos: this.formBuilder.array([]),
+            objectType: [null]
         });
-        this.addFields('fields');
-        this.addFields('customFields');
-        this.addGroupInfos();
         this.formSave.patchValue(this.model);
         //Essa ordem é importante para ordenação do @ViewChildren('sortFields') sortFields: QueryList<MatSort>;
         this.fieldsDataSource.data = this.model.fields;
@@ -361,14 +349,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this.formSave.valueChanges
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(value => {
-                const basicInfo = this.formSave.value as LuthierVisionDatasetModel;
-                this._cloneModel.code = basicInfo.code;
-                this._cloneModel.name = basicInfo.name;
-                this._cloneModel.description = basicInfo.description;
-                this._cloneModel.customDescription = basicInfo.customDescription;
-                this._cloneModel.filter = basicInfo.filter;
-                this._cloneModel.customFilter = basicInfo.customFilter;
-                this._cloneModel.uiConfiguration = basicInfo.uiConfiguration;
+                this._cloneModel = Object.assign({}, this.model, this.formSave.value) as LuthierVisionDatasetModel;
                 const ret = LuthierValidator.validateDataset(this.model, this._model);
                 this.hasChanged = !ret.isSame;
             });
@@ -501,8 +482,6 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                         const c = this.addField(type);
                         c.patchValue(dsField);
                         c.get('order').setValue(UtilFunctions.getNextValue(this.getDatasourceFromType(type).data, 'order'));
-                        const fields = this.getFields(type);
-                        fields.push(c);
                         if (type === 'customFields') {
                             this.customFieldsDataSource.data.push(dsField as LuthierVisionDatasetCustomFieldModel);
                             this.customFieldsDataSource._updateChangeSubscription();
@@ -522,8 +501,6 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
 
     delete(model: LuthierBasicModel, type: TableType) {
         const index = this.getRealIndex(model, type).index;
-        const fieldIndex = this.getFields(type).controls.findIndex(x => this.compareCode(x.value, model));
-        this.getFields(type).removeAt(fieldIndex);
         if (type === 'groupInfos') {
             this.deleteGroupInfo(model);
         }
@@ -751,51 +728,11 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this._changeDetectorRef.detectChanges();
     }
 
-    getFields(type: TableType): FormArray {
-        return this.formSave.get(type === 'customizations' ? 'fields' : type) as FormArray;
-    }
     getFieldGroup(model: LuthierBasicModel, type: TableType): FormGroup {
-        const index =(this.formSave.get(type === 'customizations' ? 'fields' : type) as FormArray).controls.findIndex(x => this.compareCode(x.value, model));
-        const fg = (this.formSave.get(type === 'customizations' ? 'fields' : type) as FormArray).at(index) as FormGroup;
+        const fg = model.row;
         return fg;
     }
-    addFields(type: TableType) {
-        let fields = this.getFields(type);
-        if (!fields) {
-            fields =  this.formBuilder.array([]);
-            this.formSave.addControl(type, fields);
-        }
-        const modelFields = type === 'fields' ? this.model.fields : this.model.customFields;
-        if (UtilFunctions.isValidStringOrArray(modelFields) === true) {
-            modelFields.forEach(x => {
-                if (UtilFunctions.isValidStringOrArray(x.id) === false) {
-                    x.id = crypto.randomUUID();
-                }
-                /*
-                if (UtilFunctions.isValidStringOrArray(this.model.customizations) === true) {
-                    const index = this.model.customizations.findIndex(y =>
-                        y.type === 'FIELD_TABLE' && y.name2 && y.name2.toUpperCase() === x.name.toUpperCase());
-                    if (index >= 0) {
-                        x['customLabel']= this.model.customizations[index].value;
-                        return;
-                    }
-                }
-                 */
-                const c = this.addField(type);
-                fields.push(c);
-            })
-        }
-    }
-    addGroupInfos() {
-        const fa = (this.formSave.get('groupInfos') as FormArray);
-        fa.clear();
-        if (UtilFunctions.isValidStringOrArray(this.model.groupInfos) === true) {
-            this.model.groupInfos.forEach(x => {
-                x.id = crypto.randomUUID();
-                fa.push(this.addGroupInfoField())
-            })
-        }
-    }
+
     addField(type: TableType): FormGroup {
         const c = this.formBuilder.group({
                 id: [crypto.randomUUID()],
@@ -824,6 +761,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 visible: [false],
                 tableName: [null],
                 lookupFilter: [null],
+            /* Não é editável
                 tableField: this.formBuilder.group({
                     id: [null],
                     code: [null],
@@ -831,6 +769,8 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                     size: [null],
                     fieldType: [null]
                 })
+
+             */
             }
         );
         if (type === 'fields') {
@@ -841,7 +781,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                     code: [null],
                     description: [null],
                     }),
-                reference: this.addReferenceField(),
+                //reference: this.addReferenceField(),
                 customLabel: this.addCustomizationField(),
                 customMask: this.addCustomizationField(),
                 customReadOnly: this.addCustomizationField(),
@@ -852,16 +792,14 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 customLookupFilter: this.addCustomizationField(),
                 customUiConfiguration: this.addCustomizationField()
             });
-            allFields.setValidators(LuthierValidator.validate(this.getFields(type)));
             return allFields;
         }
         else {
             const allFields = this.formBuilder.group ({
                 ...c.controls,
                 groupInfo: [null],
-                reference: [null]
+                //reference: [null]
             });
-            allFields.setValidators(LuthierValidator.validate(this.getFields(type)));
             return allFields;
         }
 
@@ -874,7 +812,9 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             value: [null],
             name1: [null],
             name2: [null],
-            name3: [null]
+            name3: [null],
+            name4: [null],
+            name5: [null]
         });
         return c;
     }
@@ -1008,41 +948,36 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     }
 
     editRow(model: LuthierBasicModel, type: TableType) {
-        const editing = this.getRealIndex(model, type);
-        editing.dataSource.data[editing.index]['editing'] = true;
+        //const editing = this.getRealIndex(model, type);
+        //editing.dataSource.data[editing.index]['editing'] = true;
+        const fg = this.addField(type);
+        fg.patchValue(model);
+        UtilFunctions.forceValidations(fg);
+        model.row = fg;
+        model.editing = true;
+
     }
 
     saveRow(model: LuthierBasicModel, type: TableType) {
-        const fg = this.getFieldGroup(model, type);
+        const realIndex = this.getRealIndex(model, type);
+        const fg = model.row;
         UtilFunctions.forceValidations(fg);
-        const saved = fg.value as LuthierBasicModel;
-        saved.pending = false;
-        const editing = this.getRealIndex(model, type);
-        const index = editing.index;
+        model.pending = false;
+        model.editing = false;
         if (fg.invalid) {
             this.messageService.open("Existem campo inválidos!", "Error de Validação", "warning");
             fg.updateValueAndValidity();
             this._changeDetectorRef.detectChanges();
             //return;
         }
-        if (type === 'fields') {
-            this.fieldsDataSource.data[index] = Object.assign({}, this.fieldsDataSource.data[index], saved);
-            this.fieldsDataSource._updateChangeSubscription();
-            this.customizationsDataSource._updateChangeSubscription();
-        }
-        else if (type === 'customizations') {
-            this.customizationsDataSource.data[index] = Object.assign({}, this.customizationsDataSource.data[index], saved);
-            this.customizationsDataSource._updateChangeSubscription();
-        }
-        else if (type === 'groupInfos') {
-            this.editGroupInfo(saved as LuthierGroupInfoModel);
-        }
-        else {
-            this.customFieldsDataSource.data[index] = Object.assign({}, this.customFieldsDataSource.data[index], saved);
-            this.customFieldsDataSource._updateChangeSubscription();
-        }
-        editing.dataSource.data[editing.index]['editing'] = false;
+        model = Object.assign({}, model, fg.value);
+        model.row = null;
+        realIndex.dataSource.data[realIndex.index] = model;
+        realIndex.dataSource._updateChangeSubscription();
         this._changeDetectorRef.detectChanges();
+        if (type === 'groupInfos') {
+            this.editGroupInfo(model);
+        }
     }
 
     onRowClick(index: number) {
@@ -1104,10 +1039,10 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     newGroupInfo() {
         const fg = this.addGroupInfoField();
         fg.get('order').setValue(UtilFunctions.getNextValue(this.groupsInfoDataSource.data, 'order'));
-        this.getFields('groupInfos').push(fg);
         const newField = fg.value as LuthierGroupInfoModel;
-        newField['pending'] = true;
-        newField['editing'] = true;
+        newField.pending = true;
+        newField.editing = true;
+        newField.row = fg;
         this.groupsInfoDataSource.data.push(newField);
         this.groupsInfoDataSource._updateChangeSubscription();
         this._changeDetectorRef.detectChanges();
@@ -1152,8 +1087,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this._changeDetectorRef.detectChanges();
     }
     editGroupInfo(value: LuthierGroupInfoModel) {
-        const index = this.getRealIndex(value, 'groupInfos').index;
-        const groupInfo =  this.groupsInfoDataSource.data[index];
+        const groupInfo =  value;
         const groupInfoWithGroupInfo = this.groupsInfoDataSource.data
             .filter(x => x.parent &&  this.compareCode(x.parent, groupInfo))
             .map(x => this.groupsInfoDataSource.data.findIndex(y => this.compareCode(x, y)));
@@ -1182,8 +1116,6 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             });
             this.customFieldsDataSource._updateChangeSubscription();
         }
-        this.groupsInfoDataSource.data[index] = Object.assign({}, this.groupsInfoDataSource.data[index], value);
-        this.groupsInfoDataSource._updateChangeSubscription();
     }
     filterFields(event: Event) {
         const filterValue = (event.target as HTMLInputElement).value;
@@ -1344,7 +1276,6 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
 
     changeTable(event: MatSelectChange) {
         this.fieldsDataSource.data.splice(0, this.fieldsDataSource.data.length);
-        this.getFields('fields').clear();
         this.fieldsDataSource._updateChangeSubscription();
 
         this.searchsDataSource.data.splice(0, this.searchsDataSource.data.length);
@@ -1354,7 +1285,6 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         this.customizationsDataSource._updateChangeSubscription();
 
         this.customFieldsDataSource.data.splice(0, this.customFieldsDataSource.data.length);
-        this.getFields('customFields').clear();
         this.customFieldsDataSource._updateChangeSubscription();
 
         this._changeDetectorRef.detectChanges();
@@ -1854,8 +1784,8 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         }
     }
     showValidationsError(): string {
-        const errors = UtilFunctions.getInvalidFields(this.formSave);
         /*
+        const errors = UtilFunctions.getInvalidFields(this.formSave);
         if (UtilFunctions.isValidStringOrArray(errors) === true) {
             errors.forEach(value => {
                 if (value.startsWith('fields')) {
@@ -1870,8 +1800,8 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         if (UtilFunctions.isValidObject(this.model.invalidFields) === true) {
             return JSON.stringify(this.model.invalidFields, null, 2);
         }
-        else {
-            return JSON.stringify(errors, null, 2);
+        else if (this.hasChanged === false) {
+            return 'Nenhuma alteração feita';
         }
     }
 

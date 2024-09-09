@@ -7293,7 +7293,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1245,
                         "status": 1,
-                        "referenceCod": 1144,
+                        "referenceCode": 1144,
                         "fieldPKCode": 13131,
                         "fieldFKCode": 13909,
                         "reference": {
@@ -7335,7 +7335,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1408,
                         "status": 1,
-                        "referenceCod": 1236,
+                        "referenceCode": 1236,
                         "fieldPKCode": 1169,
                         "fieldFKCode": 15108,
                         "reference": {
@@ -7377,7 +7377,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 2233,
                         "status": 1,
-                        "referenceCod": 2008,
+                        "referenceCode": 2008,
                         "fieldPKCode": 1,
                         "fieldFKCode": 23682,
                         "reference": {
@@ -7419,7 +7419,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 2234,
                         "status": 1,
-                        "referenceCod": 2009,
+                        "referenceCode": 2009,
                         "fieldPKCode": 1,
                         "fieldFKCode": 23699,
                         "reference": {
@@ -7461,7 +7461,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 2235,
                         "status": 1,
-                        "referenceCod": 2010,
+                        "referenceCode": 2010,
                         "fieldPKCode": 1,
                         "fieldFKCode": 23701,
                         "reference": {
@@ -7503,7 +7503,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 2236,
                         "status": 1,
-                        "referenceCod": 2011,
+                        "referenceCode": 2011,
                         "fieldPKCode": 23522,
                         "fieldFKCode": 23672,
                         "reference": {
@@ -7545,7 +7545,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 3168,
                         "status": 1,
-                        "referenceCod": 2926,
+                        "referenceCode": 2926,
                         "fieldPKCode": 14829,
                         "fieldFKCode": 30566,
                         "reference": {
@@ -7587,7 +7587,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 3233,
                         "status": 1,
-                        "referenceCod": 2990,
+                        "referenceCode": 2990,
                         "fieldPKCode": 684,
                         "fieldFKCode": 30869,
                         "reference": {
@@ -7629,7 +7629,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 4058,
                         "status": 1,
-                        "referenceCod": 3480,
+                        "referenceCode": 3480,
                         "fieldPKCode": 26594,
                         "fieldFKCode": 34394,
                         "reference": {
@@ -7671,7 +7671,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 4059,
                         "status": 1,
-                        "referenceCod": 3481,
+                        "referenceCode": 3481,
                         "fieldPKCode": 26594,
                         "fieldFKCode": 34395,
                         "reference": {
@@ -8018,7 +8018,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 2,
                         "status": 1,
-                        "referenceCod": 2,
+                        "referenceCode": 2,
                         "fieldPKCode": 1,
                         "fieldFKCode": 21,
                         "reference": {
@@ -8060,7 +8060,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 3,
                         "status": 1,
-                        "referenceCod": 3,
+                        "referenceCode": 3,
                         "fieldPKCode": 23,
                         "fieldFKCode": 22,
                         "reference": {
@@ -8102,7 +8102,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 3813,
                         "status": 1,
-                        "referenceCod": 3395,
+                        "referenceCode": 3395,
                         "fieldPKCode": 33925,
                         "fieldFKCode": 21,
                         "reference": {
@@ -9798,7 +9798,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1141,
                         "status": 1,
-                        "referenceCod": 4,
+                        "referenceCode": 4,
                         "fieldPKCode": 1,
                         "fieldFKCode": 29,
                         "reference": {
@@ -9840,7 +9840,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1142,
                         "status": 1,
-                        "referenceCod": 5,
+                        "referenceCode": 5,
                         "fieldPKCode": 56,
                         "fieldFKCode": 28,
                         "reference": {
@@ -9882,7 +9882,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1143,
                         "status": 1,
-                        "referenceCod": 6,
+                        "referenceCode": 6,
                         "fieldPKCode": 59,
                         "fieldFKCode": 43,
                         "reference": {
@@ -9924,7 +9924,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1144,
                         "status": 1,
-                        "referenceCod": 7,
+                        "referenceCode": 7,
                         "fieldPKCode": 95,
                         "fieldFKCode": 38,
                         "reference": {
@@ -9966,7 +9966,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1145,
                         "status": 1,
-                        "referenceCod": 8,
+                        "referenceCode": 8,
                         "fieldPKCode": 1282,
                         "fieldFKCode": 34,
                         "reference": {
@@ -10008,7 +10008,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1146,
                         "status": 1,
-                        "referenceCod": 9,
+                        "referenceCode": 9,
                         "fieldPKCode": 7184,
                         "fieldFKCode": 26,
                         "reference": {
@@ -10050,7 +10050,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1149,
                         "status": 1,
-                        "referenceCod": 1054,
+                        "referenceCode": 1054,
                         "fieldPKCode": 13131,
                         "fieldFKCode": 13252,
                         "reference": {
@@ -10092,7 +10092,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1208,
                         "status": 1,
-                        "referenceCod": 1107,
+                        "referenceCode": 1107,
                         "fieldPKCode": 59,
                         "fieldFKCode": 40,
                         "reference": {
@@ -10134,7 +10134,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1209,
                         "status": 1,
-                        "referenceCod": 1108,
+                        "referenceCode": 1108,
                         "fieldPKCode": 59,
                         "fieldFKCode": 41,
                         "reference": {
@@ -10176,7 +10176,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1220,
                         "status": 1,
-                        "referenceCod": 1119,
+                        "referenceCode": 1119,
                         "fieldPKCode": 4219,
                         "fieldFKCode": 33,
                         "reference": {
@@ -10218,7 +10218,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1832,
                         "status": 1,
-                        "referenceCod": 1628,
+                        "referenceCode": 1628,
                         "fieldPKCode": 19728,
                         "fieldFKCode": 19866,
                         "reference": {
@@ -10260,7 +10260,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1913,
                         "status": 1,
-                        "referenceCod": 1708,
+                        "referenceCode": 1708,
                         "fieldPKCode": 20546,
                         "fieldFKCode": 20550,
                         "reference": {
@@ -10302,7 +10302,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 2656,
                         "status": 1,
-                        "referenceCod": 2416,
+                        "referenceCode": 2416,
                         "fieldPKCode": 1150,
                         "fieldFKCode": 27854,
                         "reference": {
@@ -10344,7 +10344,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 2704,
                         "status": 1,
-                        "referenceCod": 2462,
+                        "referenceCode": 2462,
                         "fieldPKCode": 4219,
                         "fieldFKCode": 28134,
                         "reference": {
@@ -11343,7 +11343,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 10,
                         "status": 1,
-                        "referenceCod": 10,
+                        "referenceCode": 10,
                         "fieldPKCode": 67,
                         "fieldFKCode": 61,
                         "reference": {
@@ -12188,7 +12188,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 11,
                         "status": 1,
-                        "referenceCod": 11,
+                        "referenceCode": 11,
                         "fieldPKCode": 26,
                         "fieldFKCode": 66,
                         "reference": {
@@ -12230,7 +12230,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 12,
                         "status": 1,
-                        "referenceCod": 12,
+                        "referenceCode": 12,
                         "fieldPKCode": 10879,
                         "fieldFKCode": 66,
                         "reference": {
@@ -12272,7 +12272,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1872,
                         "status": 1,
-                        "referenceCod": 1667,
+                        "referenceCode": 1667,
                         "fieldPKCode": 4219,
                         "fieldFKCode": 20184,
                         "reference": {
@@ -12314,7 +12314,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1873,
                         "status": 1,
-                        "referenceCod": 1668,
+                        "referenceCode": 1668,
                         "fieldPKCode": 1285,
                         "fieldFKCode": 20186,
                         "reference": {
@@ -12356,7 +12356,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1982,
                         "status": 1,
-                        "referenceCod": 1767,
+                        "referenceCode": 1767,
                         "fieldPKCode": 21295,
                         "fieldFKCode": 21296,
                         "reference": {
@@ -12398,7 +12398,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 3495,
                         "status": 1,
-                        "referenceCod": 3238,
+                        "referenceCode": 3238,
                         "fieldPKCode": 13075,
                         "fieldFKCode": 20545,
                         "reference": {
@@ -12440,7 +12440,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 4942,
                         "status": 1,
-                        "referenceCod": 4185,
+                        "referenceCode": 4185,
                         "fieldPKCode": 20281,
                         "fieldFKCode": 38009,
                         "reference": {
@@ -13455,7 +13455,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 13,
                         "status": 1,
-                        "referenceCod": 13,
+                        "referenceCode": 13,
                         "fieldPKCode": 67,
                         "fieldFKCode": 72,
                         "reference": {
@@ -13497,7 +13497,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 16,
                         "status": 1,
-                        "referenceCod": 16,
+                        "referenceCode": 16,
                         "fieldPKCode": 832,
                         "fieldFKCode": 76,
                         "reference": {
@@ -13539,7 +13539,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 17,
                         "status": 1,
-                        "referenceCod": 17,
+                        "referenceCode": 17,
                         "fieldPKCode": 4219,
                         "fieldFKCode": 70,
                         "reference": {
@@ -13581,7 +13581,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 1735,
                         "status": 1,
-                        "referenceCod": 1535,
+                        "referenceCode": 1535,
                         "fieldPKCode": 518,
                         "fieldFKCode": 18701,
                         "reference": {
@@ -13623,7 +13623,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 2784,
                         "status": 1,
-                        "referenceCod": 2542,
+                        "referenceCode": 2542,
                         "fieldPKCode": 28687,
                         "fieldFKCode": 28694,
                         "reference": {
@@ -13665,7 +13665,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 4891,
                         "status": 1,
-                        "referenceCod": 4140,
+                        "referenceCode": 4140,
                         "fieldPKCode": 37815,
                         "fieldFKCode": 37818,
                         "reference": {
@@ -13707,7 +13707,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 5330,
                         "status": 1,
-                        "referenceCod": 4542,
+                        "referenceCode": 4542,
                         "fieldPKCode": 475,
                         "fieldFKCode": 40256,
                         "reference": {
@@ -14276,7 +14276,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 18,
                         "status": 1,
-                        "referenceCod": 18,
+                        "referenceCode": 18,
                         "fieldPKCode": 95,
                         "fieldFKCode": 80,
                         "reference": {
@@ -14318,7 +14318,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 19,
                         "status": 1,
-                        "referenceCod": 19,
+                        "referenceCode": 19,
                         "fieldPKCode": 1169,
                         "fieldFKCode": 93,
                         "reference": {
@@ -14360,7 +14360,7 @@ export const tables: LuthierTableModel[] = [
                     {
                         "code": 20,
                         "status": 1,
-                        "referenceCod": 20,
+                        "referenceCode": 20,
                         "fieldPKCode": 4219,
                         "fieldFKCode": 91,
                         "reference": {

@@ -135,7 +135,7 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'group
 })
 export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, AfterViewInit
 {
-
+    protected hasChanged = false;
     private _model: LuthierTableModel;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     public fieldsDataSource = new MatTableDataSource<LuthierTableFieldModel>();
@@ -160,6 +160,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     @Input()
     set model(value: LuthierTableModel) {
         this._model = value;
+        this.setCustomizations();
         this._cloneModel = cloneDeep(this._model);
     }
     get model(): LuthierTableModel {
@@ -277,13 +278,15 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             UtilFunctions.forceValidations(this.formSave);
         }
         this.model.currentViewBodyType = this.dadosViewBodyType;
-        LuthierValidator.validateTable(this.model,this._model)
+        this.hasChanged = !LuthierValidator.validateTable(this.model, this._model).isSame;
 
         this.fieldsDataSource.connect()
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
                 this.model.currentViewBodyType = this.dadosViewBodyType;
-                if (LuthierValidator.validateTable(this.model, this._model)) {
+                const ret = LuthierValidator.validateTable(this.model, this._model);
+                this.hasChanged = !ret.isSame;
+                if (ret.needUpdate) {
                     this.fieldsDataSource._updateChangeSubscription();
                 }
 
@@ -292,7 +295,9 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
                 this.model.currentViewBodyType = this.dadosViewBodyType;
-                if (LuthierValidator.validateTable(this.model, this._model)) {
+                const ret = LuthierValidator.validateTable(this.model, this._model);
+                this.hasChanged = !ret.isSame;
+                if (ret.needUpdate) {
                     this.customFieldsDataSource._updateChangeSubscription();
                 }
 
@@ -301,7 +306,9 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
                 this.model.currentViewBodyType = this.dadosViewBodyType;
-                if (LuthierValidator.validateTable(this.model, this._model)) {
+                const ret = LuthierValidator.validateTable(this.model, this._model);
+                this.hasChanged = !ret.isSame;
+                if (ret.needUpdate) {
                     this.referencesDataSource._updateChangeSubscription();
                 }
 
@@ -310,7 +317,9 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
                 this.model.currentViewBodyType = this.dadosViewBodyType;
-                if (LuthierValidator.validateTable(this.model, this._model)) {
+                const ret = LuthierValidator.validateTable(this.model, this._model);
+                this.hasChanged = !ret.isSame;
+                if (ret.needUpdate) {
                     this.indexesDataSource._updateChangeSubscription();
                 }
 
@@ -319,7 +328,9 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
                 this.model.currentViewBodyType = this.dadosViewBodyType;
-                if (LuthierValidator.validateTable(this.model, this._model)) {
+                const ret = LuthierValidator.validateTable(this.model, this._model);
+                this.hasChanged = !ret.isSame;
+                if (ret.needUpdate) {
                     this.searchsDataSource._updateChangeSubscription();
                 }
 
@@ -328,7 +339,9 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(data => {
                 this.model.currentViewBodyType = this.dadosViewBodyType;
-                if (LuthierValidator.validateTable(this.model, this._model)) {
+                const ret = LuthierValidator.validateTable(this.model, this._model);
+                this.hasChanged = !ret.isSame;
+                if (ret.needUpdate) {
                     this.groupsInfoDataSource._updateChangeSubscription();
                 }
 
@@ -354,14 +367,9 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             uiConfiguration: ['', []],
             export: [false],
             visible: [false],
-            groupInfos: this.formBuilder.array([]),
             views: this.formBuilder.array([])
         });
-        this.addFields('fields');
-        this.addFields('customFields');
-        this.addGroupInfos();
         this.addViews();
-        this.setCustomizations();
         this.formSave.patchValue(this.model);
         //Essa ordem é importante para ordenação do @ViewChildren('sortFields') sortFields: QueryList<MatSort>;
         this.fieldsDataSource.data = this.model.fields;
@@ -374,21 +382,29 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.bondsDataSource.data = this.model.bonds;
         this.bondsDatasetDataSource.data = this.model.datasetBonds;
         this.historicalDataSource.data = this.model.historical;
+        this.hasChanged = false;
+        this.formSave.valueChanges
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(value => {
+                this._cloneModel = Object.assign({}, this.model, this.formSave.value) as LuthierTableModel;
+                const ret = LuthierValidator.validateTable(this.model, this._model);
+                this.hasChanged = !ret.isSame;
+            });
     }
 
     setCustomizations() {
-        if (UtilFunctions.isValidStringOrArray(this.model.customizations)) {
-            this.model.customizations.forEach(x => {
+        if (UtilFunctions.isValidStringOrArray(this._model.customizations)) {
+            this._model.customizations.forEach(x => {
                 if ( x.type === 'FIELD_TABLE') {
-                    const index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                    const index = this._model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
-                        this.model.fields[index].customLabel = x;
+                        this._model.fields[index].customLabel = x;
                     }
                 }
                 else if ( x.type === 'STATIC_VALUE') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
-                        const field = this.model.fields[index];
+                        const field = this._model.fields[index];
                         index = field.staticFields.findIndex(y => y.value?.toUpperCase() === x.name3?.toUpperCase());
                         if (index >= 0) {
                             field.staticFields[index].customCaption = x;
@@ -396,15 +412,15 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                     }
                 }
                 else if ( x.type === 'SEARCH_TABLE') {
-                    const index = this.model.searchs.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                    const index = this._model.searchs.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
-                        this.model.searchs[index].customName = x;
+                        this._model.searchs[index].customName = x;
                     }
                 }
                 else if ( x.type === 'SEARCH_FIELD_TABLE') {
-                    let index = this.model.searchs.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                    let index = this._model.searchs.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
-                        const search = this.model.searchs[index];
+                        const search = this._model.searchs[index];
                         index = search.searchFields.findIndex(y => y.tableField.name?.toUpperCase() === x.name3?.toUpperCase());
                         if (index >= 0) {
                             search.searchFields[index].customLabel = x;
@@ -412,68 +428,68 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                     }
                 }
                 else if ( x.type === 'TABLE_FIELD_SIZE') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
-                        this.model.fields[index].customSize = x;
+                        this._model.fields[index].customSize = x;
                     }
                 }
                 else if ( x.type === 'TABLE_FIELD_REQUIRED') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
-                        this.model.fields[index].customNotNull = x;
+                        this._model.fields[index].customNotNull = x;
                     }
                 }
                 else if ( x.type === 'TABLE_FIELD_DEFAULTVALUE') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
-                        this.model.fields[index].customDefaultValue = x;
+                        this._model.fields[index].customDefaultValue = x;
                     }
                 }
                 else if ( x.type === 'TABLE_FIELD_PRECISION') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
-                        this.model.fields[index].customPrecision = x;
+                        this._model.fields[index].customPrecision = x;
                     }
                 }
                 else if ( x.type === 'TABLE_FIELD_MAXVALUE') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
-                        this.model.fields[index].customMaxValue = x;
+                        this._model.fields[index].customMaxValue = x;
                     }
                 }
                 else if ( x.type === 'TABLE_FIELD_MINVALUE') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
-                        this.model.fields[index].customMinValue = x;
+                        this._model.fields[index].customMinValue = x;
                     }
                 }
                 else if ( x.type === 'TABLE_FIELD_MASK') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
-                        this.model.fields[index].customMask = x;
+                        this._model.fields[index].customMask = x;
                     }
                 }
                 else if ( x.type === 'TABLE_FIELD_CHARCASE') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
                         x.value = LuthierFieldCharcaseEnumParser.toValue(x.value);
-                        this.model.fields[index].customCharCase = x;
+                        this._model.fields[index].customCharCase = x;
                     }
                 }
                 else if ( x.type === 'TABLE_FIELD_EDITORTYPE') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
                         x.value = LuthierFieldEditorEnumParser.toValue(x.value);
-                        this.model.fields[index].customEditor = x;
+                        this._model.fields[index].customEditor = x;
                     }
                 }
                 else if ( x.type === 'TABLE_DESCRIPTION') {
-                    this.model.customDescription = x;
+                    this._model.customDescription = x;
                 }
                 else if ( x.type === 'FIELD_UICONFIGURATION') {
-                    let index = this.model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                    let index = this._model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
-                        this.model.fields[index].customUiConfiguration = x;
+                        this._model.fields[index].customUiConfiguration = x;
                     }
                 }
             });
@@ -487,25 +503,19 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         else {
             const fg = this.addField(type);
             fg.get('order').setValue(UtilFunctions.getNextValue(this.getDatasourceFromType(type).data, 'order'));
-            this.getFields(type).push(fg);
-            const newField = fg.value;
-            newField['pending'] = true;
-            newField['editing'] = true;
-            if (type === 'fields') {
-                this.fieldsDataSource.data.push(newField);
-                this.fieldsDataSource._updateChangeSubscription();
-            } else {
-                this.customFieldsDataSource.data.push(newField);
-                this.customFieldsDataSource._updateChangeSubscription();
-            }
+            const newField = fg.value as LuthierBasicModel;
+            newField.pending = true;
+            newField.editing = true;
+            newField.row = fg;
+            const datasource = this.getDatasourceFromType(type);
+            datasource.data.push(newField);
+            datasource._updateChangeSubscription()
             this._changeDetectorRef.detectChanges();
         }
     }
 
     delete(model: LuthierBasicModel,type: TableType) {
         const index = this.getRealIndex(model, type).index;
-        const fieldIndex = this.getFields(type).controls.findIndex(x => this.compareCode(x.value, model));
-        this.getFields(type).removeAt(fieldIndex);
         if (type === 'groupInfos') {
             this.deleteGroupInfo(model);
         }
@@ -558,6 +568,20 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
 
     save() {
+        if (this.hasChanged === false) {
+            this.messageService.open('Nenhuma alteração foi detectada. Provavelmente, nenhum histórico será gerado, mas as informações serão levadas para a base de dados (Debug ID). Deseja continuar?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
+                if (result === 'confirmed') {
+                    this.doSave();
+
+                }
+            });
+        }
+        else {
+            this.doSave();
+        }
+
+    }
+    doSave() {
         this._cloneModel = Object.assign({}, this.model, this.formSave.value) as LuthierTableModel;
         this.saveCustomizations();
         this.service.saveTable(this._cloneModel)
@@ -768,45 +792,9 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this._changeDetectorRef.detectChanges();
     }
 
-    getFields(type: TableType): FormArray {
-        return this.formSave.get(type === 'customizations' ? 'fields' : type) as FormArray;
-    }
     getFieldGroup(model: LuthierBasicModel, type: TableType): FormGroup {
-        const index =(this.formSave.get(type === 'customizations' ? 'fields' : type) as FormArray).controls.findIndex(x => this.compareCode(x.value, model));
-        const fg = (this.formSave.get(type === 'customizations' ? 'fields' : type) as FormArray).at(index) as FormGroup;
+        const fg = model.row;
         return fg;
-    }
-    addFields(type: TableType) {
-        let fields = this.getFields(type);
-        if (!fields) {
-            fields =  this.formBuilder.array([]);
-            this.formSave.addControl(type, fields);
-        }
-        const modelFields = type === 'fields' ? this.model.fields : this.model.customFields;
-        if (UtilFunctions.isValidStringOrArray(modelFields) === true) {
-            modelFields.forEach(x => {
-                if (UtilFunctions.isValidStringOrArray(x.id) === false) {
-                    x.id = crypto.randomUUID();
-                }
-                /*
-                if (UtilFunctions.isValidStringOrArray(this.model.customizations) === true) {
-                    const index = this.model.customizations.findIndex(y =>
-                        y.type === 'FIELD_TABLE' && y.name2 && y.name2.toUpperCase() === x.name.toUpperCase());
-                    if (index >= 0) {
-                        x['customLabel']= this.model.customizations[index].value;
-                        return;
-                    }
-                }
-                 */
-                const c = this.addField(type);
-                if (UtilFunctions.isValidStringOrArray(x.staticFields)) {
-                    x.staticFields.forEach(y => {
-                        (c.get('staticFields') as FormArray).push(this.addStaticField(type));
-                    });
-                }
-                fields.push(c);
-            })
-        }
     }
     addViews() {
         if (this.model.objectType === 'VIEW') {
@@ -825,16 +813,6 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                     }
                 })
             }
-        }
-    }
-    addGroupInfos() {
-        const fa = (this.formSave.get('groupInfos') as FormArray);
-        fa.clear();
-        if (UtilFunctions.isValidStringOrArray(this.model.groupInfos) === true) {
-            this.model.groupInfos.forEach(x => {
-                x.id = crypto.randomUUID();
-                fa.push(this.addGroupInfoField())
-            })
         }
     }
     addField(type: TableType): FormGroup {
@@ -884,7 +862,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 customEditor: this.addCustomizationField(),
                 customUiConfiguration: this.addCustomizationField()
             });
-            allFields.setValidators(LuthierValidator.validate(this.getFields(type)));
+            allFields.setValidators(LuthierValidator.validate(this.fieldsDataSource.data));
             return allFields;
         }
         else {
@@ -892,7 +870,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 ...c.controls,
                 groupInfo: [null]
             });
-            allFields.setValidators(LuthierValidator.validate(this.getFields(type)));
+            allFields.setValidators(LuthierValidator.validate(this.customFieldsDataSource.data));
             return allFields;
         }
 
@@ -905,7 +883,9 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             value: [null],
             name1: [null],
             name2: [null],
-            name3: [null]
+            name3: [null],
+            name4: [null],
+            name5: [null]
         });
         return c;
     }
@@ -1115,41 +1095,36 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         return {datasource: dataSource, rows: dataSource.data.filter(x => x['editing'] === true)};
     }
     editRow(model: LuthierBasicModel, type: TableType) {
-        const editing = this.getRealIndex(model, type);
-        editing.dataSource.data[editing.index]['editing'] = true;
+        //const editing = this.getRealIndex(model, type);
+        //editing.dataSource.data[editing.index]['editing'] = true;
+        const fg = this.addField(type);
+        fg.patchValue(model);
+        UtilFunctions.forceValidations(fg);
+        model.row = fg;
+        model.editing = true;
+
     }
 
     saveRow(model: LuthierBasicModel, type: TableType) {
-        const fg = this.getFieldGroup(model, type);
+        const realIndex = this.getRealIndex(model, type);
+        const fg = model.row;
         UtilFunctions.forceValidations(fg);
-        const saved = fg.value as LuthierBasicModel;
-        saved.pending = false;
-        const editing = this.getRealIndex(model, type);
-        const index = editing.index;
+        model.pending = false;
+        model.editing = false;
         if (fg.invalid) {
             this.messageService.open("Existem campo inválidos!", "Error de Validação", "warning");
             fg.updateValueAndValidity();
             this._changeDetectorRef.detectChanges();
             //return;
         }
-        if (type === 'fields') {
-            this.fieldsDataSource.data[index] = Object.assign({}, this.fieldsDataSource.data[index], saved);
-            this.fieldsDataSource._updateChangeSubscription();
-            this.customizationsDataSource._updateChangeSubscription();
+        model = Object.assign({}, model, fg.value);
+        model.row = null;
+        realIndex.dataSource.data[realIndex.index] = model;
+        realIndex.dataSource._updateChangeSubscription();
+        this._changeDetectorRef.detectChanges()
+        if (type === 'groupInfos') {
+            this.editGroupInfo(model);
         }
-        else if (type === 'customizations') {
-            this.customizationsDataSource.data[index] = Object.assign({}, this.customizationsDataSource.data[index], saved);
-            this.customizationsDataSource._updateChangeSubscription();
-        }
-        else if (type === 'groupInfos') {
-            this.editGroupInfo(model, saved as LuthierGroupInfoModel);
-        }
-        else {
-            this.customFieldsDataSource.data[index] = Object.assign({}, this.customFieldsDataSource.data[index], saved);
-            this.customFieldsDataSource._updateChangeSubscription();
-        }
-        editing.dataSource.data[editing.index]['editing'] = false;
-        this._changeDetectorRef.detectChanges();
     }
 
     onRowClick(index: number) {
@@ -1325,10 +1300,10 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     newGroupInfo() {
         const fg = this.addGroupInfoField();
         fg.get('order').setValue(UtilFunctions.getNextValue(this.groupsInfoDataSource.data, 'order'));
-        this.getFields('groupInfos').push(fg);
         const newField = fg.value as LuthierGroupInfoModel;
-        newField['pending'] = true;
-        newField['editing'] = true;
+        newField.pending = true;
+        newField.editing = true;
+        newField.row = fg;
         this.groupsInfoDataSource.data.push(newField);
         this.groupsInfoDataSource._updateChangeSubscription();
         this._changeDetectorRef.detectChanges();
@@ -1371,15 +1346,14 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         }
         this._changeDetectorRef.detectChanges();
     }
-    editGroupInfo(model: LuthierBasicModel, value: LuthierGroupInfoModel) {
-        const index = this.getRealIndex(model, 'groupInfos').index;
-        const groupInfo =  this.groupsInfoDataSource.data[index];
+    editGroupInfo(model: LuthierGroupInfoModel) {
+        const groupInfo =  model;
         const groupInfoWithGroupInfo = this.groupsInfoDataSource.data
             .filter(x => x.parent && this.compareCode(x.parent, groupInfo))
             .map(x => this.groupsInfoDataSource.data.findIndex(y => this.compareCode(x, y)));
         if (UtilFunctions.isValidStringOrArray(groupInfoWithGroupInfo)) {
             groupInfoWithGroupInfo.forEach(x => {
-                this.groupsInfoDataSource.data[x].parent.description = value.description;
+                this.groupsInfoDataSource.data[x].parent.description = model.description;
             });
         }
 
@@ -1388,7 +1362,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             .map(x => this.fieldsDataSource.data.findIndex(y => this.compareCode(x, y)));
         if (UtilFunctions.isValidStringOrArray(fieldsWithGroupInfo)) {
             fieldsWithGroupInfo.forEach(x => {
-                this.fieldsDataSource.data[x].groupInfo.description = value.description;
+                this.fieldsDataSource.data[x].groupInfo.description = model.description;
             });
             this.fieldsDataSource._updateChangeSubscription();
         }
@@ -1397,13 +1371,11 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             .map(x => this.customFieldsDataSource.data.findIndex(y => this.compareCode(x, y)));
         if (UtilFunctions.isValidStringOrArray(customFieldsWithGroupInfo)) {
             customFieldsWithGroupInfo.forEach(x => {
-                this.customFieldsDataSource.data[x].groupInfo = value.description;
-                this.getFieldGroup(this.customFieldsDataSource.data[x], 'customFields').get('groupInfo').setValue(value.description);
+                this.customFieldsDataSource.data[x].groupInfo = model.description;
+                this.getFieldGroup(this.customFieldsDataSource.data[x], 'customFields').get('groupInfo').setValue(model.description);
             });
             this.customFieldsDataSource._updateChangeSubscription();
         }
-        this.groupsInfoDataSource.data[index] = Object.assign({}, this.groupsInfoDataSource.data[index], value);
-        this.groupsInfoDataSource._updateChangeSubscription();
     }
     filterFields(event: Event) {
         const filterValue = (event.target as HTMLInputElement).value;
@@ -1465,7 +1437,10 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
     changeTab(event: MatTabChangeEvent) {
         this.currentTab = event.tab.ariaLabel as TableType;
-        this.getDatasourceFromType(this.currentTab)._updateChangeSubscription();
+        const dataSource = this.getDatasourceFromType(this.currentTab);
+        if (dataSource != null) {
+            this.getDatasourceFromType(this.currentTab)._updateChangeSubscription();
+        }
     }
 
     isGroupInfoAllowed(field: LuthierGroupInfoModel, option: LuthierGroupInfoModel): boolean {
@@ -1496,7 +1471,6 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                                         (fg.get('staticFields') as FormArray).push(this.addStaticField('fields'));
                                     });
                                 }
-                                this.getFields('fields').push(fg);
                                 fg.patchValue(x);
                                 const newField = fg.value;
                                 //newField['pending'] = true;
@@ -1516,7 +1490,6 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                                         (fg.get('staticFields') as FormArray).push(this.addStaticField('customFields'));
                                     });
                                 }
-                                this.getFields('customFields').push(fg);
                                 fg.patchValue(x);
                                 const newField = fg.value;
                                 //newField['pending'] = true;
@@ -2066,7 +2039,6 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
 
     showValidationsError(): string {
-        const errors = UtilFunctions.getInvalidFields(this.formSave);
         /*
         if (UtilFunctions.isValidStringOrArray(errors) === true) {
             errors.forEach(value => {
@@ -2079,13 +2051,19 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             })
         }
          */
-        return JSON.stringify(this.model.invalidFields, null, 2);
+        if (UtilFunctions.isValidObject(this.model.invalidFields)) {
+            return JSON.stringify(this.model.invalidFields, null, 2);
+        }
+        else if (this.hasChanged === false) {
+            return 'Nenhuma alteração feita';
+        }
     }
 
     viewChanged($event: Event) {
         this._cloneModel.views = this.formSave.get('views').value;
         this.model.currentViewBodyType = this.dadosViewBodyType;
-        LuthierValidator.validateTable(this.model, this._model);
+        const ret = LuthierValidator.validateTable(this.model, this._model);
+        this.hasChanged = !ret.isSame;
     }
 
     hasValidationProblem(type: TableType): boolean {

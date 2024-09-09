@@ -1,14 +1,16 @@
 <div class="h-full flex flex-col headers-align" [formGroup]="formSave">
     <div class="flex-none flex mb-2">
-        <button class="text-sm min-h-7 h-7"
-                mat-flat-button
-                [disabled]="canSave() === false"
-                color="primary" (click)="save()">
-            <mat-icon
-                class="icon-size-4"
-                svgIcon="mat_solid:save"></mat-icon>
-            <span class="ml-2">Salvar</span>
-        </button>
+        <div [matTooltip]="canSave() === false ? showValidationsError() : ''">
+            <button class="text-sm min-h-7 h-7"
+                    mat-flat-button
+                    [disabled]="canSave() === false"
+                    color="primary" (click)="save()">
+                <mat-icon
+                    class="icon-size-4"
+                    svgIcon="mat_solid:save"></mat-icon>
+                <span class="ml-2">Salvar</span>
+            </button>
+        </div>
         <button class="text-sm min-h-7 h-7"
                 mat-flat-button
                 color="accent" (click)="revert()">

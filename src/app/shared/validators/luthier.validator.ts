@@ -1,18 +1,20 @@
-import {AbstractControl, FormArray, ValidationErrors, ValidatorFn} from '@angular/forms';
+import {AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
 import {
+    LuthierCustomFieldModel,
     LuthierFieldTypeEnum,
     LuthierTableFieldModel,
     LuthierTableModel,
     LuthierViewBodyEnum,
     LuthierVisionDatasetFieldTypeEnum,
-    LuthierVisionDatasetModel
+    LuthierVisionDatasetModel,
+    LuthierVisionModel
 } from '../models/luthier.model';
 import {UtilFunctions} from '../util/util-functions';
 import {MatTableDataSource} from '@angular/material/table';
 import _ from 'lodash';
 
 export class LuthierValidator {
-    static validate(allFields?: FormArray): ValidatorFn {
+    static validate(allFields?: Array<LuthierTableFieldModel | LuthierCustomFieldModel>): ValidatorFn {
         return (formGroup: AbstractControl): ValidationErrors | null => {
             const fieldType = formGroup.get('fieldType').value as LuthierFieldTypeEnum;
             const precisionControl = formGroup.get('precision');
@@ -70,9 +72,9 @@ export class LuthierValidator {
                 }
             }
             if (UtilFunctions.isValidStringOrArray(allFields) === true && UtilFunctions.isValidStringOrArray(nameControl.value) === true) {
-                const totalSameName = allFields.controls.filter(x =>
-                    UtilFunctions.isValidStringOrArray(x.get('name').value) &&
-                    x.get('name').value.toString().toUpperCase() === nameControl.value.toString().toUpperCase()).length;
+                const totalSameName = allFields.filter(x =>
+                    UtilFunctions.isValidStringOrArray(x.name) &&
+                    x.name.toString().toUpperCase() === nameControl.value.toString().toUpperCase()).length;
                 if (totalSameName > 1 && nameControl.hasError('sameName') === false) {
                     nameControl.setErrors({
                         'sameName': true
@@ -170,11 +172,23 @@ export class LuthierValidator {
         }
 
     }
-    static validateTable(table: LuthierTableModel, previousTable: LuthierTableModel) : boolean {
+    static validateTable(table: LuthierTableModel, previousTable: LuthierTableModel) : {needUpdate: boolean, isSame: boolean} {
         previousTable = previousTable && UtilFunctions.isValidStringOrArray(previousTable.code) ? previousTable : null;
         let needUpdate = false;
         table.invalidFields = {};
 
+        if (UtilFunctions.isValidStringOrArray(table.name) === false) {
+            table.invalidFields['name'] = ['Nome é obrigatório'];
+        }
+        if (UtilFunctions.isValidStringOrArray(table.description) === false) {
+            table.invalidFields['description'] = ['Descrição é obrigatório'];
+        }
+        if (UtilFunctions.isValidStringOrArray(table.namespace) === false) {
+            table.invalidFields['namespace'] = ['Namespace é obrigatório'];
+        }
+        if (UtilFunctions.isValidStringOrArray(table.className) === false) {
+            table.invalidFields['className'] = ['Nome da classe é obrigatório'];
+        }
         if (UtilFunctions.isValidStringOrArray(table.fields) === true) {
             table.fields.forEach((field, index) => {
 
@@ -818,13 +832,40 @@ export class LuthierValidator {
                 table.invalidFields['views'] = ['Ao menos um corpo de view deve ser definido'];
             }
         }
-        return needUpdate;
+        const isSame = LuthierTableModel.equals(table, previousTable);
+        //console.log('isSame', isSame);
+
+        return {needUpdate: needUpdate, isSame: isSame};
+
+    }
+    static validateVision(vision: LuthierVisionModel, previousVision: LuthierVisionModel) : {needUpdate: boolean, isSame: boolean} {
+        previousVision = previousVision && UtilFunctions.isValidStringOrArray(previousVision.code) ? previousVision : null;
+        let needUpdate = false;
+        vision.invalidFields = {};
+        if (UtilFunctions.isValidStringOrArray(vision.name) === false) {
+            vision.invalidFields['name'] = ['Nome é obrigatório'];
+        }
+        if (UtilFunctions.isValidStringOrArray(vision.description) === false) {
+            vision.invalidFields['description'] = ['Descrição é obrigatório'];
+        }
+        const isSame = LuthierTableModel.equals(vision, previousVision);
+        //console.log('isSame', isSame);
+
+        return {needUpdate: needUpdate, isSame: isSame};
 
     }
     static validateDataset(dataset: LuthierVisionDatasetModel, previousDataset: LuthierVisionDatasetModel) : {needUpdate: boolean, isSame: boolean} {
         let needUpdate = false;
         dataset.invalidFields = {};
-
+        if (UtilFunctions.isValidStringOrArray(dataset.name) === false) {
+            dataset.invalidFields['name'] = ['Nome é obrigatório'];
+        }
+        if (UtilFunctions.isValidStringOrArray(dataset.description) === false) {
+            dataset.invalidFields['description'] = ['Descrição é obrigatório'];
+        }
+        if (!dataset.table || UtilFunctions.isValidStringOrArray(dataset.table.code) === false) {
+            dataset.invalidFields['table'] = ['Tabela é obrigatório']
+        }
         if (UtilFunctions.isValidStringOrArray(dataset.fields) === true) {
             dataset.fields.forEach((field, index) => {
 

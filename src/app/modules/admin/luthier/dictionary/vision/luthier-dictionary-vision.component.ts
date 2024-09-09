@@ -15,13 +15,15 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {LuthierDictionaryComponent} from '../luthier-dictionary.component';
-import {LuthierVisionModel} from '../../../../../shared/models/luthier.model';
+import {LuthierVisionDatasetModel, LuthierVisionModel} from '../../../../../shared/models/luthier.model';
 import {cloneDeep} from 'lodash-es';
 import {NgxMaskDirective, provideNgxMask} from 'ngx-mask';
 import {LuthierService} from '../../luthier.service';
 import {MessageDialogService} from '../../../../../shared/services/message/message-dialog-service';
 import {MatMenuModule} from '@angular/material/menu';
 import {UtilFunctions} from '../../../../../shared/util/util-functions';
+import {Subject, takeUntil} from 'rxjs';
+import {LuthierValidator} from '../../../../../shared/validators/luthier.validator';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -47,8 +49,10 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'group
 })
 export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy, AfterViewInit
 {
+    protected hasChanged = false;
     private _model: LuthierVisionModel;
     private _cloneModel: LuthierVisionModel;
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
     public customPatterns = { 'I': { pattern: new RegExp('\[a-zA-Z0-9_\]')}};
     @Input()
     set model(value: LuthierVisionModel) {
@@ -83,6 +87,7 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy, Afte
         if (UtilFunctions.isValidStringOrArray(this.model.code)) {
             UtilFunctions.forceValidations(this.formSave);
         }
+        this.hasChanged = !LuthierValidator.validateVision(this.model, this._model).isSame;
     }
 
     refresh() {
@@ -92,6 +97,14 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy, Afte
             description: ['', [Validators.required]]
         });
         this.formSave.patchValue(this.model);
+        this.hasChanged = false;
+        this.formSave.valueChanges
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(value => {
+                this._cloneModel = Object.assign({}, this.model, this.formSave.value) as LuthierVisionDatasetModel;
+                const ret = LuthierValidator.validateVision(this.model, this._model);
+                this.hasChanged = !ret.isSame;
+            });
     }
 
 
@@ -112,9 +125,11 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy, Afte
 
     canSave(): boolean {
         if (this.formSave) {
-            return !this.formSave.invalid;
+            if (this.formSave.invalid || UtilFunctions.isValidObject(this.model.invalidFields)) {
+                return false;
+            }
         }
-        return false;
+        return this.hasChanged === true;
     }
 
     revert() {
@@ -184,6 +199,15 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy, Afte
             } catch (e) {
                 this.messageService.open('Erro na importação : ' + e, 'ERRO', 'error');
             }
+        }
+    }
+
+    showValidationsError(): string {
+        if (UtilFunctions.isValidObject(this.model.invalidFields) === true) {
+            return JSON.stringify(this.model.invalidFields, null, 2);
+        }
+        else if (this.hasChanged === false) {
+            return 'Nenhuma alteração feita';
         }
     }
 }

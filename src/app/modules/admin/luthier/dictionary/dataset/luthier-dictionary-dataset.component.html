@@ -670,7 +670,7 @@
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
 
                             <mat-select class="text-sm" [compareWith]="compareCode"
-                                        [formGroup]="getFieldGroup(field, fieldtype).get('groupInfo')">
+                                        [formGroup]="getFieldGroup(field, fieldtype)">
                                 <ng-container *ngFor="let t of model.groupInfos">
                                     <mat-option [value]="{code: t.code, description: t.description, id: t.id}">
                                         {{t.description}}
@@ -980,7 +980,7 @@
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
 
                             <mat-select class="text-sm"
-                                        [formControl]="getFieldGroup(field, fieldtype).get('groupInfo')">
+                                        [formControl]="getFieldGroup(field, fieldtype)">
                                 <ng-container *ngFor="let t of model.groupInfos">
                                     <mat-option [value]="t.description">
                                         {{t.description}}

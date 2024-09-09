@@ -440,6 +440,7 @@ export class LuthierService
                     if (index < 0) {
                         this._currentVisions.push(response);
                     } else {
+                        response.children = this._currentVisions[index].children;
                         this._currentVisions[index] = response;
                     }
                 } else {
@@ -470,6 +471,7 @@ export class LuthierService
     saveDataset(model: LuthierVisionDatasetModel): Promise<LuthierVisionDatasetModel> {
         return firstValueFrom(this._httpClient.post<LuthierVisionDatasetModel>(`${this.baseDicUrl}/dataset`, model).pipe(
             switchMap((response: LuthierVisionDatasetModel) => {
+                response.children = model.children;
                 if (UtilFunctions.isValidStringOrArray(this._currentVisions) === false) {
                     this._currentVisions = new Array<LuthierVisionModel>();
                 }

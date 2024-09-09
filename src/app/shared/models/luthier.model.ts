@@ -1,10 +1,12 @@
 import {UtilFunctions} from '../util/util-functions';
+import {FormGroup} from '@angular/forms';
 
 export class LuthierBasicModel {
     id?: string
     code?: number
     pending?: boolean = false
     editing?: boolean = false
+    row?: FormGroup
     invalidFields?: {[key: string]: any}
 }
 export class LuthierDatabaseModel {
@@ -60,6 +62,188 @@ export class LuthierTableModel extends LuthierBasicModel {
     datasetBonds?: LuthierDatasetBondModel[]
     searchs?: LuthierTableSearchModel[]
     historical?: LuthierMetadataHistoryChangeModel[]
+    public static equals(model: LuthierTableModel, previousModel: LuthierTableModel): boolean {
+        if (!UtilFunctions.equalsIgnoreCase(model?.code, previousModel?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.name, previousModel?.name)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.description, previousModel?.description, false)) {
+            return false
+        }
+        if (!LuthierCustomizationModel.equals(model?.customDescription, previousModel?.customDescription)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.technicalDescription, previousModel?.technicalDescription, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.userDescription, previousModel?.userDescription, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.className, previousModel?.className)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.namespace, previousModel?.namespace)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.export, previousModel?.export)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.logins, previousModel?.logins)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.logup, previousModel?.logup)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.logdel, previousModel?.logdel)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.uiConfiguration, previousModel?.uiConfiguration, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.visible, previousModel?.visible)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.fields?.length, previousModel?.fields?.length)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.groupInfos?.length, previousModel?.groupInfos?.length)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.searchs?.length, previousModel?.searchs?.length)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.customFields?.length, previousModel?.customFields?.length)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.references?.length, previousModel?.references?.length)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.indexes?.length, previousModel?.indexes?.length)) {
+            return false
+        }
+        if (UtilFunctions.isValidStringOrArray(model.fields) === true) {
+            for (const child of model.fields) {
+                if (UtilFunctions.isValidStringOrArray(child.code) === false) {
+                    return false;
+                }
+                const previousChildIndex = previousModel.fields.findIndex(previousChild => previousChild.code === child.code);
+                if (previousChildIndex >= 0) {
+                    const previousChild = previousModel.fields[previousChildIndex];
+                    if (LuthierTableFieldModel.equals(child, previousChild) === false) {
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        if (UtilFunctions.isValidStringOrArray(model.groupInfos) === true) {
+            for (const child of model.groupInfos) {
+                if (UtilFunctions.isValidStringOrArray(child.code) === false) {
+                    return false;
+                }
+                const previousChildIndex = previousModel.groupInfos.findIndex(previousChild => previousChild.code === child.code);
+                if (previousChildIndex >= 0) {
+                    const previousChild = previousModel.groupInfos[previousChildIndex];
+                    if (LuthierGroupInfoModel.equals(child, previousChild) === false) {
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        if (UtilFunctions.isValidStringOrArray(model.searchs) === true) {
+            for (const child of model.searchs) {
+                if (UtilFunctions.isValidStringOrArray(child.code) === false) {
+                    return false;
+                }
+                const previousChildIndex = previousModel.searchs.findIndex(previousChild => previousChild.code === child.code);
+                if (previousChildIndex >= 0) {
+                    const previousChild = previousModel.searchs[previousChildIndex];
+                    if (LuthierTableSearchModel.equals(child, previousChild) === false) {
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        if (UtilFunctions.isValidStringOrArray(model.customFields) === true) {
+            for (const child of model.customFields) {
+                if (UtilFunctions.isValidStringOrArray(child.code) === false) {
+                    return false;
+                }
+                const previousChildIndex = previousModel.customFields.findIndex(previousChild => previousChild.code === child.code);
+                if (previousChildIndex >= 0) {
+                    const previousChild = previousModel.customFields[previousChildIndex];
+                    if (LuthierCustomFieldModel.equals(child, previousChild) === false) {
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        if (UtilFunctions.isValidStringOrArray(model.references) === true) {
+            for (const child of model.references) {
+                if (UtilFunctions.isValidStringOrArray(child.code) === false) {
+                    return false;
+                }
+                const previousChildIndex = previousModel.references.findIndex(previousChild => previousChild.code === child.code);
+                if (previousChildIndex >= 0) {
+                    const previousChild = previousModel.references[previousChildIndex];
+                    if (LuthierTableReferenceModel.equals(child, previousChild) === false) {
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        if (UtilFunctions.isValidStringOrArray(model.indexes) === true) {
+            for (const child of model.indexes) {
+                if (UtilFunctions.isValidStringOrArray(child.code) === false) {
+                    return false;
+                }
+                const previousChildIndex = previousModel.indexes.findIndex(previousChild => previousChild.code === child.code);
+                if (previousChildIndex >= 0) {
+                    const previousChild = previousModel.indexes[previousChildIndex];
+                    if (LuthierTableIndexModel.equals(child, previousChild) === false) {
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        if (UtilFunctions.isValidStringOrArray(model.views) === true) {
+            for (const child of model.views) {
+                const previousChildIndex = previousModel?.views?.findIndex(previousChild => previousChild.databaseType === child.databaseType);
+                if (previousChildIndex >= 0) {
+                    const previousChild = previousModel.views[previousChildIndex];
+                    if (!UtilFunctions.equalsIgnoreCase(child.body, previousChild.body, false)) {
+                        return false
+
+                    }
+                }
+                else {
+                    if (UtilFunctions.isValidStringOrArray(child.body)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
 
 }
 export enum LuthierGroupInfoTypeEnum {
@@ -224,6 +408,135 @@ export class LuthierTableFieldModel extends LuthierBasicModel{
     staticFields?: LuthierTableStaticFieldModel[]
     realName?: string
     table?: LuthierTableModel
+
+    public static equals(model: LuthierTableFieldModel, previousModel: LuthierTableFieldModel) {
+        if (!UtilFunctions.equalsIgnoreCase(model?.code, previousModel?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.name, previousModel?.name)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.fieldType, previousModel?.fieldType)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.size, previousModel?.size)) {
+            return false
+        }
+        if (!LuthierCustomizationModel.equals(model?.customSize, previousModel?.customSize)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.key, previousModel?.key)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.search, previousModel?.search)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.label, previousModel?.label, false)) {
+            return false
+        }
+        if (!LuthierCustomizationModel.equals(model?.customLabel, previousModel?.customLabel)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.notNull, previousModel?.notNull)) {
+            return false
+        }
+        if (!LuthierCustomizationModel.equals(model?.customNotNull, previousModel?.customNotNull)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.defaultValue, previousModel?.defaultValue, false)) {
+            return false
+        }
+        if (!LuthierCustomizationModel.equals(model?.customDefaultValue, previousModel?.customDefaultValue)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.precision, previousModel?.precision)) {
+            return false
+        }
+        if (!LuthierCustomizationModel.equals(model?.customPrecision, previousModel?.customPrecision)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.minValue, previousModel?.minValue)) {
+            return false
+        }
+        if (!LuthierCustomizationModel.equals(model?.customMinValue, previousModel?.customMinValue)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.maxValue, previousModel?.maxValue)) {
+            return false
+        }
+        if (!LuthierCustomizationModel.equals(model?.customMaxValue, previousModel?.customMaxValue)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.mask, previousModel?.mask, false)) {
+            return false
+        }
+        if (!LuthierCustomizationModel.equals(model?.customMask, previousModel?.customMask)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.charCase, previousModel?.charCase)) {
+            return false
+        }
+        if (!LuthierCustomizationModel.equals(model?.customCharCase, previousModel?.customCharCase)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.order, previousModel?.order)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.autoInc, previousModel?.autoInc)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.editor, previousModel?.editor)) {
+            return false
+        }
+        if (!LuthierCustomizationModel.equals(model?.customEditor, previousModel?.customEditor)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.modifyType, previousModel?.modifyType)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.attributeName, previousModel?.attributeName, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.technicalDescription, previousModel?.technicalDescription, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.userDescription, previousModel?.userDescription, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.layoutSize, previousModel?.layoutSize)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.uiConfiguration, previousModel?.uiConfiguration, false)) {
+            return false
+        }
+        if (!LuthierCustomizationModel.equals(model?.customUiConfiguration, previousModel?.customUiConfiguration)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.groupInfo?.code, previousModel?.groupInfo?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.staticFields?.length, previousModel?.staticFields?.length)) {
+            return false
+        }
+        if (UtilFunctions.isValidStringOrArray(model?.staticFields) === true) {
+            for (const child of model.staticFields) {
+                if (UtilFunctions.isValidStringOrArray(child.code) === false) {
+                    return false;
+                }
+                const previousChildIndex = previousModel.staticFields.findIndex(previousChild => previousChild.code === child.code);
+                if (previousChildIndex >= 0) {
+                    const previousChild = previousModel.staticFields[previousChildIndex];
+                    if (LuthierTableStaticFieldModel.equals(child, previousChild) === false) {
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }
 export enum LuthierPermissionTypeEnum {
     USER =  ("USER"),
@@ -240,6 +553,28 @@ export class LuthierTableStaticFieldModel extends LuthierBasicModel{
     permissionMessage?: string
     resource?: LuthierResourceModel
     tableField?: LuthierTableFieldModel
+
+    public static equals(model: LuthierTableStaticFieldModel, previousModel: LuthierTableStaticFieldModel): boolean {
+        if (!UtilFunctions.equalsIgnoreCase(model?.code, previousModel?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.value, previousModel?.value, false)) {
+            return false
+        }
+        if (!LuthierCustomizationModel.equals(model?.customCaption, previousModel?.customCaption)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.permissionType, previousModel?.permissionType)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.permissionMessage, previousModel?.permissionMessage, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.resource?.code, previousModel?.resource?.code)) {
+            return false
+        }
+        return true;
+    }
 }
 export enum LuthierReferenceActionEnum {
     NONE = ("NONE"),
@@ -271,17 +606,90 @@ export class LuthierTableReferenceModel extends LuthierBasicModel{
     fieldsReference?: LuthierTableReferenceFieldModel[]
     lookupFastField?: LuthierTableFieldModel
     lookupDescriptionField?: LuthierTableFieldModel
+
+    public static equals(model: LuthierTableReferenceModel, previousModel: LuthierTableReferenceModel) {
+        if (!UtilFunctions.equalsIgnoreCase(model?.code, previousModel?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.name, previousModel?.name)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.status, previousModel?.status)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.onDelete, previousModel?.onDelete)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.onUpdate, previousModel?.onUpdate)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.attributeName, previousModel?.attributeName, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.updateMessage, previousModel?.updateMessage, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.deleteMessage, previousModel?.deleteMessage, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.tablePK?.code, previousModel?.tablePK?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.lookupFastField?.code, previousModel?.lookupFastField?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.lookupDescriptionField?.code, previousModel?.lookupDescriptionField?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.fieldsReference?.length, previousModel?.fieldsReference?.length)) {
+            return false
+        }
+        if (UtilFunctions.isValidStringOrArray(model?.fieldsReference) === true) {
+            for (const child of model.fieldsReference) {
+                if (UtilFunctions.isValidStringOrArray(child.code) === false) {
+                    return false;
+                }
+                const previousChildIndex = previousModel.fieldsReference.findIndex(previousChild => previousChild.code === child.code);
+                if (previousChildIndex >= 0) {
+                    const previousChild = previousModel.fieldsReference[previousChildIndex];
+                    if (LuthierTableReferenceFieldModel.equals(child, previousChild) === false) {
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }
 export class LuthierTableReferenceFieldModel extends LuthierBasicModel{
     id?: string
     code?: number
     status?: number
-    referenceCod?: number
+    referenceCode?: number
     fieldPKCode?: number
     fieldFKCode?: number
     fieldPK?: LuthierTableFieldModel
     fieldFK?: LuthierTableFieldModel
     reference?: LuthierTableReferenceModel
+
+    public static equals(model: LuthierTableReferenceFieldModel, previousModel: LuthierTableReferenceFieldModel) {
+        if (!UtilFunctions.equalsIgnoreCase(model?.code, previousModel?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.status, previousModel?.status)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.fieldPK?.code, previousModel?.fieldPK?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.fieldFK?.code, previousModel?.fieldFK?.code)) {
+            return false
+        }
+        return true;
+    }
 }
 export enum LuthierIndexSortEnum {
     ASC = ("ASC"),
@@ -298,6 +706,48 @@ export class LuthierTableIndexModel extends LuthierBasicModel{
     validationMessage?: any
     indexFields?: LuthierTableIndexFieldModel[]
     table?: LuthierTableModel
+
+    public static equals(model: LuthierTableIndexModel, previousModel: LuthierTableIndexModel) {
+        if (!UtilFunctions.equalsIgnoreCase(model?.code, previousModel?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.name, previousModel?.name)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.sortType, previousModel?.sortType)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.unique, previousModel?.unique)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.creationOrder, previousModel?.creationOrder)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.validationMessage, previousModel?.validationMessage, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.indexFields?.length, previousModel?.indexFields?.length)) {
+            return false
+        }
+        if (UtilFunctions.isValidStringOrArray(model?.indexFields) === true) {
+            for (const child of model.indexFields) {
+                if (UtilFunctions.isValidStringOrArray(child.tableField?.code) === false) {
+                    return false;
+                }
+                const previousChildIndex = previousModel.indexFields.findIndex(previousChild => previousChild.tableField.code === child.tableField?.code);
+                if (previousChildIndex >= 0) {
+                    const previousChild = previousModel.indexFields[previousChildIndex];
+                    if (LuthierTableIndexFieldModel.equals(child, previousChild) === false) {
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }
 export enum LuthierViewBodyEnum {
     SQLSERVER = ("SQLSERVER"),
@@ -317,6 +767,15 @@ export class LuthierTableIndexFieldModel extends LuthierBasicModel{
     order?: number
     tableField?: LuthierTableFieldModel
     index?: LuthierTableIndexModel
+
+    public static equals(model: LuthierTableIndexFieldModel, previousModel: LuthierTableIndexFieldModel) {
+        if (!UtilFunctions.equalsIgnoreCase(model?.order, previousModel?.order)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.tableField?.code, previousModel?.tableField?.code)) {
+            return false
+        }
+    }
 }
 export class LuthierCustomFieldModel extends LuthierBasicModel{
     id?: string
@@ -349,6 +808,101 @@ export class LuthierCustomFieldModel extends LuthierBasicModel{
     uiConfiguration?: string
     staticFields?: LuthierTableStaticCustomFieldModel[]
     realName?: string
+
+    public static equals(model: LuthierCustomFieldModel, previousModel: LuthierCustomFieldModel) {
+        if (!UtilFunctions.equalsIgnoreCase(model?.code, previousModel?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.name, previousModel?.name)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.size, previousModel?.size)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.notNull, previousModel?.notNull)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.defaultValue, previousModel?.defaultValue, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.precision, previousModel?.precision)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.minValue, previousModel?.minValue)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.maxValue, previousModel?.maxValue)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.editor, previousModel?.editor)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.charCase, previousModel?.charCase)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.description, previousModel?.description, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.fieldType, previousModel?.fieldType)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.key, previousModel?.key)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.search, previousModel?.search)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.label, previousModel?.label, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.order, previousModel?.order)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.groupInfo, previousModel?.groupInfo)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.autoInc, previousModel?.autoInc)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.technicalDescription, previousModel?.technicalDescription, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.userDescription, previousModel?.userDescription)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.modifyType, previousModel?.modifyType)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.attributeName, previousModel?.attributeName)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.layoutSize, previousModel?.layoutSize)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.uiConfiguration, previousModel?.uiConfiguration, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.staticFields?.length, previousModel?.staticFields?.length)) {
+            return false
+        }
+        if (UtilFunctions.isValidStringOrArray(model?.staticFields) === true) {
+            for (const child of model.staticFields) {
+                if (UtilFunctions.isValidStringOrArray(child.code) === false) {
+                    return false;
+                }
+                const previousChildIndex = previousModel.staticFields.findIndex(previousChild => previousChild.code === child.code);
+                if (previousChildIndex >= 0) {
+                    const previousChild = previousModel.staticFields[previousChildIndex];
+                    if (LuthierTableStaticCustomFieldModel.equals(child, previousChild) === false) {
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+    }
 }
 export class LuthierTableStaticCustomFieldModel extends LuthierBasicModel{
     id?: string
@@ -359,6 +913,25 @@ export class LuthierTableStaticCustomFieldModel extends LuthierBasicModel{
     resource?: string
     permissionType?: number
     permissionMessage?: string
+
+    public static equals(model: LuthierTableStaticCustomFieldModel, previousModel: LuthierTableStaticCustomFieldModel): boolean {
+        if (!UtilFunctions.equalsIgnoreCase(model?.code, previousModel?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.value, previousModel?.value, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.permissionType, previousModel?.permissionType)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.permissionMessage, previousModel?.permissionMessage, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.resource, previousModel?.resource)) {
+            return false
+        }
+        return true;
+    }
 }
 export type LuthierCustomizationType =
     'FIELD_TABLE' |
@@ -449,6 +1022,61 @@ export class LuthierTableSearchModel extends LuthierBasicModel{
     table?: LuthierTableModel
     searchFields?: LuthierTableSearchFieldModel[]
     subsystems?: LuthierTableSearchSubsystemModel[]
+
+    public static equals(model: LuthierTableSearchModel, previousModel: LuthierTableSearchModel) {
+        if (!UtilFunctions.equalsIgnoreCase(model?.code, previousModel?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.name, previousModel?.name)) {
+            return false
+        }
+        if (!LuthierCustomizationModel.equals(model?.customName, previousModel?.customName)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.status, previousModel?.status)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.type, previousModel?.type)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.order, previousModel?.order)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.searchFields?.length, previousModel?.searchFields?.length)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.subsystems?.length, previousModel?.subsystems?.length)) {
+            return false
+        }
+        if (UtilFunctions.isValidStringOrArray(model?.searchFields) === true) {
+            for (const child of model.searchFields) {
+                if (UtilFunctions.isValidStringOrArray(child.code) === false) {
+                    return false;
+                }
+                const previousChildIndex = previousModel.searchFields.findIndex(previousChild => previousChild.code === child.code);
+                if (previousChildIndex >= 0) {
+                    const previousChild = previousModel.searchFields[previousChildIndex];
+                    if (LuthierTableSearchFieldModel.equals(child, previousChild) === false) {
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        if (UtilFunctions.isValidStringOrArray(model?.subsystems) === true) {
+            for (const child of model.subsystems) {
+                if (UtilFunctions.isValidStringOrArray(child.subsystem?.code) === false) {
+                    return false;
+                }
+                const previousChildIndex = previousModel.subsystems.findIndex(previousChild => previousChild.subsystem.code === child.subsystem.code);
+                if (previousChildIndex < 0) {
+                    return false;
+                }
+            }
+        }
+    }
 }
 export enum LuthierSearchFieldEditorEnum {
     DEFAULT = ("DEFAULT"),
@@ -485,6 +1113,36 @@ export class LuthierTableSearchFieldModel extends LuthierBasicModel{
     editor?: LuthierSearchFieldEditorEnum
     search?: LuthierTableSearchModel
     tableField?: LuthierTableFieldModel
+
+    public static equals(model: LuthierTableSearchFieldModel, previousModel: LuthierTableSearchFieldModel) {
+        if (!UtilFunctions.equalsIgnoreCase(model?.code, previousModel?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.notNull, previousModel?.notNull)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.label, previousModel?.label, false)) {
+            return false
+        }
+        if (!LuthierCustomizationModel.equals(model?.customLabel, previousModel?.customLabel)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.operator, previousModel?.operator)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.order, previousModel?.order)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.editor, previousModel?.editor)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.search, previousModel?.search)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.tableField?.code, previousModel?.tableField?.code)) {
+            return false
+        }
+    }
 }
 export class LuthierTableSearchSubsystemModel {
     searchCode?: number
@@ -538,6 +1196,19 @@ export class LuthierVisionModel {
     description?: string
     children?: LuthierVisionDatasetModel[]
     objectType?: LuthierObjectType
+    invalidFields?: {[key: string]: any}
+    public static equals(model: LuthierVisionModel, previousModel: LuthierVisionModel): boolean {
+        if (!UtilFunctions.equalsIgnoreCase(model?.code, previousModel?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.name, previousModel?.name)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.description, previousModel?.description, false)) {
+            return false
+        }
+        return true;
+    }
 
 }
 
@@ -784,7 +1455,7 @@ export class LuthierVisionDatasetFieldModel extends LuthierBasicModel{
         if (!UtilFunctions.equalsIgnoreCase(model?.technicalDescription, previousModel?.technicalDescription, false)) {
             return false
         }
-        if (!UtilFunctions.equalsIgnoreCase(model?.technicalDescription, previousModel?.userDescription, false)) {
+        if (!UtilFunctions.equalsIgnoreCase(model?.userDescription, previousModel?.userDescription, false)) {
             return false
         }
         if (!UtilFunctions.equalsIgnoreCase(model?.layoutSize, previousModel?.layoutSize)) {
@@ -865,9 +1536,11 @@ export class LuthierVisionDatasetSearchModel extends LuthierBasicModel{
         if (!UtilFunctions.equalsIgnoreCase(model?.order, previousModel?.order)) {
             return false
         }
+        /*
         if (!UtilFunctions.equalsIgnoreCase(model?.dataset?.code, previousModel?.dataset?.code)) {
             return false
         }
+         */
         if (!UtilFunctions.equalsIgnoreCase(model?.searchFields?.length, previousModel?.searchFields?.length)) {
             return false
         }
@@ -942,9 +1615,11 @@ export class LuthierVisionDatasetSearchFieldModel extends LuthierBasicModel {
         if (!UtilFunctions.equalsIgnoreCase(model?.editor, previousModel?.editor)) {
             return false
         }
+        /*
         if (!UtilFunctions.equalsIgnoreCase(model?.search?.code, previousModel?.search?.code)) {
             return false
         }
+         */
         if (!UtilFunctions.equalsIgnoreCase(model?.dataset?.code, previousModel?.dataset?.code)) {
             return false
         }
@@ -1021,7 +1696,7 @@ export class LuthierVisionDatasetCustomFieldModel extends LuthierBasicModel{
         if (!UtilFunctions.equalsIgnoreCase(model?.technicalDescription, previousModel?.technicalDescription, false)) {
             return false
         }
-        if (!UtilFunctions.equalsIgnoreCase(model?.technicalDescription, previousModel?.userDescription, false)) {
+        if (!UtilFunctions.equalsIgnoreCase(model?.userDescription, previousModel?.userDescription, false)) {
             return false
         }
         if (!UtilFunctions.equalsIgnoreCase(model?.layoutSize, previousModel?.layoutSize)) {
