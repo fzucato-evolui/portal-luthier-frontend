@@ -48,6 +48,8 @@ export class GoogleConfigModel {
 export class PortalLuthierHistoryConfigModel {
     enabled: boolean = true;
     daysToKeep: number = 30;
+    currentVersion: string;
+    minVersion: string;
 }
 
 export class AnotherConfigModel {

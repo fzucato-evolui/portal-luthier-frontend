@@ -167,15 +167,17 @@
                                                       [checked]="historical.hasValue() && isAllSelected()"
                                                       [indeterminate]="historical.hasValue() && !isAllSelected()">
                                         </mat-checkbox>
-                                        <div [matTooltip]="!canApply() ? 'Para aplicar o histórico, escolha os itens, um banco luthier e um debug id' : ''">
-                                            <button mat-icon-button aria-label="Apply" (click)="applyHistory()" [disabled]="!canApply()">
+                                        <div [matTooltip]="!canApply(true) ? 'Para aplicar o histórico, escolha os itens, um banco luthier e um debug id' : ''">
+                                            <button mat-icon-button aria-label="Apply" (click)="applyHistory()" [disabled]="!canApply(true)">
                                                 <mat-icon class="icon-size-5 text-green-500" fontSet="fas" fontIcon="fa-file-arrow-up"></mat-icon>
                                             </button>
                                         </div>
-                                        <input type="file" #fileUploadInput (change)="onFilesSelected($event)" accept=".json" multiple style="display: none;" />
-                                        <button mat-icon-button aria-label="Upload" (click)="fileUploadInput.click()" matTooltip="Aplicar histórico a partir de arquivos salvos">
-                                            <mat-icon class="icon-size-5 text-gray-500" fontSet="fas" fontIcon="fa-folder-open"></mat-icon>
-                                        </button>
+                                        <div [matTooltip]="!canApply(false) ? 'Para aplicar o histórico, escolha um banco luthier e um debug id' : ''">
+                                            <input type="file" #fileUploadInput (change)="onFilesSelected($event)" accept=".json" multiple style="display: none;" />
+                                            <button mat-icon-button aria-label="Upload" (click)="fileUploadInput.click()" [disabled]="!canApply(false)" matTooltip="Aplicar histórico a partir de arquivos salvos">
+                                                <mat-icon class="icon-size-5 text-gray-500" fontSet="fas" fontIcon="fa-folder-open"></mat-icon>
+                                            </button>
+                                        </div>
                                         <button mat-icon-button aria-label="Refresh" (click)="refresh()">
                                             <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-sync"></mat-icon>
                                         </button>
@@ -184,7 +186,7 @@
                                 </th>
                                 <td mat-cell *matCellDef="let model">
                                     <div class="flex flex-row items-center">
-                                        <div>
+                                        <div [matTooltip]="model['tooltip']">
                                             <mat-checkbox [ngClass]="{'readOnly': model['forbidden'] === true}" (click)="$event.stopPropagation()"
                                                           (change)="$event ? historical.toggle(model) : null"
                                                           [checked]="historical.isSelected(model)">
@@ -211,6 +213,10 @@
                             <ng-container matColumnDef="id">
                                 <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
                                 <td mat-cell *matCellDef="let model"> {{ model.id }} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="version">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Versão </th>
+                                <td mat-cell *matCellDef="let model"> {{ model.version }} </td>
                             </ng-container>
                             <ng-container matColumnDef="persistDate">
                                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Data </th>

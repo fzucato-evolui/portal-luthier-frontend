@@ -85,7 +85,7 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
     drawerOpened: boolean = true;
     public unsubscribeAll: Subject<any> = new Subject<any>();
     public dataSource = new MatTableDataSource<PortalLuthierHistoryModel>();
-    displayedColumns = ['buttons', 'user.image', 'id', 'persistDate', 'user.name', 'luthierDatabase.identifier', 'persistType', 'classDescription', 'classKey'];
+    displayedColumns = ['buttons', 'user.image', 'id', 'version', 'persistDate', 'user.name', 'luthierDatabase.identifier', 'persistType', 'classDescription', 'classKey'];
     workDataBase: number;
     dadosDataBase: number;
     filterModel: PortalLuthierHistoryFilterModel = new PortalLuthierHistoryFilterModel();
@@ -122,9 +122,17 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
     {
         this.service.model$
             .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe((databases: PortalLuthierHistoryModel[]) =>
+            .subscribe((historical: PortalLuthierHistoryModel[]) =>
             {
-                this.dataSource.data = databases;
+                historical.forEach(history => {
+                    const invalidVersion = UtilFunctions.isValidStringOrArray(history.version) === false ||
+                        UtilFunctions.compareVersions(history.version, this.config.minVersion) < 0;
+                    if (invalidVersion) {
+                        history['forbidden'] = invalidVersion;
+                        history['tooltip'] = 'Versão não suportada';
+                    }
+                })
+                this.dataSource.data = historical;
             });
         this.service.config$
             .pipe(takeUntil(this.unsubscribeAll))
@@ -216,26 +224,6 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
         this.dataSource.filter = filterValue.trim().toLowerCase();
     }
 
-    check(id) {
-        this.workDataBase = id;
-        this._userService.luthierDatabase = id;
-    }
-
-    copy(id) {
-        this.messageService.open('Deseja realmente copiar os metatados desse banco para o banco de trabalho? Todos os dados atuais serão apagados.', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
-            if (result === 'confirmed') {
-                const index = this.dataSource.data.findIndex(r => r.id === id);
-                if (index >= 0) {
-                    this.service.copy(id).then(value => {
-                        this.workDataBase = null;
-                        this._userService.luthierDatabase = "";
-                        this.messageService.open('Dados copiados com sucesso', 'SUCESSO', 'success');
-                    });
-                }
-            }
-        });
-
-    }
     clearImage(model: PortalLuthierHistoryModel) {
         model.user.image = 'assets/images/noPicture.png';
     }
@@ -248,12 +236,15 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
         if (this.config == null) {
             this.config = new PortalLuthierHistoryConfigModel();
         }
+        let message = '';
         if (this.config.enabled) {
-            return `Os históricos ficam salvos por ${this.config.daysToKeep} dias`;
+            message = `Os históricos ficam salvos por ${this.config.daysToKeep} dias.`;
         }
         else {
-            return `A gravação de históricos está desabilitada`;
+            message = `A gravação de históricos está desabilitada.`;
         }
+        message += ` Versão mínima suportada ${this.config.minVersion}`;
+        return message;
     }
 
 
@@ -288,8 +279,13 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
         });
     }
 
-    canApply(): boolean {
-        return this.historical.selected.length > 0 && UtilFunctions.isValidStringOrArray(this.workDataBase) && UtilFunctions.isValidStringOrArray(this.dadosDataBase);
+    canApply(needSelectedItens: boolean): boolean {
+        if (needSelectedItens) {
+            if (this.historical.selected.length === 0) {
+                return false;
+            }
+        }
+        return UtilFunctions.isValidStringOrArray(this.workDataBase) && UtilFunctions.isValidStringOrArray(this.dadosDataBase);
     }
 
     download(model: PortalLuthierHistoryModel) {
@@ -309,6 +305,7 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
             this.jsonDataList = [];
             files.forEach(file => this.readFile(file, files.length));
         }
+        input.value = '';
     }
 
     readFile(file: File, totalFiles: number): void {
@@ -346,7 +343,13 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
             this.jsonDataList.forEach(json => {
                 try {
                     const history = JSON.parse(json.data) as PortalLuthierHistoryModel;
-                    if (UtilFunctions.isValidStringOrArray(history.className) === false || !history.className.includes('br.com.evolui.')) {
+                    if (UtilFunctions.isValidStringOrArray(history.version) === false) {
+                        throw new Error(`Histórico inválido (version)`);
+                    }
+                    if (UtilFunctions.compareVersions(history.version, this.config.minVersion) < 0) {
+                        throw new Error(`Histórico inválido (version)`);
+                    }
+                    if (UtilFunctions.isValidStringOrArray(history.className) === false) {
                         throw new Error(`Histórico inválido (className)`);
                     }
                     if (UtilFunctions.isValidStringOrArray(history.persistType) === false || !Object.keys(PortalHistoryPersistTypeEnum).includes(history.persistType)) {

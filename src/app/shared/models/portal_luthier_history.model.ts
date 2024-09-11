@@ -16,6 +16,7 @@ export class PortalLuthierHistoryModel {
     public user: UserModel;
     public luthierDatabase: PortalLuthierDatabaseModel;
     public json: string;
+    public version: string;
 }
 
 export class PortalLuthierHistoryFilterModel {

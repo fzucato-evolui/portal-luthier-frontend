@@ -58,7 +58,7 @@ export class PortalLuthierHistoryService
         );
     }
 
-    getConfig(): Observable<any>
+    getConfig(): Observable<PortalLuthierHistoryConfigModel>
     {
         return this._httpClient.get<PortalLuthierHistoryConfigModel>(`${this.baseRestUrl}/config`).pipe(
             tap((response: PortalLuthierHistoryConfigModel) =>
