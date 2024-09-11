@@ -127,7 +127,7 @@
                         <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
                             Histórico de Alterações Luthier
                         </h2>
-                        <div class="text-secondary">Para aplicar o histórico, escolha os itens, um banco luthier e um debug id. Eles serão aplicados na ordem crescente de data.</div>
+                        <div class="text-secondary">Para aplicar o histórico, escolha os itens ou os arquivos, um banco luthier e um debug id. Eles serão aplicados na ordem crescente de data.</div>
                         <div class="text-secondary">{{getHistoryDescription()}}</div>
                     </div>
                 </div>
@@ -172,6 +172,10 @@
                                                 <mat-icon class="icon-size-5 text-green-500" fontSet="fas" fontIcon="fa-file-arrow-up"></mat-icon>
                                             </button>
                                         </div>
+                                        <input type="file" #fileUploadInput (change)="onFilesSelected($event)" accept=".json" multiple style="display: none;" />
+                                        <button mat-icon-button aria-label="Upload" (click)="fileUploadInput.click()" matTooltip="Aplicar histórico a partir de arquivos salvos">
+                                            <mat-icon class="icon-size-5 text-gray-500" fontSet="fas" fontIcon="fa-folder-open"></mat-icon>
+                                        </button>
                                         <button mat-icon-button aria-label="Refresh" (click)="refresh()">
                                             <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-sync"></mat-icon>
                                         </button>

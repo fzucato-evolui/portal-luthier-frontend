@@ -225,8 +225,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             if (UtilFunctions.isValidStringOrArray(rows)) {
                 rows.rows.forEach(row =>  {
                     event.preventDefault();
-                    const fg = this.getFieldGroup(row, this.currentTab);
-                    fg.patchValue(row);
+                    row.row = null;
                     row.editing = false;
                     row.pending = false;
                 });
@@ -347,6 +346,18 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
             });
 
+        this.customizationsDataSource.connect()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(data => {
+                this.model.currentViewBodyType = this.dadosViewBodyType;
+                const ret = LuthierValidator.validateTable(this.model, this._model);
+                this.hasChanged = !ret.isSame;
+                if (ret.needUpdate) {
+                    this.customizationsDataSource._updateChangeSubscription();
+                }
+
+            });
+
     }
 
     refresh() {
@@ -436,6 +447,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                 else if ( x.type === 'TABLE_FIELD_REQUIRED') {
                     let index = this._model.fields.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
+                        x.value = UtilFunctions.parseBoolean(x.value);
                         this._model.fields[index].customNotNull = x;
                     }
                 }
@@ -567,7 +579,20 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
     }
 
+
     save() {
+        const rowsEditing = this.getAllRowsEditing();
+        if (UtilFunctions.isValidStringOrArray(rowsEditing) === true) {
+            rowsEditing.forEach(rows => {
+                rows.rows.forEach(row =>  {
+                    row.row = null;
+                    row.editing = false;
+                    row.pending = false;
+                });
+                rows.datasource._updateChangeSubscription();
+                this._changeDetectorRef.detectChanges();
+            });
+        }
         if (this.hasChanged === false) {
             this.messageService.open('Nenhuma alteração foi detectada. Provavelmente, nenhum histórico será gerado, mas as informações serão levadas para a base de dados (Debug ID). Deseja continuar?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
                 if (result === 'confirmed') {
@@ -575,10 +600,10 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
                 }
             });
+            return
         }
-        else {
-            this.doSave();
-        }
+
+        this.doSave();
 
     }
     doSave() {
@@ -1097,12 +1122,11 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     editRow(model: LuthierBasicModel, type: TableType) {
         //const editing = this.getRealIndex(model, type);
         //editing.dataSource.data[editing.index]['editing'] = true;
-        const fg = this.addField(type);
+        const fg = this.addField(type === 'customizations' ? 'fields' : type);
         fg.patchValue(model);
         UtilFunctions.forceValidations(fg);
         model.row = fg;
         model.editing = true;
-
     }
 
     saveRow(model: LuthierBasicModel, type: TableType) {
@@ -1436,6 +1460,16 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
 
     changeTab(event: MatTabChangeEvent) {
+        const rows = this.getRowEditing(this.currentTab);
+        if (UtilFunctions.isValidStringOrArray(rows)) {
+            rows.rows.forEach(row =>  {
+                row.row = null;
+                row.editing = false;
+                row.pending = false;
+            });
+            rows.datasource._updateChangeSubscription();
+            this._changeDetectorRef.detectChanges();
+        }
         this.currentTab = event.tab.ariaLabel as TableType;
         const dataSource = this.getDatasourceFromType(this.currentTab);
         if (dataSource != null) {
@@ -2068,5 +2102,17 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
     hasValidationProblem(type: TableType): boolean {
         return UtilFunctions.isValidObject(this.model.invalidFields) && UtilFunctions.isValidStringOrArray(this.model.invalidFields[type]);
+    }
+
+    getAllRowsEditing(): Array<{datasource:MatTableDataSource<any>, rows: LuthierBasicModel[]}> {
+        const editingGrids: Array<TableType> = ['fields', 'groupInfos', 'customFields', 'customizations'];
+        const allRows: Array<{datasource:MatTableDataSource<any>, rows: LuthierBasicModel[]}> = [];
+        for (const editingGrid of editingGrids) {
+            const rows = this.getRowEditing(editingGrid);
+            if (UtilFunctions.isValidStringOrArray(rows) === true) {
+                allRows.push(rows);
+            }
+        }
+        return allRows;
     }
 }

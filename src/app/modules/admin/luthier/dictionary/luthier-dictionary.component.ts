@@ -675,6 +675,27 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
         }
     }
 
+    clone(object: LuthierDictionaryObjectType) {
+        if (object.objectType === 'TABLE' || object.objectType === 'VIEW') {
+            this.service.patchTableHistory(object.code)
+                .then(result => {
+                    this.messageService.open('Histórico da tabela/view gerado com sucesso', 'SUCESSO', 'success');
+                });
+        }
+        else if (object.objectType === 'VISION') {
+            this.service.patchVisionHistory(object.code)
+                .then(result => {
+                    this.messageService.open('Histórico da visão gerado com sucesso', 'SUCESSO', 'success');
+                });
+        }
+        else if (object.objectType === 'VISION_DATASET') {
+            this.service.patchDatasetHistory(object.code)
+                .then(result => {
+                    this.messageService.open('Histórico do dataset gerado com sucesso', 'SUCESSO', 'success');
+                });
+        }
+    }
+
     getTreeDataSource(table: LuthierVisionModel, tree: MatTree<any>): MatTreeNestedDataSource<LuthierVisionModel> {
         if (!tree.dataSource) {
             const dataSource = new MatTreeNestedDataSource<LuthierVisionModel>();

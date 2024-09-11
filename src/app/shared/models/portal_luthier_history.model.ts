@@ -3,16 +3,19 @@ import {UserModel} from './user.model';
 
 export enum PortalHistoryPersistTypeEnum {
     SAVE = 'SAVE',
-    DELETE = 'DELETE'
+    DELETE = 'DELETE',
+    CLONE = 'CLONE'
 }
 export class PortalLuthierHistoryModel {
     public id: number;
+    public persistDate: Date;
     public persistType: PortalHistoryPersistTypeEnum | string;
     public className: string;
     public classDescription: string;
     public classKey: string;
     public user: UserModel;
     public luthierDatabase: PortalLuthierDatabaseModel;
+    public json: string;
 }
 
 export class PortalLuthierHistoryFilterModel {

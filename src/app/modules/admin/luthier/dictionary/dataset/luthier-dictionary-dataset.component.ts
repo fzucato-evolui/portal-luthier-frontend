@@ -180,8 +180,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             if (UtilFunctions.isValidStringOrArray(rows)) {
                 rows.rows.forEach(row =>  {
                     event.preventDefault();
-                    const fg = this.getFieldGroup(row, this.currentTab);
-                    fg.patchValue(row);
+                    row.row = null;
                     row.editing = false;
                     row.pending = false;
                 });
@@ -534,6 +533,22 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     }
 
     save() {
+        const rowsEditing = this.getAllRowsEditing();
+        if (UtilFunctions.isValidStringOrArray(rowsEditing) === true) {
+            rowsEditing.forEach(rows => {
+                rows.rows.forEach(row =>  {
+                    row.row = null;
+                    row.editing = false;
+                    row.pending = false;
+                });
+                rows.datasource._updateChangeSubscription();
+                this._changeDetectorRef.detectChanges();
+            });
+        }
+        this.doSave();
+    }
+
+    private doSave() {
         const basicInfo = this.formSave.value as LuthierVisionDatasetModel;
         this._cloneModel.code = basicInfo.code;
         this._cloneModel.name = basicInfo.name;
@@ -1053,7 +1068,6 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         const groupInfoWithGroupInfo = this.groupsInfoDataSource.data
             .filter(x => x.parent &&  (this.compareCode(x.parent, groupInfo)))
             .map(x => this.groupsInfoDataSource.data.findIndex(y => this.compareCode(x, y)));
-        console.log('groupInfoWithGroupInfo', groupInfoWithGroupInfo, groupInfo);
         if (UtilFunctions.isValidStringOrArray(groupInfoWithGroupInfo)) {
             groupInfoWithGroupInfo.forEach(x => {
                 this.groupsInfoDataSource.data[x].parent = null;
@@ -1159,6 +1173,16 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     }
 
     changeTab(event: MatTabChangeEvent) {
+        const rows = this.getRowEditing(this.currentTab);
+        if (UtilFunctions.isValidStringOrArray(rows)) {
+            rows.rows.forEach(row =>  {
+                row.row = null;
+                row.editing = false;
+                row.pending = false;
+            });
+            rows.datasource._updateChangeSubscription();
+            this._changeDetectorRef.detectChanges();
+        }
         this.currentTab = event.tab.ariaLabel as TableType;
         this.getDatasourceFromType(this.currentTab)._updateChangeSubscription();
     }
@@ -1807,5 +1831,17 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
 
     hasValidationProblem(type: TableType): boolean {
         return UtilFunctions.isValidObject(this.model.invalidFields) && UtilFunctions.isValidStringOrArray(this.model.invalidFields[type]);
+    }
+
+    getAllRowsEditing(): Array<{datasource:MatTableDataSource<any>, rows: LuthierBasicModel[]}> {
+        const editingGrids: Array<TableType> = ['fields', 'groupInfos', 'customFields', 'customizations'];
+        const allRows: Array<{datasource:MatTableDataSource<any>, rows: LuthierBasicModel[]}> = [];
+        for (const editingGrid of editingGrids) {
+            const rows = this.getRowEditing(editingGrid);
+            if (UtilFunctions.isValidStringOrArray(rows) === true) {
+                allRows.push(rows);
+            }
+        }
+        return allRows;
     }
 }

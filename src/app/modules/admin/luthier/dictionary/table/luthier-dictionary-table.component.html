@@ -1309,8 +1309,8 @@
                         {{ field.customNotNull?.value }}
                     </div>
                     <div *ngIf="field['editing']" class="flex flex-row items-center" [formGroup]="getFieldGroup(field, fieldtype).get('customNotNull')" #group="ngForm">
-                        <mat-checkbox (change)="checkIndeterminate($event, group.form.get('value'))"
-                                      [indeterminate]="group.form.get('value').value === null"
+                        <mat-checkbox (change)="checkIndeterminate($event, group.form?.get('value'))"
+                                      [indeterminate]="group.form?.get('value').value === null"
                                       [name]="'customNotNullField'+i" class="text-sm" formControlName="value"></mat-checkbox>
                     </div>
 

@@ -37,6 +37,7 @@ import {PortalLuthierHistoryConfigModel} from '../../../../shared/models/system-
 import {SelectionModel} from '@angular/cdk/collections';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {saveAs} from 'file-saver';
+import {LuthierBasicModel} from '../../../../shared/models/luthier.model';
 
 export const FORMAT = {
     parse: {
@@ -91,6 +92,8 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
     PortalHistoryPersistTypeEnum = PortalHistoryPersistTypeEnum;
     config: PortalLuthierHistoryConfigModel;
     historical = new SelectionModel<PortalLuthierHistoryModel>(true, []);
+    jsonDataList: Array<{fileName?: string, data?: string}> = [];
+    filesProcessed = 0;
     /**
      * Constructor
      */
@@ -290,12 +293,92 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
     }
 
     download(model: PortalLuthierHistoryModel) {
-        this.service.download(model.id).then(value => {
-            const blob = new Blob([value.file], {type: "text/plain;charset=utf-8"});
+        this.service.get(model.id).then(value => {
+            const blob = new Blob([JSON.stringify(value)], {type: "text/plain;charset=utf-8"});
             const filename = `history_${model.id}.json`;
             saveAs(blob, filename);
         });
 
     }
+    onFilesSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+
+        if (input.files && input.files.length > 0) {
+            const files = Array.from(input.files);
+            this.filesProcessed = 0;
+            this.jsonDataList = [];
+            files.forEach(file => this.readFile(file, files.length));
+        }
+    }
+
+    readFile(file: File, totalFiles: number): void {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const fileContent = e.target?.result as string;
+
+            try {
+                this.jsonDataList.push({
+                    fileName: file.name,
+                    data: fileContent
+                });
+
+                this.filesProcessed++;
+
+                if (this.filesProcessed === totalFiles) {
+                    setTimeout(() => {
+                        this.uploadHistorical();
+                    }, 100)
+
+                }
+            } catch (error) {
+                this.messageService.open(`Erro ao processar arquivo ${file.name}: ${error}`, 'ERRO', 'error');
+                console.error(`Error parsing JSON from file ${file.name}:`, error);
+            }
+        };
+
+        reader.readAsText(file);
+    }
+
+    uploadHistorical(): void {
+        try {
+            const historical: Array<PortalLuthierHistoryModel> = [];
+            this.jsonDataList.forEach(json => {
+                try {
+                    const history = JSON.parse(json.data) as PortalLuthierHistoryModel;
+                    if (UtilFunctions.isValidStringOrArray(history.className) === false || !history.className.includes('br.com.evolui.')) {
+                        throw new Error(`Histórico inválido (className)`);
+                    }
+                    if (UtilFunctions.isValidStringOrArray(history.persistType) === false || !Object.keys(PortalHistoryPersistTypeEnum).includes(history.persistType)) {
+                        throw new Error(`Histórico inválido (persistType)`);
+                    }
+                    if (UtilFunctions.isValidStringOrArray(history.persistDate) === false) {
+                        throw new Error(`Histórico inválido (persistDate)`);
+                    }
+                    if (UtilFunctions.isValidStringOrArray(history.json) === false) {
+                        throw new Error(`Histórico inválido (json)`);
+                    }
+                    else {
+                        const bean: LuthierBasicModel = JSON.parse(history.json);
+                        if (UtilFunctions.isValidStringOrArray(bean.code) === false) {
+                            throw new Error(`Histórico inválido (json)`);
+                        }
+                    }
+
+                    historical.push(history);
+                }
+                catch (error) {
+                    throw new Error(`Arquivo ${json.fileName}: ${error}`);
+                }
+            });
+            this.service.applyHistorical(historical).then(value => {
+                this.messageService.open('Históricos aplicados com sucesso', 'SUCESSO', 'success');
+            });
+        }
+        catch (error) {
+            this.messageService.open(`Erro ao processar arquivos: ${error}`, 'ERRO', 'error');
+        }
+    }
+
 
 }

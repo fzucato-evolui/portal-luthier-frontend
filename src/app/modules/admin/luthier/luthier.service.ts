@@ -602,6 +602,18 @@ export class LuthierService
         return firstValueFrom(this._httpClient.delete<LuthierChangesOfTableModel>(`${this.baseDicUrl}/check-objects-changes/${id}`));
     }
 
+    patchTableHistory(id: number): Promise<any> {
+        return firstValueFrom(this._httpClient.patch<any>(`${this.baseDicUrl}/history-table/${id}`, null));
+    }
+
+    patchVisionHistory(id: number): Promise<any> {
+        return firstValueFrom(this._httpClient.patch<any>(`${this.baseDicUrl}/history-vision/${id}`, null));
+    }
+
+    patchDatasetHistory(id: number): Promise<any> {
+        return firstValueFrom(this._httpClient.patch<any>(`${this.baseDicUrl}/history-dataset/${id}`, null));
+    }
+
     getJSON(jsonName: string): Promise<any> {
         return firstValueFrom(this._httpClient.get<any>(`assets/json/${jsonName}`));
     }
