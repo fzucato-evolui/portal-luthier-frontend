@@ -178,8 +178,13 @@
                                                 <mat-icon class="icon-size-5 text-gray-500" fontSet="fas" fontIcon="fa-folder-open"></mat-icon>
                                             </button>
                                         </div>
+                                        <div [matTooltip]="!historical.hasValue() ? 'Para fazer o download de múltiplos arquivos, selecione os itens' : ''">
+                                            <button mat-icon-button aria-label="Upload" (click)="downloadZip()" [disabled]="!historical.hasValue()" matTooltip="Fazer download de míltiplos históricos">
+                                                <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-download"></mat-icon>
+                                            </button>
+                                        </div>
                                         <button mat-icon-button aria-label="Refresh" (click)="refresh()">
-                                            <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-sync"></mat-icon>
+                                            <mat-icon class="icon-size-5 text-primary" fontSet="fas" fontIcon="fa-sync"></mat-icon>
                                         </button>
 
                                     </div>
@@ -195,7 +200,7 @@
                                         <button mat-icon-button aria-label="Delete" (click)="delete(model.id)" matTooltip="Remover Banco">
                                             <mat-icon class="icon-size-5 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
                                         </button>
-                                        <button mat-icon-button aria-label="Downloas" (click)="download(model)" matTooltip="Fazer download do histórico">
+                                        <button mat-icon-button aria-label="Download" (click)="download(model)" matTooltip="Fazer download do histórico">
                                             <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-download"></mat-icon>
                                         </button>
                                     </div>

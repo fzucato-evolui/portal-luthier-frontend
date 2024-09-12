@@ -296,6 +296,16 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
         });
 
     }
+
+    downloadZip() {
+        this.service.generateZip(this.historical.selected).then(value => {
+            console.log(value);
+            const blob = UtilFunctions.convertBase64ToBlobData(value.data, 'application/octet-stream');
+            const filename = value.fileName;
+            saveAs(blob, filename);
+        });
+    }
+
     onFilesSelected(event: Event): void {
         const input = event.target as HTMLInputElement;
 

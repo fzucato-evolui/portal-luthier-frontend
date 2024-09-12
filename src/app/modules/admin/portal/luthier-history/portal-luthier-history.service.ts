@@ -136,4 +136,12 @@ export class PortalLuthierHistoryService
                 return of(response);
             })));
     }
+
+    generateZip(model: PortalLuthierHistoryModel[]) : Promise<{fileName: string, data: string}> {
+
+        return firstValueFrom(this._httpClient.post<{fileName: string, data: string}>(`${this.baseRestUrl}/generate-zip`, model).pipe(
+            switchMap((response: {fileName: string, data: string}) => {
+                return of(response);
+            })));
+    }
 }
