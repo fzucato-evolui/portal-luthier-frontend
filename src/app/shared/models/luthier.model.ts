@@ -1196,6 +1196,7 @@ export class LuthierVisionModel {
     description?: string
     children?: LuthierVisionDatasetModel[]
     objectType?: LuthierObjectType
+    module?: LuthierModuleModel
     invalidFields?: {[key: string]: any}
     public static equals(model: LuthierVisionModel, previousModel: LuthierVisionModel): boolean {
         if (!UtilFunctions.equalsIgnoreCase(model?.code, previousModel?.code)) {
@@ -1205,6 +1206,9 @@ export class LuthierVisionModel {
             return false
         }
         if (!UtilFunctions.equalsIgnoreCase(model?.description, previousModel?.description, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.module?.code, previousModel?.module?.code)) {
             return false
         }
         return true;
@@ -1856,5 +1860,13 @@ export enum LuthierMetadataHistoryChangeTypeEnum {
     DELETE = ("DELETE"),
     CREATE = ("CREATE"),
     UPDATE = ("UPDATE")
+}
+
+export class LuthierModuleModel extends LuthierBasicModel {
+    name?: string
+    parentCode?: number
+    description?: string
+    parent?: LuthierModuleModel
+
 }
 

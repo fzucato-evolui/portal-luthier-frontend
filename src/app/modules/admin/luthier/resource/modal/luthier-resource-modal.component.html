@@ -31,103 +31,146 @@
 
             <div class="w-full mb-4">
                 <div class="w-full my-2">
-                    <div class="text-xl">Base de dados</div>
-                    <div class="text-secondary">Configuração de conexão da base de dados do Produto</div>
+                    <div class="text-xl">Recurso Luthier</div>
+                    <div class="text-secondary">Configuração de resources (imagens/arquivos) auxiliares do luthier</div>
 
                 </div>
                 <div class="grid sm:grid-cols-12 gap-2 mt-4 mx-1">
-                    <div class="sm:col-span-2">
+                    <div class="sm:col-span-3">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
-                            <mat-label>ID</mat-label>
+                            <mat-label>Códgo</mat-label>
                             <mat-icon
-                                class="icon-size-5"
+                                class="icon-size-5 evolui-menu-item-icon"
                                 fontSet="fas" fontIcon="fa-list-ol"
                                 matPrefix></mat-icon>
                             <input
-                                mask="0*"
+                                readonly
                                 [formControlName]="'code'"
                                 matInput>
                         </mat-form-field>
                     </div>
-                    <div class="sm:col-span-10"></div>
-                    <!-- dbType -->
+                    <div class="sm:col-span-9">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Nome</mat-label>
+                            <mat-icon
+                                class="icon-size-5 evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-signature"
+                                matPrefix></mat-icon>
+                            <input
+                                [patterns]="customPatterns" mask="I*"
+                                [formControlName]="'name'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-12">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Descrição</mat-label>
+                            <mat-icon
+                                class="icon-size-5 evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-comment"
+                                matPrefix></mat-icon>
+                            <input
+                                [formControlName]="'description'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
                     <div class="sm:col-span-6">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
-                            <mat-label>Tipo de Banco</mat-label>
+                            <mat-label>Tipo de Recurso</mat-label>
                             <mat-icon
-                                class="icon-size-5"
+                                class="icon-size-5 evolui-menu-item-icon"
                                 fontSet="fas" fontIcon="fa-t"
                                 matPrefix></mat-icon>
 
-                            <mat-select name="dbType"
-                                        [required]="true"
-                                        [formControlName]="'dbType'">
+                            <mat-select name="resourceType" (selectionChange)="resourceTypeChanged($event)"
+                                        [formControlName]="'resourceType'">
 
-                                <mat-option *ngFor="let t of DatabaseTypeEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                <ng-container *ngFor="let t of LuthierResourceTypeEnum | enumArray">
+                                    <mat-option *ngIf="t.key !== 'NOT_FOUND'"  [value]="t.key" >
+                                        {{t.key}}
 
-                                </mat-option>
+                                    </mat-option>
+                                </ng-container>
+
                             </mat-select>
 
 
                         </mat-form-field>
                     </div>
-                    <!-- database -->
                     <div class="sm:col-span-6">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
-                            <mat-label>Banco de Dados</mat-label>
+                            <mat-label>Categoria</mat-label>
                             <mat-icon
-                                class="icon-size-5"
-                                fontSet="fas" fontIcon="fa-database"
+                                class="icon-size-5 evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-certificate"
                                 matPrefix></mat-icon>
                             <input
-                                [formControlName]="'database'"
+                                readonly
+                                [formControlName]="'identifier'"
                                 matInput>
                         </mat-form-field>
                     </div>
-                    <!-- server -->
-                    <div class="sm:col-span-12">
+                    <div class="sm:col-span-3 flex justify-center items-center">
+                        <img *ngIf="isImage()" class="object-scale-down h-32 w-32" src="{{ 'data:image/png;base64,' + this.formSave.get('file').value}}"
+                             (load)="imageLoaded($event)"/>
+                    </div>
+                    <div class="sm:col-span-9" *ngIf="getAllowedExtension()">
+                        <ngx-file-drop class="mb-4"
+                                       [multiple]="false" [accept]="getAllowedExtension()" dropZoneLabel="Arraste seu arquivo aqui"
+                                       (onFileDrop)="dropped($event)">
+
+                            <ng-template ngx-file-drop-content-tmp let-openFileSelectorDocumentos="openFileSelector">
+                                {{"Arraste seu arquivo aqui"}}
+                                <button
+                                    class="px-6 ml-3"
+                                    mat-icon-button
+                                    [color]="'primary'"
+                                    (click)="openFileSelectorDocumentos()">
+                                    <mat-icon class="icon-size-5 evolui-menu-item-icon" fontSet="fas" fontIcon="fa-upload"></mat-icon>
+                                </button>
+                            </ng-template>
+                        </ngx-file-drop>
+                    </div>
+                    <div class="sm:col-span-12" *ngIf="formSave.get('resourceType').value === 'STRING'">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
-                            <mat-label>Host</mat-label>
+                            <mat-label>Valor</mat-label>
                             <mat-icon
-                                class="icon-size-5"
+                                class="icon-size-5 evolui-menu-item-icon"
                                 fontSet="fas" fontIcon="fa-server"
                                 matPrefix></mat-icon>
                             <input
-                                [required]="true"
-                                [formControlName]="'server'"
+                                [formControlName]="'file'"
                                 matInput>
                         </mat-form-field>
                     </div>
-
-                    <!-- user -->
-                    <div class="sm:col-span-6">
-                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
-                            <mat-label>Usuário</mat-label>
-                            <mat-icon
-                                class="icon-size-5"
-                                fontSet="fas" fontIcon="fa-user"
-                                matPrefix></mat-icon>
-                            <input
-                                [required]="true"
-                                [formControlName]="'user'"
-                                matInput>
-                        </mat-form-field>
-                    </div>
-                    <!-- password -->
-                    <div class="sm:col-span-6">
-                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
-                            <mat-label>Senha</mat-label>
-                            <mat-icon
-                                class="icon-size-5"
-                                fontSet="fas" fontIcon="fa-key"
-                                matPrefix></mat-icon>
-                            <input
-                                [required]="true"
-                                [formControlName]="'password'"
-                                matInput>
-                        </mat-form-field>
-                    </div>
+                    <ng-container *ngIf="isImage()">
+                        <div class="sm:col-span-6">
+                            <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                <mat-label>Altura</mat-label>
+                                <mat-icon
+                                    class="icon-size-5 evolui-menu-item-icon"
+                                    fontSet="fas" fontIcon="fa-text-height"
+                                    matPrefix></mat-icon>
+                                <input
+                                    readonly
+                                    [formControlName]="'height'"
+                                    matInput>
+                            </mat-form-field>
+                        </div>
+                        <div class="sm:col-span-6">
+                            <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                <mat-label>Largura</mat-label>
+                                <mat-icon
+                                    class="icon-size-5 evolui-menu-item-icon"
+                                    fontSet="fas" fontIcon="fa-text-width"
+                                    matPrefix></mat-icon>
+                                <input
+                                    readonly
+                                    [formControlName]="'width'"
+                                    matInput>
+                            </mat-form-field>
+                        </div>
+                    </ng-container>
 
 
                 </div>

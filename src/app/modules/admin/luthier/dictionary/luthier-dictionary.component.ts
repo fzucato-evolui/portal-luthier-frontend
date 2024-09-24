@@ -221,10 +221,14 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             .subscribe((page: string) =>
             {
                 if (page === 'dictionary') {
+                    this.drawerOpened = false;
                     setTimeout(() => {
                         this._parent.parent.sercondaryNavigation = secondaryNavigation;
-                    }, 0);
-                    this.refreshScroll();
+                        this.refreshScroll();
+                        this.drawerOpened = true;
+                        this._changeDetectorRef.detectChanges();
+                    }, 100);
+
                 }
             });
         this._parent.workDataBase$

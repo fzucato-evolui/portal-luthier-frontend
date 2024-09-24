@@ -106,6 +106,14 @@ export const mainNavigation: FuseNavigationItem[] = [
                 link : '/luthier/resources',
                 roles : ['ROLE_SUPER', 'ROLE_HYPER']
             },
+            {
+                id   : 'luthier.modules',
+                title: 'Módulos',
+                type : 'basic',
+                awesomeIcon : {fontSet:"fas", fontIcon:"fa-brain"},
+                link : '/luthier/modules',
+                roles : ['ROLE_SUPER', 'ROLE_HYPER']
+            },
         ]
     },
     {

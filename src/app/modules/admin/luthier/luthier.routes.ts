@@ -17,17 +17,24 @@ const luthierResolver = (route: ActivatedRouteSnapshot, state: RouterStateSnapsh
     if (route.url[0].toString().includes('dictionary')) {
         forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getTables() : of(null));
         forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getVisions() : of(null));
+        forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getModules() : of(null));
     }
     else if (route.url[0].toString().includes('users')) {
         forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.checkUser() : of(null));
         forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getUsers() : of(null));
+    }
+    else if (route.url[0].toString().includes('resources')) {
+        forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getResources() : of(null));
+    }
+    else if (route.url[0].toString().includes('modules')) {
+        forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getModules() : of(null));
     }
     return forkJoin(forks);
 };
 
 export function luthierMatcher(url: UrlSegment[]) {
     return url.length === 1 && (url[0].path == 'project' || url[0].path == 'connection' || url[0].path == 'dictionary'
-        || url[0].path == 'manager' || url[0].path === 'users' ||   url[0].path === 'resources')
+        || url[0].path == 'manager' || url[0].path === 'users' || url[0].path === 'resources' || url[0].path === 'modules')
         ? { consumed: url }
         : null;
 }

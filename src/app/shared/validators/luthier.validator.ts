@@ -848,7 +848,7 @@ export class LuthierValidator {
         if (UtilFunctions.isValidStringOrArray(vision.description) === false) {
             vision.invalidFields['description'] = ['Descrição é obrigatório'];
         }
-        const isSame = LuthierTableModel.equals(vision, previousVision);
+        const isSame = LuthierVisionModel.equals(vision, previousVision);
         //console.log('isSame', isSame);
 
         return {needUpdate: needUpdate, isSame: isSame};

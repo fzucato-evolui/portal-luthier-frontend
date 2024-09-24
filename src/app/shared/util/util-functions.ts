@@ -200,6 +200,16 @@ export class UtilFunctions {
         return new TextDecoder().decode(bytes);;
     }
 
+    public static arrayBufferToBase64(buffer) {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+    }
+
     public static forceValidations(fg: FormGroup | FormArray) {
         Object.keys(fg.controls).forEach(field => {
             const control = fg.get(field);

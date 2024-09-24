@@ -101,5 +101,28 @@
             </mat-form-field>
         </div>
         <div class="sm:col-span-6"></div>
+        <div class="sm:col-span-6">
+            <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                <mat-label class="text-sm">Módulo</mat-label>
+                <mat-icon
+                    class="evolui-menu-item-icon"
+                    fontSet="fas" fontIcon="fa-brain"
+                    matPrefix></mat-icon>
+
+                <mat-select class="text-sm" [formControlName]="'module'" [compareWith]="compareCode">
+
+                    <ng-container *ngFor="let t of modules">
+                        <mat-option [value]="t" >
+                            {{t.name}}
+
+                        </mat-option>
+                    </ng-container>
+
+                </mat-select>
+
+
+            </mat-form-field>
+        </div>
+        <div class="sm:col-span-6"></div>
     </div>
 </div>

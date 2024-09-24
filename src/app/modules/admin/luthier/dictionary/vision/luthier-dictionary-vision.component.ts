@@ -15,7 +15,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {LuthierDictionaryComponent} from '../luthier-dictionary.component';
-import {LuthierVisionDatasetModel, LuthierVisionModel} from '../../../../../shared/models/luthier.model';
+import {LuthierModuleModel, LuthierVisionModel} from '../../../../../shared/models/luthier.model';
 import {cloneDeep} from 'lodash-es';
 import {NgxMaskDirective, provideNgxMask} from 'ngx-mask';
 import {LuthierService} from '../../luthier.service';
@@ -24,6 +24,8 @@ import {MatMenuModule} from '@angular/material/menu';
 import {UtilFunctions} from '../../../../../shared/util/util-functions';
 import {Subject, takeUntil} from 'rxjs';
 import {LuthierValidator} from '../../../../../shared/validators/luthier.validator';
+import {MatSelectModule} from '@angular/material/select';
+import {NgForOf} from '@angular/common';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -41,7 +43,9 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'group
         MatFormFieldModule,
         MatTooltipModule,
         NgxMaskDirective,
-        MatMenuModule
+        MatMenuModule,
+        MatSelectModule,
+        NgForOf
     ],
     providers: [
         provideNgxMask(),
@@ -51,6 +55,7 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy, Afte
 {
     protected hasChanged = false;
     private _model: LuthierVisionModel;
+    protected modules: LuthierModuleModel[] = []
     private _cloneModel: LuthierVisionModel;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     public customPatterns = { 'I': { pattern: new RegExp('\[a-zA-Z0-9_\]')}};
@@ -76,6 +81,11 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy, Afte
     }
 
     ngOnInit(): void {
+        this.service.modules$.pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((value) => {
+                this.modules = value;
+            });
+
         this.refresh();
     }
 
@@ -94,14 +104,15 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy, Afte
         this.formSave = this.formBuilder.group({
             code: [this.model.code],
             name: ['', [Validators.required]],
-            description: ['', [Validators.required]]
+            description: ['', [Validators.required]],
+            module: [null]
         });
         this.formSave.patchValue(this.model);
         this.hasChanged = false;
         this.formSave.valueChanges
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(value => {
-                this._cloneModel = Object.assign({}, this.model, this.formSave.value) as LuthierVisionDatasetModel;
+                this._cloneModel = Object.assign({}, this.model, this.formSave.value) as LuthierVisionModel;
                 const ret = LuthierValidator.validateVision(this.model, this._model);
                 this.hasChanged = !ret.isSame;
             });
@@ -190,6 +201,15 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy, Afte
                 model.previousName = this.model.previousName;
                 model.code = this.model.code;
                 model.id = this.model.id;
+                if (model.module && UtilFunctions.isValidStringOrArray(model.module.code) === true) {
+                    const moduleIndex = this.modules.findIndex(x => UtilFunctions.equalsIgnoreCase(model.module.name, x.name));
+                    if (moduleIndex >= 0) {
+                        model.module = this.modules[moduleIndex];
+                    }
+                    else {
+                        model.module = null;
+                    }
+                }
 
                 this._cloneModel = model;
                 this.refresh();
@@ -208,6 +228,20 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy, Afte
         }
         else if (this.hasChanged === false) {
             return 'Nenhuma alteração feita';
+        }
+    }
+
+    compareCode(v1: any , v2: any): boolean {
+        if (v1 && v2) {
+            if (UtilFunctions.isValidStringOrArray(v1.code) === true) {
+                return v1.code === v2.code || v1.code === v2;
+            }
+            else {
+                return v1.id === v2.id || v1.id === v2;
+            }
+        }
+        else {
+            return v1 === v2;
         }
     }
 }

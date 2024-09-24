@@ -17,16 +17,16 @@ import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatDialog} from '@angular/material/dialog';
 import {NgClass, NgIf} from '@angular/common';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import {LuthierResourceModalComponent} from './modal/luthier-resource-modal.component';
-import {LuthierDatabaseModel, LuthierResourceModel} from '../../../../shared/models/luthier.model';
+import {LuthierModuleModalComponent} from './modal/luthier-module-modal.component';
+import {LuthierDatabaseModel, LuthierModuleModel} from '../../../../shared/models/luthier.model';
 import {LuthierComponent} from '../luthier.component';
 import {LuthierService} from '../luthier.service';
 import {MessageDialogService} from '../../../../shared/services/message/message-dialog-service';
 
 @Component({
-    selector     : 'luthier-resource',
-    templateUrl  : './luthier-resource.component.html',
-    styleUrls : ['./luthier-resource.component.scss'],
+    selector     : 'luthier-module',
+    templateUrl  : './luthier-module.component.html',
+    styleUrls : ['./luthier-module.component.scss'],
     encapsulation: ViewEncapsulation.None,
     standalone   : true,
     imports: [
@@ -42,14 +42,14 @@ import {MessageDialogService} from '../../../../shared/services/message/message-
 
     ],
 })
-export class LuthierResourceComponent implements OnInit, OnDestroy, AfterViewInit
+export class LuthierModuleComponent implements OnInit, OnDestroy, AfterViewInit
 {
 
     @ViewChild(MatSort) sort: MatSort;
     @ViewChild(MatTable) table: MatTable<any>;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
-    public datasource = new MatTableDataSource<LuthierResourceModel>();
-    displayedColumns = ['buttons', 'code', 'name', 'identifier', 'resourceType', 'description', 'height', 'width'];
+    public datasource = new MatTableDataSource<LuthierModuleModel>();
+    displayedColumns = ['buttons', 'code', 'name', 'description', 'parent.name'];
     get workDataBase(): number {
         return this._parent.workDataBase;
     }
@@ -74,7 +74,7 @@ export class LuthierResourceComponent implements OnInit, OnDestroy, AfterViewIni
 
     ngOnInit(): void
     {
-        this.service.resources$.pipe(takeUntil(this._unsubscribeAll))
+        this.service.modules$.pipe(takeUntil(this._unsubscribeAll))
             .subscribe((value) => {
                 this.datasource.data = value;
             })
@@ -96,14 +96,15 @@ export class LuthierResourceComponent implements OnInit, OnDestroy, AfterViewIni
         this.datasource.sort = this.sort;
     }
     add() {
-        const modal = this._matDialog.open(LuthierResourceModalComponent, { disableClose: true, panelClass: 'luthier-resource-modal-container' });
-        modal.componentInstance.title = "Recurso Luthier";
+        const modal = this._matDialog.open(LuthierModuleModalComponent, { disableClose: true, panelClass: 'luthier-module-modal-container' });
+        modal.componentInstance.title = "Módulo Luthier";
         modal.componentInstance.parent = this;
         modal.componentInstance.model = new LuthierDatabaseModel();
+        modal.componentInstance.possibleParents = this.datasource.data;
     }
 
     refresh() {
-        firstValueFrom(this._parent.service.getResources());
+        firstValueFrom(this._parent.service.getModules());
     }
 
     update() {
@@ -115,21 +116,22 @@ export class LuthierResourceComponent implements OnInit, OnDestroy, AfterViewIni
     }
 
     edit(id) {
-        this.service.getResource(id)
+        this.service.getModule(id)
             .then(result => {
-                const modal = this._matDialog.open(LuthierResourceModalComponent, { disableClose: true, panelClass: 'luthier-resource-modal-container' });
-                modal.componentInstance.title = "Recurso Luthier";
+                const modal = this._matDialog.open(LuthierModuleModalComponent, { disableClose: true, panelClass: 'luthier-module-modal-container' });
+                modal.componentInstance.title = "Módulo Luthier";
                 modal.componentInstance.parent = this;
                 modal.componentInstance.model = result;
+                modal.componentInstance.possibleParents = this.datasource.data.filter(x => x.parent?.code !== id && x.code !== id);
             })
     }
 
     delete(id) {
-        this._messageService.open('Tem certeza de que deseja remover o recurso?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
+        this._messageService.open('Tem certeza de que deseja remover o módulo?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
             if (result === 'confirmed') {
-                this.service.deleteResource(id)
+                this.service.deleteModule(id)
                     .then(result => {
-                        this._messageService.open('Recurso removido com sucesso', 'SUCESSO', 'success');
+                        this._messageService.open('Módulo removido com sucesso', 'SUCESSO', 'success');
                     })
 
             }

@@ -5,6 +5,7 @@ import {
     LuthierChangesOfTableModel,
     LuthierCheckObjectsSummaryModel,
     LuthierDatabaseModel,
+    LuthierModuleModel,
     LuthierProjectModel,
     LuthierResourceModel,
     LuthierSubsystemModel,
@@ -36,6 +37,10 @@ export class LuthierService
     private _currentUser: LuthierUserModel;
     private _users: BehaviorSubject<LuthierUserModel[]> = new BehaviorSubject(null);
     private _currentUsers: LuthierUserModel[];
+    private _resources: BehaviorSubject<LuthierResourceModel[]> = new BehaviorSubject(null);
+    private _currentResources: LuthierResourceModel[];
+    private _modules: BehaviorSubject<LuthierModuleModel[]> = new BehaviorSubject(null);
+    private _currentModules: LuthierModuleModel[];
 
     /**
      * Constructor
@@ -117,6 +122,26 @@ export class LuthierService
     get visions$(): Observable<LuthierVisionModel[]>
     {
         return this._visions.asObservable();
+    }
+    set resources(value: LuthierResourceModel[])
+    {
+        this._currentResources = value;
+        // Store the value
+        this._resources.next(value);
+    }
+    get resources$(): Observable<LuthierResourceModel[]>
+    {
+        return this._resources.asObservable();
+    }
+    set modules(value: LuthierModuleModel[])
+    {
+        this._currentModules = value;
+        // Store the value
+        this._modules.next(value);
+    }
+    get modules$(): Observable<LuthierModuleModel[]>
+    {
+        return this._modules.asObservable();
     }
 
     getProject(): Observable<any>
@@ -365,7 +390,6 @@ export class LuthierService
 
         return firstValueFrom(this._httpClient.get<LuthierTableModel>(`${this.baseDicUrl}/table/${id}`));
     }
-
     getVision(id: number): Promise<LuthierVisionModel> {
         return firstValueFrom(this._httpClient.get<LuthierVisionModel>(`${this.baseDicUrl}/vision/${id}`));
     }
@@ -390,7 +414,6 @@ export class LuthierService
     parseView(name: string, model: LuthierViewModel): Promise<LuthierTableModel> {
         return firstValueFrom(this._httpClient.post<LuthierTableModel>(`${this.baseDicUrl}/parse-view/${name}`, model));
     }
-
     saveTable(model: LuthierTableModel): Promise<LuthierTableModel> {
         return firstValueFrom(this._httpClient.post<LuthierTableModel>(`${this.baseDicUrl}/table`, model).pipe(
             switchMap((response: LuthierTableModel) => {
@@ -415,7 +438,6 @@ export class LuthierService
                 return of(response);
             })));
     }
-
     deleteTable(id: number): Promise<any>  {
         return firstValueFrom(this._httpClient.delete<LuthierTableModel>(`${this.baseDicUrl}/table/${id}`).pipe(
             switchMap((response: LuthierTableModel) => {
@@ -428,7 +450,6 @@ export class LuthierService
                 return of(response);
             })));
     }
-
     saveVision(model: LuthierVisionModel): Promise<LuthierVisionModel> {
         return firstValueFrom(this._httpClient.post<LuthierVisionModel>(`${this.baseDicUrl}/vision`, model).pipe(
             switchMap((response: LuthierVisionModel) => {
@@ -454,7 +475,6 @@ export class LuthierService
                 return of(response);
             })));
     }
-
     deleteVision(id: number): Promise<any>  {
         return firstValueFrom(this._httpClient.delete<any>(`${this.baseDicUrl}/vision/${id}`).pipe(
             switchMap((response: any) => {
@@ -467,7 +487,6 @@ export class LuthierService
                 return of(response);
             })));
     }
-
     saveDataset(model: LuthierVisionDatasetModel): Promise<LuthierVisionDatasetModel> {
         return firstValueFrom(this._httpClient.post<LuthierVisionDatasetModel>(`${this.baseDicUrl}/dataset`, model).pipe(
             switchMap((response: LuthierVisionDatasetModel) => {
@@ -545,7 +564,6 @@ export class LuthierService
                 return of(response);
             })));
     }
-
     deleteDataset(model: LuthierVisionDatasetModel, vision: LuthierVisionModel): Promise<any>  {
         return firstValueFrom(this._httpClient.delete<any>(`${this.baseDicUrl}/dataset/${model.code}`).pipe(
             switchMap((response: any) => {
@@ -557,24 +575,105 @@ export class LuthierService
                 return of(response);
             })));
     }
-
     getImagesResources(): Promise<LuthierResourceModel[]> {
 
         return firstValueFrom(this._httpClient.get<LuthierResourceModel[]>(`${this.baseCommonUrl}/get-images-resources`));
     }
 
-    getResources(): Promise<LuthierResourceModel[]> {
+    getResources(): Observable<LuthierResourceModel[]> {
 
-        return firstValueFrom(this._httpClient.get<LuthierResourceModel[]>(`${this.baseCommonUrl}/all-resources`));
+        this._resources.next([]);
+        return this._httpClient.get<LuthierResourceModel[]>(`${this.baseCommonUrl}/all-resources`).pipe(
+            tap((response: LuthierResourceModel[]) =>
+            {
+                this.resources = response;
+            }),
+        );
     }
     getResource(id: number): Promise<any> {
         return firstValueFrom(this._httpClient.get(`${this.baseCommonUrl}/resource/${id}`));
     }
-    deleteResource(id: number): Promise<any> {
-        return firstValueFrom(this._httpClient.delete(`${this.baseCommonUrl}/resource/${id}`));
+    deleteResource(id: number): Promise<any>  {
+        return firstValueFrom(this._httpClient.delete<any>(`${this.baseCommonUrl}/resource/${id}`).pipe(
+            switchMap((response) => {
+                const index = this._currentResources.findIndex(x => x.code === id);
+                if (index >= 0) {
+                    this._currentResources.splice(index, 1);
+                    this.resources = this._currentResources;
+                }
+                // Return a new observable with the response
+                return of(response);
+            })));
     }
     saveResource(model: LuthierResourceModel): Promise<LuthierResourceModel> {
-        return firstValueFrom(this._httpClient.post<LuthierResourceModel>(`${this.baseCommonUrl}/resource`, model));
+        return firstValueFrom(this._httpClient.post<LuthierResourceModel>(`${this.baseCommonUrl}/resource`, model).pipe(
+            switchMap((response: LuthierResourceModel) => {
+                if (UtilFunctions.isValidStringOrArray(this._currentResources) === false) {
+                    this._currentResources = new Array<LuthierResourceModel>();
+                }
+                if (model.code && model.code > 0) {
+                    const index = this._currentResources.findIndex(x => x.code === model.code);
+                    if (index < 0) {
+                        this._currentResources.push(response);
+                    } else {
+                        this._currentResources[index] = response;
+                    }
+                } else {
+                    this._currentResources.push(response);
+                }
+                this.resources = this._currentResources;
+                // Return a new observable with the response
+                return of(response);
+            })));
+    }
+
+    getModules(): Observable<LuthierModuleModel[]> {
+
+        this._modules.next([]);
+        return this._httpClient.get<LuthierModuleModel[]>(`${this.baseCommonUrl}/all-modules`).pipe(
+            tap((response: LuthierModuleModel[]) =>
+            {
+                this.modules = response;
+            }),
+        );
+    }
+    getModule(id: number): Promise<any> {
+        return firstValueFrom(this._httpClient.get(`${this.baseCommonUrl}/module/${id}`));
+    }
+    deleteModule(id: number): Promise<any>  {
+        return firstValueFrom(this._httpClient.delete<any>(`${this.baseCommonUrl}/module/${id}`).pipe(
+            switchMap((response) => {
+                const index = this._currentModules.findIndex(x => x.code === id);
+                if (index >= 0) {
+                    this._currentModules.splice(index, 1);
+                    const children = this._currentModules.filter(x => x.parent?.code === id);
+                    children.forEach(x => x.parent = null);
+                    this.modules = this._currentModules;
+                }
+                // Return a new observable with the response
+                return of(response);
+            })));
+    }
+    saveModule(model: LuthierModuleModel): Promise<LuthierModuleModel> {
+        return firstValueFrom(this._httpClient.post<LuthierModuleModel>(`${this.baseCommonUrl}/module`, model).pipe(
+            switchMap((response: LuthierModuleModel) => {
+                if (UtilFunctions.isValidStringOrArray(this._currentModules) === false) {
+                    this._currentModules = new Array<LuthierModuleModel>();
+                }
+                if (model.code && model.code > 0) {
+                    const index = this._currentModules.findIndex(x => x.code === model.code);
+                    if (index < 0) {
+                        this._currentModules.push(response);
+                    } else {
+                        this._currentModules[index] = response;
+                    }
+                } else {
+                    this._currentModules.push(response);
+                }
+                this.modules = this._currentModules;
+                // Return a new observable with the response
+                return of(response);
+            })));
     }
 
     getActiveSubsystems(): Promise<LuthierSubsystemModel[]> {
