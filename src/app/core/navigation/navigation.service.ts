@@ -94,7 +94,7 @@ export const mainNavigation: FuseNavigationItem[] = [
                 id   : 'luthier.manager',
                 title: 'Manager',
                 type : 'basic',
-                hidden  : item => {return true},
+                //hidden  : item => {return true},
                 awesomeIcon    : {fontSet: 'fab', fontIcon: 'fa-markdown'},
                 link : '/luthier/manager',
             },
@@ -112,6 +112,14 @@ export const mainNavigation: FuseNavigationItem[] = [
                 type : 'basic',
                 awesomeIcon : {fontSet:"fas", fontIcon:"fa-brain"},
                 link : '/luthier/modules',
+                roles : ['ROLE_SUPER', 'ROLE_HYPER']
+            },
+            {
+                id   : 'luthier.subsystems',
+                title: 'Subsistemas',
+                type : 'basic',
+                awesomeIcon : {fontSet:"fas", fontIcon:"fa-circle-nodes"},
+                link : '/luthier/subsystems',
                 roles : ['ROLE_SUPER', 'ROLE_HYPER']
             },
         ]

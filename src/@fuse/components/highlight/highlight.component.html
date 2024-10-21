@@ -3,7 +3,8 @@
 <!-- @formatter:off -->
 <ng-template let-highlightedCode="highlightedCode" let-lang="lang">
 <div class="fuse-highlight fuse-highlight-code-container">
-<pre [ngClass]="'language-' + lang"><code [ngClass]="'language-' + lang" [innerHTML]="highlightedCode"></code></pre>
+    <pre *ngIf="editable === false" [ngClass]="'language-' + lang" [ngClass]="customClass ? customClass : ''"><code [ngClass]="'language-' + lang" [innerHTML]="highlightedCode"></code></pre>
+    <pre *ngIf="editable === true" contenteditable="true" [ngClass]="'language-' + lang" [ngClass]="customClass ? customClass : ''"><code [ngClass]="'language-' + lang" [innerHTML]="highlightedCode"></code></pre>
 </div>
 </ng-template>
 <!-- @formatter:on -->

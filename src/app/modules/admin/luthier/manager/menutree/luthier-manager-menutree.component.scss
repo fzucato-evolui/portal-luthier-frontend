@@ -1,0 +1,46 @@
+
+luthier-manager-menutree {
+    .mat-mdc-tab-labels, .mat-mdc-tab {
+        height: 32px !important;
+    }
+    .mat-mdc-tab-group .mat-mdc-tab-body-content {
+        padding: 10px !important;
+    }
+    .mat-mdc-tab-group .table-tab .mat-mdc-tab-body-content {
+        padding: 0px !important;
+        @apply flex flex-col h-full overflow-hidden
+    }
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+        padding: 0px 2px 0px 2px !important;
+        font-size: 0.60rem !important;
+    }
+    .mat-mdc-row:hover .mat-mdc-cell {
+        background-color: lightgray;
+    }
+    .mat-mdc-table .mdc-data-table__row {
+        height: 0px !important;
+    }
+    .mat-mdc-row:nth-child(even){
+        background-color: inherit !important;
+    }
+    .mat-mdc-row:nth-child(odd){
+        background-color: whitesmoke !important;
+    }
+    .dark & {
+        .mat-mdc-row:nth-child(odd){
+            background-color: inherit !important;
+        }
+        .mat-mdc-row:hover .mat-mdc-cell {
+            @apply bg-gray-600;
+        }
+
+    }
+
+    .mat-mdc-cell {
+        .mdc-text-field {
+            margin: 0px !important;
+        }
+    }
+
+}

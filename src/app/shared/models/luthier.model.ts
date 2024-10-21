@@ -1870,3 +1870,71 @@ export class LuthierModuleModel extends LuthierBasicModel {
 
 }
 
+export class LuthierParameterModel {
+    name?: string
+    previousName?: string
+    value?: string
+    user?: LuthierUserModel
+    description?: string
+    creationDate?: Date
+    defaultValue?: string
+    uiConfiguration?: string
+}
+export enum LuthierSemaphoreBehaviorEnum {
+    LOCK = ("LOCK"),
+    COMPLETE = ("COMPLETE")
+}
+export enum LuthierSemaphoreValueTypeEnum {
+    NUMERIC = ("NUMERIC"),
+    ALFANUMERIC = ("ALFANUMERIC")
+}
+export class LuthierSemaphoreModel {
+    code?: number
+    name?: string
+    previousName?: string
+    description?: string
+    behavior?: LuthierSemaphoreBehaviorEnum
+    currentValue?: string
+    initialValue?: string
+    valueType?: LuthierSemaphoreValueTypeEnum
+    timeout?: number
+    mask?: string
+}
+export enum LuthierMenuActionTypeEnum {
+    SCRIPT = ("SCRIPT"),
+    WINDOW_CALL = ("WINDOW_CALL")
+}
+export enum LuthierMenuCompTypeEnum {
+    NORMAL = ("NORMAL")
+}
+export enum LuthierMenuTypeEnum {
+    NONE = ("NONE")
+}
+export enum LuthierMenuVisibilityEnum {
+    DESKTOP = ("DESKTOP"),
+    WEB = ("WEB"),
+    ALL = ("ALL")
+}
+export class LuthierMenuModel {
+    code?: number
+    compType?: LuthierMenuCompTypeEnum
+    type?: LuthierMenuTypeEnum
+    caption?: string
+    actionType?: LuthierMenuActionTypeEnum
+    action?: string
+    visibility?: LuthierMenuVisibilityEnum
+    key?: string
+    custom?: boolean
+    resource?: LuthierResourceModel
+    lockBy?: LuthierUserModel
+}
+export class LuthierMenuDetailModel {
+    code?: number
+    order?: number
+    separator?: boolean
+    key?: string
+    subsystem?: LuthierSubsystemModel
+    menu?: LuthierMenuModel
+    parent?: LuthierMenuDetailModel
+    children?: LuthierMenuDetailModel[]
+}

@@ -72,7 +72,7 @@ export class UtilFunctions {
     public static setSortingDataAccessor(dataSource: MatTableDataSource<any>) {
         dataSource.sortingDataAccessor = (item, property) => {
             if (property.includes('.')) {
-                return property.split('.').reduce((o,i)=>o[i], item);
+                return property.split('.').reduce((o,i)=>UtilFunctions.isValidObject(o[i]) ? o[i] : '', item);
             }
             return item[property];
         };

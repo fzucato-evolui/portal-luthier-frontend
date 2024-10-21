@@ -1,0 +1,59 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden">
+    <ng-container *ngIf="workDataBase; else noDatabase">
+        <div class="h-full flex flex-col overflow-hidden">
+
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-2 border-b bg-card dark:bg-transparent">
+            <mat-button-toggle-group
+                class="flex-1 min-w-0 flex-wrap items-center -m-2"
+                name="options" [(ngModel)]="selectedTab">
+                <mat-button-toggle
+                    *ngFor="let option of tabsOpened;let i = index"
+                    class="m-1 font-medium button-xs"
+                    [ngClass]="{
+                                    'bg-gray-300 dark:bg-gray-700': option === selectedTab,
+                                    'bg-transparent': option !== selectedTab
+                                }"
+                    [value]="option">
+                    <div class="flex justify-between items-center text-sm">
+                        <div>{{option}}</div>
+                        <button class="icon-size-4 ml-1"
+                                mat-icon-button
+                                (click)="removeTab(i)">
+                            <mat-icon [svgIcon]="'mat_solid:close'"></mat-icon>
+                        </button>
+                    </div>
+                </mat-button-toggle>
+            </mat-button-toggle-group>
+
+
+        </div>
+        <div class="flex-auto flex flex-col p-0 overflow-hidden">
+            <ng-container *ngFor="let t of tabsOpened;">
+                <luthier-manager-parameter class="h-full" *ngIf="t === 'PARAMETER'"
+                                          [ngClass]="{'hidden': t !== selectedTab}">
+                </luthier-manager-parameter>
+                <luthier-manager-semaphore class="h-full" *ngIf="t === 'SEMAPHORE'"
+                                           [ngClass]="{'hidden': t !== selectedTab}">
+                </luthier-manager-semaphore>
+                <luthier-manager-menu class="h-full" *ngIf="t === 'MENU'"
+                                           [ngClass]="{'hidden': t !== selectedTab}">
+                </luthier-manager-menu>
+                <luthier-manager-menutree class="h-full" *ngIf="t === 'MENU_TREE'"
+                                      [ngClass]="{'hidden': t !== selectedTab}">
+                </luthier-manager-menutree>
+            </ng-container>
+
+        </div>
+    </div>
+    </ng-container>
+    <ng-template #noDatabase>
+        <div class="flex flex-auto flex-col items-center justify-center h-full">
+            <mat-icon
+                class="icon-size-24"
+                [svgIcon]="'heroicons_outline:chat-bubble-oval-left-ellipsis'"></mat-icon>
+            <div class="p-4 mt-4 text-2xl font-semibold tracking-tight text-secondary text-center">Cadastre um projeto e escolha o banco de dados do produto</div>
+        </div>
+    </ng-template>
+
+</div>

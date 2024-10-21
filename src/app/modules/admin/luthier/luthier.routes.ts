@@ -29,12 +29,16 @@ const luthierResolver = (route: ActivatedRouteSnapshot, state: RouterStateSnapsh
     else if (route.url[0].toString().includes('modules')) {
         forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getModules() : of(null));
     }
+    else if (route.url[0].toString().includes('subsystems')) {
+        forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getSubsystems() : of(null));
+        forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getResources(true) : of(null));
+    }
     return forkJoin(forks);
 };
 
 export function luthierMatcher(url: UrlSegment[]) {
     return url.length === 1 && (url[0].path == 'project' || url[0].path == 'connection' || url[0].path == 'dictionary'
-        || url[0].path == 'manager' || url[0].path === 'users' || url[0].path === 'resources' || url[0].path === 'modules')
+        || url[0].path == 'manager' || url[0].path === 'users' || url[0].path === 'resources' || url[0].path === 'modules' || url[0].path === 'subsystems')
         ? { consumed: url }
         : null;
 }

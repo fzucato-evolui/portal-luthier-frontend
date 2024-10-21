@@ -1,0 +1,108 @@
+<div *ngIf="hasProject; else noProject" class="absolute inset-0 flex flex-col min-w-0 overflow-hidden bg-card dark:bg-transparent z-50">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between pl-4 pb-2 border-b">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div>
+                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                    Cadastro dos Subsistemas do Luthier
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div
+        class="flex-auto p-2  overflow-y-hidden">
+
+        <div class="flex flex-col h-full overflow-hidden">
+            <div class="flex-none flex justify-between items-center py-1">
+                <div class="flex-none flex">
+
+                </div>
+                <div class="flex-none flex md:w-1/3 md:pr-1">
+                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                        <mat-icon
+                            class="evolui-menu-item-icon"
+                            fontSet="fas" fontIcon="fa-search"
+                            matPrefix></mat-icon>
+                        <input
+                            [autocomplete]="'off'"
+                            class="text-sm"
+                            (input)="filter($event)"
+                            matInput>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto" cdkScrollable>
+                <table #table mat-table matSort [dataSource]="datasource" class="table-auto" (matSortChange)="announceSortChange($event)">
+
+                    <ng-container matColumnDef="buttons">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <div class="flex flex-row items-center">
+                                <button mat-icon-button aria-label="Add" (click)="add()">
+                                    <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-plus"></mat-icon>
+                                </button>
+                                <button mat-icon-button aria-label="Add" (click)="refresh()">
+                                    <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-sync"></mat-icon>
+                                </button>
+                            </div>
+                        </th>
+                        <td mat-cell *matCellDef="let model">
+                            <div class="flex flex-row items-center">
+                                <div>
+                                    <button mat-icon-button aria-label="Edit" [disabled]="model.code === -1" (click)="edit(model.code)" matTooltip="Editar Subsistema">
+                                        <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
+                                    </button>
+                                </div>
+                                <button mat-icon-button aria-label="Delete" [disabled]="model.code === -1" (click)="delete(model.code)" matTooltip="Remover Subsistema">
+                                    <mat-icon class="icon-size-5 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
+                                </button>
+
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="code">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Código </th>
+                        <td mat-cell *matCellDef="let model"> {{ model.code }} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="description">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Descrição </th>
+                        <td mat-cell *matCellDef="let model"> {{ model.description }} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="status">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Situação </th>
+                        <td mat-cell *matCellDef="let model"> {{ model.status }} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="plataform">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Plataforma </th>
+                        <td mat-cell *matCellDef="let model"> {{ model.plataform }} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="resource">
+                        <th mat-header-cell *matHeaderCellDef> Imagem </th>
+                        <td mat-cell *matCellDef="let model">
+                            <img *ngIf="model.resource" class="object-scale-down h-8 w-8" src="{{ 'data:image/png;base64,' + getSeletctedImage(model.resource)}}" />
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+<ng-template #noProject>
+    <div class="absolute inset-0 flex flex-col min-w-0 flex flex-auto flex-col items-center justify-center h-full w-full">
+        <mat-icon
+            class="icon-size-24"
+            [svgIcon]="'heroicons_outline:chat-bubble-oval-left-ellipsis'"></mat-icon>
+        <div class="p-4 mt-4 text-2xl font-semibold tracking-tight text-secondary text-center">Cadastre um projeto válido</div>
+    </div>
+</ng-template>

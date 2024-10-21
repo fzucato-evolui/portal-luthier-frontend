@@ -1,0 +1,21 @@
+:host {
+  width: 100% !important;
+  height: 100% !important;
+}
+.luthier-subsystem-modal-container {
+  max-width: 70vw !important;
+  width: 70vw !important;
+  max-height: 90vh !important;
+  height: 90vh !important;
+
+  mat-dialog-container {
+    padding: 10px !important;
+  }
+  .readOnly {
+    pointer-events: none;
+    opacity: 60%;
+  }
+  .mat-card-header-text {
+    @apply w-full #{'!important'};
+  }
+}

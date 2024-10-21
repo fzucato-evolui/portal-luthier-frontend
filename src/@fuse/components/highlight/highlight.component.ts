@@ -1,7 +1,23 @@
-import { NgClass } from '@angular/common';
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EmbeddedViewRef, Input, OnChanges, Renderer2, SecurityContext, SimpleChanges, TemplateRef, ViewChild, ViewContainerRef, ViewEncapsulation } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
-import { FuseHighlightService } from '@fuse/components/highlight/highlight.service';
+import {NgClass, NgIf} from '@angular/common';
+import {
+    AfterViewInit,
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    ElementRef,
+    EmbeddedViewRef,
+    Input,
+    OnChanges,
+    Renderer2,
+    SecurityContext,
+    SimpleChanges,
+    TemplateRef,
+    ViewChild,
+    ViewContainerRef,
+    ViewEncapsulation
+} from '@angular/core';
+import {DomSanitizer} from '@angular/platform-browser';
+import {FuseHighlightService} from '@fuse/components/highlight/highlight.service';
 
 @Component({
     selector       : 'textarea[fuse-highlight]',
@@ -11,12 +27,14 @@ import { FuseHighlightService } from '@fuse/components/highlight/highlight.servi
     changeDetection: ChangeDetectionStrategy.OnPush,
     exportAs       : 'fuseHighlight',
     standalone     : true,
-    imports        : [NgClass],
+    imports: [NgClass, NgIf],
 })
 export class FuseHighlightComponent implements OnChanges, AfterViewInit
 {
     @Input() code: string;
     @Input() lang: string;
+    @Input() editable: boolean = false;
+    @Input() customClass: string;
     @ViewChild(TemplateRef) templateRef: TemplateRef<any>;
 
     highlightedCode: string;

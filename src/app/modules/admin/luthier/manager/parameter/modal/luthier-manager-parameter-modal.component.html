@@ -1,0 +1,174 @@
+<div class="inset-0 w-full h-full flex flex-col min-w-0 md:overflow-y-auto relative">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-2 sm:py-4 sm:px-4 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="flex flex-row flex-row-reverse mt-2 items-center">
+                <div class="mr-2">
+                    <button
+                        mat-icon-button aria-label="close dialog" mat-dialog-close>
+                        <mat-icon
+                            class="icon-size-4"
+                            fontSet="fas" fontIcon="fa-times"></mat-icon>
+                    </button>
+                </div>
+                <div class="w-full">
+                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        {{title}}
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div
+        class="flex-auto overflow-y-auto p-6"
+        cdkScrollable>
+
+        <div [formGroup]="formSave" class="divide-y-2 divide-black h-full max-h-full max-w-full overflow-x-auto md:overflow-auto">
+
+
+            <div class="w-full mb-4">
+                <div class="w-full my-2">
+                    <div class="text-xl">Parâmetro Luthier</div>
+                    <div class="text-secondary">Configuração dos parâmetros luthier</div>
+
+                </div>
+                <div class="grid sm:grid-cols-12 gap-2 mt-4 mx-1">
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Nome</mat-label>
+                            <mat-icon
+                                class="icon-size-5 evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-list-ol"
+                                matPrefix></mat-icon>
+                            <input class="uppercase"
+                                [dropSpecialCharacters]="false"
+                                [patterns]="customPatterns" mask="I*"
+                                [formControlName]="'name'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Usuário</mat-label>
+                            <mat-icon
+                                class="icon-size-5 evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-user"
+                                matPrefix></mat-icon>
+
+                            <mat-select #userParam [formControlName]="'user'" [compareWith]="compareCode" (openedChange)="filterUserParam.value =null">
+                                <div class="flex flex-col h-full w-full">
+                                    <div class="flex-none">
+                                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                            <mat-icon
+                                                class="icon-size-5 evolui-menu-item-icon"
+                                                fontSet="fas" fontIcon="fa-search"
+                                                matPrefix></mat-icon>
+                                            <input [autocomplete]="'off'" #filterUserParam matInput>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="flex-1 overflow-auto">
+                                        <mat-option [value]="null" >
+
+                                        </mat-option>
+                                        <ng-container *ngFor="let t of users | filterJson : {name: filterUserParam.value, login: filterUserParam.value}">
+                                            <mat-option [value]="t" >
+                                                {{t.name + ' (' + t.login + ')'}}
+
+                                            </mat-option>
+                                        </ng-container>
+                                    </div>
+                                </div>
+
+
+                            </mat-select>
+
+
+                        </mat-form-field>
+                    </div>
+
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Valor</mat-label>
+                            <mat-icon
+                                class="icon-size-5 evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-comment"
+                                matPrefix></mat-icon>
+                            <textarea
+                                matInput
+                                [formControlName]="'value'"
+                                rows="10">
+                            </textarea>
+
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Valor Padrão</mat-label>
+                            <mat-icon
+                                class="icon-size-5 evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-comment"
+                                matPrefix></mat-icon>
+                            <textarea
+                                matInput
+                                [formControlName]="'defaultValue'"
+                                rows="10">
+                            </textarea>
+
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Descrição</mat-label>
+                            <mat-icon
+                                class="icon-size-5 evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-comment"
+                                matPrefix></mat-icon>
+                            <textarea
+                                matInput
+                                [formControlName]="'description'"
+                                rows="10">
+                            </textarea>
+
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-6">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full overflow-x-hidden">
+                            <mat-label>Configuração Visual</mat-label>
+                            <mat-icon
+                                class="icon-size-5 evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-comment"
+                                matPrefix></mat-icon>
+                            <textarea class="overflow-x-hidden"
+                                matInput
+                                [formControlName]="'uiConfiguration'"
+                                rows="10">
+                            </textarea>
+
+                        </mat-form-field>
+                    </div>
+                </div>
+                <!--
+                <pre style="font-size: 1rem; white-space: pre-wrap;">{{ formSave.value | json}}</pre>
+                !-->
+            </div>
+
+
+        </div>
+
+        <div class="absolute bottom-0 right-0 z-50">
+
+            <button
+                class="mr-4 mb-4"
+                [disabled]="canSave() === false"
+                (click)="doSaving()"
+                mat-flat-button
+                type="button"
+                [color]="'primary'">Salvar
+            </button>
+        </div>
+    </div>
+
+</div>
