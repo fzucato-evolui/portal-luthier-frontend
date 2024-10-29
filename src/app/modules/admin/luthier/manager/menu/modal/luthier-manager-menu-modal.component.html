@@ -49,7 +49,7 @@
                                 matInput>
                         </mat-form-field>
                     </div>
-                    <div class="sm:col-span-8">
+                    <div class="sm:col-span-6">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
                             <mat-label>Caption</mat-label>
                             <mat-icon
@@ -61,7 +61,9 @@
                                 matInput>
                         </mat-form-field>
                     </div>
-                    <div class="sm:col-span-2 text-sm flex items-center justify-center">
+                    <div class="sm:col-span-4 text-sm flex items-center justify-center">
+                        <mat-slide-toggle class="text-sm mr-2"
+                                          [formControlName]="'custom'">Customizado</mat-slide-toggle>
                         <mat-slide-toggle class="text-sm"
                                           [disabled]="model.lockBy && model.lockBy.code !== myUser?.code"
                                           [checked]="formSave.get('lockBy').value" (change)="testMenuChanged($event)">Menu de Teste</mat-slide-toggle>
@@ -198,9 +200,8 @@
                     </div>
 
                 </div>
-                <!--
-                <pre style="font-size: 1rem; white-space: pre-wrap;">{{ formSave.value | json}}</pre>
-                !-->
+
+                <pre style="font-size: 1rem; white-space: pre-wrap;">{{ formSave.getRawValue() | json}}</pre>
             </div>
 
 

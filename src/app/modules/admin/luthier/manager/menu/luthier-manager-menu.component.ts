@@ -52,7 +52,7 @@ export class LuthierManagerMenuComponent implements OnInit, OnDestroy, AfterView
     @ViewChild(MatTable) table: MatTable<any>;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     public datasource = new MatTableDataSource<LuthierMenuModel>();
-    displayedColumns = ['buttons', 'code', 'caption', 'compType', 'type', 'visibility', 'resource', 'lockBy.name'];
+    displayedColumns = ['buttons', 'code', 'caption', 'custom', 'compType', 'type', 'visibility', 'resource', 'lockBy.name'];
     public resources: Array<LuthierResourceModel> = [];
 
     get service(): LuthierService {

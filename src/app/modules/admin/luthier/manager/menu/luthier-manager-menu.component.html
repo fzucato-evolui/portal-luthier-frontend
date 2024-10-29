@@ -71,6 +71,10 @@
                         <th mat-header-cell *matHeaderCellDef mat-sort-header> Caption </th>
                         <td mat-cell *matCellDef="let model"> {{ model.caption }} </td>
                     </ng-container>
+                    <ng-container matColumnDef="custom">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Customizado </th>
+                        <td mat-cell *matCellDef="let model"> {{ model.custom }} </td>
+                    </ng-container>
                     <ng-container matColumnDef="compType">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo Componente </th>
                         <td mat-cell *matCellDef="let model"> {{ model.compType }} </td>
@@ -93,7 +97,6 @@
                         <th mat-header-cell *matHeaderCellDef mat-sort-header> Locked </th>
                         <td mat-cell *matCellDef="let model"> {{ model.lockBy?.name }} </td>
                     </ng-container>
-
                     <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
                     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
                 </table>

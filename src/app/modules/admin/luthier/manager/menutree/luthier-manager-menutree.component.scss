@@ -14,6 +14,10 @@ luthier-manager-menutree {
     .mat-mdc-cell {
         padding: 0px 2px 0px 2px !important;
         font-size: 0.60rem !important;
+        .mat-mdc-icon-button {
+            height: 20px !important;
+            width: 20px !important;
+        }
     }
     .mat-mdc-row:hover .mat-mdc-cell {
         background-color: lightgray;
@@ -41,6 +45,37 @@ luthier-manager-menutree {
         .mdc-text-field {
             margin: 0px !important;
         }
+    }
+
+    .menu-tree-invisible {
+        display: none;
+    }
+
+    .menu-tree ul,
+    .menu-tree li {
+        margin-top: 0;
+        margin-bottom: 0;
+        list-style-type: none;
+    }
+
+    /*
+     * This padding sets alignment of the nested nodes.
+     */
+    .menu-tree .mat-nested-tree-node div[role=group] {
+        padding-left: 20px;
+    }
+
+    /*
+     * Padding for leaf nodes.
+     * Leaf nodes need to have padding so as to align with other non-leaf nodes
+     * under the same parent.
+     */
+    .menu-tree div[role=group] > .mat-tree-node {
+        padding-left: 20px;
+    }
+
+    .mat-tree-node {
+        @apply text-sm #{'!important'};
     }
 
 }

@@ -6,6 +6,7 @@ import {
     LuthierCheckObjectsSummaryModel,
     LuthierDatabaseModel,
     LuthierMenuModel,
+    LuthierMenuTreeModel,
     LuthierModuleModel,
     LuthierParameterModel,
     LuthierProjectModel,
@@ -53,7 +54,8 @@ export class LuthierService
     private _currentSemaphores: LuthierSemaphoreModel[];
     private _menus: BehaviorSubject<LuthierMenuModel[]> = new BehaviorSubject(null);
     private _currentMenus: LuthierMenuModel[];
-
+    private _menuTree: BehaviorSubject<LuthierMenuTreeModel> = new BehaviorSubject(null);
+    private _currentMenuTree: LuthierMenuTreeModel;
     /**
      * Constructor
      */
@@ -194,6 +196,16 @@ export class LuthierService
     get menus$(): Observable<LuthierMenuModel[]>
     {
         return this._menus.asObservable();
+    }
+    set menuTree(value: LuthierMenuTreeModel)
+    {
+        this._currentMenuTree = value;
+        // Store the value
+        this._menuTree.next(value);
+    }
+    get menuTree$(): Observable<LuthierMenuTreeModel>
+    {
+        return this._menuTree.asObservable();
     }
 
     getProject(): Observable<any>
@@ -1013,6 +1025,26 @@ export class LuthierService
                     this._currentMenus.push(response);
                 }
                 this.menus = this._currentMenus;
+                // Return a new observable with the response
+                return of(response);
+            })));
+    }
+
+    getMenuTree(): Observable<LuthierMenuTreeModel> {
+
+        this._menuTree.next(null);
+        return this._httpClient.get<LuthierMenuTreeModel>(`${this.baseManagerUrl}/all-menu-tree`).pipe(
+            tap((response: LuthierMenuTreeModel) =>
+            {
+                this.menuTree = response;
+            }),
+        );
+    }
+
+    saveMenuTree(model: LuthierMenuTreeModel): Promise<LuthierMenuTreeModel> {
+        return firstValueFrom(this._httpClient.post<LuthierMenuTreeModel>(`${this.baseManagerUrl}/menu-tree`, model).pipe(
+            switchMap((response: LuthierMenuTreeModel) => {
+                this.menuTree = response;
                 // Return a new observable with the response
                 return of(response);
             })));

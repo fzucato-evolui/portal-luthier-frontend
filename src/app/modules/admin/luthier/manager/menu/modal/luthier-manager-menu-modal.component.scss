@@ -12,8 +12,8 @@
     padding: 10px !important;
   }
   .readOnly {
-    pointer-events: none;
-    opacity: 60%;
+    pointer-events: none !important;
+    opacity: 50%;
   }
   .mat-card-header-text {
     @apply w-full #{'!important'};

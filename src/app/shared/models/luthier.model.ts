@@ -1,5 +1,6 @@
 import {UtilFunctions} from '../util/util-functions';
 import {FormGroup} from '@angular/forms';
+import {PortalHistoryPersistTypeEnum} from './portal_luthier_history.model';
 
 export class LuthierBasicModel {
     id?: string
@@ -8,6 +9,7 @@ export class LuthierBasicModel {
     editing?: boolean = false
     row?: FormGroup
     invalidFields?: {[key: string]: any}
+    persistType?: PortalHistoryPersistTypeEnum
 }
 export class LuthierDatabaseModel {
     code: number
@@ -1928,7 +1930,7 @@ export class LuthierMenuModel {
     resource?: LuthierResourceModel
     lockBy?: LuthierUserModel
 }
-export class LuthierMenuDetailModel {
+export class LuthierMenuDetailModel extends LuthierBasicModel {
     code?: number
     order?: number
     separator?: boolean
@@ -1937,4 +1939,37 @@ export class LuthierMenuDetailModel {
     menu?: LuthierMenuModel
     parent?: LuthierMenuDetailModel
     children?: LuthierMenuDetailModel[]
+}
+export class LuthierCustomMenuTreeModel extends LuthierBasicModel {
+    code?: number
+    menuKey?: string
+    key?: string
+    after?: string
+    menu?: LuthierMenuModel
+    parent?: LuthierCustomMenuTreeModel
+    subsystemCode?: number
+    aboveMenuItem?: LuthierItemMenuTreeModel
+}
+export enum LuthierItemMenuTreeTypeEnum {
+    SUBSYSTEM = ("SUBSYSTEM"),
+    SYSTEM_MENU = ("SYSTEM_MENU"),
+    CUSTOM_MENU =("CUSTOM_MENU")
+}
+export class LuthierItemMenuTreeModel {
+    code?: number
+    subsystemCode?: number
+    id?: string
+    menuKey?: string
+    key?: string
+    order?: number
+    last?: boolean
+    caption?: string
+    type?: LuthierItemMenuTreeTypeEnum
+    children?: Array<LuthierItemMenuTreeModel>
+}
+export class LuthierMenuTreeModel {
+    subsystem?: LuthierSubsystemModel
+    menus?: Array<LuthierMenuDetailModel>
+    customMenus?: Array<LuthierCustomMenuTreeModel>
+    tree?: Array<LuthierItemMenuTreeModel>
 }

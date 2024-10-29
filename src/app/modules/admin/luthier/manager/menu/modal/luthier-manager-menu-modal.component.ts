@@ -15,7 +15,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import {JsonPipe, NgFor, NgIf} from '@angular/common';
+import {JsonPipe, NgClass, NgFor, NgIf} from '@angular/common';
 import {NgxMaskDirective, provideNgxMask} from 'ngx-mask';
 import {SharedPipeModule} from '../../../../../../shared/pipes/shared-pipe.module';
 import {LuthierService} from '../../../luthier.service';
@@ -48,6 +48,7 @@ import {LuthierManagerMenutreeComponent} from '../../menutree/luthier-manager-me
         MatFormFieldModule,
         ReactiveFormsModule,
         NgFor,
+        NgClass,
         NgxMaskDirective,
         MatDialogModule,
         JsonPipe,
@@ -67,7 +68,7 @@ export class LuthierManagerMenuModalComponent implements OnInit, OnDestroy
     formSave: FormGroup;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
-    public model: LuthierMenuModel;
+    private _model: LuthierMenuModel;
     title: string;
     private _service: LuthierService;
     private _parent: LuthierManagerMenuComponent | LuthierManagerMenutreeComponent;
@@ -88,6 +89,14 @@ export class LuthierManagerMenuModalComponent implements OnInit, OnDestroy
         return  this._parent;
     }
 
+    set model(value: LuthierMenuModel) {
+        this._model = value;
+    }
+
+    get model(): LuthierMenuModel {
+        return  this._model;
+    }
+
     constructor(private _formBuilder: FormBuilder,
                 private _changeDetectorRef: ChangeDetectorRef,
                 public dialogRef: MatDialogRef<LuthierManagerMenuModalComponent>,
@@ -106,10 +115,12 @@ export class LuthierManagerMenuModalComponent implements OnInit, OnDestroy
             visibility: [null, [Validators.required]],
             resource: [null],
             lockBy: [null],
+            custom: [false]
         });
-
+        if (this.model.code && this.model.code > 0) {
+            this.formSave.get('custom').disable();
+        }
         this.formSave.patchValue(this.model);
-
     }
 
     ngOnDestroy(): void {
@@ -119,7 +130,8 @@ export class LuthierManagerMenuModalComponent implements OnInit, OnDestroy
 
 
     doSaving() {
-        this.model = this.formSave.value as LuthierMenuModel;
+        // getRawValue inclui valores de campos desabilitados
+        this.model = this.formSave.getRawValue() as LuthierMenuModel;
         this._service.saveMenu(this.model).then(value => {
             this._messageService.open("Menu luthier salvo com sucesso!", "SUCESSO", "success")
             this.dialogRef.close();

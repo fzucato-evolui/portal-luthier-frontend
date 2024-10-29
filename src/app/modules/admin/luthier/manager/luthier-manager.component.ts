@@ -266,24 +266,56 @@ export class LuthierManagerComponent implements OnInit, OnDestroy
     addTab(objectType: LuthierManagerObjectType) {
         if (!this.tabsOpened.includes(objectType)) {
             if (objectType === 'PARAMETER') {
-                firstValueFrom(this.service.getParameters());
-                firstValueFrom(this.service.getUsers());
+                Promise.all(
+                    [
+                        firstValueFrom(this.service.getParameters()),
+                        firstValueFrom(this.service.getUsers())
+                    ]
+                ).then(async value => {
+                    this.tabsOpened.push(objectType);
+                    this.selectedTab = objectType;
+                    this._changeDetectorRef.detectChanges();
+                });
             }
             else if (objectType === 'SEMAPHORE') {
-                firstValueFrom(this.service.getSemaphores());
+                firstValueFrom(this.service.getSemaphores())
+                    .then(async value => {
+                        this.tabsOpened.push(objectType);
+                        this.selectedTab = objectType;
+                        this._changeDetectorRef.detectChanges();
+                    });
             }
             else if (objectType === 'MENU') {
-                firstValueFrom(this.service.getMenus());
-                firstValueFrom(this.service.getResources(true));
+                Promise.all(
+                    [
+                        firstValueFrom(this.service.getMenus()),
+                        firstValueFrom(this.service.getResources(true))
+                    ]
+                ).then(async value => {
+                    this.tabsOpened.push(objectType);
+                    this.selectedTab = objectType;
+                    this._changeDetectorRef.detectChanges();
+                });
             }
             else if (objectType === 'MENU_TREE') {
-                firstValueFrom(this.service.getMenus());
-                firstValueFrom(this.service.getSubsystems());
+                Promise.all(
+                    [
+                        firstValueFrom(this.service.getMenus()),
+                        firstValueFrom(this.service.getMenuTree()),
+                        firstValueFrom(this.service.getSubsystems())
+                    ]
+                ).then(async value => {
+                    this.tabsOpened.push(objectType);
+                    this.selectedTab = objectType;
+                    this._changeDetectorRef.detectChanges();
+                });
             }
-            this.tabsOpened.push(objectType);
         }
-        this.selectedTab = objectType;
-        this._changeDetectorRef.detectChanges();
+        else {
+            this.selectedTab = objectType;
+            this._changeDetectorRef.detectChanges();
+        }
+
     }
 
     syncParameters() {
