@@ -11,6 +11,8 @@ export default [
             {path: "luthier-database", loadChildren: () => import('app/modules/admin/portal/luthier-database/portal-luthier-database.routes')},
             {path: "config", loadChildren: () => import('app/modules/admin/portal/config/portal-config.routes')},
             {path: "historical", loadChildren: () => import('app/modules/admin/portal/luthier-history/portal-luthier-history.routes')},
+            {path: "luthier-context", loadChildren: () => import('app/modules/admin/portal/luthier-context/portal-luthier-context.routes')},
+            {path: "license", loadChildren: () => import('app/modules/admin/portal/license/portal-license.routes')},
 
         ]
     },

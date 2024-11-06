@@ -47,6 +47,22 @@ export const mainNavigation: FuseNavigationItem[] = [
                 link : '/portal/historical',
                 roles : ['ROLE_SUPER', 'ROLE_HYPER']
             },
+            {
+                id      : 'portal.luthier-context',
+                title   : 'Context',
+                type    : 'basic',
+                awesomeIcon    : {fontSet: 'fas', fontIcon: 'fa-arrows-to-circle'},
+                link    : '/portal/luthier-context',
+                roles : ['ROLE_SUPER', 'ROLE_HYPER']
+            },
+            {
+                id      : 'portal.license',
+                title   : 'Licenças',
+                subtitle: '',
+                type    : 'basic',
+                awesomeIcon    : {fontSet: 'fas', fontIcon: 'fa-key'},
+                link    : '/portal/license'
+            },
 
         ]
     },
@@ -124,24 +140,8 @@ export const mainNavigation: FuseNavigationItem[] = [
             },
         ]
     },
-    {
-        id      : 'license',
-        title   : 'Licenças',
-        subtitle: '',
-        type    : 'basic',
-        hidden  : item => {return true},
-        awesomeIcon    : {fontSet: 'fas', fontIcon: 'fa-key'},
-        link    : '/license'
-    },
-    {
-        id      : 'context',
-        title   : 'Context',
-        subtitle: '',
-        type    : 'basic',
-        hidden  : item => {return true},
-        awesomeIcon    : {fontSet: 'fas', fontIcon: 'fa-arrows-to-circle'},
-        link    : '/context'
-    },
+
+
 
 ];
 @Injectable({providedIn: 'root'})

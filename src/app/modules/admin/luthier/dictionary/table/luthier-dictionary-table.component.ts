@@ -1170,7 +1170,8 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     }
 
     detailField(model: LuthierTableFieldModel, type: TableType) {
-        const index = this.getRealIndex(model, type).index;
+        const fg = this.addField(type === 'customizations' ? 'fields' : type);
+        model.row = fg;
         this._parent.service.getImagesResources().then(resources => {
             const modal = this._matDialog.open(LuthierDictionaryTableFieldModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-field-modal-container' });
             modal.componentInstance.title = "Campo da Tabela " + this.model.name;

@@ -1,0 +1,36 @@
+
+portal-license {
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        font-size: 13px !important;
+    }
+    .mat-mdc-row:hover .mat-mdc-cell {
+        background-color: lightgray;
+    }
+
+    .mat-mdc-row {
+        cursor: pointer;
+    }
+
+    .mat-mdc-row:nth-child(even){
+        background-color: inherit !important;
+    }
+    .mat-mdc-row:nth-child(odd){
+        background-color: whitesmoke !important;
+    }
+    .dark & {
+        .mat-mdc-row:nth-child(odd){
+            background-color: inherit !important;
+        }
+        .mat-mdc-row:hover .mat-mdc-cell {
+            @apply bg-gray-600;
+        }
+
+    }
+    .mat-mdc-row.checked {
+        background-color: darkseagreen !important;
+    }
+
+}
