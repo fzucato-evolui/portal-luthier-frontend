@@ -24,6 +24,7 @@ import {UtilFunctions} from '../../../../shared/util/util-functions';
 import {PortalLuthierDatabaseModalComponent} from './modal/portal-luthier-database-modal.component';
 import {MessageDialogService} from '../../../../shared/services/message/message-dialog-service';
 import {UserService} from '../../../../shared/services/user/user.service';
+import {cloneDeep} from 'lodash-es';
 
 @Component({
     selector     : 'portal-luthier-database',
@@ -50,7 +51,7 @@ export class PortalLuthierDatabaseComponent implements OnInit, OnDestroy, AfterV
     @ViewChild(MatTable) table: MatTable<any>;
     public unsubscribeAll: Subject<any> = new Subject<any>();
     public dataSource = new MatTableDataSource<PortalLuthierDatabaseModel>();
-    displayedColumns = ['buttons', 'id', 'identifier', 'description', 'host', 'type', 'database', 'user'];
+    displayedColumns = ['buttons', 'id', 'identifier', 'description', 'host', 'databaseType', 'database', 'user'];
     workDataBase: number;
     /**
      * Constructor
@@ -94,7 +95,12 @@ export class PortalLuthierDatabaseComponent implements OnInit, OnDestroy, AfterV
             .subscribe((storage: StorageChange) =>
             {
                 if (storage.key === 'luthierDatabase') {
-                    this.workDataBase = parseInt(storage.value);
+                    if (UtilFunctions.isValidStringOrArray(storage.value) === true) {
+                        this.workDataBase = parseInt(storage.value);
+                    }
+                    else {
+                        this.workDataBase = null;
+                    }
                 }
             });
     }
@@ -111,6 +117,12 @@ export class PortalLuthierDatabaseComponent implements OnInit, OnDestroy, AfterV
     }
 
     ngAfterViewInit(): void {
+        this.dataSource.sortingDataAccessor = (item, property) => {
+            if (typeof item[property] === 'string') {
+                return item[property].toLowerCase(); // Normalize case
+            }
+            return item[property];
+        };
         this.dataSource.sort = this.sort;
     }
     add() {
@@ -138,6 +150,14 @@ export class PortalLuthierDatabaseComponent implements OnInit, OnDestroy, AfterV
         modal.componentInstance.parent = this;
         modal.componentInstance.model = this.dataSource.data.filter(x => x.id === id)[0];
     }
+    clone(id) {
+        const modal = this._matDialog.open(PortalLuthierDatabaseModalComponent, { disableClose: true, panelClass: 'portal-luthier-database-modal-container' });
+        modal.componentInstance.title = "Base Luthier";
+        modal.componentInstance.parent = this;
+        const model = cloneDeep(this.dataSource.data.filter(x => x.id === id)[0]);
+        model.id = null;
+        modal.componentInstance.model = model;
+    }
 
     delete(id) {
         this.messageService.open('Deseja realmente remover a Base Luthier?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
@@ -162,18 +182,15 @@ export class PortalLuthierDatabaseComponent implements OnInit, OnDestroy, AfterV
     }
 
     check(id) {
-        this.workDataBase = id;
         this._userService.luthierDatabase = id;
     }
 
     copy(id) {
-        this.messageService.open('Deseja realmente copiar os metatados desse banco para o banco de trabalho? Todos os dados atuais serão apagados.', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
+        this.messageService.open('Deseja realmente copiar os metatados do banco de trabalho para esse banco? Todos os dados atuais desse banco serão apagados.', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
             if (result === 'confirmed') {
                 const index = this.dataSource.data.findIndex(r => r.id === id);
                 if (index >= 0) {
                     this.service.copy(id).then(value => {
-                        this.workDataBase = null;
-                        this._userService.luthierDatabase = "";
                         this.messageService.open('Dados copiados com sucesso', 'SUCESSO', 'success');
                     });
                 }
@@ -181,4 +198,5 @@ export class PortalLuthierDatabaseComponent implements OnInit, OnDestroy, AfterV
         });
 
     }
+
 }

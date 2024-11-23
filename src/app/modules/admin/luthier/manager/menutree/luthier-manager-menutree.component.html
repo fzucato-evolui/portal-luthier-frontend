@@ -88,7 +88,7 @@
                                     <td mat-cell *matCellDef="let model"> {{ model.custom }} </td>
                                 </ng-container>
                                 <tr mat-header-row *matHeaderRowDef="displayedMenuColumns; sticky: true"></tr>
-                                <tr [draggable]="true" (dragstart)="dragMenuRowStart($event, row)" mat-row *matRowDef="let row; columns: displayedMenuColumns;"></tr>
+                                <tr class="cursor-pointer" (click)="expandMenus(row, $event)" [draggable]="true" (dragstart)="dragMenuRowStart($event, row)" mat-row *matRowDef="let row; columns: displayedMenuColumns;"></tr>
                             </table>
                         </div>
 
@@ -158,7 +158,7 @@
                                 </ng-container>
 
                                 <tr mat-header-row *matHeaderRowDef="displayedSubsystemColumns; sticky: true"></tr>
-                                <tr class="cursor-pointer" mat-row *matRowDef="let row; columns: displayedSubsystemColumns;"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedSubsystemColumns;"></tr>
                             </table>
                         </div>
 
@@ -203,7 +203,7 @@
                     <!-- There is inline padding applied to this node using styles.
                       This padding value depends on the mat-icon-button width. -->
                     <mat-tree-node *matTreeNodeDef="let node" [draggable]="node.type !== 'SUBSYSTEM'" (dragstart)="dragTreeMenuStart($event, node)">
-                        <div class="flex items-center grow cursor-pointer" (dragover)="allowDrop($event, node)"
+                        <div class="flex items-center grow cursor-pointer" [ngClass]="node['selected']===true ? 'bg-primary' : ''" (dragover)="allowDrop($event, node)"
                              (drop)="onDrop($event, node)">
                             <div *ngIf="node.type !== LuthierItemMenuTreeTypeEnum.SUBSYSTEM" class="rounded-full text-lg uppercase bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
                                 <mat-icon
@@ -231,7 +231,7 @@
                                     {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
                                 </mat-icon>
                             </button>
-                            <div class="flex items-center grow overflow-x-hidden cursor-pointer">
+                            <div class="flex items-center grow overflow-x-hidden cursor-pointer" [ngClass]="node['selected']===true ? 'bg-primary' : ''">
                                 <div *ngIf="node.type !== LuthierItemMenuTreeTypeEnum.SUBSYSTEM" class="rounded-full text-lg uppercase bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
                                     <mat-icon
                                         [matMenuTriggerFor]="objectsMenu" [matMenuTriggerData]="{object: node}"

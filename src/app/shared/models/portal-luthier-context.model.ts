@@ -28,7 +28,7 @@ export class PortalLuthierContextModel {
     public description: string;
     public configuration: PortalLuthierContextConfigEnum;
     public debugDataBase: number;
-    public licenceServer: string;
+    public licenseServer: string;
     public extraConfiguration: string;
     public dbExtra: string;
     public typeAuthentication: PortalLuthierContextAuthTypeEnum;

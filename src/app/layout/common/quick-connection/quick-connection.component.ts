@@ -158,8 +158,25 @@ export class QuickConnectionComponent implements OnInit, AfterViewInit, OnDestro
                         this.selectedLuthierDatabase = this.luthierDatabases.filter(x => x.id.toString() === storage.value.toString())[0];
                         this._userService.dadosDatabase = '';
                         if (UtilFunctions.isValidStringOrArray(storage.value) === true) {
-                            firstValueFrom(this._luthierService.getDatabases());
-                            firstValueFrom(this._luthierService.checkUser());
+                            Promise.all(
+                                [
+                                    firstValueFrom(this._luthierService.getDatabases()),
+                                    firstValueFrom(this._luthierService.checkUser())
+                                ]
+                            ).then(async value => {
+                                const databases = value[0];
+                                const user = value[1];
+                                if (!UtilFunctions.isValidObject(databases) || databases.toString().toUpperCase().includes("FALL")) {
+                                    throw new Error("Invalid Databases")
+                                }
+                                if (!UtilFunctions.isValidObject(user) || user.toString().toUpperCase().includes("FALL")) {
+                                    throw new Error("Invalid User")
+                                }
+                            }).catch(error => {
+                                console.error(error);
+                                this._userService.luthierDatabase = "";
+                            });
+
                         }
                     }
                     else {

@@ -87,7 +87,7 @@ export class PortalLuthierContextModalComponent implements OnInit, OnDestroy
             serverUrl: [''],
             description: [''],
             debugDataBase: [null, [Validators.required]],
-            licenceServer: ['', [Validators.required]],
+            licenseServer: [''],
             extraConfiguration: [''],
             dbExtra: [''],
             disableLibs: [false],

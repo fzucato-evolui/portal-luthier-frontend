@@ -47,6 +47,7 @@ export class UserService
         }
         else {
             sessionStorage.removeItem('luthierDatabase');
+            this.dadosDatabase = null;
         }
         this._storageChange$.next({
             value: id,

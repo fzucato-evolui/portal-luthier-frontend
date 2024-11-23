@@ -771,4 +771,55 @@ export class LuthierManagerMenutreeComponent implements OnInit, OnDestroy, After
 
     }
 
+    expandMenus(row: LuthierMenuModel, event: MouseEvent) {
+        const clickedElement = event.target as HTMLElement;
+
+        if (clickedElement.tagName === 'TD') {
+            const cellIndex = clickedElement['cellIndex'];
+            if (cellIndex === 0) {
+                return;
+            }
+            const expandMatchingNodes = (node: LuthierItemMenuTreeModel) => {
+                let shouldExpand = false;
+                if (row.custom) {
+                    if (node.type === LuthierItemMenuTreeTypeEnum.CUSTOM_MENU && node.menuKey === row.key) {
+                        this.treeControl.expand(node);
+                        node['selected'] = true;
+                        shouldExpand = true;
+                    }
+                    else {
+                        node['selected'] = false;
+                    }
+                }
+                else {
+                    if (node.type === LuthierItemMenuTreeTypeEnum.SYSTEM_MENU && node.menuKey === row.key) {
+                        this.treeControl.expand(node);
+                        node['selected'] = true;
+                        shouldExpand = true;
+                    }
+                    else {
+                        node['selected'] = false;
+                    }
+                }
+
+
+                // Verificacao recursiva
+                if (node.children) {
+                    node.children.forEach((child) => {
+                        const childExpanded = expandMatchingNodes(child);
+                        shouldExpand = shouldExpand || childExpanded;
+                    });
+                }
+
+                // Expande o pai e os descendentes
+                if (shouldExpand) {
+                    this.treeControl.expand(node);
+                }
+
+                return shouldExpand;
+            };
+
+            this.dataSourceTree.data.forEach((node) => expandMatchingNodes(node));
+        }
+    }
 }

@@ -327,7 +327,7 @@ export class LuthierValidator {
                                                 if (UtilFunctions.isValidStringOrArray(errors['notNull']) === false) {
                                                     errors['notNull'] = [];
                                                 }
-                                                errors['size'].push('Campos que participam de referências já salvas, não podem sem alterados');
+                                                errors['notNull'].push('Campos que participam de referências já salvas, não podem sem alterados');
                                             }
                                             if (previousType != field.fieldType) {
                                                 if (UtilFunctions.isValidStringOrArray(errors['fieldType']) === false) {

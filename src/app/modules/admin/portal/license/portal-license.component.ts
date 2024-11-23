@@ -139,7 +139,7 @@ export class PortalLicenseComponent implements OnInit, OnDestroy, AfterViewInit
     }
 
     delete(id) {
-        this.messageService.open('Deseja realmente remover a livença?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
+        this.messageService.open('Deseja realmente remover a licença?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
             if (result === 'confirmed') {
                 const index = this.dataSource.data.findIndex(r => r.id === id);
                 if (index >= 0) {
