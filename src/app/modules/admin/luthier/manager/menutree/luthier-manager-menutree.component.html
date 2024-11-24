@@ -88,7 +88,7 @@
                                     <td mat-cell *matCellDef="let model"> {{ model.custom }} </td>
                                 </ng-container>
                                 <tr mat-header-row *matHeaderRowDef="displayedMenuColumns; sticky: true"></tr>
-                                <tr class="cursor-pointer" (click)="expandMenus(row, $event)" [draggable]="true" (dragstart)="dragMenuRowStart($event, row)" mat-row *matRowDef="let row; columns: displayedMenuColumns;"></tr>
+                                <tr [ngClass]="row['selected'] ? 'selected': ''" class="cursor-pointer" (click)="expandMenus(row, $event)" [draggable]="true" (dragstart)="dragMenuRowStart($event, row)" mat-row *matRowDef="let row; columns: displayedMenuColumns;"></tr>
                             </table>
                         </div>
 
@@ -158,7 +158,7 @@
                                 </ng-container>
 
                                 <tr mat-header-row *matHeaderRowDef="displayedSubsystemColumns; sticky: true"></tr>
-                                <tr mat-row *matRowDef="let row; columns: displayedSubsystemColumns;"></tr>
+                                <tr [ngClass]="row['selected'] ? 'selected': ''" class="cursor-pointer" (click)="selectSubsystem(row, $event)" mat-row *matRowDef="let row; columns: displayedSubsystemColumns;"></tr>
                             </table>
                         </div>
 

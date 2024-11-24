@@ -570,6 +570,12 @@ export class LuthierManagerMenutreeComponent implements OnInit, OnDestroy, After
 
     revert() {
         this.model = this._model;
+        this.datasourceMenu.data.forEach(menu => {
+            menu['selected'] = false;
+        });
+        this.datasourceSubsystem.data.forEach(subsystem => {
+            subsystem['selected'] = false;
+        });
         this._changeDetectorRef.detectChanges();
     }
 
@@ -772,6 +778,7 @@ export class LuthierManagerMenutreeComponent implements OnInit, OnDestroy, After
     }
 
     expandMenus(row: LuthierMenuModel, event: MouseEvent) {
+
         const clickedElement = event.target as HTMLElement;
 
         if (clickedElement.tagName === 'TD') {
@@ -779,47 +786,90 @@ export class LuthierManagerMenutreeComponent implements OnInit, OnDestroy, After
             if (cellIndex === 0) {
                 return;
             }
-            const expandMatchingNodes = (node: LuthierItemMenuTreeModel) => {
-                let shouldExpand = false;
-                if (row.custom) {
-                    if (node.type === LuthierItemMenuTreeTypeEnum.CUSTOM_MENU && node.menuKey === row.key) {
-                        this.treeControl.expand(node);
-                        node['selected'] = true;
-                        shouldExpand = true;
-                    }
-                    else {
-                        node['selected'] = false;
-                    }
+
+            this.dataSourceTree.data.forEach((node) => {
+                this.expandNodes(node, row.custom ? LuthierItemMenuTreeTypeEnum.CUSTOM_MENU : LuthierItemMenuTreeTypeEnum.SYSTEM_MENU, row);
+            });
+            row['selected'] = true;
+            this.datasourceMenu.data.forEach(menu => {
+                if (menu.type !== row.type || menu.code !== row.code) {
+                    menu['selected'] = false;
                 }
-                else {
-                    if (node.type === LuthierItemMenuTreeTypeEnum.SYSTEM_MENU && node.menuKey === row.key) {
-                        this.treeControl.expand(node);
-                        node['selected'] = true;
-                        shouldExpand = true;
-                    }
-                    else {
-                        node['selected'] = false;
-                    }
-                }
-
-
-                // Verificacao recursiva
-                if (node.children) {
-                    node.children.forEach((child) => {
-                        const childExpanded = expandMatchingNodes(child);
-                        shouldExpand = shouldExpand || childExpanded;
-                    });
-                }
-
-                // Expande o pai e os descendentes
-                if (shouldExpand) {
-                    this.treeControl.expand(node);
-                }
-
-                return shouldExpand;
-            };
-
-            this.dataSourceTree.data.forEach((node) => expandMatchingNodes(node));
+            });
+            this.datasourceSubsystem.data.forEach(subsystem => {
+                subsystem['selected'] = false;
+            });
         }
     }
+
+    selectSubsystem(row: LuthierSubsystemModel, event: MouseEvent) {
+        const clickedElement = event.target as HTMLElement;
+
+        if (clickedElement.tagName === 'TD') {
+            const cellIndex = clickedElement['cellIndex'];
+            if (cellIndex === 0) {
+                return;
+            }
+
+            this.dataSourceTree.data.forEach((node) => {
+                this.expandNodes(node, LuthierItemMenuTreeTypeEnum.SUBSYSTEM, row);
+            });
+            row['selected'] = true;
+            this.datasourceMenu.data.forEach(menu => {
+                menu['selected'] = false;
+            });
+            this.datasourceSubsystem.data.forEach(subsystem => {
+                if (subsystem.code !== row.code) {
+                    subsystem['selected'] = false;
+                }
+            });
+        }
+    }
+
+    expandNodes (node: LuthierItemMenuTreeModel, type: LuthierItemMenuTreeTypeEnum, row: LuthierMenuModel | LuthierSubsystemModel)  {
+        let shouldExpand = false;
+        if (node.type === type ) {
+            if (type === LuthierItemMenuTreeTypeEnum.CUSTOM_MENU || type === LuthierItemMenuTreeTypeEnum.SYSTEM_MENU) {
+                if (node.menuKey === (row as LuthierMenuModel).key) {
+                    this.treeControl.expand(node);
+                    node['selected'] = true;
+                    shouldExpand = true;
+                }
+                else {
+                    node['selected'] = false;
+                }
+            }
+            else {
+                if (node.code === (row as LuthierMenuModel).code) {
+                    this.treeControl.expand(node);
+                    node['selected'] = true;
+                    shouldExpand = true;
+                }
+                else {
+                    node['selected'] = false;
+                }
+            }
+        }
+        else {
+            node['selected'] = false;
+        }
+        // Verificacao recursiva
+        if (node.children) {
+            node.children.forEach((child) => {
+                const childExpanded = this.expandNodes(child, type, row);
+                shouldExpand = shouldExpand || childExpanded;
+            });
+        }
+
+        // Expande o pai e os descendentes
+        if (shouldExpand) {
+            this.treeControl.expand(node);
+        }
+        else {
+            this.treeControl.collapse(node);
+        }
+
+        return shouldExpand;
+    }
+
 }

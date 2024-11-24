@@ -22,6 +22,9 @@ luthier-manager-menutree {
     .mat-mdc-row:hover .mat-mdc-cell {
         background-color: lightgray;
     }
+    .mat-mdc-row.selected .mat-mdc-cell {
+        @apply bg-primary
+    }
     .mat-mdc-table .mdc-data-table__row {
         height: 0px !important;
     }
