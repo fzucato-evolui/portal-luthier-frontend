@@ -1968,7 +1968,7 @@ export class LuthierItemMenuTreeModel {
     children?: Array<LuthierItemMenuTreeModel>
 }
 export class LuthierMenuTreeModel {
-    subsystem?: LuthierSubsystemModel
+    subsystems?: Array<LuthierSubsystemModel>
     menus?: Array<LuthierMenuDetailModel>
     customMenus?: Array<LuthierCustomMenuTreeModel>
     tree?: Array<LuthierItemMenuTreeModel>

@@ -1119,10 +1119,15 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         const dataSource = this.getDatasourceFromType(type);
         return {datasource: dataSource, rows: dataSource.data.filter(x => x['editing'] === true)};
     }
-    editRow(model: LuthierBasicModel, type: TableType) {
+    editRow(model: LuthierTableFieldModel | LuthierCustomFieldModel, type: TableType) {
         //const editing = this.getRealIndex(model, type);
         //editing.dataSource.data[editing.index]['editing'] = true;
         const fg = this.addField(type === 'customizations' ? 'fields' : type);
+        if (UtilFunctions.isValidStringOrArray(model.staticFields)) {
+            model.staticFields.forEach(y => {
+                (fg.get('staticFields') as FormArray).push(this.addStaticField(type === 'customizations' ? 'fields' : type));
+            });
+        }
         fg.patchValue(model);
         UtilFunctions.forceValidations(fg);
         model.row = fg;

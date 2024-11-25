@@ -22,6 +22,7 @@ import {
 } from '../../../shared/models/luthier.model';
 import {UtilFunctions} from '../../../shared/util/util-functions';
 import {cloneDeep} from 'lodash-es';
+import {PortalHistoryPersistTypeEnum} from '../../../shared/models/portal_luthier_history.model';
 
 @Injectable({providedIn: 'root'})
 export class LuthierService
@@ -55,6 +56,8 @@ export class LuthierService
     private _menus: BehaviorSubject<LuthierMenuModel[]> = new BehaviorSubject(null);
     private _currentMenus: LuthierMenuModel[];
     private _menuTree: BehaviorSubject<LuthierMenuTreeModel> = new BehaviorSubject(null);
+    private _menuChanged: BehaviorSubject<{menu: LuthierMenuModel, persistType: PortalHistoryPersistTypeEnum}> = new BehaviorSubject(null);
+    private _subsystemChanged: BehaviorSubject<{subsystem: LuthierSubsystemModel, persistType: PortalHistoryPersistTypeEnum}> = new BehaviorSubject(null);
     private _currentMenuTree: LuthierMenuTreeModel;
     /**
      * Constructor
@@ -206,6 +209,12 @@ export class LuthierService
     get menuTree$(): Observable<LuthierMenuTreeModel>
     {
         return this._menuTree.asObservable();
+    }
+    get subsystemChanged$(): Observable<{ subsystem: LuthierSubsystemModel; persistType: PortalHistoryPersistTypeEnum }> {
+        return this._subsystemChanged.asObservable();
+    }
+    get menuChanged$(): Observable<{ menu: LuthierMenuModel; persistType: PortalHistoryPersistTypeEnum }> {
+        return this._menuChanged.asObservable();
     }
 
     getProject(): Observable<any>
@@ -766,8 +775,10 @@ export class LuthierService
             switchMap((response) => {
                 const index = this._currentSubsystems.findIndex(x => x.code === id);
                 if (index >= 0) {
+                    const model = this._currentSubsystems[index];
                     this._currentSubsystems.splice(index, 1);
                     this.subsystems = this._currentSubsystems;
+                    this._subsystemChanged.next({subsystem: model, persistType: PortalHistoryPersistTypeEnum.DELETE});
                 }
                 // Return a new observable with the response
                 return of(response);
@@ -790,6 +801,7 @@ export class LuthierService
                     this._currentSubsystems.push(response);
                 }
                 this.subsystems = this._currentSubsystems;
+                this._subsystemChanged.next({subsystem: response, persistType: PortalHistoryPersistTypeEnum.SAVE});
                 // Return a new observable with the response
                 return of(response);
             })));
@@ -1000,9 +1012,12 @@ export class LuthierService
             switchMap((response) => {
                 const index = this._currentMenus.findIndex(x => x.code === code);
                 if (index >= 0) {
+                    const model = this._currentMenus[index];
                     this._currentMenus.splice(index, 1);
                     this.menus = this._currentMenus;
+                    this._menuChanged.next({menu: model, persistType: PortalHistoryPersistTypeEnum.DELETE});
                 }
+
                 // Return a new observable with the response
                 return of(response);
             })));
@@ -1025,6 +1040,7 @@ export class LuthierService
                     this._currentMenus.push(response);
                 }
                 this.menus = this._currentMenus;
+                this._menuChanged.next({menu: response, persistType: PortalHistoryPersistTypeEnum.SAVE});
                 // Return a new observable with the response
                 return of(response);
             })));

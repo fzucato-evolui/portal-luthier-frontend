@@ -257,7 +257,7 @@
                 </mat-tree>
                 <mat-menu #objectsMenu>
                     <ng-template matMenuContent let-object="object">
-                        <button mat-menu-item class="text-sm" (click)="removeMenu(object)">
+                        <button mat-menu-item class="text-sm" (click)="removeMenu(object, true)">
                             <mat-icon class="evolui-menu-item-icon" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
                             Remover
                         </button>

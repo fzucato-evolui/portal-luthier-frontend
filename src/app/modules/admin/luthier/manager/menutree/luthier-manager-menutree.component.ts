@@ -136,9 +136,56 @@ export class LuthierManagerMenutreeComponent implements OnInit, OnDestroy, After
             .subscribe((value) => {
                 this.datasourceMenu.data = value;
             });
+        this.service.menuChanged$.pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((value) => {
+                if (this.model && UtilFunctions.isValidStringOrArray(this.model.tree) === true) {
+                    this.model.tree.forEach(x => this.changeMenu(
+                            x,
+                            null,
+                            value.menu,
+                            value.persistType === PortalHistoryPersistTypeEnum.DELETE
+                        )
+                    );
+                    this.dataSourceTree.data = null;
+                    this.dataSourceTree.data = this._cloneModel.tree;
+                    this._changeDetectorRef.detectChanges();
+                }
+            });
         this.service.subsystems$.pipe(takeUntil(this._unsubscribeAll))
             .subscribe((value) => {
                 this.datasourceSubsystem.data = value;
+            });
+        this.service.subsystemChanged$.pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((value) => {
+                if (this.model && UtilFunctions.isValidStringOrArray(this.model.tree) === true) {
+                    let index = this.model.tree.findIndex(x => x.code === value.subsystem.code);
+                    if (index >= 0) {
+                        if (value.persistType === PortalHistoryPersistTypeEnum.DELETE) {
+                            this.model.tree.splice(index, 1);
+                            this.model.subsystems = this.model.subsystems.filter(x => x.code !== value.subsystem.code);
+                            this.model.menus = this.model.menus.filter(x => x.subsystem.code !== value.subsystem.code);
+                            this.model.customMenus = this.model.customMenus.filter(x => x.subsystemCode !== value.subsystem.code);
+                        }
+                        else {
+                            this.model.tree[index].caption = value.subsystem.description;
+                        }
+                    }
+                    else {
+                        const model = value.subsystem;
+                        this.model.subsystems.push(model);
+                        const newMenu = new LuthierItemMenuTreeModel();
+                        newMenu.code = model.code;
+                        newMenu.caption = model.description;
+                        newMenu.type = LuthierItemMenuTreeTypeEnum.SUBSYSTEM;
+                        newMenu.order = 1;
+                        newMenu.key = null;
+                        this.model.tree.push(newMenu);
+                    }
+
+                    this.dataSourceTree.data = null;
+                    this.dataSourceTree.data = this._cloneModel.tree;
+                    this._changeDetectorRef.detectChanges();
+                }
             });
         this.service.menuTree$.pipe(takeUntil(this._unsubscribeAll))
             .subscribe((value) => {
@@ -318,7 +365,7 @@ export class LuthierManagerMenutreeComponent implements OnInit, OnDestroy, After
             const rootNodeIndex = this._cloneModel.tree.findIndex(x => x.code === menu.subsystemCode);
             const parentNode = this.getParentNode(menu, this._cloneModel.tree[rootNodeIndex]);
             if (parentNode !== null) {
-                this.deleteAllMenuInheritance(menu);
+                this.deleteAllMenuInheritance(menu, true);
                 parentNode.parent.children.splice(parentNode.nodeIndex, 1); // Remove the node
                 if (menu.last) {
                     if (parentNode.nodeIndex > 0) {
@@ -428,12 +475,12 @@ export class LuthierManagerMenutreeComponent implements OnInit, OnDestroy, After
         return null;
     }
 
-    deleteAllMenuInheritance(menu: LuthierItemMenuTreeModel) {
+    deleteAllMenuInheritance(menu: LuthierItemMenuTreeModel, needPersist: boolean) {
         if (menu.type === LuthierItemMenuTreeTypeEnum.SYSTEM_MENU) {
             const index = this.model.menus.findIndex(x => x.code === menu.code && x.id === menu.id);
             if (index >= 0) {
                 const model = this._cloneModel.menus[index];
-                if (UtilFunctions.isValidStringOrArray(model.code)) {
+                if (UtilFunctions.isValidStringOrArray(model.code) && needPersist) {
                     model.persistType = PortalHistoryPersistTypeEnum.DELETE;
                 }
                 else {
@@ -445,7 +492,7 @@ export class LuthierManagerMenutreeComponent implements OnInit, OnDestroy, After
             const index = this.model.customMenus.findIndex(x => x.code === menu.code && x.id === menu.id);
             if (index >= 0) {
                 const model = this._cloneModel.customMenus[index];
-                if (UtilFunctions.isValidStringOrArray(model.code)) {
+                if (UtilFunctions.isValidStringOrArray(model.code) && needPersist) {
                     model.persistType = PortalHistoryPersistTypeEnum.DELETE;
                 }
                 else {
@@ -455,7 +502,7 @@ export class LuthierManagerMenutreeComponent implements OnInit, OnDestroy, After
         }
         if (UtilFunctions.isValidStringOrArray(menu.children) === true) {
             for(const child of menu.children) {
-                this.deleteAllMenuInheritance(child);
+                this.deleteAllMenuInheritance(child, needPersist);
             }
         }
     }
@@ -872,4 +919,34 @@ export class LuthierManagerMenutreeComponent implements OnInit, OnDestroy, After
         return shouldExpand;
     }
 
+    private changeMenu (node: LuthierItemMenuTreeModel, nodeParent:LuthierItemMenuTreeModel,  row: LuthierMenuModel, wasRemoved:boolean): boolean  {
+        let removed = false;
+        const type: LuthierItemMenuTreeTypeEnum = row.custom ? LuthierItemMenuTreeTypeEnum.CUSTOM_MENU : LuthierItemMenuTreeTypeEnum.SYSTEM_MENU;
+        if (node.type === type ) {
+            if (node.menuKey === (row as LuthierMenuModel).key) {
+                let index = nodeParent.children.findIndex(x => x.code === node.code && x.id === node.id && x.type === node.type);
+                if (index >= 0) {
+                    if (wasRemoved) {
+                        this.deleteAllMenuInheritance(node, false);
+                        nodeParent.children.splice(index, 1);
+                        removed = true;
+                    }
+                    else {
+                        nodeParent.children[index].caption = (row as LuthierMenuModel).caption;
+                    }
+                }
+            }
+        }
+        if (!node.children) {
+            node.children = new Array<LuthierItemMenuTreeModel>();
+        }
+        for (let i = 0; i < node.children.length;) {
+            const child = node.children[i];
+            const childRemoved = this.changeMenu(child, node, row, wasRemoved);
+            if (!childRemoved) {
+                i++;
+            }
+        }
+        return removed;
+    }
 }
