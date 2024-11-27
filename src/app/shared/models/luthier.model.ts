@@ -563,6 +563,9 @@ export class LuthierTableStaticFieldModel extends LuthierBasicModel{
         if (!UtilFunctions.equalsIgnoreCase(model?.value, previousModel?.value, false)) {
             return false
         }
+        if (!UtilFunctions.equalsIgnoreCase(model?.caption, previousModel?.caption, false)) {
+            return false
+        }
         if (!LuthierCustomizationModel.equals(model?.customCaption, previousModel?.customCaption)) {
             return false
         }
@@ -921,6 +924,9 @@ export class LuthierTableStaticCustomFieldModel extends LuthierBasicModel{
             return false
         }
         if (!UtilFunctions.equalsIgnoreCase(model?.value, previousModel?.value, false)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.caption, previousModel?.caption, false)) {
             return false
         }
         if (!UtilFunctions.equalsIgnoreCase(model?.permissionType, previousModel?.permissionType)) {

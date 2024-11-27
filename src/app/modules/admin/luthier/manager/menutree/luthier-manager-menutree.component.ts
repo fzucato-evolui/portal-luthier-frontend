@@ -824,61 +824,65 @@ export class LuthierManagerMenutreeComponent implements OnInit, OnDestroy, After
 
     }
 
-    expandMenus(row: LuthierMenuModel, event: MouseEvent) {
+    expandMenus(row: LuthierMenuModel, event: MouseEvent, ignoreExpandAndColllapse: boolean) {
 
         const clickedElement = event.target as HTMLElement;
 
-        if (clickedElement.tagName === 'TD') {
-            const cellIndex = clickedElement['cellIndex'];
-            if (cellIndex === 0) {
-                return;
-            }
-
-            this.dataSourceTree.data.forEach((node) => {
-                this.expandNodes(node, row.custom ? LuthierItemMenuTreeTypeEnum.CUSTOM_MENU : LuthierItemMenuTreeTypeEnum.SYSTEM_MENU, row);
-            });
-            row['selected'] = true;
-            this.datasourceMenu.data.forEach(menu => {
-                if (menu.type !== row.type || menu.code !== row.code) {
-                    menu['selected'] = false;
+        if (!ignoreExpandAndColllapse) {
+            if (clickedElement.tagName === 'TD') {
+                const cellIndex = clickedElement['cellIndex'];
+                if (cellIndex === 0) {
+                    return;
                 }
-            });
-            this.datasourceSubsystem.data.forEach(subsystem => {
-                subsystem['selected'] = false;
-            });
-        }
-    }
-
-    selectSubsystem(row: LuthierSubsystemModel, event: MouseEvent) {
-        const clickedElement = event.target as HTMLElement;
-
-        if (clickedElement.tagName === 'TD') {
-            const cellIndex = clickedElement['cellIndex'];
-            if (cellIndex === 0) {
-                return;
             }
-
-            this.dataSourceTree.data.forEach((node) => {
-                this.expandNodes(node, LuthierItemMenuTreeTypeEnum.SUBSYSTEM, row);
-            });
-            row['selected'] = true;
-            this.datasourceMenu.data.forEach(menu => {
+        }
+        this.dataSourceTree.data.forEach((node) => {
+            this.expandNodes(node, row.custom ? LuthierItemMenuTreeTypeEnum.CUSTOM_MENU : LuthierItemMenuTreeTypeEnum.SYSTEM_MENU, row, ignoreExpandAndColllapse);
+        });
+        row['selected'] = true;
+        this.datasourceMenu.data.forEach(menu => {
+            if (menu.type !== row.type || menu.code !== row.code) {
                 menu['selected'] = false;
-            });
-            this.datasourceSubsystem.data.forEach(subsystem => {
-                if (subsystem.code !== row.code) {
-                    subsystem['selected'] = false;
-                }
-            });
-        }
+            }
+        });
+        this.datasourceSubsystem.data.forEach(subsystem => {
+            subsystem['selected'] = false;
+        });
     }
 
-    expandNodes (node: LuthierItemMenuTreeModel, type: LuthierItemMenuTreeTypeEnum, row: LuthierMenuModel | LuthierSubsystemModel)  {
+    selectSubsystem(row: LuthierSubsystemModel, event: MouseEvent, ignoreExpandAndColllapse: boolean) {
+        const clickedElement = event.target as HTMLElement;
+
+        if (!ignoreExpandAndColllapse) {
+            if (clickedElement.tagName === 'TD') {
+                const cellIndex = clickedElement['cellIndex'];
+                if (cellIndex === 0) {
+                    return;
+                }
+            }
+        }
+        this.dataSourceTree.data.forEach((node) => {
+            this.expandNodes(node, LuthierItemMenuTreeTypeEnum.SUBSYSTEM, row, ignoreExpandAndColllapse);
+        });
+        row['selected'] = true;
+        this.datasourceMenu.data.forEach(menu => {
+            menu['selected'] = false;
+        });
+        this.datasourceSubsystem.data.forEach(subsystem => {
+            if (subsystem.code !== row.code) {
+                subsystem['selected'] = false;
+            }
+        });
+    }
+
+    expandNodes (node: LuthierItemMenuTreeModel, type: LuthierItemMenuTreeTypeEnum, row: LuthierMenuModel | LuthierSubsystemModel, ignoreExpandAndColllapse: boolean)  {
         let shouldExpand = false;
         if (node.type === type ) {
             if (type === LuthierItemMenuTreeTypeEnum.CUSTOM_MENU || type === LuthierItemMenuTreeTypeEnum.SYSTEM_MENU) {
                 if (node.menuKey === (row as LuthierMenuModel).key) {
-                    this.treeControl.expand(node);
+                    if (!ignoreExpandAndColllapse) {
+                        this.treeControl.expand(node);
+                    }
                     node['selected'] = true;
                     shouldExpand = true;
                 }
@@ -888,7 +892,9 @@ export class LuthierManagerMenutreeComponent implements OnInit, OnDestroy, After
             }
             else {
                 if (node.code === (row as LuthierMenuModel).code) {
-                    this.treeControl.expand(node);
+                    if (!ignoreExpandAndColllapse) {
+                        this.treeControl.expand(node);
+                    }
                     node['selected'] = true;
                     shouldExpand = true;
                 }
@@ -903,17 +909,18 @@ export class LuthierManagerMenutreeComponent implements OnInit, OnDestroy, After
         // Verificacao recursiva
         if (node.children) {
             node.children.forEach((child) => {
-                const childExpanded = this.expandNodes(child, type, row);
+                const childExpanded = this.expandNodes(child, type, row, ignoreExpandAndColllapse);
                 shouldExpand = shouldExpand || childExpanded;
             });
         }
 
-        // Expande o pai e os descendentes
-        if (shouldExpand) {
-            this.treeControl.expand(node);
-        }
-        else {
-            this.treeControl.collapse(node);
+        if (!ignoreExpandAndColllapse) {
+            // Expande o pai e os descendentes
+            if (shouldExpand) {
+                this.treeControl.expand(node);
+            } else {
+                this.treeControl.collapse(node);
+            }
         }
 
         return shouldExpand;
@@ -948,5 +955,53 @@ export class LuthierManagerMenutreeComponent implements OnInit, OnDestroy, After
             }
         }
         return removed;
+    }
+
+    selectNode(node: LuthierItemMenuTreeModel, event: MouseEvent) {
+        if (node.type === LuthierItemMenuTreeTypeEnum.SUBSYSTEM) {
+            const index = this.datasourceSubsystem.data.findIndex(x => x.code === node.code);
+            if (index >= 0) {
+                const model = this.datasourceSubsystem.data[index];
+                this.selectSubsystem(model, event, true);
+            }
+        }
+        else if (node.type === LuthierItemMenuTreeTypeEnum.SYSTEM_MENU) {
+            const index = this.datasourceMenu.data.findIndex(x => x.key === node.menuKey && x.custom === false);
+            if (index >= 0) {
+                const model = this.datasourceMenu.data[index];
+                this.expandMenus(model, event, true);
+            }
+        }
+        else if (node.type === LuthierItemMenuTreeTypeEnum.CUSTOM_MENU) {
+            const index = this.datasourceMenu.data.findIndex(x => x.key === node.menuKey && x.custom === true);
+            if (index >= 0) {
+                const model = this.datasourceMenu.data[index];
+                this.expandMenus(model, event, true);
+            }
+        }
+    }
+
+    editNodeMenu(node) {
+        if (node.type === LuthierItemMenuTreeTypeEnum.SUBSYSTEM) {
+            const index = this.datasourceSubsystem.data.findIndex(x => x.code === node.code);
+            if (index >= 0) {
+                const model = this.datasourceSubsystem.data[index];
+                this.editSubsystem(model.code);
+            }
+        }
+        else if (node.type === LuthierItemMenuTreeTypeEnum.SYSTEM_MENU) {
+            const index = this.datasourceMenu.data.findIndex(x => x.key === node.menuKey && x.custom === false);
+            if (index >= 0) {
+                const model = this.datasourceMenu.data[index];
+                this.editMenu(model.code);
+            }
+        }
+        else if (node.type === LuthierItemMenuTreeTypeEnum.CUSTOM_MENU) {
+            const index = this.datasourceMenu.data.findIndex(x => x.key === node.menuKey && x.custom === true);
+            if (index >= 0) {
+                const model = this.datasourceMenu.data[index];
+                this.editMenu(model.code);
+            }
+        }
     }
 }
