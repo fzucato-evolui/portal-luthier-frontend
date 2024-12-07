@@ -261,6 +261,11 @@
                     <tr mat-footer-row *matFooterRowDef="displayedColumns; sticky: true"></tr>
                 </table>
             </div>
+            <div class="w-full flex justify-end h-16">
+                <mat-paginator [length]="resultsLength" [pageSize]="50" [showFirstLastButtons]="true"
+                               [pageSizeOptions]="[25, 50, 75, 100]" aria-label="Select page of GitHub search results"></mat-paginator>
+            </div>
+
         </div>
     </div>
 

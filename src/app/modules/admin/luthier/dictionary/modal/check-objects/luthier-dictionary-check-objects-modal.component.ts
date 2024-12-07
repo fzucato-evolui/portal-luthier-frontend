@@ -3,6 +3,7 @@ import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
+    Injectable,
     OnDestroy,
     OnInit,
     ViewChild,
@@ -27,6 +28,7 @@ import {MatCheckboxChange, MatCheckboxModule} from '@angular/material/checkbox';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {LuthierDictionaryChangesModalComponent} from '../changes/luthier-dictionary-changes-modal.component';
 import {FormsModule} from '@angular/forms';
+import {MatPaginator, MatPaginatorIntl, MatPaginatorModule} from '@angular/material/paginator';
 
 export type FilterCheckObjectsModel = {
     changed?: boolean
@@ -40,6 +42,26 @@ export type FilterCheckObjectsModel = {
     isNew?: boolean
     text?: string
 }
+@Injectable()
+export class MyCustomPaginatorIntl implements MatPaginatorIntl {
+    changes = new Subject<void>();
+
+    firstPageLabel = `Primeira Página`;
+    itemsPerPageLabel = `Itens por página:`;
+    lastPageLabel = `Última Página`;
+
+    nextPageLabel = 'Próxima Página';
+    previousPageLabel = 'Página Anterio';
+
+    getRangeLabel(page: number, pageSize: number, length: number): string {
+        if (length === 0) {
+            return `Página 1 de 1`;
+        }
+        const amountPages = Math.ceil(length / pageSize);
+        return `Página ${page + 1} de ${amountPages}`;
+    }
+}
+
 @Component({
     selector       : 'luthier-dictionary-check-objects-modal',
     styleUrls      : ['/luthier-dictionary-check-objects-modal.component.scss'],
@@ -53,6 +75,7 @@ export type FilterCheckObjectsModel = {
         NgFor,
         MatDialogModule,
         MatTableModule,
+        MatPaginatorModule,
         MatSortModule,
         NgIf,
         MatCheckboxModule,
@@ -62,10 +85,13 @@ export type FilterCheckObjectsModel = {
     encapsulation  : ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone     : true,
+    providers: [{provide: MatPaginatorIntl, useClass: MyCustomPaginatorIntl}]
 })
 export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDestroy, AfterViewInit
 {
     @ViewChild(MatSort) sort: MatSort;
+    @ViewChild(MatPaginator) paginator: MatPaginator;
+    resultsLength = 0;
     model: LuthierCheckObjectsSummaryModel;
     summaryFooter: LuthierCheckObjectsSummaryModel = new LuthierCheckObjectsSummaryModel();
     displayedColumns = [ 'buttons', 'table.code', 'table.name', 'table.objectType', 'isNew', 'changed', 'done', 'hasError', "changedFields", "changedPKs", "changedReferences", "changedIndexes", "changedViews" ];
@@ -103,6 +129,7 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
 
     ngOnInit(): void {
         this.dataSource.data = this.model.changes;
+        this.resultsLength = this.dataSource.data.length;
         this.summaryFooter = {
             totalTime: this.model.totalTime,
             total: this.model.total,
@@ -137,6 +164,7 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
     ngAfterViewInit(): void {
         this.dataSource.sort = this.sort;
         UtilFunctions.setSortingDataAccessor(this.dataSource);
+        this.dataSource.paginator = this.paginator;
     }
 
     filter(value: FilterCheckObjectsModel) {
