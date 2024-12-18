@@ -1979,3 +1979,11 @@ export class LuthierMenuTreeModel {
     customMenus?: Array<LuthierCustomMenuTreeModel>
     tree?: Array<LuthierItemMenuTreeModel>
 }
+export class LuthierGenerateLoadXMLModel {
+    tableCode?: number
+    tableName?: string
+    filter?: string
+    generateReferences?: boolean
+    generateBlob?: boolean
+    generateChildren?: boolean
+}

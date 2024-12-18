@@ -1,0 +1,40 @@
+:host {
+    width: 100% !important;
+    height: 100% !important;
+}
+.luthier-dictionary-xml-load-modal-container {
+    max-width: 70vw !important;
+    width: 70vw !important;
+    max-height: 90vh !important;
+    height: 90vh !important;
+
+    mat-dialog-container {
+        padding: 10px !important;
+    }
+    .readOnly {
+        pointer-events: none;
+        opacity: 60%;
+    }
+    .mat-card-header-text {
+        @apply w-full #{'!important'};
+    }
+    .custom-prefix {
+        position: relative;
+    }
+
+    /* Move o matPrefix para o topo */
+    .custom-prefix .mat-form-field-prefix {
+        position: absolute;
+        top: -20px; /* Ajuste para alinhar ao topo desejado */
+        left: 0; /* Mantém o texto alinhado à esquerda */
+        transform: none; /* Remove transformações padrão */
+        color: rgba(0, 0, 0, 0.6); /* Cor personalizada */
+        font-size: 12px; /* Tamanho da fonte ajustado */
+        pointer-events: none; /* Garante que o prefixo não seja interativo */
+    }
+
+    /* Evitar preenchimento desnecessário no campo */
+    .custom-prefix textarea {
+        padding-left: 0; /* Remove espaço extra no lado esquerdo */
+    }
+}

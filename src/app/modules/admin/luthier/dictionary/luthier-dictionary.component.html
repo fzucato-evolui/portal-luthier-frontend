@@ -194,6 +194,10 @@
                             <mat-icon fontSet="fas" fontIcon="fa-equals"></mat-icon>
                             Clonar como histórico
                         </button>
+                        <button mat-menu-item *ngIf="objectType === 'TABLE'" (click)="generateXMLLoad(object)">
+                            <mat-icon fontSet="fas" fontIcon="fa-file-code"></mat-icon>
+                            Gerar XML de Carga
+                        </button>
                     </ng-template>
 
 

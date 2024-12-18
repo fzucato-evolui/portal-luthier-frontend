@@ -24,6 +24,7 @@ import {
 import {
     LuthierDatabaseModel,
     LuthierDictionaryObjectType,
+    LuthierGenerateLoadXMLModel,
     LuthierTableModel,
     LuthierVisionDatasetModel,
     LuthierVisionModel
@@ -51,6 +52,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {
     LuthierDictionaryCheckObjectsModalComponent
 } from './modal/check-objects/luthier-dictionary-check-objects-modal.component';
+import {LuthierDictionaryXmlLoadModalComponent} from './modal/xml-load/luthier-dictionary-xml-load-modal.component';
 
 @Component({
     selector     : 'luthier-dictionary',
@@ -749,5 +751,19 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
     downloadFile(model: any, filename: string) {
         const blob = new Blob([JSON.stringify(model)], {type: "text/plain;charset=utf-8"});
         saveAs(blob, filename);
+    }
+
+    generateXMLLoad(model: LuthierTableModel) {
+        const modal = this._matDialog.open(LuthierDictionaryXmlLoadModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-xml-load-modal-container' });
+        const info: LuthierGenerateLoadXMLModel = {
+            generateBlob: false,
+            generateReferences: false,
+            generateChildren: false,
+            tableName: model.name,
+            tableCode: model.code
+        }
+        modal.componentInstance.title = `Carga XML (${model.name})`;
+        modal.componentInstance.parent = this;
+        modal.componentInstance.model = info;
     }
 }

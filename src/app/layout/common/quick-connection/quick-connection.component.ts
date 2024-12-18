@@ -174,7 +174,8 @@ export class QuickConnectionComponent implements OnInit, AfterViewInit, OnDestro
                                 }
                             }).catch(error => {
                                 console.error(error);
-                                this._userService.luthierDatabase = "";
+                                this._messageService.open("O banco conectado parece não ter a estrutura correta de trabalho. Tente sincronizar seus esquemas para criação das sequences e outras estruturas que possam estar faltando!", "ALERTA", "warning")
+                                //this._userService.luthierDatabase = "";
                             });
 
                         }

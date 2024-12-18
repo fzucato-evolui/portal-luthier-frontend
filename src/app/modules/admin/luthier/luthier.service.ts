@@ -5,6 +5,7 @@ import {
     LuthierChangesOfTableModel,
     LuthierCheckObjectsSummaryModel,
     LuthierDatabaseModel,
+    LuthierGenerateLoadXMLModel,
     LuthierMenuModel,
     LuthierMenuTreeModel,
     LuthierModuleModel,
@@ -1064,5 +1065,9 @@ export class LuthierService
                 // Return a new observable with the response
                 return of(response);
             })));
+    }
+
+    generateXMLLoad(model: LuthierGenerateLoadXMLModel): Promise<{xml: string, fileName: string}> {
+        return firstValueFrom(this._httpClient.patch<{xml: string, fileName: string}>(`${this.baseDicUrl}/xml-load`, model));
     }
 }

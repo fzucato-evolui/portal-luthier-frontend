@@ -1,0 +1,126 @@
+<div class="inset-0 w-full h-full flex flex-col min-w-0 md:overflow-y-auto relative">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-2 sm:py-4 sm:px-4 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="flex flex-row flex-row-reverse mt-2 items-center">
+                <div class="mr-2">
+                    <button
+                        mat-icon-button aria-label="close dialog" mat-dialog-close>
+                        <mat-icon
+                            class="icon-size-4"
+                            fontSet="fas" fontIcon="fa-times"></mat-icon>
+                    </button>
+                </div>
+                <div class="w-full">
+                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        {{title}}
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div
+        class="flex-auto overflow-y-auto p-6"
+        cdkScrollable>
+        <form name="formSave" #form="ngForm">
+            <div class="divide-y-2 divide-black h-full max-h-full max-w-full overflow-x-auto md:overflow-auto">
+
+
+                <div class="w-full mb-4">
+                    <div class="w-full my-2">
+                        <div class="text-xl">Gerador de Carga XML</div>
+                        <div class="text-secondary">
+                            <p>Orientações</p>
+                            <p>1. Sempre procure colocar um filtro. De preferência filtre pela PK para trazer apenas 1 registro da tabela.</p>
+                            <p>2. Quando optar por gerar os filhos, tenha certeza de que se trata de uma tabela chave da regra de negócio e não uma tabela auxiliar que é referenciada por muitas outras.</p>
+                            <p>As 2 ações diminuem muito a complexidade do processamento e o tempo de execução</p>
+                        </div>
+
+                    </div>
+                    <div class="grid sm:grid-cols-12 gap-2 mt-4 mx-1">
+                        <div class="sm:col-span-2">
+                            <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                <mat-label>ID</mat-label>
+                                <mat-icon
+                                    class="icon-size-5 evolui-menu-item-icon"
+                                    fontSet="fas" fontIcon="fa-list-ol"
+                                    matPrefix></mat-icon>
+                                <input
+                                    name="tableCode"
+                                    readonly
+                                    [(ngModel)]="model.tableCode"
+                                    matInput>
+                            </mat-form-field>
+                        </div>
+                        <div class="sm:col-span-10">
+                            <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                <mat-label>Tabela</mat-label>
+                                <mat-icon
+                                    class="icon-size-5 evolui-menu-item-icon"
+                                    fontSet="fas" fontIcon="fa-signature"
+                                    matPrefix></mat-icon>
+                                <input class="uppercase"
+                                       name="tableName"
+                                       readonly
+                                       [(ngModel)]="model.tableName"
+                                       matInput>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="sm:col-span-12">
+                            <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full custom-prefix">
+                                <mat-label>Filtro (WHERE ou JOIN + WHERE)</mat-label>
+                                <mat-icon
+                                    class="icon-size-5 evolui-menu-item-icon"
+                                    fontSet="fas" fontIcon="fa-filter"
+                                    matPrefix></mat-icon>
+                                <span class="mr-2" matPrefix>SELECT * FROM {{model.tableName}}</span>
+                                <textarea
+                                    required
+                                    name="filter"
+                                    matInput
+                                    placeholder="Digite o restante da query"
+                                    [(ngModel)]="model.filter"
+                                    cdkTextareaAutosize
+                                    [cdkAutosizeMinRows]="3"
+                                ></textarea>
+
+                            </mat-form-field>
+                        </div>
+                        <div class="sm:col-span-4 text-sm flex items-center justify-center">
+                            <mat-slide-toggle name="generateReferences" class="text-sm" [(ngModel)]="model.generateReferences">Gerar Referências</mat-slide-toggle>
+                        </div>
+                        <div class="sm:col-span-4 text-sm flex items-center justify-center">
+                            <mat-slide-toggle name="generateChildren" class="text-sm" [(ngModel)]="model.generateChildren">Gerar Filhos</mat-slide-toggle>
+                        </div>
+                        <div class="sm:col-span-4 text-sm flex items-center justify-center">
+                            <mat-slide-toggle name="generateBlob" class="text-sm" [(ngModel)]="model.generateBlob">Gerar Blobs</mat-slide-toggle>
+                        </div>
+                    </div>
+                    <!--
+                    <pre style="font-size: 1rem; white-space: pre-wrap;">{{ formSave.value | json}}</pre>
+                    !-->
+                </div>
+
+
+            </div>
+        </form>
+
+
+        <div class="absolute bottom-0 right-0 z-50">
+
+            <button
+                class="mr-4 mb-4"
+                [disabled]="form.invalid"
+                (click)="generate()"
+                mat-flat-button
+                type="button"
+                [color]="'primary'">Gerar XML
+            </button>
+        </div>
+    </div>
+
+</div>
