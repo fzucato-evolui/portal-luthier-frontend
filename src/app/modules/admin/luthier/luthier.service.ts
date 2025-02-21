@@ -2,8 +2,11 @@ import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, catchError, firstValueFrom, Observable, of, switchMap, tap} from 'rxjs';
 import {
+    LuthierChangesOfProcedureModel,
     LuthierChangesOfTableModel,
+    LuthierCheckObjectsProcedureSummaryModel,
     LuthierCheckObjectsSummaryModel,
+    LuthierCheckObjectsTableSummaryModel,
     LuthierDatabaseModel,
     LuthierGenerateLoadXMLModel,
     LuthierMenuModel,
@@ -839,11 +842,23 @@ export class LuthierService
     }
 
     checkObjectsTableChanges(id: String, tableName: String): Promise<LuthierChangesOfTableModel> {
-        return firstValueFrom(this._httpClient.get<LuthierChangesOfTableModel>(`${this.baseDicUrl}/check-objects-changes/${id}/${tableName}`));
+        return firstValueFrom(this._httpClient.get<LuthierChangesOfTableModel>(`${this.baseDicUrl}/check-objects-changes-table/${id}/${tableName}`));
+    }
+
+    checkObjectsProcedureChanges(id: String, procedureName: String): Promise<LuthierChangesOfProcedureModel> {
+        return firstValueFrom(this._httpClient.get<LuthierChangesOfProcedureModel>(`${this.baseDicUrl}/check-objects-changes-procedure/${id}/${procedureName}`));
     }
 
     checkObjectsAllChanges(id: String): Promise<LuthierCheckObjectsSummaryModel> {
         return firstValueFrom(this._httpClient.get<LuthierCheckObjectsSummaryModel>(`${this.baseDicUrl}/check-objects-changes/${id}`));
+    }
+
+    checkObjectsAllTableChanges(id: String): Promise<LuthierCheckObjectsTableSummaryModel> {
+        return firstValueFrom(this._httpClient.get<LuthierCheckObjectsTableSummaryModel>(`${this.baseDicUrl}/check-objects-changes-tables/${id}`));
+    }
+
+    checkObjectsAllProcedureChanges(id: String): Promise<LuthierCheckObjectsProcedureSummaryModel> {
+        return firstValueFrom(this._httpClient.get<LuthierCheckObjectsProcedureSummaryModel>(`${this.baseDicUrl}/check-objects-changes-procedures/${id}`));
     }
 
     checkObjectsDeleteChanges(id: String): Promise<any> {

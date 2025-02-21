@@ -1807,6 +1807,11 @@ export class LuthierUserGroupModel {
 
 export class LuthierCheckObjectsSummaryModel {
     id?: string
+    tables?: LuthierCheckObjectsTableSummaryModel
+    procedures?: LuthierCheckObjectsProcedureSummaryModel
+}
+
+export class LuthierCheckObjectsTableSummaryModel {
     totalTime?: number = 0
     total?: number = 0
     totalChanges?: number = 0
@@ -1821,6 +1826,17 @@ export class LuthierCheckObjectsSummaryModel {
     totalDone?: number = 0
     totalErrors?: number = 0
     changes?: LuthierChangesOfTableModel[]
+}
+export class LuthierCheckObjectsProcedureSummaryModel {
+    totalTime?: number = 0
+    total?: number = 0
+    totalChanges?: number = 0
+    totalChangesBodies?: number = 0
+    totalNew?: number = 0
+    totalProcedures?: number = 0
+    totalDone?: number = 0
+    totalErrors?: number = 0
+    changes?: LuthierChangesOfProcedureModel[]
 }
 export class LuthierChangesOfTableModel {
     needPK?: boolean
@@ -1848,6 +1864,19 @@ export class LuthierChangesOfTableModel {
     insertedIndexes?: LuthierTableIndexModel[]
     updatedIndexes?: LuthierTableIndexModel[]
     views?: LuthierViewModel[]
+}
+
+export class LuthierChangesOfProcedureModel {
+    changed?: boolean
+    hasError?: boolean
+    done?: boolean
+    isNew?: boolean
+    changedBodies?: boolean
+    nativeProcedureBody?: string
+    error?: string
+    meta?: LuthierProcedureModel
+    procedure?: LuthierProcedureModel
+    bodies?: LuthierProcedureBodyModel[]
 }
 
 export class LuthierMetadataHistoryChangeModel extends LuthierBasicModel {

@@ -13,12 +13,15 @@ import {debounceTime, ReplaySubject, Subject, takeUntil} from 'rxjs';
 import {MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
-import {AsyncPipe, NgFor, NgIf} from '@angular/common';
+import {AsyncPipe, NgClass, NgFor, NgIf} from '@angular/common';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatSort, MatSortModule} from '@angular/material/sort';
 import {
+    LuthierChangesOfProcedureModel,
     LuthierChangesOfTableModel,
-    LuthierCheckObjectsSummaryModel
+    LuthierCheckObjectsProcedureSummaryModel,
+    LuthierCheckObjectsSummaryModel,
+    LuthierCheckObjectsTableSummaryModel
 } from '../../../../../../shared/models/luthier.model';
 import {LuthierDictionaryComponent} from '../../luthier-dictionary.component';
 import {UtilFunctions} from '../../../../../../shared/util/util-functions';
@@ -29,14 +32,23 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {LuthierDictionaryChangesModalComponent} from '../changes/luthier-dictionary-changes-modal.component';
 import {FormsModule} from '@angular/forms';
 import {MatPaginator, MatPaginatorIntl, MatPaginatorModule} from '@angular/material/paginator';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
 
-export type FilterCheckObjectsModel = {
+export type FilterCheckObjectsTableModel = {
     changed?: boolean
     changedFields?: boolean
     changedPKs?: boolean
     changedReferences?: boolean
     changedIndexes?: boolean
     changedViews?: boolean
+    hasError?: boolean
+    done?: boolean
+    isNew?: boolean
+    text?: string
+}
+export type FilterCheckObjectsProcedureModel = {
+    changed?: boolean
+    changedBodies?: boolean
     hasError?: boolean
     done?: boolean
     isNew?: boolean
@@ -80,7 +92,9 @@ export class MyCustomPaginatorIntl implements MatPaginatorIntl {
         NgIf,
         MatCheckboxModule,
         MatTooltipModule,
-        AsyncPipe
+        AsyncPipe,
+        MatButtonToggleModule,
+        NgClass
     ],
     encapsulation  : ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -89,13 +103,14 @@ export class MyCustomPaginatorIntl implements MatPaginatorIntl {
 })
 export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDestroy, AfterViewInit
 {
-    @ViewChild(MatSort) sort: MatSort;
-    @ViewChild(MatPaginator) paginator: MatPaginator;
-    resultsLength = 0;
     model: LuthierCheckObjectsSummaryModel;
-    summaryFooter: LuthierCheckObjectsSummaryModel = new LuthierCheckObjectsSummaryModel();
-    displayedColumns = [ 'buttons', 'table.code', 'table.name', 'table.objectType', 'isNew', 'changed', 'done', 'hasError', "changedFields", "changedPKs", "changedReferences", "changedIndexes", "changedViews" ];
-    filterModel: FilterCheckObjectsModel = {
+
+    @ViewChild("sortTables") sortTables: MatSort;
+    @ViewChild("paginatorTables") paginatorTables: MatPaginator;
+    resultsLengthTables = 0;
+    summaryFooterTables: LuthierCheckObjectsTableSummaryModel = new LuthierCheckObjectsTableSummaryModel();
+    displayedColumnsTables = [ 'buttons', 'table.code', 'table.name', 'table.objectType', 'isNew', 'changed', 'done', 'hasError', "changedFields", "changedPKs", "changedReferences", "changedIndexes", "changedViews" ];
+    filterModelTables: FilterCheckObjectsTableModel = {
         changed: null,
         changedFields: null,
         changedPKs: null,
@@ -107,8 +122,25 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
         isNew: null,
         text: null
     }
-    $filterModel: ReplaySubject<FilterCheckObjectsModel> = new ReplaySubject<FilterCheckObjectsModel>(1);
-    public dataSource = new MatTableDataSource<LuthierChangesOfTableModel>();
+    $filterModelTables: ReplaySubject<FilterCheckObjectsTableModel> = new ReplaySubject<FilterCheckObjectsTableModel>(1);
+    public dataSourceTables = new MatTableDataSource<LuthierChangesOfTableModel>();
+
+    @ViewChild("sortProcedures") sortProcedures: MatSort;
+    @ViewChild("paginatorProcedures") paginatorProcedures: MatPaginator;
+    resultsLengthProcedures = 0;
+    summaryFooterProcedures: LuthierCheckObjectsProcedureSummaryModel = new LuthierCheckObjectsProcedureSummaryModel();
+    displayedColumnsProcedures = [ 'buttons', 'procedure.code', 'procedure.name', 'isNew', 'changed', 'done', 'hasError', "changedBodies" ];
+    filterModelProcedures: FilterCheckObjectsProcedureModel = {
+        changed: null,
+        changedBodies: null,
+        hasError: null,
+        done: null,
+        isNew: null,
+        text: null
+    }
+    $filterModelProcedures: ReplaySubject<FilterCheckObjectsProcedureModel> = new ReplaySubject<FilterCheckObjectsProcedureModel>(1);
+    public dataSourceProcedures = new MatTableDataSource<LuthierChangesOfProcedureModel>();
+
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     title: string;
     private _parent: LuthierDictionaryComponent;
@@ -128,50 +160,75 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
     }
 
     ngOnInit(): void {
-        this.dataSource.data = this.model.changes;
-        this.resultsLength = this.dataSource.data.length;
-        this.summaryFooter = {
-            totalTime: this.model.totalTime,
-            total: this.model.total,
-            totalChanges: this.model.totalChanges,
-            totalNew: this.model.totalNew,
-            totalChangesFields: this.model.totalChangesFields,
-            totalChangesPKs: this.model.totalChangesPKs,
-            totalChangesReferences: this.model.totalChangesReferences,
-            totalChangesIndexes: this.model.totalChangesIndexes,
-            totalChangesViews: this.model.totalChangesViews,
-            totalTables: this.model.totalTables,
-            totalViews: this.model.totalViews,
-            totalDone: this.model.totalDone,
-            totalErrors: this.model.totalErrors
+        this.dataSourceTables.data = this.model.tables.changes;
+        this.resultsLengthTables = this.dataSourceTables.data.length;
+        this.summaryFooterTables = {
+            totalTime: this.model.tables.totalTime,
+            total: this.model.tables.total,
+            totalChanges: this.model.tables.totalChanges,
+            totalNew: this.model.tables.totalNew,
+            totalChangesFields: this.model.tables.totalChangesFields,
+            totalChangesPKs: this.model.tables.totalChangesPKs,
+            totalChangesReferences: this.model.tables.totalChangesReferences,
+            totalChangesIndexes: this.model.tables.totalChangesIndexes,
+            totalChangesViews: this.model.tables.totalChangesViews,
+            totalTables: this.model.tables.totalTables,
+            totalViews: this.model.tables.totalViews,
+            totalDone: this.model.tables.totalDone,
+            totalErrors: this.model.tables.totalErrors
 
         }
-        this.$filterModel.pipe(takeUntil(this._unsubscribeAll), debounceTime(300))
+        this.$filterModelTables.pipe(takeUntil(this._unsubscribeAll), debounceTime(300))
             .subscribe((value) =>
             {
-                this.filter(value);
+                this.filterTables(value);
+            });
+
+
+        this.dataSourceProcedures.data = this.model.procedures.changes;
+        this.resultsLengthProcedures = this.dataSourceProcedures.data.length;
+        this.summaryFooterProcedures = {
+            totalTime: this.model.procedures.totalTime,
+            total: this.model.procedures.total,
+            totalChanges: this.model.procedures.totalChanges,
+            totalChangesBodies: this.model.procedures.totalChangesBodies,
+            totalNew: this.model.procedures.totalNew,
+            totalProcedures: this.model.procedures.totalProcedures,
+            totalDone: this.model.procedures.totalDone,
+            totalErrors: this.model.procedures.totalErrors
+
+        }
+        this.$filterModelProcedures.pipe(takeUntil(this._unsubscribeAll), debounceTime(300))
+            .subscribe((value) =>
+            {
+                this.filterProcedures(value);
             });
     }
 
     ngOnDestroy(): void {
         this.parent.service.checkObjectsDeleteChanges(this.model.id);
-        this.dataSource.data = [];
+        this.dataSourceTables.data = [];
+        this.dataSourceProcedures.data = [];
         this.model = null;
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
 
     ngAfterViewInit(): void {
-        this.dataSource.sort = this.sort;
-        UtilFunctions.setSortingDataAccessor(this.dataSource);
-        this.dataSource.paginator = this.paginator;
+        this.dataSourceTables.sort = this.sortTables;
+        UtilFunctions.setSortingDataAccessor(this.dataSourceTables);
+        this.dataSourceTables.paginator = this.paginatorTables;
+
+        this.dataSourceProcedures.sort = this.sortProcedures;
+        UtilFunctions.setSortingDataAccessor(this.dataSourceProcedures);
+        this.dataSourceProcedures.paginator = this.paginatorProcedures;
     }
 
-    filter(value: FilterCheckObjectsModel) {
-        this.summaryFooter = new LuthierCheckObjectsSummaryModel();
-        this.summaryFooter.totalTime = this.model.totalTime;
+    filterTables(value: FilterCheckObjectsTableModel) {
+        this.summaryFooterTables = new LuthierCheckObjectsTableSummaryModel();
+        this.summaryFooterTables.totalTime = this.model.tables.totalTime;
 
-        this.dataSource.data = this.model.changes.filter(x => {
+        this.dataSourceTables.data = this.model.tables.changes.filter(x => {
             for (const key in value) {
                 if (key !== 'text') {
                     if (value[key] !== null) {
@@ -188,83 +245,186 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
                     UtilFunctions.removeAccents(x.table.objectType.toUpperCase()).includes(UtilFunctions.removeAccents(value.text.toUpperCase()));
             }
             if (valid) {
-                this.summaryFooter.total += 1;
+                this.summaryFooterTables.total += 1;
                 if (x.table.objectType === 'TABLE') {
-                    this.summaryFooter.totalTables += 1;
+                    this.summaryFooterTables.totalTables += 1;
                 }
                 else {
-                    this.summaryFooter.totalViews += 1;
+                    this.summaryFooterTables.totalViews += 1;
                 }
                 if (x.done) {
-                    this.summaryFooter.totalDone += 1;
+                    this.summaryFooterTables.totalDone += 1;
                 }
                 if (x.hasError) {
-                    this.summaryFooter.totalErrors += 1;
+                    this.summaryFooterTables.totalErrors += 1;
                 }
                 if (x.isNew) {
-                    this.summaryFooter.totalNew += 1;
+                    this.summaryFooterTables.totalNew += 1;
                 }
                 if (x.changed) {
-                    this.summaryFooter.totalChanges += 1;
+                    this.summaryFooterTables.totalChanges += 1;
                 }
                 if (x.changedFields) {
-                    this.summaryFooter.totalChangesFields += 1;
+                    this.summaryFooterTables.totalChangesFields += 1;
                 }
                 if (x.changedPKs) {
-                    this.summaryFooter.totalChangesPKs += 1;
+                    this.summaryFooterTables.totalChangesPKs += 1;
                 }
                 if (x.changedReferences) {
-                    this.summaryFooter.totalChangesReferences += 1;
+                    this.summaryFooterTables.totalChangesReferences += 1;
                 }
                 if (x.changedIndexes) {
-                    this.summaryFooter.totalChangesIndexes += 1;
+                    this.summaryFooterTables.totalChangesIndexes += 1;
                 }
                 if (x.changedViews) {
-                    this.summaryFooter.totalChangesViews += 1;
+                    this.summaryFooterTables.totalChangesViews += 1;
                 }
 
             }
             return valid;
         });
 
-        this.dataSource._updateChangeSubscription();
+        this.dataSourceTables._updateChangeSubscription();
         this._changeDetectorRef.detectChanges();
 
     }
 
-    filterText() {
-        this.$filterModel.next(this.filterModel);
+    filterProcedures(value: FilterCheckObjectsProcedureModel) {
+        this.summaryFooterProcedures = new LuthierCheckObjectsProcedureSummaryModel();
+        this.summaryFooterProcedures.totalTime = this.model.procedures.totalTime;
+
+        this.dataSourceProcedures.data = this.model.procedures.changes.filter(x => {
+            for (const key in value) {
+                if (key !== 'text') {
+                    if (value[key] !== null) {
+                        if (x[key] !== value[key]) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            let valid = true;
+            if (UtilFunctions.isValidStringOrArray(value.text) === true) {
+                valid = UtilFunctions.removeAccents(x.procedure.code.toString()).includes(UtilFunctions.removeAccents(value.text.toUpperCase())) ||
+                    UtilFunctions.removeAccents(x.procedure.name.toUpperCase()).includes(UtilFunctions.removeAccents(value.text.toUpperCase())) ||
+                    UtilFunctions.removeAccents(x.procedure.objectType.toUpperCase()).includes(UtilFunctions.removeAccents(value.text.toUpperCase()));
+            }
+            if (valid) {
+                this.summaryFooterProcedures.total += 1;
+                this.summaryFooterProcedures.totalProcedures += 1;
+                if (x.done) {
+                    this.summaryFooterProcedures.totalDone += 1;
+                }
+                if (x.hasError) {
+                    this.summaryFooterProcedures.totalErrors += 1;
+                }
+                if (x.isNew) {
+                    this.summaryFooterProcedures.totalNew += 1;
+                }
+                if (x.changed) {
+                    this.summaryFooterProcedures.totalChanges += 1;
+                }
+
+            }
+            return valid;
+        });
+
+        this.dataSourceProcedures._updateChangeSubscription();
+        this._changeDetectorRef.detectChanges();
+
     }
-    changeBoolean(event: MatCheckboxChange, key: string) {
-        if (this.filterModel[key] !== null) {
-            if (UtilFunctions.parseBoolean(this.filterModel[key]) === false) {
-                this.filterModel[key] = null;
+
+    filterTextTables() {
+        this.$filterModelTables.next(this.filterModelTables);
+    }
+
+    filterTextProcedures() {
+        this.$filterModelProcedures.next(this.filterModelProcedures);
+    }
+
+    changeBooleanTables(event: MatCheckboxChange, key: string) {
+        if (this.filterModelTables[key] !== null) {
+            if (UtilFunctions.parseBoolean(this.filterModelTables[key]) === false) {
+                this.filterModelTables[key] = null;
             }
             else {
-                this.filterModel[key] = false;
+                this.filterModelTables[key] = false;
             }
         }
         else {
-            this.filterModel[key] = true;
+            this.filterModelTables[key] = true;
         }
-        event.source.checked = this.filterModel[key];
-        this.$filterModel.next(this.filterModel);
+        event.source.checked = this.filterModelTables[key];
+        this.$filterModelTables.next(this.filterModelTables);
+    }
+
+    changeBooleanProcedures(event: MatCheckboxChange, key: string) {
+        if (this.filterModelProcedures[key] !== null) {
+            if (UtilFunctions.parseBoolean(this.filterModelProcedures[key]) === false) {
+                this.filterModelProcedures[key] = null;
+            }
+            else {
+                this.filterModelProcedures[key] = false;
+            }
+        }
+        else {
+            this.filterModelProcedures[key] = true;
+        }
+        event.source.checked = this.filterModelProcedures[key];
+        this.$filterModelProcedures.next(this.filterModelProcedures);
     }
 
     download() {
         this.parent.service.checkObjectsAllChanges(this.model.id)
             .then(result => {
                 const filteredResult = {
-                    filter: this.filterModel,
-                    summary: this.summaryFooter,
-                    changes: result.changes.filter(x => this.dataSource.data.findIndex(y => y.table.name === x.table.name) >= 0)
+                    tables: {
+                        filter: this.filterModelTables,
+                        summary: this.summaryFooterTables,
+                        changes: result.tables.changes.filter(x => this.dataSourceTables.data.findIndex(y => y.table.name === x.table.name) >= 0)
+                    },
+                    procedures: {
+                        filter: this.filterModelProcedures,
+                        summary: this.summaryFooterProcedures,
+                        changes: result.procedures.changes.filter(x => this.dataSourceProcedures.data.findIndex(y => y.procedure.name === x.procedure.name) >= 0)
+                    }
                 };
                 this.parent.downloadFile(filteredResult, 'changes.json');
             })
 
     }
 
-    downloadChange(model: LuthierChangesOfTableModel) {
+    downloadTables() {
+        this.parent.service.checkObjectsAllTableChanges(this.model.id)
+            .then(result => {
+                const filteredResult = {
+                    tables: {
+                        filter: this.filterModelTables,
+                        summary: this.summaryFooterTables,
+                        changes: result.changes.filter(x => this.dataSourceTables.data.findIndex(y => y.table.name === x.table.name) >= 0)
+                    }
+                };
+                this.parent.downloadFile(filteredResult, 'tables_changes.json');
+            })
+
+    }
+
+    downloadProcedures() {
+        this.parent.service.checkObjectsAllProcedureChanges(this.model.id)
+            .then(result => {
+                const filteredResult = {
+                    procedures: {
+                        filter: this.filterModelProcedures,
+                        summary: this.summaryFooterProcedures,
+                        changes: result.changes.filter(x => this.dataSourceProcedures.data.findIndex(y => y.procedure.name === x.procedure.name) >= 0)
+                    }
+                };
+                this.parent.downloadFile(filteredResult, 'procedures_changes.json');
+            })
+
+    }
+
+    downloadChangeTable(model: LuthierChangesOfTableModel) {
         if (model['complete']) {
             this.parent.downloadFile(model, `changes${model.table.name}.json`);
         }
@@ -272,10 +432,25 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
             this.parent.service.checkObjectsTableChanges(this.model.id, model.table.name)
                 .then(result => {
                     result['complete'] = true;
-                    const index = this.dataSource.data.findIndex(x => x.table.code === model.table.code);
-                    this.dataSource.data[index] = result;
-                    this.dataSource._updateChangeSubscription();
+                    const index = this.dataSourceTables.data.findIndex(x => x.table.code === model.table.code);
+                    this.dataSourceTables.data[index] = result;
+                    this.dataSourceTables._updateChangeSubscription();
                     this.parent.downloadFile(result, `changes${result.table.name}.json`);
+                });
+        }
+    }
+    downloadChangeProcedure(model: LuthierChangesOfProcedureModel) {
+        if (model['complete']) {
+            this.parent.downloadFile(model, `changes${model.procedure.name}.json`);
+        }
+        else {
+            this.parent.service.checkObjectsProcedureChanges(this.model.id, model.procedure.name)
+                .then(result => {
+                    result['complete'] = true;
+                    const index = this.dataSourceProcedures.data.findIndex(x => x.procedure.code === model.procedure.code);
+                    this.dataSourceProcedures.data[index] = result;
+                    this.dataSourceProcedures._updateChangeSubscription();
+                    this.parent.downloadFile(result, `changes${result.procedure.name}.json`);
                 });
         }
     }
@@ -291,9 +466,9 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
             this.parent.service.checkObjectsTableChanges(this.model.id, model.table.name)
                 .then(result => {
                     result['complete'] = true;
-                    const index = this.dataSource.data.findIndex(x => x.table.code === model.table.code);
-                    this.dataSource.data[index] = result;
-                    this.dataSource._updateChangeSubscription();
+                    const index = this.dataSourceTables.data.findIndex(x => x.table.code === model.table.code);
+                    this.dataSourceTables.data[index] = result;
+                    this.dataSourceTables._updateChangeSubscription();
                     const modalModel = {
                         isNew: result.isNew,
                         luthierTable: result.table
@@ -304,7 +479,32 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
 
     }
 
-    viewMeta(model: LuthierChangesOfTableModel, i) {
+    viewProcedure(model: LuthierChangesOfProcedureModel) {
+        if (model['complete']) {
+            const modalModel = {
+                isNew: model.isNew,
+                luthierProcedure: model.procedure
+            };
+            this.openModal(`Dados do banco Luthier da procedure ${model.procedure.name}`, modalModel);
+        }
+        else {
+            this.parent.service.checkObjectsProcedureChanges(this.model.id, model.procedure.name)
+                .then(result => {
+                    result['complete'] = true;
+                    const index = this.dataSourceProcedures.data.findIndex(x => x.procedure.code === model.procedure.code);
+                    this.dataSourceProcedures.data[index] = result;
+                    this.dataSourceProcedures._updateChangeSubscription();
+                    const modalModel = {
+                        isNew: result.isNew,
+                        luthierProcedure: result.procedure
+                    };
+                    this.openModal(`Dados do banco Luthier da procedure ${result.procedure.name}`, modalModel);
+                });
+        }
+
+    }
+
+    viewMetaTable(model: LuthierChangesOfTableModel, i) {
         if (model['complete']) {
             const modalModel = {
                 isNew: model.isNew,
@@ -316,9 +516,9 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
             this.parent.service.checkObjectsTableChanges(this.model.id, model.table.name)
                 .then(result => {
                     result['complete'] = true;
-                    const index = this.dataSource.data.findIndex(x => x.table.code === model.table.code);
-                    this.dataSource.data[index] = result;
-                    this.dataSource._updateChangeSubscription();
+                    const index = this.dataSourceTables.data.findIndex(x => x.table.code === model.table.code);
+                    this.dataSourceTables.data[index] = result;
+                    this.dataSourceTables._updateChangeSubscription();
                     const modalModel = {
                         isNew: result.isNew,
                         databaseMeta: result.meta
@@ -328,7 +528,31 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
         }
     }
 
-    viewError(model: LuthierChangesOfTableModel, i) {
+    viewMetaProcedure(model: LuthierChangesOfProcedureModel, i) {
+        if (model['complete']) {
+            const modalModel = {
+                isNew: model.isNew,
+                databaseMeta: model.meta
+            };
+            this.openModal(`Dados que estavam salvos no banco de dados da procedure ${model.procedure.name}`, modalModel);
+        }
+        else {
+            this.parent.service.checkObjectsProcedureChanges(this.model.id, model.procedure.name)
+                .then(result => {
+                    result['complete'] = true;
+                    const index = this.dataSourceProcedures.data.findIndex(x => x.procedure.code === model.procedure.code);
+                    this.dataSourceProcedures.data[index] = result;
+                    this.dataSourceProcedures._updateChangeSubscription();
+                    const modalModel = {
+                        isNew: result.isNew,
+                        databaseMeta: result.meta
+                    };
+                    this.openModal(`Dados que estavam salvos no banco de dados da procedure ${result.procedure.name}`, modalModel);
+                });
+        }
+    }
+
+    viewErrorTable(model: LuthierChangesOfTableModel, i) {
         if (model['complete']) {
             const modalModel = {
                 isNew: model.isNew,
@@ -340,9 +564,9 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
             this.parent.service.checkObjectsTableChanges(this.model.id, model.table.name)
                 .then(result => {
                     result['complete'] = true;
-                    const index = this.dataSource.data.findIndex(x => x.table.code === model.table.code);
-                    this.dataSource.data[index] = result;
-                    this.dataSource._updateChangeSubscription();
+                    const index = this.dataSourceTables.data.findIndex(x => x.table.code === model.table.code);
+                    this.dataSourceTables.data[index] = result;
+                    this.dataSourceTables._updateChangeSubscription();
                     const modalModel = {
                         isNew: result.isNew,
                         error: result.error
@@ -352,7 +576,31 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
         }
     }
 
-    viewChangedFields(model: LuthierChangesOfTableModel, i) {
+    viewErrorProcedure(model: LuthierChangesOfProcedureModel, i) {
+        if (model['complete']) {
+            const modalModel = {
+                isNew: model.isNew,
+                error: model.error
+            };
+            this.openModal(`Stacktrace do erro ocorrido na procedure ${model.procedure.name}`, modalModel);
+        }
+        else {
+            this.parent.service.checkObjectsProcedureChanges(this.model.id, model.procedure.name)
+                .then(result => {
+                    result['complete'] = true;
+                    const index = this.dataSourceProcedures.data.findIndex(x => x.procedure.code === model.procedure.code);
+                    this.dataSourceProcedures.data[index] = result;
+                    this.dataSourceProcedures._updateChangeSubscription();
+                    const modalModel = {
+                        isNew: result.isNew,
+                        error: result.error
+                    };
+                    this.openModal(`Stacktrace do erro ocorrido na procedure ${result.procedure.name}`, modalModel);
+                });
+        }
+    }
+
+    viewChangedFieldsTable(model: LuthierChangesOfTableModel, i) {
         if (model['complete']) {
             const modalModel = {
                 isNew: model.isNew,
@@ -368,9 +616,9 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
             this.parent.service.checkObjectsTableChanges(this.model.id, model.table.name)
                 .then(result => {
                     result['complete'] = true;
-                    const index = this.dataSource.data.findIndex(x => x.table.code === model.table.code);
-                    this.dataSource.data[index] = result;
-                    this.dataSource._updateChangeSubscription();
+                    const index = this.dataSourceTables.data.findIndex(x => x.table.code === model.table.code);
+                    this.dataSourceTables.data[index] = result;
+                    this.dataSourceTables._updateChangeSubscription();
                     const modalModel = {
                         isNew: result.isNew,
                         updated: result.updatedFields,
@@ -384,7 +632,7 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
         }
     }
 
-    viewChangedPKs(model: LuthierChangesOfTableModel, i) {
+    viewChangedPKsTable(model: LuthierChangesOfTableModel, i) {
         if (model['complete']) {
             const modalModel = {
                 isNew: model.isNew,
@@ -399,9 +647,9 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
             this.parent.service.checkObjectsTableChanges(this.model.id, model.table.name)
                 .then(result => {
                     result['complete'] = true;
-                    const index = this.dataSource.data.findIndex(x => x.table.code === model.table.code);
-                    this.dataSource.data[index] = result;
-                    this.dataSource._updateChangeSubscription();
+                    const index = this.dataSourceTables.data.findIndex(x => x.table.code === model.table.code);
+                    this.dataSourceTables.data[index] = result;
+                    this.dataSourceTables._updateChangeSubscription();
                     const modalModel = {
                         isNew: result.isNew,
                         wasNeeded: result.needPK,
@@ -415,7 +663,7 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
 
     }
 
-    viewChangedReferences(model: LuthierChangesOfTableModel, i) {
+    viewChangedReferencesTable(model: LuthierChangesOfTableModel, i) {
         if (model['complete']) {
             const modalModel = {
                 isNew: model.isNew,
@@ -432,9 +680,9 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
             this.parent.service.checkObjectsTableChanges(this.model.id, model.table.name)
                 .then(result => {
                     result['complete'] = true;
-                    const index = this.dataSource.data.findIndex(x => x.table.code === model.table.code);
-                    this.dataSource.data[index] = result;
-                    this.dataSource._updateChangeSubscription();
+                    const index = this.dataSourceTables.data.findIndex(x => x.table.code === model.table.code);
+                    this.dataSourceTables.data[index] = result;
+                    this.dataSourceTables._updateChangeSubscription();
                     const modalModel = {
                         isNew: result.isNew,
                         updated: result.updatedReferences,
@@ -448,7 +696,7 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
         }
     }
 
-    viewChangedIndexes(model: LuthierChangesOfTableModel, i) {
+    viewChangedIndexesTable(model: LuthierChangesOfTableModel, i) {
         if (model['complete']) {
             const modalModel = {
                 isNew: model.isNew,
@@ -464,9 +712,9 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
             this.parent.service.checkObjectsTableChanges(this.model.id, model.table.name)
                 .then(result => {
                     result['complete'] = true;
-                    const index = this.dataSource.data.findIndex(x => x.table.code === model.table.code);
-                    this.dataSource.data[index] = result;
-                    this.dataSource._updateChangeSubscription();
+                    const index = this.dataSourceTables.data.findIndex(x => x.table.code === model.table.code);
+                    this.dataSourceTables.data[index] = result;
+                    this.dataSourceTables._updateChangeSubscription();
                     const modalModel = {
                         isNew: result.isNew,
                         updated: result.updatedIndexes,
@@ -495,9 +743,9 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
             this.parent.service.checkObjectsTableChanges(this.model.id, model.table.name)
                 .then(result => {
                     result['complete'] = true;
-                    const index = this.dataSource.data.findIndex(x => x.table.code === model.table.code);
-                    this.dataSource.data[index] = result;
-                    this.dataSource._updateChangeSubscription();
+                    const index = this.dataSourceTables.data.findIndex(x => x.table.code === model.table.code);
+                    this.dataSourceTables.data[index] = result;
+                    this.dataSourceTables._updateChangeSubscription();
                     const modalModel = {
                         isNew: result.isNew,
                         updatedValue: result.nativeViewBody,
@@ -510,14 +758,43 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
 
     }
 
+    viewChangedProcedureBodies(model: LuthierChangesOfProcedureModel, i) {
+        if (model['complete']) {
+            const modalModel = {
+                isNew: model.isNew,
+                updatedValue: model.nativeProcedureBody,
+                metaBodies: model.meta?.bodies,
+                luthierBodies: model.procedure.bodies,
+            }
+            this.openModal(`Alterações de SQL na procedure ${model.procedure.name}`, modalModel);
+        }
+        else {
+            this.parent.service.checkObjectsProcedureChanges(this.model.id, model.procedure.name)
+                .then(result => {
+                    result['complete'] = true;
+                    const index = this.dataSourceProcedures.data.findIndex(x => x.procedure.code === model.procedure.code);
+                    this.dataSourceProcedures.data[index] = result;
+                    this.dataSourceProcedures._updateChangeSubscription();
+                    const modalModel = {
+                        isNew: result.isNew,
+                        updatedValue: result.nativeProcedureBody,
+                        metaBodies: result.meta?.bodies,
+                        luthierBodies: result.procedure.bodies,
+                    }
+                    this.openModal(`Alterações de SQL na procedure ${result.procedure.name}`, modalModel);
+                });
+        }
+
+    }
+
     openModal(title: string, model: any) {
         const modal = this._matDialog.open(LuthierDictionaryChangesModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-changes-modal-container' });
         modal.componentInstance.title = title;
         modal.componentInstance.model = model;
     }
 
-    cleanFilter() {
-        this.filterModel = {
+    cleanFilterTables() {
+        this.filterModelTables = {
             changed: null,
             changedFields: null,
             changedPKs: null,
@@ -529,6 +806,18 @@ export class LuthierDictionaryCheckObjectsModalComponent implements OnInit, OnDe
             isNew: null,
             text: null
         }
-        this.$filterModel.next(this.filterModel);
+        this.$filterModelTables.next(this.filterModelTables);
+    }
+
+    cleanFilterProcedures() {
+        this.filterModelProcedures = {
+            changed: null,
+            changedBodies: null,
+            hasError: null,
+            done: null,
+            isNew: null,
+            text: null
+        }
+        this.$filterModelProcedures.next(this.filterModelProcedures);
     }
 }
