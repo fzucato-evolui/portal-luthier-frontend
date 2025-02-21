@@ -468,6 +468,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                         dsField.groupInfo = null;
                         dsField.code = null;
                         dsField.tableField = x;
+                        dsField.visible = true;
                         dsField.id = crypto.randomUUID();
                         dsField.fieldType = modal.componentInstance.model.fieldType;
                         if (dsField.fieldType === LuthierVisionDatasetFieldTypeEnum.LOOKUP) {
@@ -954,6 +955,9 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         }
         else if (type === 'searchs') {
             return this.searchsDataSource;
+        }
+        else {
+            return new MatTableDataSource<any>();
         }
     }
 

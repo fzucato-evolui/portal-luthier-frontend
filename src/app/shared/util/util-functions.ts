@@ -292,5 +292,14 @@ export class UtilFunctions {
         return blob;
     }
 
+    public static normalizeBody(body: string): string {
+        if (UtilFunctions.isValidStringOrArray(body) === false) {
+            return body;
+        }
+        return body
+            .replace(/\s+/g, ' ')   // Substitui qualquer quantidade de espaços (inclusive quebras de linha) por um único espaço.
+            .trim();                // Remove espaços no início e no fim da string.
+    }
+
 
 }

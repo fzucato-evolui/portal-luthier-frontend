@@ -25,6 +25,7 @@ import {
     LuthierDatabaseModel,
     LuthierDictionaryObjectType,
     LuthierGenerateLoadXMLModel,
+    LuthierProcedureModel,
     LuthierTableModel,
     LuthierVisionDatasetModel,
     LuthierVisionModel
@@ -53,6 +54,7 @@ import {
     LuthierDictionaryCheckObjectsModalComponent
 } from './modal/check-objects/luthier-dictionary-check-objects-modal.component';
 import {LuthierDictionaryXmlLoadModalComponent} from './modal/xml-load/luthier-dictionary-xml-load-modal.component';
+import {LuthierDictionaryProcedureComponent} from './procedure/luthier-dictionary-procedure.component';
 
 @Component({
     selector     : 'luthier-dictionary',
@@ -83,7 +85,8 @@ import {LuthierDictionaryXmlLoadModalComponent} from './modal/xml-load/luthier-d
         MatTreeModule,
         LuthierDictionaryVisionComponent,
         LuthierDictionaryDatasetComponent,
-        ClipboardModule
+        ClipboardModule,
+        LuthierDictionaryProcedureComponent
     ],
 })
 export class LuthierDictionaryComponent implements OnInit, OnDestroy
@@ -94,6 +97,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
     private databases: LuthierDatabaseModel[];
     tables: LuthierTableModel[];
     visions: LuthierVisionModel[];
+    procedures: LuthierProcedureModel[];
     filteredObjects: ReplaySubject<Array<LuthierDictionaryObjectType>> = new ReplaySubject<Array<LuthierDictionaryObjectType>>(1);
     tabsOpened: LuthierDictionaryObjectType[] = [];
     selectedTab: LuthierDictionaryObjectType;
@@ -180,6 +184,18 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                         awesomeIcon : {fontSet: 'fas', fontIcon: 'fa-glasses'},
                         function: item => {
                             this.objectType = 'VISION';
+                            this.filteredObjects.next(null);
+                            this.filterObjects(item);
+                            this._changeDetectorRef.markForCheck();
+                        },
+                    },
+                    {
+                        id      : 'luthier.dictionary.objects.procedures',
+                        title   : 'Procedures',
+                        type    : 'basic',
+                        awesomeIcon : {fontSet: 'fas', fontIcon: 'fa-glasses'},
+                        function: item => {
+                            this.objectType = 'PROCEDURE';
                             this.filteredObjects.next(null);
                             this.filterObjects(item);
                             this._changeDetectorRef.markForCheck();
@@ -284,6 +300,13 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 this.visions = visions;
                 this.filterObjects();
             });
+        this._parent.service.procedures$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((procedures: LuthierProcedureModel[]) =>
+            {
+                this.procedures = procedures;
+                this.filterObjects();
+            });
         // Subscribe to media changes
         this._fuseMediaWatcherService.onMediaChange$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -330,7 +353,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             }
 
         }
-        else {
+        else if (this.objectType === 'VISION') {
             if (UtilFunctions.isValidStringOrArray(this.visions) === true) {
                 const filtrered = this.visions.filter(x => {
                     const model = x;
@@ -341,6 +364,18 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                     return valid;
                 });
                 this.filteredObjects.next(filtrered);
+            }
+        }
+        else if (this.objectType === 'PROCEDURE') {
+            if (UtilFunctions.isValidStringOrArray(this.procedures) === true) {
+                this.filteredObjects.next(this.procedures.filter(x => {
+                    const model = x;
+                    let valid = true;
+                    if (valid && UtilFunctions.isValidStringOrArray(filterText) === true) {
+                        valid =  UtilFunctions.removeAccents(model.name.toUpperCase()).includes(filterText);
+                    }
+                    return valid;
+                }));
             }
         }
         if (item) {
@@ -399,6 +434,15 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 }
                 else if (table.objectType === 'VISION_DATASET') {
                     this._parent.service.getDataset(table.code)
+                        .then(response => {
+                            response.id = crypto.randomUUID();
+                            this.tabsOpened.push(response);
+                            this.selectedTab = response;
+                            this._changeDetectorRef.markForCheck();
+                        })
+                }
+                else if (table.objectType === 'PROCEDURE') {
+                    this._parent.service.getProcedure(table.code)
                         .then(response => {
                             response.id = crypto.randomUUID();
                             this.tabsOpened.push(response);
@@ -487,6 +531,20 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                             this.messageService.open(`Dataset removido com sucesso`, 'SUCESSO', 'success');
                         })
                 }
+                else if (object.objectType === 'PROCEDURE') {
+                    this.service.deleteProcedure(object.code)
+                        .then(result => {
+
+                            let index = this.tabsOpened.findIndex(x => x.objectType === object.objectType && x.id === object.id);
+                            this.tabsOpened.splice(index, 1);
+                            this.selectedTab = null;
+                            object['removed'] = true;
+                            vision['updated'] = true;
+                            this._changeDetectorRef.detectChanges();
+                            this.messageService.open(`Procedure removida com sucesso`, 'SUCESSO', 'success');
+                        })
+
+                }
 
             }
         });
@@ -550,8 +608,11 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
         if (this.objectType === 'VISION') {
             firstValueFrom(this.service.getVisions());
         }
-        else {
+        else if (this.objectType === 'TABLE' || this.objectType === 'VIEW') {
             firstValueFrom(this.service.getTables());
+        }
+        else if (this.objectType === 'PROCEDURE') {
+            firstValueFrom(this.service.getProcedures());
         }
     }
     addObject() {
@@ -562,7 +623,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             newModel.objectType = 'VISION';
             this.addTab(newModel);
         }
-        else {
+        else if (this.objectType === 'TABLE' || this.objectType === 'VIEW') {
             const newModel = new LuthierTableModel();
             newModel.name = this.objectType === 'TABLE' ? 'Nova_Tabela' : 'Nova_View';
             newModel.id = crypto.randomUUID();
@@ -575,6 +636,15 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             newModel.references = [];
             newModel.indexes = [];
             newModel.views = [];
+            this.addTab(newModel);
+        }
+        else if (this.objectType === 'PROCEDURE') {
+            const newModel = new LuthierProcedureModel();
+            newModel.name = 'Nova_Procedure';
+            newModel.id = crypto.randomUUID();
+            newModel.objectType = 'PROCEDURE';
+            newModel.bodies = [];
+            newModel.dependencies = [];
             this.addTab(newModel);
         }
     }

@@ -1744,7 +1744,7 @@ export class LuthierVisionDatasetCustomFieldModel extends LuthierBasicModel{
         return true;
     }
 }
-export type LuthierDictionaryObjectType = LuthierTableModel | LuthierVisionModel | LuthierVisionDatasetModel
+export type LuthierDictionaryObjectType = LuthierTableModel | LuthierVisionModel | LuthierVisionDatasetModel | LuthierProcedureModel
 
 export enum LuthierUserTypeEnum {
     SYSTEM = ("SYSTEM"),
@@ -1986,4 +1986,68 @@ export class LuthierGenerateLoadXMLModel {
     generateReferences?: boolean
     generateBlob?: boolean
     generateChildren?: boolean
+}
+export class LuthierProcedureModel extends LuthierBasicModel {
+    id?: string;
+    code?: number
+    name?: string
+    previousName?: string
+    date?: Date
+    objectType?: LuthierObjectType | string = 'PROCEDURE'
+    dependencies?: LuthierProcedureDependencyModel[]
+    bodies?: LuthierProcedureBodyModel[]
+    currentProcedureBodyType?: LuthierViewBodyEnum | string
+    bonds?: LuthierBondModel[]
+    historical?: LuthierMetadataHistoryChangeModel[]
+    public static equals(model: LuthierProcedureModel, previousModel: LuthierProcedureModel): boolean {
+        if (!UtilFunctions.equalsIgnoreCase(model?.code, previousModel?.code)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.name, previousModel?.name)) {
+            return false
+        }
+        if (!UtilFunctions.equalsIgnoreCase(model?.dependencies?.length, previousModel?.dependencies?.length)) {
+            return false
+        }
+        if (UtilFunctions.isValidStringOrArray(model.dependencies) === true) {
+            for (const child of model.dependencies) {
+
+                const previousChildIndex = previousModel.dependencies.findIndex(previousChild => previousChild.dependency.code === child.dependency.code);
+                if (previousChildIndex < 0) {
+                    return false;
+                }
+            }
+        }
+        if (UtilFunctions.isValidStringOrArray(model.bodies) === true) {
+            for (const child of model.bodies) {
+                const previousChildIndex = previousModel?.bodies?.findIndex(previousChild => previousChild.databaseType === child.databaseType);
+                if (previousChildIndex >= 0) {
+                    const previousChild = previousModel.bodies[previousChildIndex];
+                    if (!UtilFunctions.equalsIgnoreCase(UtilFunctions.normalizeBody(child.sql), UtilFunctions.normalizeBody(previousChild.sql), false)) {
+                        return false
+
+                    }
+                }
+                else {
+                    if (UtilFunctions.isValidStringOrArray(child.sql)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+}
+
+export class LuthierProcedureDependencyModel extends LuthierBasicModel {
+    procedureCode?: number
+    dependencyCode?: number
+    procedure?: LuthierProcedureModel
+    dependency?: LuthierProcedureModel
+}
+
+export class LuthierProcedureBodyModel {
+    databaseType?: LuthierViewBodyEnum | string
+    sql?: string
 }

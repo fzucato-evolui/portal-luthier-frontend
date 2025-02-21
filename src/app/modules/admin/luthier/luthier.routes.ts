@@ -17,6 +17,7 @@ const luthierResolver = (route: ActivatedRouteSnapshot, state: RouterStateSnapsh
     if (route.url[0].toString().includes('dictionary')) {
         forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getTables() : of(null));
         forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getVisions() : of(null));
+        forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getProcedures() : of(null));
         forks.push(UtilFunctions.isValidStringOrArray(userService.luthierDatabase) === true ? service.getModules() : of(null));
     }
     else if (route.url[0].toString().includes('users')) {

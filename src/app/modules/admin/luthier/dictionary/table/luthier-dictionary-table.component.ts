@@ -1113,6 +1113,9 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         else if (type === 'searchs') {
             return this.searchsDataSource;
         }
+        else {
+            return new MatTableDataSource<any>();
+        }
     }
 
     getRowEditing(type: TableType): {datasource:MatTableDataSource<any>, rows: LuthierBasicModel[]} {

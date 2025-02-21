@@ -2,6 +2,7 @@ import {AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
 import {
     LuthierCustomFieldModel,
     LuthierFieldTypeEnum,
+    LuthierProcedureModel,
     LuthierTableFieldModel,
     LuthierTableModel,
     LuthierViewBodyEnum,
@@ -861,7 +862,7 @@ export class LuthierValidator {
             dataset.invalidFields['name'] = ['Nome é obrigatório'];
         }
         if (UtilFunctions.isValidStringOrArray(dataset.description) === false) {
-            dataset.invalidFields['description'] = ['Descrição é obrigatório'];
+            //dataset.invalidFields['description'] = ['Descrição é obrigatório'];
         }
         if (!dataset.table || UtilFunctions.isValidStringOrArray(dataset.table.code) === false) {
             dataset.invalidFields['table'] = ['Tabela é obrigatório']
@@ -1069,6 +1070,72 @@ export class LuthierValidator {
             })
         }
         const isSame = LuthierVisionDatasetModel.equals(dataset, previousDataset);
+        //console.log('isSame', isSame);
+
+        return {needUpdate: needUpdate, isSame: isSame};
+
+    }
+    static validateProcedure(procedure: LuthierProcedureModel, previousProcedure: LuthierProcedureModel) : {needUpdate: boolean, isSame: boolean} {
+        previousProcedure = previousProcedure && UtilFunctions.isValidStringOrArray(previousProcedure.code) ? previousProcedure : null;
+        let needUpdate = false;
+        procedure.invalidFields = {};
+
+        if (UtilFunctions.isValidStringOrArray(procedure.name) === false) {
+            procedure.invalidFields['name'] = ['Nome é obrigatório'];
+        }
+        if (UtilFunctions.isValidStringOrArray(procedure.dependencies) === true) {
+            procedure.dependencies.forEach((dependency, index) => {
+
+                const errors : {[key: string]: any} = {};
+                const totalSameName = procedure.dependencies.filter(x =>
+                    x.dependency.code === dependency.dependency.code).length;
+                if (totalSameName > 1) {
+
+                    if (UtilFunctions.isValidStringOrArray(errors['dependency']) === false) {
+                        errors['dependency'] = [];
+                    }
+                    errors['dependency'].push('Dependências não podem ser repetidas');
+                }
+
+                if (_.isEqual(dependency.invalidFields, errors) === false ) {
+                    dependency.invalidFields = errors;
+                    needUpdate = true;
+                }
+                if (UtilFunctions.isValidObject(errors) === true) {
+                    if (UtilFunctions.isValidObject(procedure.invalidFields['dependencies']) === false) {
+                        procedure.invalidFields['dependencies'] = {};
+                    }
+                    procedure.invalidFields['dependencies'][index] = errors;
+                }
+
+            })
+        }
+
+        if (UtilFunctions.isValidStringOrArray(procedure.bodies) === true) {
+            let invalid = true;
+            const regex = new RegExp(`^\\s*CREATE\\s+(?:ALIAS|PROCEDURE|OR\\s+REPLACE\\s+PROCEDURE)\\s+${procedure.name}\\b`, 'i');
+            procedure.bodies.forEach(field => {
+                if (field.databaseType === LuthierViewBodyEnum.GENERICO ||
+                    field.databaseType === LuthierViewBodyEnum.CUSTOM ||
+                    field.databaseType === procedure.currentProcedureBodyType) {
+                    if (UtilFunctions.isValidStringOrArray(field.sql)) {
+                        invalid = false;
+                        if (UtilFunctions.isValidStringOrArray(procedure.name) === true) {
+                            if (regex.test(field.sql) === false) {
+                                procedure.invalidFields['bodies'] = ['Sintaxe da procedure não está correta'];
+                            }
+                        }
+                    }
+                }
+            })
+            if (invalid) {
+                procedure.invalidFields['bodies'] = ['Ao menos um sql válido para o banco atual deve ser definido'];
+            }
+        }
+        else {
+            procedure.invalidFields['bodies'] = ['Ao menos um sql deve ser definido'];
+        }
+        const isSame = LuthierProcedureModel.equals(procedure, previousProcedure);
         //console.log('isSame', isSame);
 
         return {needUpdate: needUpdate, isSame: isSame};

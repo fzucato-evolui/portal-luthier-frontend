@@ -50,7 +50,7 @@
                     <ng-container *ngIf="workDataBase; else noDatabase">
                         <ng-container *cdkVirtualFor="let table of filteredObjects | async">
 
-                            <div *ngIf="objectType !== 'VISION' && !table['removed']" class="flex items-center w-full max-w-full overflow-x-auto justify-between border-b dark:bg-transparent hover:bg-gray-100 dark:hover:bg-hover p-1">
+                            <div *ngIf="(objectType === 'TABLE' || objectType === 'VIEW') && !table['removed']" class="flex items-center w-full max-w-full overflow-x-auto justify-between border-b dark:bg-transparent hover:bg-gray-100 dark:hover:bg-hover p-1">
 
                                 <div class="flex items-center grow cursor-pointer" (dblclick)="addTab(table)">
                                     <div class="rounded-full text-lg uppercase bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
@@ -133,6 +133,30 @@
                                 </mat-tree>
                             </div>
 
+                            <div *ngIf="objectType === 'PROCEDURE' && !table['removed']" class="flex items-center w-full max-w-full overflow-x-auto justify-between border-b dark:bg-transparent hover:bg-gray-100 dark:hover:bg-hover p-1">
+
+                                <div class="flex items-center grow cursor-pointer" (dblclick)="addTab(table)">
+                                    <div class="rounded-full text-lg uppercase bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                                        <mat-icon [matMenuTriggerFor]="objectsMenu" [matMenuTriggerData]="{object: table}"
+                                                  class="evolui-menu-item-icon"
+                                                  fontSet="fas" fontIcon="fa-code"></mat-icon>
+                                    </div>
+                                    <div class="min-w-0 ml-4">
+                                        <div class="font-medium truncate leading-normal text-sm">{{table.name}}</div>
+                                    </div>
+                                </div>
+                                <!--
+                                <div>
+                                    <button
+                                        mat-icon-button
+                                        [matMenuTriggerFor]="chatsHeaderMenu">
+                                        <mat-icon [svgIcon]="'heroicons_outline:ellipsis-vertical'"></mat-icon>
+
+                                    </button>
+                                </div>
+                                !-->
+
+                            </div>
                         </ng-container>
                     </ng-container>
                 </cdk-virtual-scroll-viewport>
@@ -261,6 +285,9 @@
                     <luthier-dictionary-dataset *ngIf="table.objectType === 'VISION_DATASET'" class="w-full h-full" [model]="table"
                                                [ngClass]="{'hidden': table !== selectedTab}">
                     </luthier-dictionary-dataset>
+                    <luthier-dictionary-procedure *ngIf="table.objectType === 'PROCEDURE'" class="w-full h-full" [model]="table"
+                                                [ngClass]="{'hidden': table !== selectedTab}">
+                    </luthier-dictionary-procedure>
                 </ng-container>
 
             </div>

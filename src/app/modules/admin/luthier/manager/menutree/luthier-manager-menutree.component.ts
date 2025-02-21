@@ -750,7 +750,6 @@ export class LuthierManagerMenutreeComponent implements OnInit, OnDestroy, After
                         menu.parent = null;
                     } else if (node.type === LuthierItemMenuTreeTypeEnum.SYSTEM_MENU) {
                         menu.parent = {code: node.code, id: node.id};
-                        menu.key = node.key;
                     } else {
                         throw new Error("Menus customizados não podem ter menus do sistema como filhos");
                     }

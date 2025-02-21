@@ -120,7 +120,15 @@ export class LuthierManagerMenuModalComponent implements OnInit, OnDestroy
         if (this.model.code && this.model.code > 0) {
             this.formSave.get('custom').disable();
         }
+        // Precisa dessa porcaria pq o Luthier faz uma gambiarra pra criar o LUP. O text area salva com \n e o LUP espera \r\n
+        this.formSave.get('action')?.valueChanges.subscribe(value => {
+            if (value.includes('\n')) {
+                const updatedValue = value.replace(/(?<!\r)\n/g, '\r\n');
+                this.formSave.get('action')?.setValue(updatedValue, { emitEvent: false });
+            }
+        });
         this.formSave.patchValue(this.model);
+
     }
 
     ngOnDestroy(): void {

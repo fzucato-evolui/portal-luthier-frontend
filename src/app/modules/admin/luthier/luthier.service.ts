@@ -10,6 +10,7 @@ import {
     LuthierMenuTreeModel,
     LuthierModuleModel,
     LuthierParameterModel,
+    LuthierProcedureModel,
     LuthierProjectModel,
     LuthierResourceModel,
     LuthierSemaphoreModel,
@@ -38,8 +39,10 @@ export class LuthierService
     private _currentDatabases: LuthierDatabaseModel[];
     private _tables: BehaviorSubject<LuthierTableModel[]> = new BehaviorSubject(null);
     private _visions: BehaviorSubject<LuthierVisionModel[]> = new BehaviorSubject(null);
+    private _procedures: BehaviorSubject<LuthierProcedureModel[]> = new BehaviorSubject(null);
     private _currentTables: LuthierTableModel[];
     private _currentVisions: LuthierVisionModel[];
+    private _currentProcedures: LuthierProcedureModel[];
     private _user: BehaviorSubject<LuthierUserModel> = new BehaviorSubject(null);
     private _currentUser: LuthierUserModel;
     private _users: BehaviorSubject<LuthierUserModel[]> = new BehaviorSubject(null);
@@ -140,6 +143,16 @@ export class LuthierService
     get visions$(): Observable<LuthierVisionModel[]>
     {
         return this._visions.asObservable();
+    }
+    set procedures(value: Array<LuthierProcedureModel>)
+    {
+        this._currentProcedures = value;
+        // Store the value
+        this._procedures.next(value);
+    }
+    get procedures$(): Observable<LuthierProcedureModel[]>
+    {
+        return this._procedures.asObservable();
     }
     set resources(value: LuthierResourceModel[])
     {
@@ -466,6 +479,10 @@ export class LuthierService
     }
     getVision(id: number): Promise<LuthierVisionModel> {
         return firstValueFrom(this._httpClient.get<LuthierVisionModel>(`${this.baseDicUrl}/vision/${id}`));
+    }
+    getProcedure(id: number): Promise<LuthierProcedureModel> {
+
+        return firstValueFrom(this._httpClient.get<LuthierProcedureModel>(`${this.baseDicUrl}/procedure/${id}`));
     }
     getUser(id: number): Promise<LuthierUserModel> {
         return firstValueFrom(this._httpClient.get<LuthierUserModel>(`${this.baseCommonUrl}/user/${id}`));
@@ -1069,5 +1086,54 @@ export class LuthierService
 
     generateXMLLoad(model: LuthierGenerateLoadXMLModel): Promise<{xml: string, fileName: string}> {
         return firstValueFrom(this._httpClient.patch<{xml: string, fileName: string}>(`${this.baseDicUrl}/xml-load`, model));
+    }
+
+    saveProcedure(model: LuthierProcedureModel): Promise<LuthierProcedureModel> {
+        return firstValueFrom(this._httpClient.post<LuthierProcedureModel>(`${this.baseDicUrl}/procedure`, model).pipe(
+            switchMap((response: LuthierProcedureModel) => {
+                if (UtilFunctions.isValidStringOrArray(this._currentProcedures) === false) {
+                    this._currentProcedures = new Array<LuthierTableModel>();
+                }
+                if (model.code && model.code > 0) {
+                    const index = this._currentProcedures.findIndex(x => x.code === model.code);
+                    if (index < 0) {
+                        this._currentProcedures.push(response);
+                    } else {
+                        this._currentProcedures[index] = response;
+                    }
+                } else {
+                    this._currentProcedures.push(response);
+                    this._currentProcedures.sort((a, b) => {
+                        return a.name.localeCompare(b.name);
+                    });
+                }
+                this.tables = this._currentProcedures;
+                // Return a new observable with the response
+                return of(response);
+            })));
+    }
+
+    deleteProcedure(id: number): Promise<any>  {
+        return firstValueFrom(this._httpClient.delete<any>(`${this.baseDicUrl}/procedure/${id}`).pipe(
+            switchMap((response: any) => {
+                const index = this._currentProcedures.findIndex(x => x.code === id);
+                if (index >= 0) {
+                    this._currentProcedures.splice(index, 1);
+                    this.procedures = this._currentProcedures;
+                }
+                // Return a new observable with the response
+                return of(response);
+            })));
+    }
+
+    getProcedures(): Observable<any>
+    {
+        this._procedures.next([]);
+        return this._httpClient.get<LuthierVisionModel[]>(`${this.baseDicUrl}/all-procedures`).pipe(
+            tap((response: LuthierProcedureModel[]) =>
+            {
+                this.procedures = response;
+            }),
+        );
     }
 }

@@ -1,0 +1,365 @@
+<mat-accordion class="h-full flex flex-col headers-align" multi [formGroup]="formSave">
+    <div class="flex-none flex mb-2">
+        <div [matTooltip]="canSave() === false || hasChanged === false ? showValidationsError() : ''">
+            <button class="text-sm min-h-7 h-7"
+                    mat-flat-button
+                    [disabled]="canSave() === false"
+                    color="primary" (click)="save()">
+                <mat-icon *ngIf="hasChanged === true"
+                    class="icon-size-4"
+                    svgIcon="mat_solid:save"></mat-icon>
+                <mat-icon *ngIf="hasChanged === false"
+                          class="icon-size-4"
+                          fontSet="fas" fontIcon="fa-ban"></mat-icon>
+                <span class="ml-2">Salvar</span>
+            </button>
+        </div>
+        <button class="text-sm min-h-7 h-7"
+                mat-flat-button
+                color="accent" (click)="revert()">
+            <mat-icon
+                class="icon-size-4"
+                svgIcon="mat_solid:undo"></mat-icon>
+            <span class="ml-2">Reverter</span>
+        </button>
+        <button class="text-sm min-h-7 h-7"
+                mat-flat-button
+                color="warn" [matMenuTriggerFor]="menuImportProcedure">
+            <mat-icon
+                class="icon-size-4"
+                svgIcon="mat_solid:import_export"></mat-icon>
+            <span class="ml-2">Importar</span>
+        </button>
+        <mat-menu #menuImportProcedure="matMenu">
+            <button mat-menu-item (click)="readProcedureFromClipboard()">
+                <mat-icon [svgIcon]="'mat_outline:content_copy'"></mat-icon>
+                Importar do Clipboard
+            </button>
+            <button mat-menu-item (click)="fileProcedureInput.click()">
+                <mat-icon [svgIcon]="'mat_solid:file_download'"></mat-icon>
+                Importar de Arquivo
+            </button>
+            <input type="file" #fileProcedureInput (change)="readProcedureFromFile($event)" accept=".json" style="display: none;" />
+        </mat-menu>
+    </div>
+    <mat-expansion-panel expanded="true" class="flex-none max-h-1/2 flex flex-col mb-2 mt-0">
+        <mat-expansion-panel-header class="flex-none" [collapsedHeight]="'32px'" [expandedHeight]="'32px'">
+            <mat-panel-title>
+                Dados Informativos
+            </mat-panel-title>
+            <mat-panel-description>
+                Nome, Data de Criação
+                <mat-icon svgIcon="mat_solid:info"></mat-icon>
+            </mat-panel-description>
+        </mat-expansion-panel-header>
+        <mat-tab-group class="h-full overflow-y-auto">
+            <mat-tab [labelClass]="['text-sm', 'font-bold']" label="Definições Básicas">
+                <div class="grid sm:grid-cols-12 gap-2">
+                    <div class="sm:col-span-2">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                            <mat-label class="text-sm">Código</mat-label>
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-list-ol"
+                                matPrefix></mat-icon>
+                            <input
+                                readonly
+                                class="text-sm"
+                                [formControlName]="'code'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                            <mat-label class="text-sm">Tipo</mat-label>
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-t"
+                                matPrefix></mat-icon>
+                            <input
+                                readonly
+                                class="text-sm"
+                                [formControlName]="'objectType'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                            <mat-label class="text-sm">Data Criação</mat-label>
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-calendar-check"
+                                matPrefix></mat-icon>
+                            <input
+                                readonly
+                                class="text-sm"
+                                [value]="model.date | date: 'dd/MM/yyyy'"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-4">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                            <mat-label class="text-sm">Nome</mat-label>
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-signature"
+                                matPrefix></mat-icon>
+                            <input
+                                class="text-sm"
+                                [patterns]="customPatterns" mask="I*"
+                                [formControlName]="'name'"
+                                required
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+            </mat-tab>
+            <mat-tab [labelClass]="['text-sm', 'font-bold']" label="Histórico" bodyClass="table-tab">
+
+                <div class="flex-none flex justify-between items-center pt-1">
+                    <div class="flex-none flex">
+                        <div class="pl-2 text-secondary">São mostradas as 100 últimas alterações</div>
+                    </div>
+                    <div class="flex-none flex md:w-1/3 md:pr-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-search"
+                                matPrefix></mat-icon>
+                            <input
+                                [autocomplete]="'off'"
+                                class="text-sm"
+                                (input)="filterHistorical($event)"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto" cdkScrollable>
+                    <table #procedure mat-table matSort #sortHistorical="matSort" [dataSource]="historicalDataSource" class="table-auto" (matSortChange)="announceSortChange($event)">
+                        <ng-container matColumnDef="code">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+                            <td mat-cell *matCellDef="let model"> {{ model.code }} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="user.name">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Usuário </th>
+                            <td mat-cell *matCellDef="let model"> {{ model.user?.name }} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="date">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Data </th>
+                            <td mat-cell *matCellDef="let model"> {{ model.date | date: 'dd/MM/yyyy HH:mm:ss'}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="type">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
+                            <td mat-cell *matCellDef="let model"> {{ model.type }} </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="displayedHistoricalColumns; sticky: true"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedHistoricalColumns;"></tr>
+                    </table>
+                </div>
+
+            </mat-tab>
+        </mat-tab-group>
+    </mat-expansion-panel>
+    <mat-expansion-panel expanded="true" class="flex flex-col m-0">
+        <mat-expansion-panel-header class="flex-none" [collapsedHeight]="'32px'" [expandedHeight]="'32px'">
+            <mat-panel-title>
+                Dados Estruturais
+            </mat-panel-title>
+            <mat-panel-description>
+                SQL, Dependências
+                <mat-icon svgIcon="mat_solid:construction"></mat-icon>
+            </mat-panel-description>
+        </mat-expansion-panel-header>
+        <mat-tab-group class="h-full overflow-hidden" (selectedTabChange)="changeTab($event)">
+            <mat-tab [labelClass]="['text-sm', 'font-bold', hasValidationProblem('bodies') ? 'invalid-tab' : '']"
+                     aria-label="bodies" label="SQL" bodyClass="table-tab">
+                <ng-template mat-tab-label>
+                    <label *ngIf="hasValidationProblem('bodies')" [matTooltip]="model.invalidFields['bodies'] | json">
+                        <span><mat-icon class="icon-size-3 text-red-500 mr-1" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>SQL
+                        </span>
+                    </label>
+                    <label *ngIf="!hasValidationProblem('bodies')">SQL</label>
+                </ng-template>
+                <mat-tab-group>
+                    <ng-container *ngFor="let t of LuthierViewBodyEnum | enumArray">
+                        <mat-tab *ngIf="t.key !== 'GENERICO'" [labelClass]="['text-sm', 'font-bold']" bodyClass="h-96" label="{{t.key}}" [formGroup]="getBody(t.key)">
+                            <div class="flex-none flex justify-between items-center pt-1">
+                                <div class="flex-none flex hidden">
+                                    <button class="text-sm min-h-7 h-7" *ngIf="t.key === 'GENERICO' || t.key === 'CUSTOM' || t.key === dadosViewBodyType"
+                                            mat-flat-button
+                                            color="primary" (click)="parseBody(t.key)">
+                                        <mat-icon
+                                            class="icon-size-4"
+                                            svgIcon="mat_solid:import_export"></mat-icon>
+                                        <span class="ml-2">Importar campos pela query</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex-1" cdkScrollable>
+                                <textarea class="text-sm p-2 w-full h-full"
+                                          [formControlName]="'sql'" (input)="bodyChanged($event)"
+                                          matInput>
+                                </textarea>
+                            </div>
+
+                        </mat-tab>
+                    </ng-container>
+                </mat-tab-group>
+            </mat-tab>
+            <mat-tab [labelClass]="['text-sm', 'font-bold', hasValidationProblem('dependencies') ? 'invalid-tab' : '']" aria-label="dependencies" label="Dependências" bodyClass="table-tab">
+                <ng-template mat-tab-label>
+                    <label *ngIf="hasValidationProblem('dependencies')" [matTooltip]="model.invalidFields['dependencies'] | json">
+                        <span><mat-icon class="icon-size-3 text-red-500 mr-1" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>Dependências
+                        </span>
+                    </label>
+                    <label *ngIf="!hasValidationProblem('dependencies')">Dependências</label>
+                </ng-template>
+                <div class="flex-none flex justify-between items-center pt-1">
+                    <div class="flex-none flex">
+
+                    </div>
+                    <div class="flex-none flex md:w-1/3 md:pr-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-search"
+                                matPrefix></mat-icon>
+                            <input
+                                [autocomplete]="'off'"
+                                class="text-sm"
+                                (input)="filterDependencies($event)"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto" cdkScrollable>
+                    <ng-container
+                        *ngTemplateOutlet="fieldProcedureTemplate; context: { displayedColumns: displayedDependenciesColumns, datasource: dependenciesDataSource, fieldtype: 'dependencies' }">
+                    </ng-container>
+
+                </div>
+
+            </mat-tab>
+            <mat-tab [labelClass]="['text-sm', 'font-bold']" aria-label="bonds" label="Vínculos" bodyClass="table-tab">
+                <div class="flex-none flex justify-between items-center pt-1">
+                    <div class="flex-none flex">
+
+                    </div>
+                    <div class="flex-none flex md:w-1/3 md:pr-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                            <mat-icon
+                                class="evolui-menu-item-icon"
+                                fontSet="fas" fontIcon="fa-search"
+                                matPrefix></mat-icon>
+                            <input
+                                [autocomplete]="'off'"
+                                class="text-sm"
+                                (input)="filterBonds($event)"
+                                matInput>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto" cdkScrollable>
+                    <table #procedure mat-table matSort #sortBonds="matSort" [dataSource]="bondsDataSource" class="table-auto" (matSortChange)="announceSortChange($event)">
+                        <!-- code -->
+                        <ng-container matColumnDef="code">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+                            <td mat-cell *matCellDef="let model"> {{ model.code }} </td>
+                        </ng-container>
+                        <!-- name -->
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Procedure </th>
+                            <td mat-cell *matCellDef="let model"> {{ model.name }} </td>
+                        </ng-container>
+                        <!-- description -->
+                        <ng-container matColumnDef="description">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Descrição </th>
+                            <td mat-cell *matCellDef="let model"> {{ model.description }} </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="displayedBondColumns; sticky: true"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedBondColumns;"></tr>
+                    </table>
+                </div>
+
+            </mat-tab>
+        </mat-tab-group>
+    </mat-expansion-panel>
+</mat-accordion>
+<ng-template #fieldProcedureTemplate let-displayedColumns="displayedColumns" let-datasource="datasource" let-fieldtype="fieldtype">
+    <table #procedureFields mat-table #sortFields="matSort" matSort [dataSource]="datasource" class="table-auto" (matSortChange)="announceSortChange($event)">
+        <ng-container matColumnDef="buttons" sticky>
+            <th mat-header-cell *matHeaderCellDef>
+                <div class="flex flex-row items-center">
+                    <button mat-icon-button aria-label="Add" (click)="add(fieldtype)">
+                        <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-plus"></mat-icon>
+                    </button>
+                </div>
+            </th>
+            <td mat-cell *matCellDef="let field; let i = index">
+                <div class="flex flex-row items-center">
+                    <button mat-icon-button aria-label="Delete" *ngIf="fieldtype !== 'customizations'" (click)="delete(field, fieldtype)" matTooltip="Remover">
+                        <mat-icon class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
+                    </button>
+                    <button *ngIf="!field['editing']" mat-icon-button aria-label="Edit" (click)="editRow(field, fieldtype)" matTooltip="Editar">
+                        <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
+                    </button>
+                    <button *ngIf="field['editing']" mat-icon-button aria-label="Save" (click)="saveRow(field, fieldtype)" matTooltip="Salvar">
+                        <mat-icon class="icon-size-4 text-green-500" fontSet="fas" fontIcon="fa-save"></mat-icon>
+                    </button>
+
+                    <mat-icon *ngIf="!field.pending && field.invalidFields | isValidObject" [matTooltip]="field.invalidFields | json"
+                              class="icon-size-4 text-red-500" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>
+                </div>
+            </td>
+        </ng-container>
+        <!-- dependency.code -->
+        <ng-container matColumnDef="dependency.code">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+            <td mat-cell *matCellDef="let dependency; let i = index">
+                <div>
+                    {{ dependency.dependency.code }}
+                </div>
+            </td>
+        </ng-container>
+        <!-- dependency.name -->
+        <ng-container matColumnDef="dependency.name">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome </th>
+            <td mat-cell [evoluiMatCell]="dependency" *matCellDef="let dependency; let i = index">
+                <div *ngIf="!dependency['editing']">
+                    {{ dependency.dependency.name }}
+                </div>
+                <div *ngIf="dependency['editing']" class="flex flex-row items-center">
+                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
+                        <mat-select [compareWith]="compareCode" (openedChange)="filterDependency.value =null"
+                                    [formControl]="getFieldGroup(dependency, fieldtype)">
+                            <div class="flex flex-col h-full w-full">
+                                <div class="flex-none">
+                                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                                        <mat-icon
+                                            class="icon-size-5"
+                                            fontSet="fas" fontIcon="fa-search"
+                                            matPrefix></mat-icon>
+                                        <input [autocomplete]="'off'" #filterDependency matInput>
+                                    </mat-form-field>
+                                </div>
+                                <div class="flex-1 overflow-auto">
+                                    <ng-container *ngFor="let t of getPossiblesDependencies(dependency) | filterJson : {name: filterDependency.value}">
+                                        <mat-option [value]="{id: t.id, dependency: {code: t.code, name: t.name}}" >
+                                            {{t.name}}
+                                        </mat-option>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onRowClick(row.elementIndex)"></tr>
+    </table>
+</ng-template>
