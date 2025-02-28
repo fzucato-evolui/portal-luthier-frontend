@@ -837,6 +837,10 @@ export class LuthierService
         return firstValueFrom(this._httpClient.patch<any>(`${this.baseDicUrl}/sync-schemas`, null));
     }
 
+    updateSequences(): Promise<any> {
+        return firstValueFrom(this._httpClient.patch<any>(`${this.baseDicUrl}/update-sequencess`, null));
+    }
+
     checkObjects(): Promise<LuthierCheckObjectsSummaryModel> {
         return firstValueFrom(this._httpClient.patch<LuthierCheckObjectsSummaryModel>(`${this.baseDicUrl}/check-objects`, null));
     }

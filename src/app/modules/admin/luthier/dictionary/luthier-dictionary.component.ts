@@ -222,6 +222,16 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                         },
                     },
                     {
+                        id      : 'luthier.dictionary.tools.update-sequences',
+                        title   : 'Atualizar Sequences',
+                        type    : 'basic',
+                        awesomeIcon : {fontSet: 'fas', fontIcon: 'fa-arrow-up-1-9'},
+                        function: item => {
+                            this.updateSequences();
+
+                        },
+                    },
+                    {
                         id      : 'luthier.dictionary.tools.check-objects',
                         title   : 'Checar Objetos na Base de Dados',
                         type    : 'basic',
@@ -656,6 +666,19 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 this.service.syncSchemas()
                     .then(result => {
                         this.messageService.open('Schemas sincronizados com sucesso', 'SUCESSO', 'success');
+                    })
+
+            }
+        });
+
+    }
+
+    updateSequences() {
+        this.messageService.open('As sequences serão atualizadas. Tem certeza de que deseja continuar?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
+            if (result === 'confirmed') {
+                this.service.syncSchemas()
+                    .then(result => {
+                        this.messageService.open('Sequences atualizadas com sucesso', 'SUCESSO', 'success');
                     })
 
             }
