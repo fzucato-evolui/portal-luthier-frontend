@@ -1,0 +1,18 @@
+<div class="h-full inset-0 flex flex-row min-w-0 overflow-hidden bg-card dark:bg-transparent z-50">
+    <div class="flex flex-none overflow-hidden w-16 h-full bg-card border-r">
+        <div class="flex flex-col items-center w-full">
+            <mat-button-toggle-group name="patchType" [(ngModel)]="patchType" vertical>
+                <mat-button-toggle value="LPX">LPX</mat-button-toggle>
+                <mat-button-toggle value="LUP">LUP</mat-button-toggle>
+                <mat-button-toggle value="LED">LED</mat-button-toggle>
+            </mat-button-toggle-group>
+        </div>
+    </div>
+    <div class="flex flex-1 overflow-hidden">
+        <div class="flex flex-col h-full w-full">
+            <luthier-manager-patches-lpx class="w-full h-full" [hidden]="patchType !== 'LPX'"></luthier-manager-patches-lpx>
+            <luthier-manager-patches-lup class="w-full h-full" [hidden]="patchType !== 'LUP'"></luthier-manager-patches-lup>
+            <luthier-manager-patches-led class="w-full h-full" [hidden]="patchType !== 'LED'"></luthier-manager-patches-led>
+        </div>
+    </div>
+</div>

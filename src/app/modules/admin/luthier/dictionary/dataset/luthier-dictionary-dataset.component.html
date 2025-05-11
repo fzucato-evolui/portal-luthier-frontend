@@ -350,13 +350,13 @@
                 </div>
 
             </mat-tab>
-            <mat-tab [labelClass]="['text-sm', 'font-bold', hasValidationProblem('searchs') ? 'invalid-tab' : '']" aria-label="searchs" label="Pesquisas" bodyClass="table-tab">
+            <mat-tab [labelClass]="['text-sm', 'font-bold', hasValidationProblem('searches') ? 'invalid-tab' : '']" aria-label="searches" label="Pesquisas" bodyClass="table-tab">
                 <ng-template mat-tab-label>
-                    <label *ngIf="hasValidationProblem('searchs')" [matTooltip]="model.invalidFields['searchs'] | json">
+                    <label *ngIf="hasValidationProblem('searches')" [matTooltip]="model.invalidFields['searches'] | json">
                         <span><mat-icon class="icon-size-3 text-red-500 mr-1" fontSet="fas" fontIcon="fa-circle-exclamation"></mat-icon>Pesquisas
                         </span>
                     </label>
-                    <label *ngIf="!hasValidationProblem('searchs')">Pesquisas</label>
+                    <label *ngIf="!hasValidationProblem('searches')">Pesquisas</label>
                 </ng-template>
                 <div class="flex-none flex justify-between items-center pt-1">
                     <div class="flex-none flex">

@@ -1,0 +1,79 @@
+<div class="h-full inset-0 flex flex-row min-w-0 overflow-hidden bg-card dark:bg-transparent z-50 relative">
+    <div class="flex flex-none overflow-hidden w-16 h-full bg-card border-r">
+        <div class="flex flex-col items-center w-full">
+            <mat-button-toggle-group name="ledType" [(ngModel)]="lpxType" vertical>
+                <button *ngIf="import && fileLoaded" mat-button matTooltip="Remover arquivo importado" matTooltipPosition="right"
+                        class="mat-button-toggle"
+                        (click)="clearFile()">
+                    <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-trash"></mat-icon>
+                </button>
+                <ng-container *ngIf="!import || fileLoaded">
+                    <mat-button-toggle value="TABLE" matTooltip="Tabelas/Views" matTooltipPosition="right">
+                        <div class="relative">
+                            <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-table"></mat-icon>
+                            <ng-container *ngIf="tables.canSave()">
+                                <div
+                                    class="absolute top-1 -right-1 flex-0 w-2 h-2 -ml-0.5 rounded-full ring-2 ring-bg-card dark:ring-gray-900 bg-primary dark:bg-primary-500 text-on-primary">
+                                </div>
+                            </ng-container>
+                        </div>
+                    </mat-button-toggle>
+                    <mat-button-toggle value="VISION" matTooltip="Visões" matTooltipPosition="right">
+                        <div class="relative">
+                            <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-glasses"></mat-icon>
+                            <ng-container *ngIf="visions.canSave()">
+                                <div
+                                    class="absolute top-1 -right-1 flex-0 w-2 h-2 -ml-0.5 rounded-full ring-2 ring-bg-card dark:ring-gray-900 bg-primary dark:bg-primary-500 text-on-primary">
+                                </div>
+                            </ng-container>
+                        </div>
+                    </mat-button-toggle>
+                    <mat-button-toggle value="PROCEDURE" matTooltip="Procedures" matTooltipPosition="right">
+                        <div class="relative">
+                            <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-code"></mat-icon>
+                            <ng-container *ngIf="procedures.canSave()">
+                                <div
+                                    class="absolute top-1 -right-1 flex-0 w-2 h-2 -ml-0.5 rounded-full ring-2 ring-bg-card dark:ring-gray-900 bg-primary dark:bg-primary-500 text-on-primary">
+                                </div>
+                            </ng-container>
+                        </div>
+                    </mat-button-toggle>
+                </ng-container>
+
+
+            </mat-button-toggle-group>
+        </div>
+    </div>
+    <div class="flex flex-col flex-1 overflow-hidden">
+        <ngx-file-drop *ngIf="import && !fileLoaded" class="w-full h-full" [dropZoneClassName]="'full-drop-zone'" (onFileDrop)="dropped($event)"
+                       [multiple]="false" [accept]="'.LPX'" dropZoneLabel="Arraste seu arquivo de LPX aqui">
+
+            <ng-template ngx-file-drop-content-tmp let-openFileSelectorDocumentos="openFileSelector">
+                {{"Arraste seu arquivo LPX aqui"}}
+                <button
+                    class="px-6 ml-3"
+                    mat-icon-button
+                    [color]="'primary'"
+                    (click)="openFileSelectorDocumentos()">
+                    <mat-icon class="icon-size-5" fontSet="fas" fontIcon="fa-upload"></mat-icon>
+                </button>
+            </ng-template>
+        </ngx-file-drop>
+        <div [hidden]="import && !fileLoaded" class="w-full h-full overflow-hidden">
+            <luthier-manager-patches-lpx-tables #tables [hidden]="lpxType !== 'TABLE'" class="h-full w-full overflow-hidden"></luthier-manager-patches-lpx-tables>
+            <luthier-manager-patches-lpx-visions #visions [hidden]="lpxType !== 'VISION'" class="h-full w-full overflow-hidden"></luthier-manager-patches-lpx-visions>
+            <luthier-manager-patches-lpx-procedures #procedures [hidden]="lpxType !== 'PROCEDURE'" class="h-full w-full overflow-hidden"></luthier-manager-patches-lpx-procedures>
+        </div>
+    </div>
+    <div class="absolute bottom-0 right-0 z-50">
+
+        <button
+            class="mr-4 mb-4"
+            [disabled]="!canSave()"
+            (click)="save()"
+            mat-flat-button
+            type="button"
+            [color]="'primary'">Salvar
+        </button>
+    </div>
+</div>

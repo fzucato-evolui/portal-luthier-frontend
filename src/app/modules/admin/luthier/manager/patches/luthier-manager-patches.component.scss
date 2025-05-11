@@ -1,0 +1,15 @@
+luthier-manager-patches {
+    .mat-button-toggle-group .mat-button-toggle {
+        border-radius: 0 !important;
+        border-bottom: solid 1px #374152 !important;
+    }
+    .full-drop-zone {
+        border: 2px dashed #ccc;
+        width: 100%;
+        height: 100%;
+    }
+    .readOnly {
+        pointer-events: none;
+        opacity: 60%;
+    }
+}

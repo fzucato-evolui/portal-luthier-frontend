@@ -42,6 +42,11 @@
                 <luthier-manager-menutree class="h-full" *ngIf="t === 'MENU_TREE'"
                                       [ngClass]="{'hidden': t !== selectedTab}">
                 </luthier-manager-menutree>
+                <ng-container *ngIf="t === 'PATCHES_EXPORT' || t === 'PATCHES_IMPORT'">
+                    <luthier-manager-patches class="h-full" [import]="t === 'PATCHES_IMPORT'"
+                                              [ngClass]="{'hidden': t !== selectedTab}">
+                    </luthier-manager-patches>
+                </ng-container>
             </ng-container>
 
         </div>

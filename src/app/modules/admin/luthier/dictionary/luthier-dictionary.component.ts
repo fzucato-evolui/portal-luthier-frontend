@@ -193,7 +193,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                         id      : 'luthier.dictionary.objects.procedures',
                         title   : 'Procedures',
                         type    : 'basic',
-                        awesomeIcon : {fontSet: 'fas', fontIcon: 'fa-glasses'},
+                        awesomeIcon : {fontSet: 'fas', fontIcon: 'fa-code'},
                         function: item => {
                             this.objectType = 'PROCEDURE';
                             this.filteredObjects.next(null);
@@ -284,6 +284,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 else {
                     this.service.visions = [];
                     this.service.tables = [];
+                    this.service.procedures = [];
                     this.service.databases = [];
                     this.enableSecondaryMenu(true);
                 }
@@ -604,7 +605,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 newModel.parent = model.objectType === 'VISION_DATASET' ? model as LuthierVisionDatasetModel : null;
                 newModel.relatives = relatives;
                 newModel.fields = [];
-                newModel.searchs = [];
+                newModel.searches = [];
                 newModel.customFields = [];
                 newModel.customizations = [];
                 newModel.groupInfos = [];
@@ -639,7 +640,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
             newModel.id = crypto.randomUUID();
             newModel.objectType = this.objectType;
             newModel.fields = [];
-            newModel.searchs = [];
+            newModel.searches = [];
             newModel.customFields = [];
             newModel.customizations = [];
             newModel.groupInfos = [];
@@ -676,7 +677,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
     updateSequences() {
         this.messageService.open('As sequences serão atualizadas. Tem certeza de que deseja continuar?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
             if (result === 'confirmed') {
-                this.service.syncSchemas()
+                this.service.updateSequences()
                     .then(result => {
                         this.messageService.open('Sequences atualizadas com sucesso', 'SUCESSO', 'success');
                     })

@@ -700,8 +700,8 @@ export class LuthierValidator {
 
             })
         }
-        if (UtilFunctions.isValidStringOrArray(table.searchs) === true) {
-            table.searchs.forEach((field, index) => {
+        if (UtilFunctions.isValidStringOrArray(table.searches) === true) {
+            table.searches.forEach((field, index) => {
 
                 const errors : {[key: string]: any} = {};
                 if (UtilFunctions.isValidStringOrArray(field.name) === false) {
@@ -746,7 +746,7 @@ export class LuthierValidator {
                 }
 
                 if (UtilFunctions.isValidStringOrArray(field.name) === true) {
-                    const totalSameName = table.searchs.filter(x =>
+                    const totalSameName = table.searches.filter(x =>
                         UtilFunctions.isValidStringOrArray(x.name) &&
                         x.name.toUpperCase() === field.name.toUpperCase()).length;
                     if (totalSameName > 1) {
@@ -764,10 +764,10 @@ export class LuthierValidator {
                     needUpdate = true;
                 }
                 if (UtilFunctions.isValidObject(errors) === true) {
-                    if (UtilFunctions.isValidObject(table.invalidFields['searchs']) === false) {
-                        table.invalidFields['searchs'] = {};
+                    if (UtilFunctions.isValidObject(table.invalidFields['searches']) === false) {
+                        table.invalidFields['searches'] = {};
                     }
-                    table.invalidFields['searchs'][index] = errors;
+                    table.invalidFields['searches'][index] = errors;
                 }
 
             })
@@ -953,8 +953,8 @@ export class LuthierValidator {
 
             })
         }
-        if (UtilFunctions.isValidStringOrArray(dataset.searchs) === true) {
-            dataset.searchs.forEach((field, index) => {
+        if (UtilFunctions.isValidStringOrArray(dataset.searches) === true) {
+            dataset.searches.forEach((field, index) => {
 
                 const errors : {[key: string]: any} = {};
                 if (UtilFunctions.isValidStringOrArray(field.name) === false) {
@@ -1002,7 +1002,7 @@ export class LuthierValidator {
                 }
 
                 if (UtilFunctions.isValidStringOrArray(field.name) === true) {
-                    const totalSameName = dataset.searchs.filter(x =>
+                    const totalSameName = dataset.searches.filter(x =>
                         UtilFunctions.isValidStringOrArray(x.name) &&
                         x.name.toUpperCase() === field.name.toUpperCase()).length;
                     if (totalSameName > 1) {
@@ -1020,10 +1020,10 @@ export class LuthierValidator {
                     needUpdate = true;
                 }
                 if (UtilFunctions.isValidObject(errors) === true) {
-                    if (UtilFunctions.isValidObject(dataset.invalidFields['searchs']) === false) {
-                        dataset.invalidFields['searchs'] = {};
+                    if (UtilFunctions.isValidObject(dataset.invalidFields['searches']) === false) {
+                        dataset.invalidFields['searches'] = {};
                     }
-                    dataset.invalidFields['searchs'][index] = errors;
+                    dataset.invalidFields['searches'][index] = errors;
                 }
 
             })

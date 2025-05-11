@@ -2,6 +2,9 @@ import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, catchError, firstValueFrom, Observable, of, switchMap, tap} from 'rxjs';
 import {
+    LedImportModel,
+    LpxImportModel,
+    LupImportModel,
     LuthierChangesOfProcedureModel,
     LuthierChangesOfTableModel,
     LuthierCheckObjectsProcedureSummaryModel,
@@ -9,15 +12,20 @@ import {
     LuthierCheckObjectsTableSummaryModel,
     LuthierDatabaseModel,
     LuthierGenerateLoadXMLModel,
+    LuthierLayoutControlModel,
     LuthierMenuModel,
     LuthierMenuTreeModel,
+    LuthierMessageTypeModel,
     LuthierModuleModel,
     LuthierParameterModel,
     LuthierProcedureModel,
     LuthierProjectModel,
+    LuthierReportModel,
     LuthierResourceModel,
+    LuthierScriptTableModel,
     LuthierSemaphoreModel,
     LuthierSubsystemModel,
+    LuthierTableHelpModel,
     LuthierTableModel,
     LuthierUserGroupEnum,
     LuthierUserModel,
@@ -28,6 +36,8 @@ import {
 import {UtilFunctions} from '../../../shared/util/util-functions';
 import {cloneDeep} from 'lodash-es';
 import {PortalHistoryPersistTypeEnum} from '../../../shared/models/portal_luthier_history.model';
+import {UserService} from '../../../shared/services/user/user.service';
+import {AsyncRequestModel} from '../../../shared/models/async_request.model';
 
 @Injectable({providedIn: 'root'})
 export class LuthierService
@@ -69,7 +79,7 @@ export class LuthierService
     /**
      * Constructor
      */
-    constructor(private _httpClient: HttpClient)
+    constructor(private _httpClient: HttpClient, private authService: UserService)
     {
     }
 
@@ -237,6 +247,8 @@ export class LuthierService
     getProject(): Observable<any>
     {
         this.tables = [];
+        this.procedures = [];
+        this.visions = [];
         this.project = null;
         return this._httpClient.get<LuthierProjectModel>(`${this.baseCommonUrl}/project`).pipe(
 
@@ -274,6 +286,10 @@ export class LuthierService
     getDatabases(): Observable<any>
     {
         this.databases = [];
+        this.procedures = [];
+        this.tables = [];
+        this.visions = [];
+
         return this._httpClient.get<LuthierDatabaseModel[]>(`${this.baseCommonUrl}/all-databases`).pipe(
 
             tap((response: LuthierDatabaseModel[]) =>
@@ -838,7 +854,7 @@ export class LuthierService
     }
 
     updateSequences(): Promise<any> {
-        return firstValueFrom(this._httpClient.patch<any>(`${this.baseDicUrl}/update-sequencess`, null));
+        return firstValueFrom(this._httpClient.patch<any>(`${this.baseDicUrl}/update-sequences`, null));
     }
 
     checkObjects(): Promise<LuthierCheckObjectsSummaryModel> {
@@ -1126,7 +1142,7 @@ export class LuthierService
                         return a.name.localeCompare(b.name);
                     });
                 }
-                this.tables = this._currentProcedures;
+                this.procedures = this._currentProcedures;
                 // Return a new observable with the response
                 return of(response);
             })));
@@ -1155,4 +1171,165 @@ export class LuthierService
             }),
         );
     }
+
+    getExportedTables(): Promise<Array<LuthierTableModel>> {
+        return firstValueFrom(this._httpClient.get<LuthierVisionModel[]>(`${this.baseManagerUrl}/all-exported-tables`));
+    }
+
+    getScripts(): Promise<Array<LuthierScriptTableModel>> {
+        return firstValueFrom(this._httpClient.get<Array<LuthierScriptTableModel>>(`${this.baseManagerUrl}/all-scripts`));
+    }
+
+    getReports(): Promise<Array<LuthierReportModel>> {
+        return firstValueFrom(this._httpClient.get<Array<LuthierReportModel>>(`${this.baseManagerUrl}/all-reports`));
+    }
+
+    getLayoutControls(): Promise<Array<LuthierLayoutControlModel>> {
+        return firstValueFrom(this._httpClient.get<Array<LuthierLayoutControlModel>>(`${this.baseManagerUrl}/all-layout-controls`));
+    }
+
+    getTableHelps(): Promise<Array<LuthierTableHelpModel>> {
+        return firstValueFrom(this._httpClient.get<Array<LuthierTableHelpModel>>(`${this.baseManagerUrl}/all-table-helps`));
+    }
+
+    getMessageTypes(): Promise<Array<LuthierMessageTypeModel>> {
+        return firstValueFrom(this._httpClient.get<Array<LuthierMessageTypeModel>>(`${this.baseManagerUrl}/all-message-types`));
+    }
+
+    generateLed(filter: Array<number>): Promise<{link: string, fileName: string}> {
+        return firstValueFrom(this._httpClient.patch<any>(`${this.baseManagerUrl}/generate-led`, filter))
+    }
+
+    generateLpx(filter: {[key: string]: Array<number>}): Promise<{link: string, fileName: string}> {
+        return firstValueFrom(this._httpClient.patch<any>(`${this.baseManagerUrl}/generate-lpx`, filter))
+    }
+
+    generateLup(filter: {[key: string]: Array<number>}): Promise<{link: string, fileName: string}> {
+        return firstValueFrom(this._httpClient.patch<any>(`${this.baseManagerUrl}/generate-lup`, filter))
+    }
+
+    download(link: string): Promise<Blob> {
+        return firstValueFrom(
+            this._httpClient.get(link, { responseType: 'blob' })
+        );
+    }
+
+    uploadLed(formData: FormData): Promise<LedImportModel> {
+        return firstValueFrom(this._httpClient.post<LedImportModel>(`${this.baseManagerUrl}/upload-led`, formData));
+    }
+
+    processLedOld(model: LedImportModel): Promise<LedImportModel> {
+        return firstValueFrom(this._httpClient.post<LedImportModel>(`${this.baseManagerUrl}/process-led`, model));
+    }
+
+    processLed(
+        body: LedImportModel,
+        callback: (msg: AsyncRequestModel<LedImportModel>) => void
+    ): () => void {
+        return this.processAsync<AsyncRequestModel<LedImportModel>>(
+            body,
+            `${this.baseManagerUrl}/process-led`,
+            callback
+        );
+    }
+
+    uploadLpx(formData: FormData): Promise<LpxImportModel> {
+        return firstValueFrom(this._httpClient.post<LpxImportModel>(`${this.baseManagerUrl}/upload-lpx`, formData));
+    }
+
+    processLpxOld(model: LpxImportModel): Promise<LpxImportModel> {
+        return firstValueFrom(this._httpClient.post<LpxImportModel>(`${this.baseManagerUrl}/process-lpx`, model));
+    }
+
+    processLpx(
+        body: LpxImportModel,
+        callback: (msg: AsyncRequestModel<LpxImportModel>) => void
+    ): () => void {
+        return this.processAsync<AsyncRequestModel<LpxImportModel>>(
+            body,
+            `${this.baseManagerUrl}/process-lpx`,
+            callback
+        );
+    }
+
+    uploadLup(formData: FormData): Promise<LupImportModel> {
+        return firstValueFrom(this._httpClient.post<LupImportModel>(`${this.baseManagerUrl}/upload-lup`, formData));
+    }
+
+    processLup(
+        body: LupImportModel,
+        callback: (msg: AsyncRequestModel<LupImportModel>) => void
+    ): () => void {
+        return this.processAsync<AsyncRequestModel<LupImportModel>>(
+            body,
+            `${this.baseManagerUrl}/process-lup`,
+            callback
+        );
+    }
+
+    processAsync<T>(
+        body: any,
+        url: string,
+        onMessage: (msg: T) => void
+    ): () => void {
+        const controller = new AbortController();
+        const luthierDatabase = this.authService.luthierDatabase;
+        const dadosDatabase = this.authService.dadosDatabase;
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-LuthierDatabaseID': luthierDatabase,
+                'X-DadosDatabaseID': dadosDatabase
+            },
+            body: JSON.stringify(body),
+            signal: controller.signal,
+        })
+            .then(response => {
+                const reader = response.body?.getReader();
+                const decoder = new TextDecoder('utf-8');
+                let buffer = '';
+
+                const read = () => {
+                    reader?.read().then(({ done, value }) => {
+                        if (done) return;
+
+                        buffer += decoder.decode(value, { stream: true });
+
+                        // separa blocos por linhas vazias (\n\n)
+                        const parts = buffer.split(/\r?\n\r?\n/);
+                        buffer = parts.pop() || ''; // última parte pode estar incompleta
+
+                        for (const part of parts) {
+                            const lines = part.split(/\r?\n/);
+                            for (const line of lines) {
+                                if (line.startsWith('data:')) {
+                                    const json = line.slice(5).trim();
+                                    try {
+                                        const parsed = JSON.parse(json);
+                                        onMessage(parsed);
+                                    } catch (err) {
+                                        console.warn('Erro ao parsear JSON:', json, err);
+                                    }
+                                }
+                            }
+                        }
+
+                        read(); // continuar lendo
+                    }).catch(err => {
+                        console.error('Erro ao ler stream:', err);
+                    });
+                };
+
+                read();
+            })
+            .catch(err => {
+                console.error('Erro no fetch:', err);
+            });
+
+        return () => controller.abort();
+    }
+
+
 }

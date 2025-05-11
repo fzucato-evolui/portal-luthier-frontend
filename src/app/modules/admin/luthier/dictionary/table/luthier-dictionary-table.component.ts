@@ -94,7 +94,7 @@ import {Clipboard} from '@angular/cdk/clipboard';
 import {SharedDirectiveModule} from '../../../../../shared/directives/shared-directive.module';
 import {FilterPredicateUtil} from '../../../../../shared/util/util-classes';
 
-export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
+export type TableType = 'fields' | 'indexes' | 'references' | 'searches' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
     selector     : 'luthier-dictionary-table',
     templateUrl  : './luthier-dictionary-table.component.html',
@@ -389,7 +389,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.customizationsDataSource.data = this.model.fields;
         this.indexesDataSource.data = this.model.indexes;
         this.referencesDataSource.data = this.model.references;
-        this.searchsDataSource.data = this.model.searchs;
+        this.searchsDataSource.data = this.model.searches;
         this.bondsDataSource.data = this.model.bonds;
         this.bondsDatasetDataSource.data = this.model.datasetBonds;
         this.historicalDataSource.data = this.model.historical;
@@ -423,15 +423,15 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                     }
                 }
                 else if ( x.type === 'SEARCH_TABLE') {
-                    const index = this._model.searchs.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                    const index = this._model.searches.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
-                        this._model.searchs[index].customName = x;
+                        this._model.searches[index].customName = x;
                     }
                 }
                 else if ( x.type === 'SEARCH_FIELD_TABLE') {
-                    let index = this._model.searchs.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
+                    let index = this._model.searches.findIndex(y => y.name?.toUpperCase() === x.name2?.toUpperCase());
                     if (index >= 0) {
-                        const search = this._model.searchs[index];
+                        const search = this._model.searches[index];
                         index = search.searchFields.findIndex(y => y.tableField.name?.toUpperCase() === x.name3?.toUpperCase());
                         if (index >= 0) {
                             search.searchFields[index].customLabel = x;
@@ -780,7 +780,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             });
         });
 
-        this.model.searchs.forEach(model => {
+        this.model.searches.forEach(model => {
             if (model.customName
                 && UtilFunctions.isValidStringOrArray(model.customName.value) === true
                 && model.customName.value !== model.name
@@ -1110,7 +1110,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         else if (type === 'indexes') {
             return this.indexesDataSource;
         }
-        else if (type === 'searchs') {
+        else if (type === 'searches') {
             return this.searchsDataSource;
         }
         else {
@@ -1297,13 +1297,13 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.editSearch(model);
     }
     deleteSearch(model: LuthierBasicModel) {
-        const index = this.getRealIndex(model, 'searchs').index;
+        const index = this.getRealIndex(model, 'searches').index;
         this.searchsDataSource.data.splice(index, 1);
         this.searchsDataSource._updateChangeSubscription();
         this._changeDetectorRef.detectChanges();
     }
     editSearch(model: LuthierTableSearchModel) {
-        const index = this.getRealIndex(model, 'searchs').index;
+        const index = this.getRealIndex(model, 'searches').index;
         this._parent.service.getActiveSubsystems().then(subsystems => {
             const fields = this.model.fields;//.filter(x => UtilFunctions.isValidStringOrArray(x['pending']) === false || x['pending']=== false);
             const modal = this._matDialog.open(LuthierDictionaryTableSearchModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-table-search-modal-container' });
@@ -1945,69 +1945,69 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
 
                         //end indexes
 
-                        //searchs
-                        if (UtilFunctions.isValidStringOrArray(model.searchs) === false) {
-                            model.searchs = [];
+                        //searches
+                        if (UtilFunctions.isValidStringOrArray(model.searches) === false) {
+                            model.searches = [];
                         }
-                        if (UtilFunctions.isValidStringOrArray(this.model.searchs) === false) {
-                            this.model.searchs = [];
+                        if (UtilFunctions.isValidStringOrArray(this.model.searches) === false) {
+                            this.model.searches = [];
                         }
 
-                        for(let i = 0; i < this.model.searchs.length; i++) {
-                            let search = this.model.searchs[i];
-                            let index = model.searchs.findIndex(x => x.name.toUpperCase() === search.name.toUpperCase());
+                        for(let i = 0; i < this.model.searches.length; i++) {
+                            let search = this.model.searches[i];
+                            let index = model.searches.findIndex(x => x.name.toUpperCase() === search.name.toUpperCase());
                             if (index >= 0) {
-                                model.searchs[index].code = search.code;
-                                model.searchs[index].id = search.id;
+                                model.searches[index].code = search.code;
+                                model.searches[index].id = search.id;
                                 if (UtilFunctions.isValidStringOrArray(search.searchFields) === false) {
                                     search.searchFields = [];
                                 }
-                                if (UtilFunctions.isValidStringOrArray(model.searchs[index].searchFields) === false) {
-                                    model.searchs[index].searchFields = [];
+                                if (UtilFunctions.isValidStringOrArray(model.searches[index].searchFields) === false) {
+                                    model.searches[index].searchFields = [];
                                 }
                                 for (let j = 0; j < search.searchFields.length; j++) {
                                     let searchField = search.searchFields[j];
-                                    const searchFieldIndex = model.searchs[index].searchFields.findIndex(x => x.label.toUpperCase() === searchField.label.toUpperCase());
+                                    const searchFieldIndex = model.searches[index].searchFields.findIndex(x => x.label.toUpperCase() === searchField.label.toUpperCase());
                                     if (searchFieldIndex >= 0) {
-                                        model.searchs[index].searchFields[searchFieldIndex].code = searchField.code;
-                                        model.searchs[index].searchFields[searchFieldIndex].id = searchField.id;
-                                        const [itemSearch] = model.searchs[index].searchFields.splice(searchFieldIndex, 1);
-                                        model.searchs[index].searchFields.splice(j, 0, itemSearch);
+                                        model.searches[index].searchFields[searchFieldIndex].code = searchField.code;
+                                        model.searches[index].searchFields[searchFieldIndex].id = searchField.id;
+                                        const [itemSearch] = model.searches[index].searchFields.splice(searchFieldIndex, 1);
+                                        model.searches[index].searchFields.splice(j, 0, itemSearch);
                                     }
                                     else {
-                                        model.searchs[index].searchFields.splice(j, 0, searchField);
+                                        model.searches[index].searchFields.splice(j, 0, searchField);
                                     }
                                 }
-                                for (let j = search.searchFields.length; j < model.searchs[index].searchFields.length; j++) {
-                                    let searchField = model.searchs[index].searchFields[j];
+                                for (let j = search.searchFields.length; j < model.searches[index].searchFields.length; j++) {
+                                    let searchField = model.searches[index].searchFields[j];
                                     searchField.code = null;
                                     searchField.id = crypto.randomUUID();
                                 }
-                                for (let j = search.subsystems.length; j < model.searchs[index].subsystems.length;) {
-                                    let subsystemField = model.searchs[index].subsystems[j];
+                                for (let j = search.subsystems.length; j < model.searches[index].subsystems.length;) {
+                                    let subsystemField = model.searches[index].subsystems[j];
 
                                     const indexField = subsystems.findIndex(x => x.code === subsystemField.subsystem.code);
                                     if (indexField < 0) {
-                                        model.searchs[index].subsystems.splice(j, 1);
+                                        model.searches[index].subsystems.splice(j, 1);
                                         continue;
                                     }
                                     j++;
                                 }
-                                for (let j = 0; j < model.searchs[index].searchFields.length; j++) {
-                                    let searchField = model.searchs[index].searchFields[j];
+                                for (let j = 0; j < model.searches[index].searchFields.length; j++) {
+                                    let searchField = model.searches[index].searchFields[j];
                                     const indexField = model.fields.findIndex(x => x.name.toUpperCase() === searchField.tableField.name.toUpperCase());
                                     searchField.tableField = model.fields[indexField];
                                 }
 
-                                const [item] = model.searchs.splice(index, 1);
-                                model.searchs.splice(i, 0, item);
+                                const [item] = model.searches.splice(index, 1);
+                                model.searches.splice(i, 0, item);
                             }
                             else {
-                                model.searchs.splice(i, 0, search);
+                                model.searches.splice(i, 0, search);
                             }
                         }
-                        for(let i = this.model.searchs.length; i < model.searchs.length; i++) {
-                            let search = model.searchs[i];
+                        for(let i = this.model.searches.length; i < model.searches.length; i++) {
+                            let search = model.searches[i];
                             search.code = null;
                             search.id = crypto.randomUUID();
                             for (let j = 0; j < search.searchFields.length; j++) {
@@ -2029,7 +2029,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                                 j++;
                             }
                         }
-                        //end searchs
+                        //end searches
 
                         //customizations
                         if (UtilFunctions.isValidStringOrArray(model.customizations) === false) {

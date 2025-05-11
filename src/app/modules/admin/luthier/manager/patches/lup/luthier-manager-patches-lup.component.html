@@ -1,0 +1,145 @@
+<div class="h-full inset-0 flex flex-row min-w-0 overflow-hidden bg-card dark:bg-transparent z-50 relative">
+    <div class="flex flex-none overflow-hidden w-16 h-full bg-card border-r">
+        <div class="flex flex-col items-center w-full">
+
+            <mat-button-toggle-group name="ledType" [(ngModel)]="lupType" vertical>
+                <button *ngIf="import && fileLoaded" mat-button matTooltip="Remover arquivo importado" matTooltipPosition="right"
+                        class="mat-button-toggle"
+                        (click)="clearFile()">
+                    <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-trash"></mat-icon>
+                </button>
+                <ng-container *ngIf="!import || fileLoaded">
+                    <mat-button-toggle value="PROJECT" matTooltip="Projeto" matTooltipPosition="right">
+                        <div class="relative">
+                            <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-cube"></mat-icon>
+                            <ng-container *ngIf="projects.canSave()">
+                                <div
+                                    class="absolute top-1 -right-1 flex-0 w-2 h-2 -ml-0.5 rounded-full ring-2 ring-bg-card dark:ring-gray-900 bg-primary dark:bg-primary-500 text-on-primary">
+                                </div>
+                            </ng-container>
+                        </div>
+                    </mat-button-toggle>
+                    <mat-button-toggle value="FILES" matTooltip="Arquivos" matTooltipPosition="right">
+                        <div class="relative">
+                            <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-file"></mat-icon>
+                            <ng-container *ngIf="files.canSave()">
+                                <div
+                                    class="absolute top-1 -right-1 flex-0 w-2 h-2 -ml-0.5 rounded-full ring-2 ring-bg-card dark:ring-gray-900 bg-primary dark:bg-primary-500 text-on-primary">
+                                </div>
+                            </ng-container>
+                        </div>
+                    </mat-button-toggle>
+                    <mat-button-toggle value="REPORT" matTooltip="Relatórios" matTooltipPosition="right">
+                        <div class="relative">
+                            <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-file-pdf"></mat-icon>
+                            <ng-container *ngIf="reports.canSave()">
+                                <div
+                                    class="absolute top-1 -right-1 flex-0 w-2 h-2 -ml-0.5 rounded-full ring-2 ring-bg-card dark:ring-gray-900 bg-primary dark:bg-primary-500 text-on-primary">
+                                </div>
+                            </ng-container>
+                        </div>
+                    </mat-button-toggle>
+                    <mat-button-toggle value="RESOURCE" matTooltip="Resource" matTooltipPosition="right">
+                        <div class="relative">
+                            <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-paperclip"></mat-icon>
+                            <ng-container *ngIf="resources.canSave()">
+                                <div
+                                    class="absolute top-1 -right-1 flex-0 w-2 h-2 -ml-0.5 rounded-full ring-2 ring-bg-card dark:ring-gray-900 bg-primary dark:bg-primary-500 text-on-primary">
+                                </div>
+                            </ng-container>
+                        </div>
+                    </mat-button-toggle>
+                    <mat-button-toggle value="MENU" matTooltip="Menu" matTooltipPosition="right">
+                        <div class="relative">
+                            <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-bars"></mat-icon>
+                            <ng-container *ngIf="menus.canSave()">
+                                <div
+                                    class="absolute top-1 -right-1 flex-0 w-2 h-2 -ml-0.5 rounded-full ring-2 ring-bg-card dark:ring-gray-900 bg-primary dark:bg-primary-500 text-on-primary">
+                                </div>
+                            </ng-container>
+                        </div>
+                    </mat-button-toggle>
+                    <mat-button-toggle value="PARAMETER" matTooltip="Parâmetros" matTooltipPosition="right">
+                        <div class="relative">
+                            <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-tag"></mat-icon>
+                            <ng-container *ngIf="parameters.canSave()">
+                                <div
+                                    class="absolute top-1 -right-1 flex-0 w-2 h-2 -ml-0.5 rounded-full ring-2 ring-bg-card dark:ring-gray-900 bg-primary dark:bg-primary-500 text-on-primary">
+                                </div>
+                            </ng-container>
+                        </div>
+                    </mat-button-toggle>
+                    <mat-button-toggle value="LAYOUTCONTROL" matTooltip="Layout Control" matTooltipPosition="right">
+                        <div class="relative">
+                            <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-expand"></mat-icon>
+                            <ng-container *ngIf="layoutControls.canSave()">
+                                <div
+                                    class="absolute top-1 -right-1 flex-0 w-2 h-2 -ml-0.5 rounded-full ring-2 ring-bg-card dark:ring-gray-900 bg-primary dark:bg-primary-500 text-on-primary">
+                                </div>
+                            </ng-container>
+                        </div>
+                    </mat-button-toggle>
+                    <mat-button-toggle value="HELP" matTooltip="Help Context" matTooltipPosition="right">
+                        <div class="relative">
+                            <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-question"></mat-icon>
+                            <ng-container *ngIf="helps.canSave()">
+                                <div
+                                    class="absolute top-1 -right-1 flex-0 w-2 h-2 -ml-0.5 rounded-full ring-2 ring-bg-card dark:ring-gray-900 bg-primary dark:bg-primary-500 text-on-primary">
+                                </div>
+                            </ng-container>
+                        </div>
+                    </mat-button-toggle>
+                    <mat-button-toggle value="MESSAGE" matTooltip="Tipo Mensagem" matTooltipPosition="right">
+                        <div class="relative">
+                            <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-message"></mat-icon>
+                            <ng-container *ngIf="messages.canSave()">
+                                <div
+                                    class="absolute top-1 -right-1 flex-0 w-2 h-2 -ml-0.5 rounded-full ring-2 ring-bg-card dark:ring-gray-900 bg-primary dark:bg-primary-500 text-on-primary">
+                                </div>
+                            </ng-container>
+                        </div>
+                    </mat-button-toggle>
+                </ng-container>
+
+            </mat-button-toggle-group>
+        </div>
+    </div>
+    <div class="flex flex-col flex-1 overflow-hidden">
+        <ngx-file-drop *ngIf="import && !fileLoaded" class="w-full h-full" [dropZoneClassName]="'full-drop-zone'" (onFileDrop)="dropped($event)"
+                       [multiple]="false" [accept]="'.LUP'" dropZoneLabel="Arraste seu arquivo de LUP aqui">
+
+            <ng-template ngx-file-drop-content-tmp let-openFileSelectorDocumentos="openFileSelector">
+                {{"Arraste seu arquivo LPX aqui"}}
+                <button
+                    class="px-6 ml-3"
+                    mat-icon-button
+                    [color]="'primary'"
+                    (click)="openFileSelectorDocumentos()">
+                    <mat-icon class="icon-size-5" fontSet="fas" fontIcon="fa-upload"></mat-icon>
+                </button>
+            </ng-template>
+        </ngx-file-drop>
+        <div [hidden]="import && !fileLoaded" class="w-full h-full overflow-hidden">
+            <luthier-manager-patches-lup-project #projects [hidden]="lupType !== 'PROJECT'" class="h-full w-full overflow-hidden"></luthier-manager-patches-lup-project>
+            <luthier-manager-patches-lup-file #files [hidden]="lupType !== 'FILES'" class="h-full w-full overflow-hidden"></luthier-manager-patches-lup-file>
+            <luthier-manager-patches-lup-report #reports [hidden]="lupType !== 'REPORT'" class="h-full w-full overflow-hidden"></luthier-manager-patches-lup-report>
+            <luthier-manager-patches-lup-resource #resources [hidden]="lupType !== 'RESOURCE'" class="h-full w-full overflow-hidden"></luthier-manager-patches-lup-resource>
+            <luthier-manager-patches-lup-menu #menus [hidden]="lupType !== 'MENU'" class="h-full w-full overflow-hidden"></luthier-manager-patches-lup-menu>
+            <luthier-manager-patches-lup-parameter #parameters [hidden]="lupType !== 'PARAMETER'" class="h-full w-full overflow-hidden"></luthier-manager-patches-lup-parameter>
+            <luthier-manager-patches-lup-layout-control #layoutControls [hidden]="lupType !== 'LAYOUTCONTROL'" class="h-full w-full overflow-hidden"></luthier-manager-patches-lup-layout-control>
+            <luthier-manager-patches-lup-help #helps [hidden]="lupType !== 'HELP'" class="h-full w-full overflow-hidden"></luthier-manager-patches-lup-help>
+            <luthier-manager-patches-lup-message #messages [hidden]="lupType !== 'MESSAGE'" class="h-full w-full overflow-hidden"></luthier-manager-patches-lup-message>
+        </div>
+    </div>
+    <div class="absolute bottom-0 right-0 z-50">
+
+        <button
+            class="mr-4 mb-4"
+            [disabled]="!canSave()"
+            (click)="save()"
+            mat-flat-button
+            type="button"
+            [color]="'primary'">Salvar
+        </button>
+    </div>
+</div>

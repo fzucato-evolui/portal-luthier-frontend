@@ -27,7 +27,7 @@ import {LuthierValidator} from '../../../../../shared/validators/luthier.validat
 import {MatSelectModule} from '@angular/material/select';
 import {NgForOf} from '@angular/common';
 
-export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
+export type TableType = 'fields' | 'indexes' | 'references' | 'searches' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
     selector     : 'luthier-dictionary-vision',
     templateUrl  : './luthier-dictionary-vision.component.html',

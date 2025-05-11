@@ -26,8 +26,9 @@ import {LuthierManagerParameterComponent} from './parameter/luthier-manager-para
 import {LuthierManagerSemaphoreComponent} from './semaphore/luthier-manager-semaphore.component';
 import {LuthierManagerMenuComponent} from './menu/luthier-manager-menu.component';
 import {LuthierManagerMenutreeComponent} from './menutree/luthier-manager-menutree.component';
+import {LuthierManagerPatchesComponent} from './patches/luthier-manager-patches.component';
 
-export type LuthierManagerObjectType = 'PARAMETER' | 'SEMAPHORE' | 'MENU' | 'MENU_TREE'
+export type LuthierManagerObjectType = 'PARAMETER' | 'SEMAPHORE' | 'MENU' | 'MENU_TREE' | 'PATCHES_IMPORT' | 'PATCHES_EXPORT';
 @Component({
     selector     : 'luthier-manager',
     templateUrl  : './luthier-manager.component.html',
@@ -48,6 +49,7 @@ export type LuthierManagerObjectType = 'PARAMETER' | 'SEMAPHORE' | 'MENU' | 'MEN
         LuthierManagerSemaphoreComponent,
         LuthierManagerMenuComponent,
         LuthierManagerMenutreeComponent,
+        LuthierManagerPatchesComponent,
     ],
 })
 export class LuthierManagerComponent implements OnInit, OnDestroy
@@ -138,6 +140,38 @@ export class LuthierManagerComponent implements OnInit, OnDestroy
                             this.addTab('SEMAPHORE');
 
                         },
+                    },
+                    {
+                        id: 'luthier.manager.objects.patches',
+                        title: 'Patches',
+                        type: 'aside',
+                        awesomeIcon: {fontSet: 'fas', fontIcon: 'fa-file-zipper'},
+                        roles: ['ROLE_SUPER', 'ROLE_HYPER'],
+                        children: [
+                            {
+                                id: 'luthier.manager.objects.patches.import',
+                                title: 'Importar',
+                                type: 'basic',
+                                awesomeIcon: {fontSet: 'fas', fontIcon: 'fa-download'},
+                                roles: ['ROLE_SUPER', 'ROLE_HYPER'],
+                                function: item => {
+                                    this.addTab('PATCHES_IMPORT');
+
+                                },
+                            },
+                            {
+                                id: 'luthier.manager.objects.patches.export',
+                                title: 'Exportar',
+                                type: 'basic',
+                                awesomeIcon: {fontSet: 'fas', fontIcon: 'fa-upload'},
+                                roles: ['ROLE_SUPER', 'ROLE_HYPER'],
+                                function: item => {
+                                    this.addTab('PATCHES_EXPORT');
+
+                                },
+                            }
+                        ]
+
                     }
                 ]
             },
@@ -303,6 +337,29 @@ export class LuthierManagerComponent implements OnInit, OnDestroy
                         firstValueFrom(this.service.getMenus()),
                         firstValueFrom(this.service.getMenuTree()),
                         firstValueFrom(this.service.getSubsystems())
+                    ]
+                ).then(async value => {
+                    this.tabsOpened.push(objectType);
+                    this.selectedTab = objectType;
+                    this._changeDetectorRef.detectChanges();
+                });
+            }
+            else if (objectType === 'PATCHES_EXPORT') {
+                Promise.all(
+                    [
+
+                    ]
+                ).then(async value => {
+                    this.tabsOpened.push(objectType);
+                    this.selectedTab = objectType;
+                    this._changeDetectorRef.detectChanges();
+                });
+            }
+            else if (objectType === 'PATCHES_IMPORT') {
+                //this.messageService.open('Ainda não implementado', 'INFORMAÇÃO', 'info');
+                Promise.all(
+                    [
+
                     ]
                 ).then(async value => {
                     this.tabsOpened.push(objectType);

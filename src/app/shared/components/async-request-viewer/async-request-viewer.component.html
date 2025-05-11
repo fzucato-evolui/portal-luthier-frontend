@@ -1,0 +1,125 @@
+<mat-drawer-container class="flex-auto h-full">
+
+    <!-- Drawer -->
+    <mat-drawer
+        [autoFocus]="false"
+        class="w-72"
+        [mode]="drawerMode"
+        [opened]="drawerOpened"
+        [position]="'end'"
+        #matDrawerRight>
+        <div class="absolute py-1 h-full w-full flex flex-col overflow-hidden">
+            <!-- Header -->
+            <div class="flex flex-col flex-0 p-1 border-b dark:bg-transparent">
+                <div class="flex items-center justify-between">
+                    <div class="text-xl font-bold tracking-tight ml-2">Filtro</div>
+                    <div class="flex">
+                        <button (click)="filterLogs()" mat-icon-button>
+                            <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-filter"/>
+                        </button>
+                        <button (click)="limpar()" mat-icon-button>
+                            <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-eraser"/>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-auto w-full overflow-y-auto overflow-x-hidden">
+                <form name="editForm" role="form" #editForm="ngForm" class="flex flex-col items-center justify-end py-1">
+                    <div class="flex flex-col w-full px-2 py-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>De</mat-label>
+                            <input (keydown.enter)="filterLogs()" placeholder="dd/mm/aaaa hh:mm:ss.SSS" mask="00/00/0000 00:00:00.000" [dropSpecialCharacters]="false" name="timeStampFrom" [(ngModel)]="filter.sTimeStampFrom" (ngModelChange)="convertToDate('from', $event, timeStampFromInput)" #timeStampFromInput="ngModel" matInput>
+                        </mat-form-field>
+                        <mat-error *ngIf="errorMessage.from">
+                            {{ errorMessage.from }}
+                        </mat-error>
+                    </div>
+                    <div class="flex flex-col w-full px-2 py-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Até</mat-label>
+                            <input (keydown.enter)="filterLogs()" placeholder="dd/mm/aaaa hh:mm:ss.SSS" mask="00/00/0000 00:00:00.000" [dropSpecialCharacters]="false" name="timeStampTo" [(ngModel)]="filter.sTimeStampTo" (ngModelChange)="convertToDate('from', $event, timeStampToInput)" #timeStampToInput="ngModel" matInput>
+                        </mat-form-field>
+                        <mat-error *ngIf="errorMessage.to">
+                            {{ errorMessage.to }}
+                        </mat-error>
+                    </div>
+                    <div class="flex flex-col w-full px-2 py-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Log Level</mat-label>
+                            <mat-select name="actionType" [(ngModel)]="filter.tempLevel" multiple="true">
+                                <mat-option *ngFor="let t of LogLevelEnum | enumArray" [value]="t.key">
+                                    {{t.key}}
+
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="flex flex-col w-full px-2 py-1">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Texto</mat-label>
+                            <input
+                                (keydown.enter)="filterLogs()"
+                                name="message"
+                                [(ngModel)]="filter.tempMessage"
+                                matInput>
+                        </mat-form-field>
+                        <mat-error *ngIf="errorMessage.to">
+                            {{ errorMessage.to }}
+                        </mat-error>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </mat-drawer>
+
+    <!-- Drawer content -->
+    <mat-drawer-content class="flex flex-col overflow-hidden bg-inherit">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row flex-0 sm:justify-between p-1 border-b">
+            <div class="flex-1 min-w-0">
+                <!-- Title -->
+                <div class="mt-0">
+                    <h2 class="text-xl font-semibold">
+                        {{ model?.title }}
+                    </h2>
+                    <div class="text-secondary">Progresso: {{ model?.progress }}%</div>
+                </div>
+            </div>
+            <div class="flex shrink-0 mt-0 sm:mx-2">
+                <button mat-icon-button (click)="toggleMatRight()">
+                    <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-search"/>
+                </button>
+            </div>
+        </div>
+        <!-- Main -->
+        <div #scrollableDiv cdkScrollable class="log-container h-full max-h-full max-w-full overflow-auto" (scroll)="onUserScroll()">
+
+            <div *ngFor="let job of (filteredJobs | async) | keyvalue: compareJobKeys" class="text-sm px-2 py-1">
+                <!-- Job Title Button -->
+                <button
+                    class="w-full flex items-center justify-between bg-gray-100 dark:bg-gray-800 px-3 py-1 text-xs font-bold text-gray-700 dark:text-gray-300 border-l-4 border-primary-500 rounded"
+                    (click)="toggleJob(job.key)">
+                    <span>{{ job.value.title + ' - Progresso:' + job.value?.progress + '%  (' + job.value.delayedTime + 'ms)' }}</span>
+                    <mat-icon class="text-xs">
+                        {{ expandedJobs[job.key] ? 'expand_less' : 'expand_more' }}
+                    </mat-icon>
+                </button>
+                <!-- Logs do Job -->
+                <div *ngIf="expandedJobs[job.key]" class="space-y-1 mt-1">
+                    <div class="text-xs p-1 rounded bg-white/5 shadow-sm" *ngFor="let log of job.value.logs">
+                        <span *ngIf="log.logLevel === LogLevelEnum.ERROR" class="text-red-500">{{ log.formattedMessage }}</span>
+                        <span *ngIf="log.logLevel === LogLevelEnum.WARN" class="text-orange-500">{{ log.formattedMessage }}</span>
+                        <span *ngIf="log.logLevel === LogLevelEnum.INFO" class="text-blue-500">{{ log.formattedMessage }}</span>
+                        <span *ngIf="log.logLevel === LogLevelEnum.DEBUG" class="text-default">{{ log.formattedMessage }}</span>
+                        <span *ngIf="log.logLevel === LogLevelEnum.TRACE" class="text-pink-500">{{ log.formattedMessage }}</span>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+    </mat-drawer-content>
+
+</mat-drawer-container>

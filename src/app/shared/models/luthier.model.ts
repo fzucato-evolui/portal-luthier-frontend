@@ -31,7 +31,7 @@ export class LuthierProjectModel extends LuthierDatabaseModel{
     protocol?: string
 }
 export type LuthierObjectType = 'UNKNOW' | 'TABLE' | 'VIEW' | 'VISION' | 'PROCEDURE' | 'JUST_RUNTIME' | 'VISION_DATASET';
-export type TableType = 'fields' | 'indexes' | 'references' | 'searchs' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
+export type TableType = 'fields' | 'indexes' | 'references' | 'searches' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 export class LuthierTableModel extends LuthierBasicModel {
     id?: string;
     code?: number
@@ -62,7 +62,7 @@ export class LuthierTableModel extends LuthierBasicModel {
     customizations?: LuthierCustomizationModel[]
     bonds?: LuthierBondModel[]
     datasetBonds?: LuthierDatasetBondModel[]
-    searchs?: LuthierTableSearchModel[]
+    searches?: LuthierTableSearchModel[]
     historical?: LuthierMetadataHistoryChangeModel[]
     public static equals(model: LuthierTableModel, previousModel: LuthierTableModel): boolean {
         if (!UtilFunctions.equalsIgnoreCase(model?.code, previousModel?.code)) {
@@ -113,7 +113,7 @@ export class LuthierTableModel extends LuthierBasicModel {
         if (!UtilFunctions.equalsIgnoreCase(model?.groupInfos?.length, previousModel?.groupInfos?.length)) {
             return false
         }
-        if (!UtilFunctions.equalsIgnoreCase(model?.searchs?.length, previousModel?.searchs?.length)) {
+        if (!UtilFunctions.equalsIgnoreCase(model?.searches?.length, previousModel?.searches?.length)) {
             return false
         }
         if (!UtilFunctions.equalsIgnoreCase(model?.customFields?.length, previousModel?.customFields?.length)) {
@@ -159,14 +159,14 @@ export class LuthierTableModel extends LuthierBasicModel {
                 }
             }
         }
-        if (UtilFunctions.isValidStringOrArray(model.searchs) === true) {
-            for (const child of model.searchs) {
+        if (UtilFunctions.isValidStringOrArray(model.searches) === true) {
+            for (const child of model.searches) {
                 if (UtilFunctions.isValidStringOrArray(child.code) === false) {
                     return false;
                 }
-                const previousChildIndex = previousModel.searchs.findIndex(previousChild => previousChild.code === child.code);
+                const previousChildIndex = previousModel.searches.findIndex(previousChild => previousChild.code === child.code);
                 if (previousChildIndex >= 0) {
-                    const previousChild = previousModel.searchs[previousChildIndex];
+                    const previousChild = previousModel.searches[previousChildIndex];
                     if (LuthierTableSearchModel.equals(child, previousChild) === false) {
                         return false;
                     }
@@ -1241,7 +1241,7 @@ export class LuthierVisionDatasetModel extends LuthierBasicModel{
     objectType?: LuthierObjectType
     fields?: LuthierVisionDatasetFieldModel[]
     groupInfos?: LuthierVisionGroupInfoModel[]
-    searchs?: LuthierVisionDatasetSearchModel[]
+    searches?: LuthierVisionDatasetSearchModel[]
     customizations?: LuthierCustomizationModel[]
     customFields?: LuthierVisionDatasetCustomFieldModel[]
     relatives?: LuthierVisionDatasetModel[]
@@ -1284,7 +1284,7 @@ export class LuthierVisionDatasetModel extends LuthierBasicModel{
         if (!UtilFunctions.equalsIgnoreCase(model?.groupInfos?.length, previousModel?.groupInfos?.length)) {
             return false
         }
-        if (!UtilFunctions.equalsIgnoreCase(model?.searchs?.length, previousModel?.searchs?.length)) {
+        if (!UtilFunctions.equalsIgnoreCase(model?.searches?.length, previousModel?.searches?.length)) {
             return false
         }
         if (!UtilFunctions.equalsIgnoreCase(model?.customFields?.length, previousModel?.customFields?.length)) {
@@ -1325,14 +1325,14 @@ export class LuthierVisionDatasetModel extends LuthierBasicModel{
                 }
             }
         }
-        if (UtilFunctions.isValidStringOrArray(model.searchs) === true) {
-            for (const child of model.searchs) {
+        if (UtilFunctions.isValidStringOrArray(model.searches) === true) {
+            for (const child of model.searches) {
                 if (UtilFunctions.isValidStringOrArray(child.code) === false) {
                     return false;
                 }
-                const previousChildIndex = previousModel.searchs.findIndex(previousChild => previousChild.code === child.code);
+                const previousChildIndex = previousModel.searches.findIndex(previousChild => previousChild.code === child.code);
                 if (previousChildIndex >= 0) {
-                    const previousChild = previousModel.searchs[previousChildIndex];
+                    const previousChild = previousModel.searches[previousChildIndex];
                     if (LuthierVisionDatasetSearchModel.equals(child, previousChild) === false) {
                         return false;
                     }
@@ -2079,4 +2079,123 @@ export class LuthierProcedureDependencyModel extends LuthierBasicModel {
 export class LuthierProcedureBodyModel {
     databaseType?: LuthierViewBodyEnum | string
     sql?: string
+}
+
+export class PatchImportItemModel<T> {
+    message?: string;
+    status?: string;
+    selectable?: boolean;
+    item: T;
+}
+
+export class LedImportModel {
+    fileName?: string;
+    tables: Array<PatchImportItemModel<LuthierTableModel>>
+}
+
+export class LpxImportModel {
+    fileName?: string;
+    tables: Array<PatchImportItemModel<LuthierTableModel>>;
+    procedures: Array<PatchImportItemModel<LuthierProcedureModel>>;
+    visions: Array<PatchImportItemModel<LuthierVisionModel>>;
+}
+
+export class LupImportModel {
+    fileName?: string;
+    projects: Array<PatchImportItemModel<LuthierProjectModel>>;
+    files: Array<PatchImportItemModel<LuthierScriptTableModel>>;
+    reports: Array<PatchImportItemModel<LuthierReportModel>>;
+    resources: Array<PatchImportItemModel<LuthierResourceModel>>;
+    menus: Array<PatchImportItemModel<LuthierSubsystemModel>>;
+    parameters: Array<PatchImportItemModel<LuthierParameterModel>>;
+    layoutControls: Array<PatchImportItemModel<LuthierLayoutControlModel>>;
+    helps: Array<PatchImportItemModel<LuthierTableHelpModel>>;
+    messages: Array<PatchImportItemModel<LuthierMessageTypeModel>>;
+}
+
+export class LuthierReportModel extends LuthierBasicModel {
+    description?: string;
+    name?: string;
+    report?: Uint8Array;
+    projectCode?: number;
+    changedAt?: Date;
+    userModifierCode?: number;
+    detailedDescription?: string;
+    subsystemCode?: number;
+    userLockerCode?: number;
+    lockedDate?: Date;
+    creationDate?: Date;
+    custom?: number;
+    status?: number;
+    typeManager?: number;
+    lockedDescription?: string;
+    version?: string;
+    compiledReport?: Uint8Array;
+    allowCache?: number;
+    cacheLimit?: number;
+    type?: number;
+    update?: number;
+    subsystem?: LuthierSubsystemModel;
+    userModifier?: LuthierUserModel;
+    userLocker?: LuthierUserModel;
+    layoutControl?: LuthierLayoutControlModel
+}
+
+export class LuthierScriptTableModel extends LuthierBasicModel {
+    fileName: string;
+    execServer?: boolean;
+    type?: number;
+    computerName?: string;
+    save?: boolean;
+    moduleCode?: number;
+    extension?: string;
+    description?: string;
+    projectCode?: number;
+    script?: Uint8Array; // ou base64: string
+    userCheckinCode?: number;
+    userModifierCode?: number;
+    changedAt?: string; // ou Date, se você parsear
+    compunit?: Uint8Array; // ou base64: string
+    module?: LuthierModuleModel;
+    userCheckin?: LuthierUserModel;
+    userModifier?: LuthierUserModel;
+}
+
+export enum LuthierLayoutControlTypeEnum {
+    REPORT = "REPORT",
+    WINDOW = "WINDOW"
+}
+export class LuthierLayoutControlModel {
+    name?: string;
+    type?: LuthierLayoutControlTypeEnum;
+    projectCode?: number;
+    script?: Uint8Array;
+    changedAt?: Date;
+    userModifierCode?: number;
+    creationDate?: Date;
+    userLockerCode?: number;
+    lockDate?: Date;
+    lockDescription?: string;
+    plataform?: LuthierPlataformEnum;
+    userModifier?: LuthierUserModel;
+    userLocker?: LuthierUserModel;
+}
+
+export class LuthierTableHelpModel {
+    code: number;
+    form?: string;
+    component?: string;
+    value?: string;
+    type: number;
+    changedAt?: Date;
+    userModifierCode?: number;
+    patchDate?: Date;
+    projectCode: number;
+    parameter?: string;
+    userModifier?: LuthierUserModel;
+}
+
+export class LuthierMessageTypeModel {
+    code?: number;
+    name?: string;
 }

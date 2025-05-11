@@ -1,0 +1,151 @@
+<div class="h-full inset-0 flex flex-row min-w-0 overflow-hidden bg-card dark:bg-transparent z-50">
+    <div class="flex flex-none overflow-hidden w-16 h-full bg-card border-r">
+        <div class="flex flex-col items-center w-full">
+            <mat-button-toggle-group name="ledType" [(ngModel)]="ledType" vertical>
+                <button *ngIf="import && fileLoaded" mat-button matTooltip="Remover arquivo importado"
+                        class="mat-button-toggle"
+                        (click)="clearFile()">
+                    <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-trash"></mat-icon>
+                </button>
+                <ng-container *ngIf="!import || fileLoaded">
+                    <mat-button-toggle value="TABLE" matTooltip="Tabelas Exportadas">
+                        <div class="relative">
+                            <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-table"></mat-icon>
+                            <ng-container *ngIf="canSave()">
+                                <div
+                                    class="absolute top-1 -right-1 flex-0 w-2 h-2 -ml-0.5 rounded-full ring-2 ring-bg-card dark:ring-gray-900 bg-primary dark:bg-primary-500 text-on-primary">
+                                </div>
+                            </ng-container>
+                        </div>
+                    </mat-button-toggle>
+                </ng-container>
+
+            </mat-button-toggle-group>
+        </div>
+    </div>
+    <div [hidden]="ledType !== 'TABLE'" class="flex flex-col flex-1 overflow-hidden">
+        <ngx-file-drop *ngIf="import && !fileLoaded" class="w-full h-full" [dropZoneClassName]="'full-drop-zone'" (onFileDrop)="dropped($event)"
+                       [multiple]="false" [accept]="'.LED'" dropZoneLabel="Arraste seu arquivo de LED aqui">
+
+            <ng-template ngx-file-drop-content-tmp let-openFileSelectorDocumentos="openFileSelector">
+                {{"Arraste seu arquivo LED aqui"}}
+                <button
+                    class="px-6 ml-3"
+                    mat-icon-button
+                    [color]="'primary'"
+                    (click)="openFileSelectorDocumentos()">
+                    <mat-icon class="icon-size-5" fontSet="fas" fontIcon="fa-upload"></mat-icon>
+                </button>
+            </ng-template>
+        </ngx-file-drop>
+        <div [hidden]="import && !fileLoaded" class="w-full h-full overflow-hidden">
+            <div [hidden]="ledType !== 'TABLE'" class="w-full h-full overflow-hidden relative">
+                <!-- Header -->
+                <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between pl-4 pb-2 border-b">
+                    <div class="flex-1 min-w-0">
+                        <!-- Title -->
+                        <div>
+                            <h2 class="text-xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                                Lista das Tabelas Exportadas do Sistema
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main -->
+                <div
+                    class="h-full w-full flex-auto p-2  overflow-y-hidden">
+
+                    <div class="flex flex-col h-full overflow-hidden">
+                        <div class="flex-none flex justify-between items-center py-1">
+                            <div class="flex-none flex">
+
+                            </div>
+                            <div class="flex-none flex md:w-1/3 md:pr-1">
+                                <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                                    <mat-icon
+                                        class="evolui-menu-item-icon"
+                                        fontSet="fas" fontIcon="fa-search"
+                                        matPrefix></mat-icon>
+                                    <input
+                                        [autocomplete]="'off'"
+                                        class="text-sm"
+                                        (input)="filter($event)"
+                                        matInput>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="flex-1 overflow-y-auto" cdkScrollable>
+                            <table #table mat-table matSort [dataSource]="datasource" class="table-auto">
+
+                                <ng-container matColumnDef="select">
+                                    <th mat-header-cell *matHeaderCellDef>
+                                        <div class="flex flex-row items-center">
+                                            <mat-checkbox *ngIf="datasource.data.length > 0"
+                                                (change)="$event ? masterToggle() : null"
+                                                [checked]="selection.hasValue() && isAllSelected()"
+                                                [indeterminate]="selection.hasValue() && !isAllSelected()">
+                                            </mat-checkbox>
+                                            <button *ngIf="!import" mat-icon-button aria-label="Add" (click)="refresh()">
+                                                <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-sync"></mat-icon>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <td mat-cell *matCellDef="let row">
+                                        <div *ngIf="!import || row['selectable'] === true">
+                                            <mat-checkbox
+                                                (click)="$event.stopPropagation()"
+                                                (change)="$event ? toggleSelection(row) : null"
+                                                [checked]="selection.isSelected(row)">
+                                            </mat-checkbox>
+                                        </div>
+                                        <div *ngIf="import && row['selectable'] === false" [matTooltip]="row['message']">
+                                            <mat-icon class="evolui-menu-item-icon text-red-500" fontSet="fas" fontIcon="fa-exclamation"></mat-icon>
+                                        </div>
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell *matHeaderCellDef> Status </th>
+                                    <td mat-cell *matCellDef="let model"> {{ model['status'] }} </td>
+                                </ng-container>
+                                <ng-container matColumnDef="code">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+                                    <td mat-cell *matCellDef="let model"> {{ model.code }} </td>
+                                </ng-container>
+                                <ng-container matColumnDef="name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome </th>
+                                    <td mat-cell *matCellDef="let model"> {{ model.name }} </td>
+                                </ng-container>
+                                <ng-container matColumnDef="description">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header> Descrição </th>
+                                    <td mat-cell *matCellDef="let model"> {{ model.description }} </td>
+                                </ng-container>
+                                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                            </table>
+                        </div>
+
+                    </div>
+
+
+                </div>
+                <div class="absolute bottom-0 right-0 z-50">
+
+                    <button
+                        class="mr-4 mb-4"
+                        [disabled]="canSave() === false"
+                        (click)="save()"
+                        mat-flat-button
+                        type="button"
+                        [color]="'primary'">Salvar
+                    </button>
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+</div>
