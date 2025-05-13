@@ -326,7 +326,8 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             table: this.formBuilder.group({
                 code: [null],
                 name: ['', [Validators.required]],
-                description: ['']
+                description: [''],
+                references: []
             }, {validators: Validators.required}),
             vision: this.formBuilder.group({
                 code: [null],
@@ -969,7 +970,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
     editRow(model: LuthierBasicModel, type: TableType) {
         //const editing = this.getRealIndex(model, type);
         //editing.dataSource.data[editing.index]['editing'] = true;
-        const fg = this.addField(type);
+        const fg = this.addField(type === 'customizations' ? 'fields' : type);
         fg.patchValue(model);
         UtilFunctions.forceValidations(fg);
         model.row = fg;
