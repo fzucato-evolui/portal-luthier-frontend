@@ -1,4 +1,4 @@
-import {CdkScrollable, CdkVirtualScrollViewport, ScrollingModule} from '@angular/cdk/scrolling';
+import {CdkVirtualScrollViewport, ScrollingModule} from '@angular/cdk/scrolling';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -30,7 +30,7 @@ import {
     LuthierVisionDatasetModel,
     LuthierVisionModel
 } from '../../../../shared/models/luthier.model';
-import {AsyncPipe, NgClass, NgForOf, NgIf} from '@angular/common';
+import {AsyncPipe, CommonModule, NgClass, NgForOf, NgIf} from '@angular/common';
 import {LuthierComponent} from '../luthier.component';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
@@ -55,21 +55,20 @@ import {
 } from './modal/check-objects/luthier-dictionary-check-objects-modal.component';
 import {LuthierDictionaryXmlLoadModalComponent} from './modal/xml-load/luthier-dictionary-xml-load-modal.component';
 import {LuthierDictionaryProcedureComponent} from './procedure/luthier-dictionary-procedure.component';
+import {TranslocoModule} from '@ngneat/transloco';
 
 @Component({
     selector     : 'luthier-dictionary',
     templateUrl  : './luthier-dictionary.component.html',
-    styleUrls : ['/luthier-dictionary.component.scss'],
+    styleUrls : ['./luthier-dictionary.component.scss'],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone   : true,
     imports: [
         NgClass,
         MatSidenavModule,
-        FuseVerticalNavigationComponent,
         MatIconModule,
         MatButtonModule,
-        CdkScrollable,
         NgForOf,
         FormsModule,
         MatInputModule,
@@ -86,7 +85,9 @@ import {LuthierDictionaryProcedureComponent} from './procedure/luthier-dictionar
         LuthierDictionaryVisionComponent,
         LuthierDictionaryDatasetComponent,
         ClipboardModule,
-        LuthierDictionaryProcedureComponent
+        LuthierDictionaryProcedureComponent,
+        TranslocoModule,
+        CommonModule
     ],
 })
 export class LuthierDictionaryComponent implements OnInit, OnDestroy
@@ -859,5 +860,21 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
         modal.componentInstance.title = `Carga XML (${model.name})`;
         modal.componentInstance.parent = this;
         modal.componentInstance.model = info;
+    }
+
+    isTableModel(model: LuthierDictionaryObjectType): model is LuthierTableModel {
+        return model.objectType === 'TABLE' || model.objectType === 'VIEW';
+    }
+
+    isVisionModel(model: LuthierDictionaryObjectType): model is LuthierVisionModel {
+        return model.objectType === 'VISION';
+    }
+
+    isVisionDatasetModel(model: LuthierDictionaryObjectType): model is LuthierVisionDatasetModel {
+        return model.objectType === 'VISION_DATASET';
+    }
+
+    isProcedureModel(model: LuthierDictionaryObjectType): model is LuthierProcedureModel {
+        return model.objectType === 'PROCEDURE';
     }
 }

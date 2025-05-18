@@ -327,7 +327,7 @@
                                                             matPrefix></mat-icon>
 
                                                         <input
-                                                            [formControl]="c.get('id')"
+                                                            [formControl]="c.get('id') | asFormControl"
                                                             readonly
                                                             matInput>
                                                     </mat-form-field>
@@ -341,7 +341,7 @@
                                                             matPrefix></mat-icon>
 
                                                         <input
-                                                            [formControl]="c.get('name')"
+                                                            [formControl]="c.get('name') | asFormControl"
                                                             [patterns]="customPatterns" mask="I*"
                                                             matInput>
                                                     </mat-form-field>
@@ -356,7 +356,7 @@
                                                             matPrefix></mat-icon>
 
                                                         <input
-                                                            [formControl]="c.get('classname')"
+                                                            [formControl]="c.get('classname') | asFormControl"
                                                             [patterns]="customPatterns" mask="J*"
                                                             matInput>
                                                     </mat-form-field>

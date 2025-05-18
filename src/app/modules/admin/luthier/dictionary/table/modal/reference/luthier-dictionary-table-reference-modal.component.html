@@ -67,7 +67,7 @@
                             <mat-select formControlName="status">
 
                                 <mat-option *ngFor="let t of LuthierReferenceStatusEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'LuthierReferenceStatusEnum'}}
 
                                 </mat-option>
                             </mat-select>
@@ -82,7 +82,7 @@
                                 fontSet="fas" fontIcon="fa-t"
                                 matPrefix></mat-icon>
                             <mat-select #tablePK [compareWith]="parent.compareCode" (openedChange)="filterTablePK.value =null"
-                                        [formControl]="formSave.get('tablePK')" (selectionChange)="changeTablePK($event)">
+                                        [formGroup]="formSave.get('tablePK') | asFormGroup" (selectionChange)="changeTablePK($event)">
                                 <div class="flex flex-col h-full w-full">
                                     <div class="flex-none">
                                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
@@ -119,7 +119,7 @@
                     </div>
                     <div class="sm:col-span-6">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
-                            <mat-label>ONDELETE</mat-label>
+                            <mat-label>NA REMOÇÃO</mat-label>
                             <mat-icon
                                 class="icon-size-5"
                                 fontSet="fas" fontIcon="fa-t"
@@ -128,7 +128,7 @@
                             <mat-select formControlName="onDelete">
 
                                 <mat-option *ngFor="let t of LuthierReferenceActionEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'LuthierReferenceActionEnum'}}
 
                                 </mat-option>
                             </mat-select>
@@ -136,7 +136,7 @@
                     </div>
                     <div class="sm:col-span-6">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
-                            <mat-label>ONUPDATE</mat-label>
+                            <mat-label>NA ATUALIZAÇÃO</mat-label>
                             <mat-icon
                                 class="icon-size-5"
                                 fontSet="fas" fontIcon="fa-t"
@@ -145,7 +145,7 @@
                             <mat-select formControlName="onUpdate">
 
                                 <mat-option *ngFor="let t of LuthierReferenceActionEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'LuthierReferenceActionEnum'}}
 
                                 </mat-option>
                             </mat-select>
@@ -188,7 +188,7 @@
                                 matPrefix></mat-icon>
 
                             <mat-select [disabled]="!tablePK.value" [compareWith]="parent.compareCode" (openedChange)="filterFieldsPKKey.value =null"
-                                        [formControl]="formSave.get('lookupFastField')">
+                                        [formGroup]="formSave.get('lookupFastField') | asFormGroup">
                                 <div class="flex flex-col h-full w-full">
                                     <div class="flex-none">
                                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
@@ -219,7 +219,7 @@
                                 matPrefix></mat-icon>
 
                             <mat-select [disabled]="!tablePK.value" [compareWith]="parent.compareCode" (openedChange)="filterFieldsPKDescr.value =null"
-                                        [formControl]="formSave.get('lookupDescriptionField')">
+                                        [formGroup]="formSave.get('lookupDescriptionField') | asFormGroup">
                                 <div class="flex flex-col h-full w-full">
                                     <div class="flex-none">
                                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">

@@ -87,7 +87,7 @@
 
                                 <ng-container *ngFor="let t of LuthierResourceTypeEnum | enumArray">
                                     <mat-option *ngIf="t.key !== 'NOT_FOUND'"  [value]="t.key" >
-                                        {{t.key}}
+                                        {{t.key | enumTranslate:'LuthierResourceTypeEnum'}}
 
                                     </mat-option>
                                 </ng-container>
@@ -116,7 +116,7 @@
                     </div>
                     <div class="sm:col-span-9" *ngIf="getAllowedExtension()">
                         <ngx-file-drop class="mb-4"
-                                       [multiple]="false" [accept]="getAllowedExtension()" dropZoneLabel="Arraste seu arquivo aqui"
+                                       [multiple]="false" [accept]="getAllowedExtension().join(',')" dropZoneLabel="Arraste seu arquivo aqui"
                                        (onFileDrop)="dropped($event)">
 
                             <ng-template ngx-file-drop-content-tmp let-openFileSelectorDocumentos="openFileSelector">

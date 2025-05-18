@@ -11,7 +11,7 @@ import {firstValueFrom, Subject, takeUntil} from 'rxjs';
 import {MatTable, MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatDialog} from '@angular/material/dialog';
-import {NgClass, NgIf} from '@angular/common';
+import {NgIf} from '@angular/common';
 import {LuthierSubsystemModalComponent} from './modal/luthier-subsystem-modal.component';
 import {LuthierResourceModel, LuthierSubsystemModel} from '../../../../shared/models/luthier.model';
 import {LuthierComponent} from '../luthier.component';
@@ -24,6 +24,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatButtonModule} from '@angular/material/button';
 import {UtilFunctions} from '../../../../shared/util/util-functions';
 import {FilterPredicateUtil} from '../../../../shared/util/util-classes';
+import {SharedPipeModule} from 'app/shared/pipes/shared-pipe.module';
 
 @Component({
     selector     : 'luthier-subsystem',
@@ -39,9 +40,8 @@ import {FilterPredicateUtil} from '../../../../shared/util/util-classes';
         MatTableModule,
         MatSortModule,
         MatTooltipModule,
-        NgClass,
-        NgIf
-
+        NgIf,
+        SharedPipeModule
     ],
 })
 export class LuthierSubsystemComponent implements OnInit, OnDestroy, AfterViewInit

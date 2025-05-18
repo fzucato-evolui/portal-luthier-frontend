@@ -25,6 +25,7 @@ import {PortalLuthierDatabaseModalComponent} from './modal/portal-luthier-databa
 import {MessageDialogService} from '../../../../shared/services/message/message-dialog-service';
 import {UserService} from '../../../../shared/services/user/user.service';
 import {cloneDeep} from 'lodash-es';
+import {SharedPipeModule} from 'app/shared/pipes/shared-pipe.module';
 
 @Component({
     selector     : 'portal-luthier-database',
@@ -40,6 +41,7 @@ import {cloneDeep} from 'lodash-es';
         MatTableModule,
         MatSortModule,
         MatTooltipModule,
+        SharedPipeModule,
         NgClass,
         NgIf
 

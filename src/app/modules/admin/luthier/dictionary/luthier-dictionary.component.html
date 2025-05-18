@@ -15,7 +15,9 @@
                 <!-- Header -->
                 <div *ngIf="workDataBase" class="flex flex-col flex-0 p-1 border-b dark:bg-transparent">
                     <div class="flex items-center justify-between">
-                        <div class="grow px-6 text-3xl font-bold tracking-tighter">{{objectType}}</div>
+                        <div class="grow px-6 text-3xl font-bold tracking-tighter">
+                            {{ ('objectType.' + objectType) | transloco:{ defaultValue: objectType } | uppercase }}
+                        </div>
                         <div class="flex">
                             <button (click)="refresh()"
                                     mat-icon-button>
@@ -276,16 +278,16 @@
             </div>
             <div class="flex-auto flex flex-col p-2 overflow-hidden">
                 <ng-container *ngFor="let table of tabsOpened;">
-                    <luthier-dictionary-table *ngIf="table.objectType === 'TABLE' || table.objectType === 'VIEW'" class="w-full h-full" [model]="table"
+                    <luthier-dictionary-table *ngIf="isTableModel(table)" class="w-full h-full" [model]="table"
                           [ngClass]="{'hidden': table !== selectedTab}">
                     </luthier-dictionary-table>
-                    <luthier-dictionary-vision *ngIf="table.objectType === 'VISION'" class="w-full h-full" [model]="table"
+                    <luthier-dictionary-vision *ngIf="isVisionModel(table)" class="w-full h-full" [model]="table"
                           [ngClass]="{'hidden': table !== selectedTab}">
                     </luthier-dictionary-vision>
-                    <luthier-dictionary-dataset *ngIf="table.objectType === 'VISION_DATASET'" class="w-full h-full" [model]="table"
+                    <luthier-dictionary-dataset *ngIf="isVisionDatasetModel(table)" class="w-full h-full" [model]="table"
                                                [ngClass]="{'hidden': table !== selectedTab}">
                     </luthier-dictionary-dataset>
-                    <luthier-dictionary-procedure *ngIf="table.objectType === 'PROCEDURE'" class="w-full h-full" [model]="table"
+                    <luthier-dictionary-procedure *ngIf="isProcedureModel(table)" class="w-full h-full" [model]="table"
                                                 [ngClass]="{'hidden': table !== selectedTab}">
                     </luthier-dictionary-procedure>
                 </ng-container>

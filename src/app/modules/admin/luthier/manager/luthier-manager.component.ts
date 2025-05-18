@@ -27,19 +27,19 @@ import {LuthierManagerSemaphoreComponent} from './semaphore/luthier-manager-sema
 import {LuthierManagerMenuComponent} from './menu/luthier-manager-menu.component';
 import {LuthierManagerMenutreeComponent} from './menutree/luthier-manager-menutree.component';
 import {LuthierManagerPatchesComponent} from './patches/luthier-manager-patches.component';
+import {TranslocoModule} from '@ngneat/transloco';
 
 export type LuthierManagerObjectType = 'PARAMETER' | 'SEMAPHORE' | 'MENU' | 'MENU_TREE' | 'PATCHES_IMPORT' | 'PATCHES_EXPORT';
 @Component({
     selector     : 'luthier-manager',
     templateUrl  : './luthier-manager.component.html',
-    styleUrls : ['/luthier-manager.component.scss'],
+    styleUrls : ['./luthier-manager.component.scss'],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone   : true,
     imports: [
         NgClass,
         FormsModule,
-        FuseVerticalNavigationComponent,
         MatIconModule,
         MatButtonModule,
         NgForOf,
@@ -50,6 +50,7 @@ export type LuthierManagerObjectType = 'PARAMETER' | 'SEMAPHORE' | 'MENU' | 'MEN
         LuthierManagerMenuComponent,
         LuthierManagerMenutreeComponent,
         LuthierManagerPatchesComponent,
+        TranslocoModule
     ],
 })
 export class LuthierManagerComponent implements OnInit, OnDestroy
@@ -146,7 +147,7 @@ export class LuthierManagerComponent implements OnInit, OnDestroy
                         title: 'Patches',
                         type: 'aside',
                         awesomeIcon: {fontSet: 'fas', fontIcon: 'fa-file-zipper'},
-                        roles: ['ROLE_SUPER', 'ROLE_HYPER'],
+                        roles: ['ROLE_HYPER'],
                         children: [
                             {
                                 id: 'luthier.manager.objects.patches.import',

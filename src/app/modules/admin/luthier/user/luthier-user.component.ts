@@ -16,7 +16,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatTable, MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatDialog} from '@angular/material/dialog';
-import {DatePipe, NgClass, NgIf} from '@angular/common';
+import {DatePipe, NgIf} from '@angular/common';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {
     LuthierSubsystemModel,
@@ -32,6 +32,7 @@ import {MessageDialogService} from '../../../../shared/services/message/message-
 import {LuthierUserUserModalComponent} from './modal/user/luthier-user-user-modal.component';
 import {FilterPredicateUtil} from '../../../../shared/util/util-classes';
 import {LuthierUserGroupModalComponent} from './modal/group/luthier-user-group-modal.component';
+import {SharedPipeModule} from 'app/shared/pipes/shared-pipe.module';
 
 @Component({
     selector     : 'luthier-user',
@@ -48,10 +49,10 @@ import {LuthierUserGroupModalComponent} from './modal/group/luthier-user-group-m
         MatTableModule,
         MatSortModule,
         MatTooltipModule,
-        NgClass,
         NgIf,
         DatePipe,
-        MatTabsModule
+        MatTabsModule,
+        SharedPipeModule
 
     ],
 })

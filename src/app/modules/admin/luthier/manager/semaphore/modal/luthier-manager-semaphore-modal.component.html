@@ -142,7 +142,7 @@
                                         [formControlName]="'behavior'">
 
                                 <mat-option *ngFor="let t of LuthierSemaphoreBehaviorEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'LuthierSemaphoreBehaviorEnum'}}
 
                                 </mat-option>
                             </mat-select>
@@ -161,7 +161,7 @@
                                         [formControlName]="'valueType'">
 
                                 <mat-option *ngFor="let t of LuthierSemaphoreValueTypeEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'LuthierSemaphoreValueTypeEnum'}}
 
                                 </mat-option>
                             </mat-select>

@@ -125,13 +125,13 @@
                                 <ng-container *ngIf="buyType.value === 'coin'">
                                     <span class="mr-1">It will cost:</span>
                                     <span class="font-mono font-medium text-normal">
-                                        {{buyAmount.value * data.prices[walletSelector.value] | currency:'USD':'symbol':'1.2-4'}}
+                                        {{(+buyAmount.value) * data.prices[walletSelector.value] | currency:'USD':'symbol':'1.2-4'}}
                                     </span>
                                 </ng-container>
                                 <ng-container *ngIf="buyType.value === 'usd'">
                                     <span class="mr-1">You will receive:</span>
                                     <span class="font-mono font-medium text-normal">
-                                        {{buyAmount.value / data.prices[walletSelector.value] | number:'1.2-6'}} {{walletSelector.value | uppercase}}
+                                        {{(+buyAmount.value) / data.prices[walletSelector.value] | number:'1.2-6'}} {{walletSelector.value | uppercase}}
                                     </span>
                                 </ng-container>
                             </mat-hint>
@@ -170,13 +170,13 @@
                                 <ng-container *ngIf="sellType.value === 'coin'">
                                     <span class="mr-1">You will receive:</span>
                                     <span class="font-mono font-medium text-normal">
-                                        {{sellAmount.value * data.prices[walletSelector.value] | currency:'USD':'symbol':'1.2-4'}}
+                                        {{(+sellAmount.value) * data.prices[walletSelector.value] | currency:'USD':'symbol':'1.2-4'}}
                                     </span>
                                 </ng-container>
                                 <ng-container *ngIf="sellType.value === 'usd'">
                                     <span class="mr-1">You will sell:</span>
                                     <span class="font-mono font-medium text-normal">
-                                        {{sellAmount.value / data.prices[walletSelector.value] | number:'1.2-6'}} {{walletSelector.value | uppercase}}
+                                        {{(+sellAmount.value) / data.prices[walletSelector.value] | number:'1.2-6'}} {{walletSelector.value | uppercase}}
                                     </span>
                                 </ng-container>
                             </mat-hint>

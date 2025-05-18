@@ -11,7 +11,7 @@ import {firstValueFrom, of, Subject, takeUntil} from 'rxjs';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatDialog} from '@angular/material/dialog';
-import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
+import {NgClass, NgIf} from '@angular/common';
 import {MatIconModule} from '@angular/material/icon';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
@@ -44,6 +44,7 @@ import {cloneDeep} from 'lodash-es';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {PortalHistoryPersistTypeEnum} from '../../../../../shared/models/portal_luthier_history.model';
 import {LuthierManagerObjectType} from '../luthier-manager.component';
+import {SharedPipeModule} from 'app/shared/pipes/shared-pipe.module';
 
 export class DragItemDataTransfer {
     type: LuthierManagerObjectType
@@ -65,14 +66,13 @@ export class DragItemDataTransfer {
         MatTooltipModule,
         NgClass,
         NgIf,
-        NgForOf,
-        DatePipe,
         MatSidenavModule,
         CdkScrollable,
         MatMenuModule,
         ScrollingModule,
         MatTreeModule,
-        MatTabsModule
+        MatTabsModule,
+        SharedPipeModule
 
     ],
 })

@@ -334,7 +334,7 @@
                 <div *ngIf="dependency['editing']" class="flex flex-row items-center">
                     <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
                         <mat-select [compareWith]="compareCode" (openedChange)="filterDependency.value =null"
-                                    [formControl]="getFieldGroup(dependency, fieldtype)">
+                                    [formGroup]="getFieldGroup(dependency, fieldtype)">
                             <div class="flex flex-col h-full w-full">
                                 <div class="flex-none">
                                     <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">

@@ -16,8 +16,8 @@ import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import {DatePipe, JsonPipe, NgFor, NgIf} from '@angular/common';
-import {NgxMaskDirective, provideNgxMask} from 'ngx-mask';
+import {DatePipe, NgFor, NgIf} from '@angular/common';
+import {provideNgxMask} from 'ngx-mask';
 import {MatSlideToggleChange, MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatSort, MatSortModule} from '@angular/material/sort';
@@ -58,8 +58,6 @@ import {LuthierService} from '../../../luthier.service';
         FormsModule,
         NgFor,
         MatDialogModule,
-        NgxMaskDirective,
-        JsonPipe,
         MatTableModule,
         MatSortModule,
         NgIf,
@@ -86,7 +84,7 @@ export class LuthierUserGroupModalComponent implements OnInit, OnDestroy, AfterV
     selectedUsers: SelectionModel<LuthierUserGroupModel>;
     selectedSubsystems: SelectionModel<LuthierUserSubsystemModel>;
     private _subsystems: LuthierSubsystemModel[];
-    private editMode: boolean = false;
+    editMode: boolean = false;
     get service(): LuthierService {
         return this.parent.service;
     }

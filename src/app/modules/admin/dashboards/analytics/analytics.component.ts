@@ -1,14 +1,14 @@
-import { DecimalPipe, NgFor } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { Router } from '@angular/router';
-import { AnalyticsService } from 'app/modules/admin/dashboards/analytics/analytics.service';
-import { ApexOptions, NgApexchartsModule } from 'ng-apexcharts';
-import { Subject, takeUntil } from 'rxjs';
+import {DecimalPipe, NgFor} from '@angular/common';
+import {ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewEncapsulation} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {MatIconModule} from '@angular/material/icon';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {Router} from '@angular/router';
+import {AnalyticsService} from 'app/modules/admin/dashboards/analytics/analytics.service';
+import {ApexAxisChartSeries, ApexNonAxisChartSeries, ApexOptions, NgApexchartsModule} from 'ng-apexcharts';
+import {Subject, takeUntil} from 'rxjs';
 
 @Component({
     selector       : 'analytics',
@@ -657,5 +657,10 @@ export class AnalyticsComponent implements OnInit, OnDestroy
                                                 </div>`,
             },
         };
+    }
+
+    getVisitorsSeries(year: string): ApexAxisChartSeries | ApexNonAxisChartSeries {
+        const series = this.chartVisitors.series[year];
+        return Array.isArray(series) ? series : [series] as ApexAxisChartSeries;
     }
 }

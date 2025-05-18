@@ -78,7 +78,7 @@
                                         [formControlName]="'databaseType'">
 
                                 <mat-option *ngFor="let t of DatabaseTypeEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'DatabaseTypeEnum'}}
 
                                 </mat-option>
                             </mat-select>

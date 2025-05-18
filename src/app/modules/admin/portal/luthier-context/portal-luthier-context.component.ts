@@ -17,12 +17,12 @@ import {MatInputModule} from '@angular/material/input';
 import {MatTable, MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatDialog} from '@angular/material/dialog';
-import {NgClass, NgIf} from '@angular/common';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {PortalLuthierContextModalComponent} from './modal/portal-luthier-context-modal.component';
 import {MessageDialogService} from '../../../../shared/services/message/message-dialog-service';
 import {UtilFunctions} from '../../../../shared/util/util-functions';
 import {FilterPredicateUtil} from '../../../../shared/util/util-classes';
+import {SharedPipeModule} from '../../../../shared/pipes/shared-pipe.module';
 
 @Component({
     selector     : 'portal-luthier-context',
@@ -38,9 +38,7 @@ import {FilterPredicateUtil} from '../../../../shared/util/util-classes';
         MatTableModule,
         MatSortModule,
         MatTooltipModule,
-        NgClass,
-        NgIf
-
+        SharedPipeModule
     ],
 })
 export class PortalLuthierContextComponent implements OnInit, OnDestroy, AfterViewInit

@@ -1,10 +1,17 @@
-import { NgFor, NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatMenuModule } from '@angular/material/menu';
-import { FuseNavigationService, FuseVerticalNavigationComponent } from '@fuse/components/navigation';
-import { AvailableLangs, TranslocoService } from '@ngneat/transloco';
-import { take } from 'rxjs';
+import {NgFor, NgTemplateOutlet} from '@angular/common';
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    OnDestroy,
+    OnInit,
+    ViewEncapsulation
+} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {MatMenuModule} from '@angular/material/menu';
+import {FuseNavigationService, FuseVerticalNavigationComponent} from '@fuse/components/navigation';
+import {TranslocoService} from '@ngneat/transloco';
+import {take} from 'rxjs';
 
 @Component({
     selector       : 'languages',
@@ -17,7 +24,7 @@ import { take } from 'rxjs';
 })
 export class LanguagesComponent implements OnInit, OnDestroy
 {
-    availableLangs: AvailableLangs;
+    availableLangs: { id: string; label: string }[] = [];
     activeLang: string;
     flagCodes: any;
 
@@ -42,7 +49,7 @@ export class LanguagesComponent implements OnInit, OnDestroy
     ngOnInit(): void
     {
         // Get the available languages from transloco
-        this.availableLangs = this._translocoService.getAvailableLangs();
+        this.availableLangs = this._translocoService.getAvailableLangs() as { id: string; label: string }[];
 
         // Subscribe to language changes
         this._translocoService.langChanges$.subscribe((activeLang) =>

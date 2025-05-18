@@ -1,8 +1,10 @@
 import {Pipe, PipeTransform} from '@angular/core';
 import {UtilFunctions} from "../util/util-functions";
+import {AbstractControl, FormControl, FormGroup} from '@angular/forms';
+import {TranslocoService} from '@ngneat/transloco';
 
 @Pipe({
-    name: 'isValidStringOrArray'
+    name: 'isValidStringOrArray',
 })
 export class IsValidStringOrArrayPipe implements PipeTransform{
     transform(value: string | any[]): boolean {
@@ -12,7 +14,7 @@ export class IsValidStringOrArrayPipe implements PipeTransform{
 }
 
 @Pipe({
-    name: 'isValidObject'
+    name: 'isValidObject',
 })
 export class IsValidObjectPipe implements PipeTransform{
     transform(value: string | any[]): boolean {
@@ -83,5 +85,56 @@ export class FilterJsonPipe implements PipeTransform {
                 return accumulator ? accumulator[key] : undefined;
             }, item);
     }
+}
+
+@Pipe({
+    name: 'asFormControl',
+})
+export class AsFormControlPipe implements PipeTransform {
+    transform(control: AbstractControl | null): FormControl | null {
+        return control instanceof FormControl ? control : null;
+    }
+}
+
+@Pipe({
+    name: 'asFormGroup',
+})
+export class AsFormGroupPipe implements PipeTransform {
+    transform(control: AbstractControl | null): FormGroup | null {
+        return control instanceof FormGroup ? control : null;
+    }
+}
+
+@Pipe({
+    name: 'enumTranslate'
+})
+export class EnumTranslatePipe implements PipeTransform {
+    constructor(private translocoService: TranslocoService) {}
+
+    transform(value: string, enumName: string): string {
+        if (UtilFunctions.isValidStringOrArray(value) === false) {
+            return '';
+        }
+        // Tenta traduzir usando a chave específica do enum
+        const translationKey = `enums.${enumName}.${value}`;
+        const translation = this.translocoService.translate(translationKey);
+        //console.log('tradução', translationKey, translation);
+
+        // Se não encontrar tradução específica, retorna o valor original
+        return translation !== translationKey ? translation.toUpperCase() : value;
+    }
+}
+
+@Pipe({ name: 'simNao' })
+export class SimNaoPipe implements PipeTransform {
+  transform(value: any): string {
+    if (value === true || (typeof value === 'string' && value.toLowerCase() === 'true')) {
+      return 'SIM';
+    }
+    if (value === false || (typeof value === 'string' && value.toLowerCase() === 'false')) {
+      return 'NÃO';
+    }
+    return '';
+  }
 }
 

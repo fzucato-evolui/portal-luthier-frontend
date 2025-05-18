@@ -43,7 +43,7 @@ import {LuthierManagerPatchesLupComponent} from '../luthier-manager-patches-lup.
     ]
 })
 export class LuthierManagerPatchesLupLayoutControlComponent implements OnInit, OnDestroy, AfterViewInit{
-
+    private _retrievedBackendData = false;
     @ViewChild(MatSort) sort!: MatSort;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     public datasource = new MatTableDataSource<LuthierLayoutControlModel>();
@@ -84,9 +84,12 @@ export class LuthierManagerPatchesLupLayoutControlComponent implements OnInit, O
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const numRows = this.datasource.data.length;
-        return numSelected === numRows;
+        if (this._retrievedBackendData) {
+            const numSelected = this.selection.selected.length;
+            const numRows = this.datasource.data.length;
+            return numSelected === numRows;
+        }
+        return false;
     }
 
     masterToggle() {
@@ -123,6 +126,7 @@ export class LuthierManagerPatchesLupLayoutControlComponent implements OnInit, O
             this.service.getLayoutControls()
                 .then(value => {
                     this.datasource.data = value;
+                    this._retrievedBackendData = true;
                 });
             this.selection.clear();
         }
@@ -151,5 +155,24 @@ export class LuthierManagerPatchesLupLayoutControlComponent implements OnInit, O
             this.datasource.data[rowIndex]['statusRow'] = '#none';
             this.selection.deselect(this.datasource.data[rowIndex]);
         }
+    }
+
+    updateDataSource() {
+        const updatedData = [...this.datasource.data];
+        this.datasource.data = null;
+        this.selection.clear();
+
+
+        // Como backup, também atualize após um pequeno delay
+        setTimeout(() => {
+            this.datasource.data = updatedData;
+            this.datasource.data.forEach(row => {
+                if (row['statusRow'] === '#selected') {
+                    this.selection.select(row);
+                }
+            });
+            this.datasource._updateChangeSubscription();
+            this._parent.changeDetectorRef.detectChanges();
+        }, 50);
     }
 }

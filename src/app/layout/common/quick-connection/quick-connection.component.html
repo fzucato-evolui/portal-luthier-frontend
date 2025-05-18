@@ -106,7 +106,7 @@
                                     <div class="flex flex-auto py-2">
                                         <!-- Icon -->
                                         <div class="flex shrink-0 items-center justify-center px-4 cursor-pointer"
-                                             [ngClass]="{'hover:bg-gray-100 dark:hover:bg-hover': !selectedDadosDatabase || selectedDadosDatabase.code !== database.id,
+                                             [ngClass]="{'hover:bg-gray-100 dark:hover:bg-hover': !selectedDadosDatabase || selectedDadosDatabase.code !== database.code,
                                         'bg-primary-50 dark:bg-hover': selectedDadosDatabase && selectedDadosDatabase.code === database.code}"
                                              (click)="toggleDadosDatabase(database.code)">
                                             <div class="relative flex flex-0 items-center justify-center w-8 h-8">

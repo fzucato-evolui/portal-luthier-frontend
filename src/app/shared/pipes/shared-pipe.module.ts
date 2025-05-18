@@ -1,18 +1,35 @@
 import {NgModule} from '@angular/core';
-import {EnumToArrayPipe, FilterJsonPipe, IsValidObjectPipe, IsValidStringOrArrayPipe} from './util-functions.pipe';
+import {
+    AsFormControlPipe,
+    AsFormGroupPipe,
+    EnumToArrayPipe,
+    EnumTranslatePipe,
+    FilterJsonPipe,
+    IsValidObjectPipe,
+    IsValidStringOrArrayPipe,
+    SimNaoPipe
+} from './util-functions.pipe';
 
 @NgModule({
     declarations : [
         EnumToArrayPipe,
         IsValidStringOrArrayPipe,
         IsValidObjectPipe,
-        FilterJsonPipe
+        FilterJsonPipe,
+        AsFormGroupPipe,
+        AsFormControlPipe,
+        EnumTranslatePipe,
+        SimNaoPipe
     ],
     exports : [
         EnumToArrayPipe,
         IsValidStringOrArrayPipe,
         IsValidObjectPipe,
-        FilterJsonPipe
+        FilterJsonPipe,
+        AsFormGroupPipe,
+        AsFormControlPipe,
+        EnumTranslatePipe,
+        SimNaoPipe
     ]
 })
 export class SharedPipeModule {

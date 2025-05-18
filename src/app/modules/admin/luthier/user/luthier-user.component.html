@@ -47,10 +47,10 @@
                                 </button>
                             </div>
                         </th>
-                        <td mat-cell *matCellDef="let model">
+                        <td mat-cell *matCellDef="let model; let i = index">
                             <div class="flex flex-row items-center">
                                 <div [matTooltip]="model.code === -1 ? 'Para editar o Debug ID -1, edite o projeto' : ''">
-                                    <button mat-icon-button aria-label="Edit" (click)="editUser(model.code)" matTooltip="Editar Usuário">
+                                    <button mat-icon-button aria-label="Edit" (click)="editUser(model.code, i)" matTooltip="Editar Usuário">
                                         <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
                                     </button>
                                 </div>
@@ -78,7 +78,7 @@
                     </ng-container>
                     <ng-container matColumnDef="userType">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo de Usuário </th>
-                        <td mat-cell *matCellDef="let model"> {{ model.userType }} </td>
+                        <td mat-cell *matCellDef="let model"> {{ model.userType | enumTranslate:'LuthierUserTypeEnum' }} </td>
                     </ng-container>
                     <ng-container matColumnDef="date">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header> Data de Criação </th>
@@ -86,7 +86,7 @@
                     </ng-container>
                     <ng-container matColumnDef="status">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
-                        <td mat-cell *matCellDef="let model"> {{ model.status }} </td>
+                        <td mat-cell *matCellDef="let model"> {{ model.status | enumTranslate:'LuthierUserStatusEnum' }} </td>
                     </ng-container>
                     <ng-container matColumnDef="email">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header> Email </th>
@@ -142,10 +142,10 @@
                                 </button>
                             </div>
                         </th>
-                        <td mat-cell *matCellDef="let model">
+                        <td mat-cell *matCellDef="let model; let i = index">
                             <div class="flex flex-row items-center">
                                 <div [matTooltip]="model.code === -1 ? 'Para editar o Debug ID -1, edite o projeto' : ''">
-                                    <button mat-icon-button aria-label="Edit" (click)="editGroup(model.code)" matTooltip="Editar Gripo de Usuário">
+                                    <button mat-icon-button aria-label="Edit" (click)="editGroup(model.code, i)" matTooltip="Editar Gripo de Usuário">
                                         <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
                                     </button>
                                 </div>
@@ -173,7 +173,7 @@
                     </ng-container>
                     <ng-container matColumnDef="userType">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo de Usuário </th>
-                        <td mat-cell *matCellDef="let model"> {{ model.userType }} </td>
+                        <td mat-cell *matCellDef="let model"> {{ model.userType | enumTranslate:'LuthierUserTypeEnum' }} </td>
                     </ng-container>
                     <ng-container matColumnDef="date">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header> Data de Criação </th>
@@ -181,7 +181,7 @@
                     </ng-container>
                     <ng-container matColumnDef="status">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
-                        <td mat-cell *matCellDef="let model"> {{ model.status }} </td>
+                        <td mat-cell *matCellDef="let model"> {{ model.status | enumTranslate:'LuthierUserStatusEnum' }} </td>
                     </ng-container>
                     <ng-container matColumnDef="email">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header> Email </th>

@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-import {CommonModule, NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import {CommonModule, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
@@ -74,6 +74,7 @@ import {
 import {FilterPredicateUtil} from '../../../../../shared/util/util-classes';
 import {MatMenuModule} from '@angular/material/menu';
 import {Subject, takeUntil} from 'rxjs';
+import {SharedDirectiveModule} from '../../../../../shared/directives/shared-directive.module';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searches' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -84,7 +85,6 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searches' | 'grou
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone   : true,
     imports: [
-        NgClass,
         MatIconModule,
         MatButtonModule,
         NgForOf,
@@ -106,7 +106,8 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searches' | 'grou
         SharedPipeModule,
         MatSelectModule,
         NgTemplateOutlet,
-        MatMenuModule
+        MatMenuModule,
+        SharedDirectiveModule
     ],
     providers: [
         provideNgxMask(),

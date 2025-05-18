@@ -2,7 +2,7 @@
     <div class="flex flex-none overflow-hidden w-16 h-full bg-card border-r">
         <div class="flex flex-col items-center w-full">
 
-            <mat-button-toggle-group name="ledType" [(ngModel)]="lupType" vertical>
+            <mat-button-toggle-group name="ledType" [(ngModel)]="lupType" vertical (change)="onLupTypeChange($event)">
                 <button *ngIf="import && fileLoaded" mat-button matTooltip="Remover arquivo importado" matTooltipPosition="right"
                         class="mat-button-toggle"
                         (click)="clearFile()">

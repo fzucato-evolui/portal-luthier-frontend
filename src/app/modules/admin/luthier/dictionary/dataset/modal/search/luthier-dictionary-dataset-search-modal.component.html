@@ -55,7 +55,7 @@
                             <mat-select formControlName="status">
 
                                 <mat-option *ngFor="let t of LuthierSearchStatusEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'LuthierSearchStatusEnum'}}
 
                                 </mat-option>
                             </mat-select>
@@ -85,7 +85,7 @@
                             <mat-select formControlName="type">
 
                                 <mat-option *ngFor="let t of LuthierSearchTypeEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'LuthierSearchTypeEnum'}}
 
                                 </mat-option>
                             </mat-select>
@@ -173,7 +173,7 @@
                         <td mat-cell *matCellDef="let model; let i = index"> {{model.get('code').value}} </td>
                     </ng-container>
                     <ng-container matColumnDef="label">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Caption </th>
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Título </th>
                         <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
                             <div class="flex flex-row items-center">
                                 <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
@@ -183,7 +183,7 @@
                         </td>
                     </ng-container>
                     <ng-container matColumnDef="customLabel">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Caption Customizado </th>
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Título Customizado </th>
                         <td mat-cell *matCellDef="let model; let i = index" [formGroup]="model">
                             <div class="flex flex-row items-center" formGroupName="customLabel">
                                 <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
@@ -201,7 +201,7 @@
                                                 formControlName="operator">
 
                                         <mat-option *ngFor="let t of LuthierSearchFieldOperatorEnum | enumArray" [value]="t.key" >
-                                            {{t.key}}
+                                            {{t.key | enumTranslate:'LuthierSearchFieldOperatorEnum'}}
 
                                         </mat-option>
                                     </mat-select>
@@ -271,7 +271,7 @@
                                                 formControlName="editor">
 
                                         <mat-option *ngFor="let t of LuthierSearchFieldEditorEnum | enumArray" [value]="t.key" >
-                                            {{t.key}}
+                                            {{t.key | enumTranslate:'LuthierSearchFieldEditorEnum'}}
 
                                         </mat-option>
                                     </mat-select>

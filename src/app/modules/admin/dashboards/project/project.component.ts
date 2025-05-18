@@ -1,17 +1,17 @@
-import { CurrencyPipe, NgClass, NgFor, NgIf } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatRippleModule } from '@angular/material/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatTableModule } from '@angular/material/table';
-import { MatTabsModule } from '@angular/material/tabs';
-import { Router } from '@angular/router';
-import { TranslocoModule } from '@ngneat/transloco';
-import { ProjectService } from 'app/modules/admin/dashboards/project/project.service';
-import { ApexOptions, NgApexchartsModule } from 'ng-apexcharts';
-import { Subject, takeUntil } from 'rxjs';
+import {CurrencyPipe, NgClass, NgFor, NgIf} from '@angular/common';
+import {ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewEncapsulation} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {MatRippleModule} from '@angular/material/core';
+import {MatIconModule} from '@angular/material/icon';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatTableModule} from '@angular/material/table';
+import {MatTabsModule} from '@angular/material/tabs';
+import {Router} from '@angular/router';
+import {TranslocoModule} from '@ngneat/transloco';
+import {ProjectService} from 'app/modules/admin/dashboards/project/project.service';
+import {ApexAxisChartSeries, ApexNonAxisChartSeries, ApexOptions, NgApexchartsModule} from 'ng-apexcharts';
+import {Subject, takeUntil} from 'rxjs';
 
 @Component({
     selector       : 'project',
@@ -104,6 +104,16 @@ export class ProjectComponent implements OnInit, OnDestroy
     trackByFn(index: number, item: any): any
     {
         return item.id || index;
+    }
+
+    getTaskDistributionSeries(week: string): ApexAxisChartSeries | ApexNonAxisChartSeries {
+        const series = this.data.taskDistribution.series[week];
+        return Array.isArray(series) ? series : [series] as ApexAxisChartSeries;
+    }
+
+    getGithubIssuesSeries(week: string): ApexAxisChartSeries | ApexNonAxisChartSeries {
+        const series = this.data.githubIssues.series[week];
+        return Array.isArray(series) ? series : [series] as ApexAxisChartSeries;
     }
 
     // -----------------------------------------------------------------------------------------------------

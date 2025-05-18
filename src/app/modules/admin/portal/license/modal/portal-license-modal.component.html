@@ -64,7 +64,7 @@
                                         [formControlName]="'licenseType'">
 
                                 <mat-option *ngFor="let t of PortalLicenseTypeEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'PortalLicenseTypeEnum'}}
                                 </mat-option>
                             </mat-select>
 
@@ -84,7 +84,7 @@
                                         [formControlName]="'status'">
 
                                 <mat-option *ngFor="let t of PortalLicenseStatusEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'PortalLicenseStatusEnum'}}
                                 </mat-option>
                             </mat-select>
 

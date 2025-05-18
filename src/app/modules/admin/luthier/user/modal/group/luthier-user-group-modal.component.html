@@ -57,7 +57,7 @@
                                     <mat-select formControlName="status">
 
                                         <mat-option *ngFor="let t of LuthierUserStatusEnum | enumArray" [value]="t.key" >
-                                            {{t.key}}
+                                            {{t.key | enumTranslate:'LuthierUserStatusEnum'}}
 
                                         </mat-option>
                                     </mat-select>
@@ -165,7 +165,7 @@
                         </ng-container>
                         <ng-container matColumnDef="user.status">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
-                            <td mat-cell *matCellDef="let user; let i = index"> {{user.user.status}} </td>
+                            <td mat-cell *matCellDef="let user; let i = index"> {{user.user.status | enumTranslate:'LuthierUserStatusEnum'}} </td>
                         </ng-container>
                         <ng-container matColumnDef="user.email">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Email </th>
@@ -248,7 +248,7 @@
                                                 [(ngModel)]="subsystem.access">
 
                                         <mat-option *ngFor="let t of LuthierUserSubsystemAcessEnum | enumArray" [value]="t.key" >
-                                            {{t.key}}
+                                            {{t.key | enumTranslate:'LuthierUserSubsystemAcessEnum'}}
 
                                         </mat-option>
                                     </mat-select>

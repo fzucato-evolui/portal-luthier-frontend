@@ -16,7 +16,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatIconModule} from '@angular/material/icon';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import {LuthierReportModel, LuthierVisionModel} from '../../../../../../../shared/models/luthier.model';
+import {LuthierReportModel} from '../../../../../../../shared/models/luthier.model';
 import {LuthierService} from '../../../../luthier.service';
 import {UtilFunctions} from '../../../../../../../shared/util/util-functions';
 import {FilterPredicateUtil} from '../../../../../../../shared/util/util-classes';
@@ -93,15 +93,22 @@ export class LuthierManagerPatchesLupReportComponent implements OnInit, OnDestro
         if (this.isAllSelected() === true) {
             this.datasource.data.forEach(row => {
                 row['statusRow'] = '#none';
-                this.selection.clear()
+                if (row.layoutControl) {
+                    this._parent.layoutControls.uncheckRow(row.layoutControl);
+                }
             });
+            this.selection.clear();
         }
         else {
             this.datasource.data.forEach(row => {
                 row['statusRow'] = '#selected';
                 this.selection.select(row);
+                if (row.layoutControl) {
+                    this._parent.layoutControls.checkRow(row.layoutControl);
+                }
             });
         }
+        this._parent.layoutControls.updateDataSource();
     }
 
     toggleSelection(row: LuthierReportModel) {
@@ -117,6 +124,7 @@ export class LuthierManagerPatchesLupReportComponent implements OnInit, OnDestro
                 this._parent.layoutControls.uncheckRow(row.layoutControl);
             }
         }
+        this._parent.layoutControls.updateDataSource();
     }
 
     filter(event: Event) {

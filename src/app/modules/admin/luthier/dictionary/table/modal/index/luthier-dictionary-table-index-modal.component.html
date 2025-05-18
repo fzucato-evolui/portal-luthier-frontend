@@ -73,7 +73,7 @@
                             <mat-select formControlName="sortType">
 
                                 <mat-option *ngFor="let t of LuthierIndexSortEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'LuthierIndexSortEnum'}}
 
                                 </mat-option>
                             </mat-select>

@@ -1,4 +1,4 @@
-import { IBoard, ICard, ILabel, IList, IMember } from 'app/modules/admin/apps/scrumboard/scrumboard.types';
+import {IBoard, ICard, ILabel, IList, IMember} from 'app/modules/admin/apps/scrumboard/scrumboard.types';
 
 // -----------------------------------------------------------------------------------------------------
 // @ Board
@@ -123,6 +123,7 @@ export class Card implements Required<ICard>
     description: string | null;
     labels: Label[];
     dueDate: string | null;
+    coverImage: any;
 
     /**
      * Constructor

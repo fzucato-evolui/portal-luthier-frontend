@@ -70,7 +70,7 @@
                                     <mat-option [value]="null" >
                                     </mat-option>
                                     <mat-option *ngFor="let t of PortalHistoryPersistTypeEnum | enumArray" [value]="t.key" >
-                                        {{t.key}}
+                                        {{t.key | enumTranslate:'PortalHistoryPersistTypeEnum'}}
 
                                     </mat-option>
                                 </mat-select>
@@ -237,7 +237,7 @@
                             </ng-container>
                             <ng-container matColumnDef="persistType">
                                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
-                                <td mat-cell *matCellDef="let model"> {{ model.persistType }} </td>
+                                <td mat-cell *matCellDef="let model"> {{ model.persistType | enumTranslate:'PortalHistoryPersistTypeEnum' }} </td>
                             </ng-container>
                             <ng-container matColumnDef="classDescription">
                                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Classe </th>

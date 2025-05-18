@@ -85,7 +85,7 @@
                         [dataLabels]="chartVisitors.dataLabels"
                         [fill]="chartVisitors.fill"
                         [grid]="chartVisitors.grid"
-                        [series]="chartVisitors.series[visitorsYearSelector.value]"
+                        [series]="getVisitorsSeries(visitorsYearSelector.value)"
                         [stroke]="chartVisitors.stroke"
                         [tooltip]="chartVisitors.tooltip"
                         [xaxis]="chartVisitors.xaxis"

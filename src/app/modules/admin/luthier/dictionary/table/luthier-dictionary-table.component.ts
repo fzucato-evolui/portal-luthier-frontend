@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-import {DatePipe, JsonPipe, NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import {DatePipe, JsonPipe, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
 import {
     FormArray,
     FormBuilder,
@@ -93,6 +93,7 @@ import {MatMenuModule} from '@angular/material/menu';
 import {Clipboard} from '@angular/cdk/clipboard';
 import {SharedDirectiveModule} from '../../../../../shared/directives/shared-directive.module';
 import {FilterPredicateUtil} from '../../../../../shared/util/util-classes';
+import {TranslocoModule} from '@ngneat/transloco';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searches' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -103,7 +104,6 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searches' | 'grou
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone   : true,
     imports: [
-        NgClass,
         MatIconModule,
         MatButtonModule,
         NgForOf,
@@ -127,7 +127,8 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searches' | 'grou
         MatMenuModule,
         DatePipe,
         SharedDirectiveModule,
-        JsonPipe
+        JsonPipe,
+        TranslocoModule
     ],
     providers: [
         provideNgxMask(),
@@ -1452,7 +1453,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
         this.historicalDataSource.filter = filterValue.trim().toLowerCase();
     }
 
-    checkIndeterminate(event: MatCheckboxChange, c: FormControl) {
+    checkIndeterminate(event: MatCheckboxChange, c: FormControl | any) {
         if (!event.source.indeterminate) {
             if (UtilFunctions.parseBoolean(c.value) === false) {
                 c.setValue(null);

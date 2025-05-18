@@ -235,7 +235,7 @@
                                                 [labels]="chartGithubIssues.labels"
                                                 [legend]="chartGithubIssues.legend"
                                                 [plotOptions]="chartGithubIssues.plotOptions"
-                                                [series]="chartGithubIssues.series[githubIssuesWeekSelector.value]"
+                                                [series]="getGithubIssuesSeries(githubIssuesWeekSelector.value)"
                                                 [states]="chartGithubIssues.states"
                                                 [stroke]="chartGithubIssues.stroke"
                                                 [tooltip]="chartGithubIssues.tooltip"
@@ -313,7 +313,7 @@
                                         [labels]="chartTaskDistribution.labels"
                                         [legend]="chartTaskDistribution.legend"
                                         [plotOptions]="chartTaskDistribution.plotOptions"
-                                        [series]="chartTaskDistribution.series[taskDistributionWeekSelector.value]"
+                                        [series]="getTaskDistributionSeries(taskDistributionWeekSelector.value)"
                                         [states]="chartTaskDistribution.states"
                                         [stroke]="chartTaskDistribution.stroke"
                                         [theme]="chartTaskDistribution.theme"
@@ -560,16 +560,15 @@
 
                                         <!-- Type -->
                                         <ng-container
-                                            matColumnDef="type"
-                                            sticky>
+                                            matColumnDef="type">
                                             <th
                                                 mat-header-cell
-                                                *matHeaderCellDef>
+                                                *matHeaderCellDef sticky>
                                                 Type
                                             </th>
                                             <td
                                                 mat-cell
-                                                *matCellDef="let budget">
+                                                *matCellDef="let budget" sticky>
                                                 <span class="flex items-center">
                                                     <span
                                                         class="w-2 h-2 rounded-full"

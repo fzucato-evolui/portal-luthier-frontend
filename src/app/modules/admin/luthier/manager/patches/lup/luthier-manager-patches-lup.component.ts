@@ -8,7 +8,7 @@ import {
     ViewChild,
     ViewEncapsulation
 } from '@angular/core';
-import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {MatButtonToggleChange, MatButtonToggleModule} from '@angular/material/button-toggle';
 import {FormsModule} from '@angular/forms';
 import {LuthierManagerPatchesComponent} from '../luthier-manager-patches.component';
 import {LuthierService} from '../../../luthier.service';
@@ -34,16 +34,16 @@ import {
     LupImportModel,
     LuthierLayoutControlModel,
     LuthierMessageTypeModel,
-    LuthierParameterModel, LuthierProjectModel,
+    LuthierParameterModel,
+    LuthierProjectModel,
     LuthierReportModel,
     LuthierResourceModel,
-    LuthierScriptTableModel, LuthierSemaphoreModel,
+    LuthierScriptTableModel,
     LuthierSubsystemModel,
     LuthierTableHelpModel,
     PatchImportItemModel
 } from '../../../../../../shared/models/luthier.model';
 import {LuthierManagerPatchesLupProjectComponent} from './project/luthier-manager-patches-lup-project.component';
-import {LuthierManagerSemaphoreModalComponent} from '../../semaphore/modal/luthier-manager-semaphore-modal.component';
 import {MatDialog} from '@angular/material/dialog';
 import {
     LuthierManagerPatchesLupProcessModalComponent
@@ -111,7 +111,7 @@ export class LuthierManagerPatchesLupComponent implements OnInit, OnDestroy, Aft
     }
 
     constructor(private _parent: LuthierManagerPatchesComponent,
-                private _changeDetectorRef: ChangeDetectorRef,
+                public changeDetectorRef: ChangeDetectorRef,
                 private _matDialog: MatDialog) {
     }
 
@@ -434,12 +434,22 @@ export class LuthierManagerPatchesLupComponent implements OnInit, OnDestroy, Aft
                         });
                         me.fileLoaded = true;
                         me.fileName = result.fileName;
-                        me._changeDetectorRef.markForCheck();
+                        me.changeDetectorRef.markForCheck();
                     });
 
                 });
             }
         })
 
+    }
+
+    onLupTypeChange(event: MatButtonToggleChange) {
+        // console.log(event);
+        // setTimeout(() => {
+        //     if (event.value === 'LAYOUTCONTROL') {
+        //         this.layoutControls.updateDataSource();
+        //     }
+        //     this.changeDetectorRef.detectChanges();
+        // }, 50);
     }
 }

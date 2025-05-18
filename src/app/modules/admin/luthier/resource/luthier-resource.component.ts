@@ -15,13 +15,14 @@ import {MatInputModule} from '@angular/material/input';
 import {MatTable, MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatDialog} from '@angular/material/dialog';
-import {NgClass, NgIf} from '@angular/common';
+import {NgIf} from '@angular/common';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {LuthierResourceModalComponent} from './modal/luthier-resource-modal.component';
 import {LuthierDatabaseModel, LuthierResourceModel} from '../../../../shared/models/luthier.model';
 import {LuthierComponent} from '../luthier.component';
 import {LuthierService} from '../luthier.service';
 import {MessageDialogService} from '../../../../shared/services/message/message-dialog-service';
+import {SharedPipeModule} from 'app/shared/pipes/shared-pipe.module';
 
 @Component({
     selector     : 'luthier-resource',
@@ -37,9 +38,8 @@ import {MessageDialogService} from '../../../../shared/services/message/message-
         MatTableModule,
         MatSortModule,
         MatTooltipModule,
-        NgClass,
-        NgIf
-
+        NgIf,
+        SharedPipeModule
     ],
 })
 export class LuthierResourceComponent implements OnInit, OnDestroy, AfterViewInit

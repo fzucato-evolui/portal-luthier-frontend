@@ -11,7 +11,6 @@ import {firstValueFrom, Subject, takeUntil} from 'rxjs';
 import {MatTable, MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatDialog} from '@angular/material/dialog';
-import {DatePipe, NgClass, NgIf} from '@angular/common';
 import {LuthierManagerSemaphoreModalComponent} from './modal/luthier-manager-semaphore-modal.component';
 import {MatIconModule} from '@angular/material/icon';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -24,6 +23,7 @@ import {LuthierComponent} from '../../luthier.component';
 import {MessageDialogService} from '../../../../../shared/services/message/message-dialog-service';
 import {UtilFunctions} from '../../../../../shared/util/util-functions';
 import {FilterPredicateUtil} from '../../../../../shared/util/util-classes';
+import {SharedPipeModule} from '../../../../../shared/pipes/shared-pipe.module';
 
 @Component({
     selector     : 'luthier-manager-semaphore',
@@ -39,10 +39,7 @@ import {FilterPredicateUtil} from '../../../../../shared/util/util-classes';
         MatTableModule,
         MatSortModule,
         MatTooltipModule,
-        NgClass,
-        NgIf,
-        DatePipe
-
+        SharedPipeModule
     ],
 })
 export class LuthierManagerSemaphoreComponent implements OnInit, OnDestroy, AfterViewInit

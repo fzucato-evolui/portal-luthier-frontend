@@ -48,8 +48,7 @@
                             <mat-label>Log Level</mat-label>
                             <mat-select name="actionType" [(ngModel)]="filter.tempLevel" multiple="true">
                                 <mat-option *ngFor="let t of LogLevelEnum | enumArray" [value]="t.key">
-                                    {{t.key}}
-
+                                    {{t.key | enumTranslate:'LogLevelEnum'}}
                                 </mat-option>
                             </mat-select>
                         </mat-form-field>
@@ -108,11 +107,11 @@
                 <!-- Logs do Job -->
                 <div *ngIf="expandedJobs[job.key]" class="space-y-1 mt-1">
                     <div class="text-xs p-1 rounded bg-white/5 shadow-sm" *ngFor="let log of job.value.logs">
-                        <span *ngIf="log.logLevel === LogLevelEnum.ERROR" class="text-red-500">{{ log.formattedMessage }}</span>
-                        <span *ngIf="log.logLevel === LogLevelEnum.WARN" class="text-orange-500">{{ log.formattedMessage }}</span>
-                        <span *ngIf="log.logLevel === LogLevelEnum.INFO" class="text-blue-500">{{ log.formattedMessage }}</span>
-                        <span *ngIf="log.logLevel === LogLevelEnum.DEBUG" class="text-default">{{ log.formattedMessage }}</span>
-                        <span *ngIf="log.logLevel === LogLevelEnum.TRACE" class="text-pink-500">{{ log.formattedMessage }}</span>
+                        <span *ngIf="log.logLevel === LogLevelEnum.ERROR" class="text-red-500">{{ log.logLevel | enumTranslate:'LogLevelEnum' }} - {{ log.formattedMessage }}</span>
+                        <span *ngIf="log.logLevel === LogLevelEnum.WARN" class="text-orange-500">{{ log.logLevel | enumTranslate:'LogLevelEnum' }} - {{ log.formattedMessage }}</span>
+                        <span *ngIf="log.logLevel === LogLevelEnum.INFO" class="text-blue-500">{{ log.logLevel | enumTranslate:'LogLevelEnum' }} - {{ log.formattedMessage }}</span>
+                        <span *ngIf="log.logLevel === LogLevelEnum.DEBUG" class="text-default">{{ log.logLevel | enumTranslate:'LogLevelEnum' }} - {{ log.formattedMessage }}</span>
+                        <span *ngIf="log.logLevel === LogLevelEnum.TRACE" class="text-pink-500">{{ log.logLevel | enumTranslate:'LogLevelEnum' }} - {{ log.formattedMessage }}</span>
                     </div>
                 </div>
             </div>

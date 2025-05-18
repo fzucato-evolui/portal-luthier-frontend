@@ -51,7 +51,7 @@
                     </div>
                     <div class="sm:col-span-6">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
-                            <mat-label>Caption</mat-label>
+                            <mat-label>Título</mat-label>
                             <mat-icon
                                 class="icon-size-5 evolui-menu-item-icon"
                                 fontSet="fas" fontIcon="fa-signature"
@@ -80,7 +80,7 @@
                                         [formControlName]="'type'">
 
                                 <mat-option *ngFor="let t of LuthierMenuTypeEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'LuthierMenuTypeEnum'}}
 
                                 </mat-option>
                             </mat-select>
@@ -99,7 +99,7 @@
                                         [formControlName]="'compType'">
 
                                 <mat-option *ngFor="let t of LuthierMenuCompTypeEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'LuthierMenuCompTypeEnum'}}
 
                                 </mat-option>
                             </mat-select>
@@ -118,7 +118,7 @@
                                         [formControlName]="'visibility'">
 
                                 <mat-option *ngFor="let t of LuthierMenuVisibilityEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'LuthierMenuVisibilityEnum'}}
 
                                 </mat-option>
                             </mat-select>
@@ -137,7 +137,7 @@
                                         [formControlName]="'actionType'">
 
                                 <mat-option *ngFor="let t of LuthierMenuActionTypeEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'LuthierMenuActionTypeEnum'}}
 
                                 </mat-option>
                             </mat-select>

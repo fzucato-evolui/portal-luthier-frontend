@@ -16,7 +16,7 @@
                                 }"
                     [value]="option">
                     <div class="flex justify-between items-center text-sm">
-                        <div>{{option}}</div>
+                        <div>{{('managerObjectType.' + option | transloco:{ defaultValue: option })}}</div>
                         <button class="icon-size-4 ml-1"
                                 mat-icon-button
                                 (click)="removeTab(i)">

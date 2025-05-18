@@ -134,7 +134,7 @@
                                                     formControlName="permissionType">
 
                                             <mat-option *ngFor="let t of LuthierPermissionTypeEnum | enumArray" [value]="t.key" >
-                                                {{t.key}}
+                                                {{t.key | enumTranslate:'LuthierPermissionTypeEnum'}}
 
                                             </mat-option>
                                         </mat-select>
@@ -234,7 +234,7 @@
                             <mat-select formControlName="fieldType">
 
                                 <mat-option *ngFor="let t of LuthierFieldTypeEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'LuthierFieldTypeEnum'}}
 
                                 </mat-option>
                             </mat-select>
@@ -333,7 +333,7 @@
                     </div>
                     <div class="sm:col-span-4">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
-                            <mat-label>CharCase</mat-label>
+                            <mat-label>Letra</mat-label>
                             <mat-icon
                                 class="icon-size-5"
                                 fontSet="fas" fontIcon="fa-t"
@@ -342,7 +342,7 @@
                             <mat-select formControlName="charCase">
 
                                 <mat-option *ngFor="let t of LuthierFieldCharcaseEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'LuthierFieldCharcaseEnum'}}
 
                                 </mat-option>
                             </mat-select>
@@ -359,7 +359,7 @@
                             <mat-select formControlName="editor">
 
                                 <mat-option *ngFor="let t of LuthierFieldEditorEnum | enumArray" [value]="t.key" >
-                                    {{t.key}}
+                                    {{t.key | enumTranslate:'LuthierFieldEditorEnum'}}
 
                                 </mat-option>
                             </mat-select>

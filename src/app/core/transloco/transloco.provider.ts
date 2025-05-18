@@ -1,6 +1,12 @@
-import { APP_INITIALIZER, EnvironmentProviders, importProvidersFrom, inject, Provider } from '@angular/core';
-import { TRANSLOCO_CONFIG, TRANSLOCO_LOADER, translocoConfig, TranslocoModule, TranslocoService } from '@ngneat/transloco';
-import { TranslocoHttpLoader } from 'app/core/transloco/transloco.http-loader';
+import {APP_INITIALIZER, EnvironmentProviders, importProvidersFrom, inject, Provider} from '@angular/core';
+import {
+    TRANSLOCO_CONFIG,
+    TRANSLOCO_LOADER,
+    translocoConfig,
+    TranslocoModule,
+    TranslocoService
+} from '@ngneat/transloco';
+import {TranslocoHttpLoader} from 'app/core/transloco/transloco.http-loader';
 
 export const provideTransloco = (): Array<Provider | EnvironmentProviders> =>
 {
@@ -19,9 +25,13 @@ export const provideTransloco = (): Array<Provider | EnvironmentProviders> =>
                         id   : 'tr',
                         label: 'Turkish',
                     },
+                    {
+                        id   : 'pt-BR',
+                        label: 'Português (Brasil)',
+                    },
                 ],
-                defaultLang         : 'en',
-                fallbackLang        : 'en',
+                defaultLang         : 'pt-BR',
+                fallbackLang        : 'pt-BR',
                 reRenderOnLangChange: true,
                 prodMode            : true,
             }),

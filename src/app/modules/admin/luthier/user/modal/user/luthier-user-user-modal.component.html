@@ -57,7 +57,7 @@
                                     <mat-select formControlName="status">
 
                                         <mat-option *ngFor="let t of LuthierUserStatusEnum | enumArray" [value]="t.key" >
-                                            {{t.key}}
+                                            {{t.key | enumTranslate:'LuthierUserStatusEnum'}}
 
                                         </mat-option>
                                     </mat-select>
@@ -89,7 +89,7 @@
                                     <mat-select formControlName="userType">
 
                                         <mat-option *ngFor="let t of LuthierUserTypeEnum | enumArray" [value]="t.key" >
-                                            {{t.key}}
+                                            {{t.key | enumTranslate:'LuthierUserTypeEnum'}}
 
                                         </mat-option>
                                     </mat-select>
@@ -253,7 +253,7 @@
                         </ng-container>
                         <ng-container matColumnDef="group.userType">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
-                            <td mat-cell *matCellDef="let group; let i = index"> {{group.group.userType}} </td>
+                            <td mat-cell *matCellDef="let group; let i = index"> {{group.group.userType | enumTranslate:'LuthierUserTypeEnum'}} </td>
                         </ng-container>
                         <ng-container matColumnDef="group.date">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Data Criação </th>
@@ -261,7 +261,7 @@
                         </ng-container>
                         <ng-container matColumnDef="group.status">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
-                            <td mat-cell *matCellDef="let group; let i = index"> {{group.group.status}} </td>
+                            <td mat-cell *matCellDef="let group; let i = index"> {{group.group.status | enumTranslate:'LuthierUserStatusEnum'}} </td>
                         </ng-container>
                         <ng-container matColumnDef="group.email">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Email </th>
@@ -344,7 +344,7 @@
                                                 [(ngModel)]="subsystem.access">
 
                                         <mat-option *ngFor="let t of LuthierUserSubsystemAcessEnum | enumArray" [value]="t.key" >
-                                            {{t.key}}
+                                            {{t.key | enumTranslate:'LuthierUserSubsystemAcessEnum'}}
 
                                         </mat-option>
                                     </mat-select>

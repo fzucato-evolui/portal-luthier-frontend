@@ -1,0 +1,362 @@
+{
+    "enums": {
+        "LuthierFieldLayoutEnum": {
+            "NORMAL": "Normal",
+            "HORIZONTAL": "Horizontal",
+            "VERTICAL": "Vertical",
+            "NAO_DEFINIDO": "Não Definido",
+            "METADE": "Metade",
+            "CHEIO": "Cheio",
+            "L1": "Linha 1",
+            "L2": "Linha 2",
+            "L3": "Linha 3",
+            "L4": "Linha 4",
+            "L5": "Linha 5",
+            "L6": "Linha 6",
+            "L7": "Linha 7",
+            "L8": "Linha 8",
+            "L9": "Linha 9",
+            "L10": "Linha 10",
+            "L11": "Linha 11",
+            "L12": "Linha 12"
+        },
+        "LuthierFieldTypeEnum": {
+            "STRING": "Texto",
+            "INTEIRO": "Inteiro",
+            "FLOAT": "Decimal",
+            "DATE": "Data",
+            "DATETIME": "Data/Hora",
+            "TEXTO": "Texto Longo",
+            "MONEY": "Dinheiro",
+            "IMAGEM": "Imagem",
+            "BLOB": "Binário",
+            "BOOLEAN": "Booleano",
+            "INTEIRO_LARGO": "Inteiro Longo",
+            "NUMERIC": "Numérico",
+            "TIME": "Hora",
+            "CLOB": "Texto Longo",
+            "STATIC": "Estático"
+        },
+        "LuthierFieldModifierEnum": {
+            "NONE": "Nenhum",
+            "READONLY": "Somente Leitura",
+            "HIDDEN": "Oculto",
+            "DISABLED": "Desabilitado",
+            "PUBLIC": "Público",
+            "PROTEGIDO": "Protegido",
+            "INTERNO": "Interno"
+        },
+        "LuthierFieldEditorEnum": {
+            "DEFAULT": "Padrão",
+            "TEXT": "Texto",
+            "TEXTAREA": "Área de Texto",
+            "NUMBER": "Número",
+            "DATE": "Data",
+            "TIME": "Hora",
+            "DATETIME": "Data/Hora",
+            "CHECKBOX": "Caixa de Seleção",
+            "COMBOBOX": "Combo",
+            "RADIO": "Rádio",
+            "LOOKUP": "Lookup",
+            "MULTILOOKUP": "Multi Lookup",
+            "MULTISELECT": "Multi Seleção",
+            "PASSWORD": "Senha",
+            "COLOR": "Cor",
+            "EMAIL": "E-mail",
+            "URL": "URL",
+            "PHONE": "Telefone",
+            "CEP": "CEP",
+            "CPF": "CPF",
+            "CNPJ": "CNPJ",
+            "PERCENT": "Percentual",
+            "CURRENCY": "Moeda",
+            "STATIC": "Estático",
+            "AUTO": "Automático",
+            "USUARIO_SISTEMA": "Usuário do Sistema",
+            "GRUPOS_SISTEMA": "Grupos do Sistema",
+            "BUTTON_EDIT": "Botão de Edição",
+            "EDITOR_NUMERICO": "Editor Numérico",
+            "EDITOR_MEMO": "Editor de Texto Longo",
+            "EDITOR_TIME": "Editor de Hora",
+            "EDITOR_AUTO_INCREMENTO": "Editor Auto-Incremento",
+            "SUBSISTEMA": "Subsistema"
+        },
+        "LuthierFieldCharcaseEnum": {
+            "NORMAL": "Normal",
+            "UPPERCASE": "Maiúsculo",
+            "LOWERCASE": "Minúsculo"
+        },
+        "LuthierSearchTypeEnum": {
+            "SIMPLE": "Simples",
+            "MULTIPLE": "Múltiplo",
+            "SIMPLE_MULTIPLE": "Simples/Múltiplo"
+        },
+        "LuthierSearchStatusEnum": {
+            "ACTIVE": "Ativo",
+            "INACTIVE": "Inativo"
+        },
+        "LuthierSearchFieldOperatorEnum": {
+            "EQUALS": "Igual",
+            "NOT_EQUALS": "Diferente",
+            "GREATER": "Maior",
+            "LESS": "Menor",
+            "GREATER_EQUALS": "Maior ou Igual",
+            "LESS_EQUALS": "Menor ou Igual",
+            "LIKE": "Contém",
+            "NOT_LIKE": "Não Contém",
+            "IS_NULL": "É Nulo",
+            "IS_NOT_NULL": "Não é Nulo",
+            "IN": "Está em",
+            "NOT_IN": "Não está em",
+            "EQUAL": "Igual",
+            "LIKE_LEFT": "Contém à Esquerda",
+            "LIKE_RIGHT": "Contém à Direita",
+            "NOT_LIKE_LEFT": "Não Contém à Esquerda",
+            "NOT_LIKE_RIGHT": "Não Contém à Direita",
+            "GREATER_THAN": "Maior que",
+            "LESS_THAN": "Menor que",
+            "GREATER_OR_EQUAL": "Maior ou Igual",
+            "LESS_OR_EQUAL": "Menor ou Igual",
+            "DIFERENT": "Diferente",
+            "NULL": "Nulo",
+            "NOT_NULL": "Não Nulo"
+        },
+        "LogLevelEnum": {
+            "DEBUG": "Depuração",
+            "INFO": "Informação",
+            "WARN": "Aviso",
+            "ERROR": "Erro",
+            "TRACE": "Rastreamento"
+        },
+        "PortalHistoryPersistTypeEnum": {
+            "DATABASE": "Banco de Dados",
+            "FILE": "Arquivo",
+            "SAVE": "Salvar",
+            "DELETE": "Excluir",
+            "CLONE": "Clonar"
+        },
+        "DatabaseTypeEnum": {
+            "ORACLE": "Oracle",
+            "MSSQL": "SQL Server",
+            "POSTGRES": "PostgreSQL",
+            "H2": "H2"
+        },
+        "PortalLicenseTypeEnum": {
+            "TRIAL": "Avaliação",
+            "BASIC": "Básica",
+            "FULL": "Completa",
+            "COMMERCIAL": "Comercial",
+            "DEVELOPER": "Desenvolvedor"
+        },
+        "PortalLicenseStatusEnum": {
+            "ACTIVE": "Ativa",
+            "INACTIVE": "Inativa",
+            "EXPIRED": "Expirado",
+            "PENDING": "Pendente"
+        },
+        "LuthierUserStatusEnum": {
+            "ACTIVE": "Ativo",
+            "INACTIVE": "Inativo",
+            "BLOCKED": "Bloqueado"
+        },
+        "LuthierUserTypeEnum": {
+            "ADMIN": "Administrador",
+            "USER": "Usuário",
+            "SYSTEM": "Sistema",
+            "NORMAL": "Normal",
+            "DEVELOPER": "Desenvolvedor",
+            "ENGENIEER": "Engenheiro",
+            "SUPER": "Super"
+        },
+        "LuthierUserSubsystemAcessEnum": {
+            "NONE": "Nenhum",
+            "READ": "Leitura",
+            "WRITE": "Escrita",
+            "ADMIN": "Administrador",
+            "NO_ACCESS": "Sem Acesso",
+            "NORMAL": "Normal",
+            "MANAGER": "Gerente"
+        },
+        "LuthierSubsystemStatusEnum": {
+            "ACTIVE": "Ativo",
+            "INACTIVE": "Inativo"
+        },
+        "LuthierPlataformEnum": {
+            "WEB": "Web",
+            "MOBILE": "Mobile",
+            "DESKTOP": "Desktop",
+            "BOTH": "Ambos"
+        },
+        "LuthierSemaphoreBehaviorEnum": {
+            "WAIT": "Aguardar",
+            "SKIP": "Pular",
+            "ERROR": "Erro",
+            "LOCK": "Travar",
+            "COMPLETE": "Completar"
+        },
+        "LuthierSemaphoreValueTypeEnum": {
+            "STRING": "Texto",
+            "NUMERIC": "Numérico",
+            "BOOLEAN": "Booleano",
+            "DATE": "Data",
+            "ALFANUMERIC": "Alfanumérico"
+        },
+        "LuthierResourceTypeEnum": {
+            "IMAGE": "Imagem",
+            "CSS": "CSS",
+            "JAVASCRIPT": "JavaScript",
+            "HTML": "HTML",
+            "NOT_FOUND": "Não Encontrado",
+            "IMAGE_BITMAP": "Imagem Bitmap",
+            "IMAGE_ICO": "Imagem ICO",
+            "IMAGE_PNG": "Imagem PNG",
+            "IMAGE_JPEG": "Imagem JPEG",
+            "IMAGE_WMF": "Imagem WMF",
+            "OLE_WORD": "OLE Word",
+            "OLE_EXCEL": "OLE Excel"
+        },
+        "LuthierMenuTypeEnum": {
+            "MENU": "Menu",
+            "SUBMENU": "Submenu",
+            "ACTION": "Ação",
+            "NONE": "Nenhum"
+        },
+        "LuthierMenuCompTypeEnum": {
+            "BUTTON": "Botão",
+            "LINK": "Link",
+            "ICON": "Ícone",
+            "NORMAL": "Normal"
+        },
+        "LuthierMenuVisibilityEnum": {
+            "ALWAYS": "Sempre",
+            "LOGGED": "Logado",
+            "NOT_LOGGED": "Não Logado",
+            "DESKTOP": "Desktop",
+            "WEB": "Web",
+            "ALL": "Todos"
+        },
+        "LuthierMenuActionTypeEnum": {
+            "URL": "URL",
+            "COMPONENT": "Componente",
+            "FUNCTION": "Função",
+            "SCRIPT": "Script",
+            "WINDOW_CALL": "Chamada de Janela"
+        },
+        "LuthierReferenceStatusEnum": {
+            "ACTIVE": "Ativo",
+            "INACTIVE": "Inativo"
+        },
+        "LuthierReferenceActionEnum": {
+            "NONE": "Nenhum",
+            "CASCADE": "Cascata",
+            "SET_NULL": "Definir Nulo",
+            "SET_DEFAULT": "Definir Padrão",
+            "RESTRICT": "Restrito"
+        },
+        "LuthierPermissionTypeEnum": {
+            "NONE": "Nenhum",
+            "READ": "Leitura",
+            "WRITE": "Escrita",
+            "ADMIN": "Administrador",
+            "USER": "Usuário",
+            "ONLY_SYSTEM": "Somente Sistema"
+        },
+        "LuthierSearchFieldEditorEnum": {
+            "DEFAULT": "Padrão",
+            "TEXT": "Texto",
+            "NUMBER": "Número",
+            "DATE": "Data",
+            "COMBOBOX": "Combo",
+            "CHECKBOX": "Caixa de Seleção",
+            "TIME": "Hora"
+        },
+        "LuthierViewBodyEnum": {
+            "HEADER": "Cabeçalho",
+            "BODY": "Corpo",
+            "FOOTER": "Rodapé",
+            "SQLSERVER": "SQL Server",
+            "ORACLE": "Oracle",
+            "POSTGRES": "PostgreSQL",
+            "H2": "H2",
+            "GENERICO": "Genérico",
+            "CUSTOM": "Customizado"
+        },
+        "LuthierIndexSortEnum": {
+            "ASC": "Ascendente",
+            "DESC": "Descendente"
+        },
+        "LuthierGroupInfoTypeEnum": {
+            "NONE": "Nenhum",
+            "COUNT": "Contagem",
+            "SUM": "Soma",
+            "AVG": "Média",
+            "MIN": "Mínimo",
+            "MAX": "Máximo",
+            "GROUP_OF_GROUP": "Grupo de Grupos",
+            "HORIZONTAL_GRID": "Grade Horizontal",
+            "VERTICAL_GRID": "Grade Vertical",
+            "GROUP_IN_VERTICAL_GRID": "Grupo na Grade Vertical"
+        },
+        "LuthierVisionDatasetFieldTypeEnum": {
+            "FIELD": "Campo",
+            "CALCULATED": "Calculado",
+            "CONSTANT": "Constante",
+            "NORMAL": "Normal",
+            "LOOKUP": "Consulta"
+        },
+        "LuthierUserGroupEnum": {
+            "USER": "Usuário",
+            "GROUP": "Grupo"
+        },
+        "LuthierUserActionEnum": {
+            "NONE": "Nenhuma",
+            "CHANGE_PASSWORD": "Alterar Senha"
+        },
+        "LuthierMetadataHistoryChangeTypeEnum": {
+            "NONE": "Nenhuma",
+            "DELETE": "Exclusão",
+            "CREATE": "Criação",
+            "UPDATE": "Atualização"
+        },
+        "LuthierItemMenuTreeTypeEnum": {
+            "SUBSYSTEM": "Subsistema",
+            "SYSTEM_MENU": "Menu do Sistema",
+            "CUSTOM_MENU": "Menu Customizado"
+        },
+        "LuthierLayoutControlTypeEnum": {
+            "REPORT": "Relatório",
+            "WINDOW": "Janela"
+        },
+        "PerfilUsuarioEnum": {
+            "ROLE_HYPER": "Hiper",
+            "ROLE_SUPER": "Super",
+            "ROLE_ADMIN": "Administrador",
+            "ROLE_USER": "Usuário"
+        },
+        "TipoUsuarioEnum": {
+            "CUSTOM": "Customizado",
+            "GOOGLE": "Google",
+            "FACEBOOK": "Facebook"
+        },
+        "SystemConfigModelEnum": {
+            "GOOGLE": "Google",
+            "LUTHIER_HISTORY": "Histórico Luthier"
+        }
+    },
+    "objectType": {
+        "TABLE": "TABELA",
+        "VIEW": "VIEW",
+        "PROCEDURE": "PROCEDURE",
+        "VISION": "VISÃO",
+        "DATASET": "DATASET"
+    },
+    "managerObjectType": {
+        "PARAMETER": "PARÂMETRO",
+        "SEMAPHORE": "SEMÁFORO",
+        "MENU": "MENU",
+        "MENU_TREE": "ÁRVORE DE MENU",
+        "PATCHES_IMPORT": "IMPORTAR PATCHES",
+        "PATCHES_EXPORT": "EXPORTAR PATCHES"
+    }
+
+} 
