@@ -1,0 +1,62 @@
+<div class="flex flex-col h-full">
+    <div class="flex flex-0 items-center justify-between p-4 border-b">
+        <h3 class="text-lg font-medium">Configuração de Diretório Local</h3>
+        <div class="flex justify-end gap-2">
+            <button mat-button type="button" (click)="onDelete()" *ngIf="config?.id">
+                <mat-icon class="mr-2" fontSet="fas" fontIcon="fa-trash"></mat-icon>
+                Excluir
+            </button>
+            <button mat-button type="button" (click)="onActivate()" *ngIf="config?.id && !config.active">
+                <mat-icon class="mr-2" fontSet="fas" fontIcon="fa-check"></mat-icon>
+                Ativar
+            </button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading" form="localDirectoryConfigForm">
+                <mat-icon class="mr-2" fontSet="fas" fontIcon="fa-save"></mat-icon>
+                Salvar
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-auto overflow-y-auto p-6">
+        <!-- Exibir status configurado/não configurado -->
+        <div class="mb-4">
+            <ng-container *ngIf="config; else notConfigured">
+                <div class="flex items-center space-x-2 text-green-600">
+                    <mat-icon [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                    <span>Configurado</span>
+                </div>
+                <div class="mt-2 text-sm text-secondary">
+                    Última atualização: {{ config.updatedAt | date:'medium' }}
+                </div>
+            </ng-container>
+            <ng-template #notConfigured>
+                <div class="flex items-center space-x-2 text-secondary">
+                    <mat-icon [svgIcon]="'heroicons_solid:x-circle'"></mat-icon>
+                    <span>Não configurado</span>
+                </div>
+            </ng-template>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4" id="localDirectoryConfigForm">
+            <mat-card>
+                <mat-card-content>
+                    <div class="grid grid-cols-1 gap-4">
+                        <!-- Base Path -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Caminho Base</mat-label>
+                            <input matInput formControlName="basePath" placeholder="Digite o caminho base do diretório">
+                            <mat-error *ngIf="form.get('basePath')?.hasError('required')">
+                                Caminho base é obrigatório
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- Create Missing Directories -->
+                        <mat-checkbox formControlName="createMissingDirectories" class="mb-4">
+                            Criar diretórios ausentes automaticamente
+                        </mat-checkbox>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </form>
+    </div>
+</div> 

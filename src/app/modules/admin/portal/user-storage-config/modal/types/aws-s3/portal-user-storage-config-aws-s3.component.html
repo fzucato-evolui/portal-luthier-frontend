@@ -1,0 +1,93 @@
+<div class="flex flex-col h-full">
+    <div class="flex flex-0 items-center justify-between p-4 border-b">
+        <h3 class="text-lg font-medium">Configuração do AWS S3</h3>
+        <div class="flex justify-end gap-2">
+            <button mat-button type="button" (click)="onDelete()" *ngIf="config?.id">
+                <mat-icon class="mr-2" fontSet="fas" fontIcon="fa-trash"></mat-icon>
+                Excluir
+            </button>
+            <button mat-button type="button" (click)="onActivate()" *ngIf="config?.id && !config.active">
+                <mat-icon class="mr-2" fontSet="fas" fontIcon="fa-check"></mat-icon>
+                Ativar
+            </button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading" form="awsS3ConfigForm">
+                <mat-icon class="mr-2" fontSet="fas" fontIcon="fa-save"></mat-icon>
+                Salvar
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-auto overflow-y-auto p-6">
+        <!-- Exibir status configurado/não configurado -->
+        <div class="mb-4">
+            <ng-container *ngIf="config; else notConfigured">
+                <div class="flex items-center space-x-2 text-green-600">
+                    <mat-icon [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                    <span>Configurado</span>
+                </div>
+                <div class="mt-2 text-sm text-secondary">
+                    Última atualização: {{ config.updatedAt | date:'medium' }}
+                </div>
+            </ng-container>
+            <ng-template #notConfigured>
+                <div class="flex items-center space-x-2 text-secondary">
+                    <mat-icon [svgIcon]="'heroicons_solid:x-circle'"></mat-icon>
+                    <span>Não configurado</span>
+                </div>
+            </ng-template>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4" id="awsS3ConfigForm">
+            <mat-card>
+                <mat-card-content>
+                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+                        <!-- Access Key -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Access Key</mat-label>
+                            <input matInput formControlName="accessKey" placeholder="Digite a Access Key">
+                            <mat-error *ngIf="form.get('accessKey')?.hasError('required')">
+                                Access Key é obrigatória
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- Secret Key -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Secret Key</mat-label>
+                            <input matInput formControlName="secretKey" placeholder="Digite a Secret Key">
+                            <mat-error *ngIf="form.get('secretKey')?.hasError('required')">
+                                Secret Key é obrigatória
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- Region -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Região</mat-label>
+                            <input matInput formControlName="region" placeholder="Digite a região (ex: us-east-1)">
+                            <mat-error *ngIf="form.get('region')?.hasError('required')">
+                                Região é obrigatória
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- Bucket Name -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Nome do Bucket</mat-label>
+                            <input matInput formControlName="bucketName" placeholder="Digite o nome do bucket">
+                            <mat-error *ngIf="form.get('bucketName')?.hasError('required')">
+                                Nome do bucket é obrigatório
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- Root Folder -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Pasta Raiz</mat-label>
+                            <input matInput formControlName="rootFolder" placeholder="Digite o caminho da pasta raiz">
+                            <mat-error *ngIf="form.get('rootFolder')?.hasError('required')">
+                                Pasta raiz é obrigatória
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </form>
+    </div>
+</div> 

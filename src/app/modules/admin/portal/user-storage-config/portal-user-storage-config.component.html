@@ -1,0 +1,109 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden bg-card dark:bg-transparent z-50">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-4 border-b">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="mt-2">
+                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                    Configurações de Armazenamento
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex-auto p-2 overflow-y-hidden">
+        <div class="flex flex-col h-full overflow-hidden">
+            <div class="flex-none flex justify-between items-center py-1">
+                <div class="flex-none flex">
+                    <!-- Botões de ação podem ser adicionados aqui se necessário -->
+                </div>
+                <div class="flex-none flex md:w-1/3 md:pr-1">
+                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                        <mat-icon
+                            class="evolui-menu-item-icon"
+                            fontSet="fas" 
+                            fontIcon="fa-search"
+                            matPrefix></mat-icon>
+                        <input
+                            [autocomplete]="'off'"
+                            class="text-sm"
+                            (input)="filter($event)"
+                            matInput
+                            placeholder="Buscar usuários...">
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto" cdkScrollable>
+                <table #table mat-table matSort [dataSource]="dataSource" class="table-auto" (matSortChange)="announceSortChange()">
+                    <!-- Botões -->
+                    <ng-container matColumnDef="buttons">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <div class="flex flex-row items-center">
+                                <button mat-icon-button aria-label="Refresh" (click)="refresh()">
+                                    <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-sync"></mat-icon>
+                                </button>
+                                <button mat-icon-button aria-label="Add" (click)="addConfig()">
+                                    <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-plus"></mat-icon>
+                                </button>
+                            </div>
+                        </th>
+                        <td mat-cell *matCellDef="let user">
+                            <div class="flex flex-row items-center">
+                                <button mat-icon-button 
+                                        aria-label="Edit" 
+                                        (click)="edit(user)" 
+                                        matTooltip="Configurar Armazenamento">
+                                    <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-cog"></mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- ID -->
+                    <ng-container matColumnDef="id">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+                        <td mat-cell *matCellDef="let user">{{ user.id }}</td>
+                    </ng-container>
+
+                    <!-- Nome -->
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Nome</th>
+                        <td mat-cell *matCellDef="let user">{{ user.name }}</td>
+                    </ng-container>
+
+                    <!-- Email -->
+                    <ng-container matColumnDef="email">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+                        <td mat-cell *matCellDef="let user">{{ user.email }}</td>
+                    </ng-container>
+
+                    <!-- Configurações Ativas -->
+                    <ng-container matColumnDef="activeConfigs">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Armazenamento Ativo</th>
+                        <td mat-cell *matCellDef="let user">
+                            <ng-container *ngIf="user.activeStorageType; else noConfig">
+                                {{ user.activeStorageType === 'GOOGLE_DRIVE' ? 'Google Drive' :
+                                   user.activeStorageType === 'DROPBOX' ? 'Dropbox' :
+                                   user.activeStorageType === 'AWS_S3' ? 'AWS S3' : '' }}
+                            </ng-container>
+                            <ng-template #noConfig>
+                                <span class="text-gray-400">Nenhum</span>
+                            </ng-template>
+                        </td>
+                    </ng-container>
+
+                    <!-- Última Atualização -->
+                    <ng-container matColumnDef="lastConfigUpdate">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Última Atualização</th>
+                        <td mat-cell *matCellDef="let user">{{ user.lastConfigUpdate | date:'dd/MM/yyyy HH:mm' }}</td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,84 @@
+<div class="flex flex-col h-full">
+    <div class="flex flex-0 items-center justify-between p-4 border-b">
+        <h3 class="text-lg font-medium">Configuração do Google Drive</h3>
+        <div class="flex justify-end gap-2">
+            <button mat-button type="button" (click)="onDelete()" *ngIf="config?.id">
+                <mat-icon class="mr-2" fontSet="fas" fontIcon="fa-trash"></mat-icon>
+                Excluir
+            </button>
+            <button mat-button type="button" (click)="onActivate()" *ngIf="config?.id && !config.active">
+                <mat-icon class="mr-2" fontSet="fas" fontIcon="fa-check"></mat-icon>
+                Ativar
+            </button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading" form="googleDriveConfigForm">
+                <mat-icon class="mr-2" fontSet="fas" fontIcon="fa-save"></mat-icon>
+                Salvar
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-auto overflow-y-auto p-6">
+        <!-- Exibir status configurado/não configurado -->
+        <div class="mb-4">
+            <ng-container *ngIf="config; else notConfigured">
+                <div class="flex items-center space-x-2 text-green-600">
+                    <mat-icon [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                    <span>Configurado</span>
+                </div>
+                <div class="mt-2 text-sm text-secondary">
+                    Última atualização: {{ config.updatedAt | date:'medium' }}
+                </div>
+            </ng-container>
+            <ng-template #notConfigured>
+                <div class="flex items-center space-x-2 text-secondary">
+                    <mat-icon [svgIcon]="'heroicons_solid:x-circle'"></mat-icon>
+                    <span>Não configurado</span>
+                </div>
+            </ng-template>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4" id="googleDriveConfigForm">
+            <mat-card>
+                <mat-card-content>
+                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+                        <!-- Client ID -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Client ID</mat-label>
+                            <input matInput formControlName="clientId" placeholder="Digite o Client ID">
+                            <mat-error *ngIf="form.get('clientId')?.hasError('required')">
+                                Client ID é obrigatório
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- Client Secret -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Client Secret</mat-label>
+                            <input matInput formControlName="clientSecret" placeholder="Digite o Client Secret">
+                            <mat-error *ngIf="form.get('clientSecret')?.hasError('required')">
+                                Client Secret é obrigatório
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- Refresh Token -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Refresh Token</mat-label>
+                            <input matInput formControlName="refreshToken" placeholder="Digite o Refresh Token">
+                            <mat-error *ngIf="form.get('refreshToken')?.hasError('required')">
+                                Refresh Token é obrigatório
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- Root Folder ID -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>ID da Pasta Raiz</mat-label>
+                            <input matInput formControlName="rootFolderId" placeholder="Digite o ID da pasta raiz">
+                            <mat-error *ngIf="form.get('rootFolderId')?.hasError('required')">
+                                ID da pasta raiz é obrigatório
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </form>
+    </div>
+</div> 

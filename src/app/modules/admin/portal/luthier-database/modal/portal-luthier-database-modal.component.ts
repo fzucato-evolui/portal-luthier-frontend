@@ -16,7 +16,7 @@ import {NgxMaskDirective, provideNgxMask} from 'ngx-mask';
 
 @Component({
     selector       : 'portal-luthier-database-modal',
-    styleUrls      : ['/portal-luthier-database-modal.component.scss'],
+    styleUrls      : ['./portal-luthier-database-modal.component.scss'],
     templateUrl    : './portal-luthier-database-modal.component.html',
     imports: [
         SharedPipeModule,

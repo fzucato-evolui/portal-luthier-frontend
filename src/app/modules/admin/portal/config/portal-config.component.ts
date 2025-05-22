@@ -20,7 +20,7 @@ import {PortalConfigLuthierHistoryComponent} from './luthier-history/portal-conf
 @Component({
     selector     : 'portal-config',
     templateUrl  : './portal-config.component.html',
-    styleUrls : ['/portal-config.component.scss'],
+    styleUrls : ['./portal-config.component.scss'],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone   : true,
