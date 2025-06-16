@@ -133,6 +133,7 @@ export class PortalLuthierHistoryComponent implements OnInit, OnDestroy, AfterVi
                     }
                 })
                 this.dataSource.data = historical;
+                this.historical.clear();
             });
         this.service.config$
             .pipe(takeUntil(this.unsubscribeAll))

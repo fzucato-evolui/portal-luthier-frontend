@@ -1,0 +1,219 @@
+<div [formGroup]="filterForm" class="w-full h-full overflow-hidden bg-white dark:bg-gray-800">
+    <div class="absolute py-1 px-2 h-full w-full flex flex-col overflow-hidden">
+        <!-- Cabeçalho com título e botões de ação -->
+        <div class="flex-0 flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                <mat-icon class="mr-2 text-primary">filter_list</mat-icon>
+                Filtros
+            </h3>
+
+            <div class="flex items-center gap-1">
+                <!-- Botão Filtrar -->
+                <button
+                    (click)="onSubmit()"
+                    mat-icon-button
+                    type="submit"
+                    [disabled]="loading"
+                    matTooltip="{{ loading ? 'Filtrando...' : 'Aplicar Filtros' }}"
+                    color="primary">
+                    <mat-icon *ngIf="loading" class="animate-spin">refresh</mat-icon>
+                    <mat-icon *ngIf="!loading">search</mat-icon>
+                </button>
+
+                <!-- Botão Limpar -->
+                <button
+                    mat-icon-button
+                    type="button"
+                    (click)="onClearFilters()"
+                    [disabled]="loading"
+                    matTooltip="Limpar Filtros">
+                    <mat-icon fontSet="fas" fontIcon="fa-eraser"/>
+                </button>
+
+                <!-- Botão Fechar -->
+                <button
+                    *ngIf="showCloseButton"
+                    mat-icon-button
+                    type="button"
+                    (click)="onCloseFilter()"
+                    [disabled]="loading"
+                    matTooltip="Fechar Filtros">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Campos de filtro -->
+        <div class="flex-auto w-full overflow-y-auto overflow-x-hidden">
+            <div class="flex flex-col w-full px-2 py-1" *ngFor="let filter of filters">
+
+                <!-- Input Text -->
+                <mat-form-field
+                    *ngIf="filter.type === 'TEXT'"
+                    subscriptSizing="dynamic"
+
+                    class="fuse-mat-dense w-full">
+                    <mat-label>{{ filter.label }}</mat-label>
+                    <input
+                        matInput
+                        [formControlName]="filter.column"
+                        [placeholder]="filter.label"
+                        [required]="filter.required">
+                    <mat-error *ngIf="getFieldError(filter)">
+                        {{ getFieldError(filter) }}
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Input Number -->
+                <mat-form-field
+                    *ngIf="filter.type === 'NUMBER'"
+                    subscriptSizing="dynamic"
+
+                    class="fuse-mat-dense w-full">
+                    <mat-label>{{ filter.label }}</mat-label>
+                    <input
+                        matInput
+                        type="number"
+                        [formControlName]="filter.column"
+                        [placeholder]="filter.label"
+                        [required]="filter.required">
+                    <mat-error *ngIf="getFieldError(filter)">
+                        {{ getFieldError(filter) }}
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Date Picker -->
+                <mat-form-field
+                    *ngIf="filter.type === 'DATE'"
+                    subscriptSizing="dynamic"
+
+                    class="fuse-mat-dense w-full">
+                    <mat-label>{{ filter.label }}</mat-label>
+                    <mat-icon
+                        class="icon-size-5 cursor-pointer"
+                        fontSet="fas"
+                        fontIcon="fa-calendar"
+                        matPrefix
+                        (click)="picker.open()">
+                    </mat-icon>
+                    <input
+                        matInput
+                        [matDatepicker]="picker"
+                        [formControlName]="filter.column"
+                        [placeholder]="filter.label"
+                        [required]="filter.required"
+                        readonly>
+                    <mat-datepicker #picker></mat-datepicker>
+                    <mat-error *ngIf="getFieldError(filter)">
+                        {{ getFieldError(filter) }}
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Date Range -->
+                <mat-form-field
+                    *ngIf="filter.type === 'DATE_RANGE'"
+                    subscriptSizing="dynamic"
+
+                    class="fuse-mat-dense w-full">
+                    <mat-label>{{ filter.label }}</mat-label>
+                    <mat-icon
+                        class="icon-size-5 cursor-pointer"
+                        fontSet="fas"
+                        fontIcon="fa-calendar"
+                        matPrefix
+                        (click)="rangePicker.open()">
+                    </mat-icon>
+                    <mat-date-range-input [rangePicker]="rangePicker">
+                        <input
+                            matStartDate
+                            placeholder="De"
+                            [formControlName]="filter.column + '_start'">
+                        <input
+                            matEndDate
+                            placeholder="Até"
+                            [formControlName]="filter.column + '_end'">
+                    </mat-date-range-input>
+                    <mat-date-range-picker #rangePicker></mat-date-range-picker>
+                    <mat-error *ngIf="getFieldError(filter)">
+                        {{ getFieldError(filter) }}
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Select -->
+                <mat-form-field
+                    *ngIf="filter.type === 'SELECT'"
+                    subscriptSizing="dynamic"
+
+                    class="fuse-mat-dense w-full">
+                    <mat-label>{{ filter.label }}</mat-label>
+                    <mat-select
+                        [formControlName]="filter.column"
+                        [required]="filter.required">
+                        <mat-option value="">Selecione uma opção</mat-option>
+                        <mat-option
+                            *ngFor="let option of filter.options"
+                            [value]="option.value">
+                            {{ option.label }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="getFieldError(filter)">
+                        {{ getFieldError(filter) }}
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Multiple Select -->
+                <mat-form-field
+                    *ngIf="filter.type === 'MULTIPLE_SELECT'"
+                    subscriptSizing="dynamic"
+
+                    class="fuse-mat-dense w-full">
+                    <mat-label>{{ filter.label }}</mat-label>
+                    <mat-select
+                        multiple
+                        [formControlName]="filter.column"
+                        [required]="filter.required">
+                        <mat-option
+                            *ngFor="let option of filter.options"
+                            [value]="option.value">
+                            {{ option.label }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="getFieldError(filter)">
+                        {{ getFieldError(filter) }}
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Checkbox -->
+                <div *ngIf="filter.type === 'CHECKBOX'" class="flex items-center space-x-2 py-2">
+                    <mat-checkbox [formControlName]="filter.column">
+                        {{ filter.label }}
+                    </mat-checkbox>
+                </div>
+
+                <!-- Radio -->
+                <div *ngIf="filter.type === 'RADIO'" class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ filter.label }}
+                    </label>
+                    <mat-radio-group
+                        [formControlName]="filter.column"
+                        class="flex flex-col space-y-2">
+                        <mat-radio-button [color]="'primary'"
+                            *ngFor="let option of filter.options"
+                            [value]="option.value"
+                            class="text-sm">
+                            {{ option.label }}
+                        </mat-radio-button>
+                    </mat-radio-group>
+                    <mat-error *ngIf="getFieldError(filter)">
+                        {{ getFieldError(filter) }}
+                    </mat-error>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+</div>

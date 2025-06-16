@@ -48,6 +48,9 @@ import {MatDialog} from '@angular/material/dialog';
 import {
     LuthierManagerPatchesLupProcessModalComponent
 } from './modal/luthier-manager-patches-lup-process-modal.component';
+import {
+    LuthierManagerPatchesLpxProcessModalComponent
+} from '../lpx/modal/luthier-manager-patches-lpx-process-modal.component';
 
 export type LupType = 'PROJECT' | 'FILES' | 'REPORT' | 'RESOURCE' | 'MENU' | 'PARAMETER' | 'LAYOUTCONTROL' | 'HELP' | 'MESSAGE';
 @Component({
@@ -90,27 +93,53 @@ export class LuthierManagerPatchesLupComponent implements OnInit, OnDestroy, Aft
     fileLoaded: boolean = false;
     private fileName: string = null;
     get service(): LuthierService {
-        if (this._parent != null) {
-            return this._parent.service;
+        if (this.parent != null) {
+            return this.parent.service;
         }
         return null;
     }
 
     get import(): boolean {
-        if (this._parent != null) {
-            return this._parent.import;
+        if (this.parent != null) {
+            return this.parent.import;
         }
         return false;
     }
 
     get messageService(): MessageDialogService {
-        if (this._parent != null) {
-            return this._parent.messageService;
+        if (this.parent != null) {
+            return this.parent.messageService;
         }
         return null;
     }
 
-    constructor(private _parent: LuthierManagerPatchesComponent,
+    get drawerMode(): 'over' | 'side' {
+        if (this.parent != null) {
+            return this.parent.drawerMode;
+        }
+        return 'side';
+    }
+
+    set drawerMode(value: 'over' | 'side') {
+        if (this.parent != null) {
+            this.parent.drawerMode = value;
+        }
+    }
+
+    get drawerOpened(): boolean {
+        if (this.parent != null) {
+            return this.parent.drawerOpened;
+        }
+        return true;
+    }
+
+    set drawerOpened(value: boolean) {
+        if (this.parent != null) {
+            this.parent.drawerOpened = value;
+        }
+    }
+
+    constructor(public parent: LuthierManagerPatchesComponent,
                 public changeDetectorRef: ChangeDetectorRef,
                 private _matDialog: MatDialog) {
     }
@@ -134,7 +163,7 @@ export class LuthierManagerPatchesLupComponent implements OnInit, OnDestroy, Aft
                 filter['PROJECT'] = this.projects.isAllSelected() ? [] : this.projects.selection.selected.map(item => item.code);
             }
             if (this.files.canSave()) {
-                filter['FILE'] = this.files.isAllSelected() ? [] : this.files.selection.selected.map(item => item.code);
+                filter['FILES'] = this.files.isAllSelected() ? [] : this.files.selection.selected.map(item => item.code);
             }
             if (this.reports.canSave()) {
                 filter['REPORT'] = this.reports.isAllSelected() ? [] : this.reports.selection.selected.map(item => item.code);
@@ -158,14 +187,19 @@ export class LuthierManagerPatchesLupComponent implements OnInit, OnDestroy, Aft
                 filter['MESSAGE'] = this.messages.isAllSelected() ? [] : this.messages.selection.selected.map(item => item.code);
             }
 
-            this.service.generateLup(filter)
-                .then(result => {
-                    this.service.download(result.link)
-                        .then(blob => {
-                            saveAs(blob, result.fileName);// Handle successful download
-                        })
-
-                });
+            // this.service.generateLup(filter)
+            //     .then(result => {
+            //         this.service.download(result.link)
+            //             .then(blob => {
+            //                 saveAs(blob, result.fileName);// Handle successful download
+            //             })
+            //
+            //     });
+            const modal = this._matDialog.open(LuthierManagerPatchesLupProcessModalComponent, { disableClose: true, panelClass: 'luthier-manager-patches-lup-process-modal-container' });
+            modal.componentInstance.title = "Geração de Arquivo LUP";
+            modal.componentInstance.parent = this;
+            modal.componentInstance.model = filter;
+            modal.componentInstance.isImport = false;
         }
         else {
             const model = new LupImportModel();
@@ -224,8 +258,6 @@ export class LuthierManagerPatchesLupComponent implements OnInit, OnDestroy, Aft
     }
 
     canSave() {
-        return true;
-        /*
         const canSave = (this.projects && this.projects.canSave()) ||
             (this.files && this.files.canSave()) ||
             (this.reports && this.reports.canSave()) ||
@@ -236,8 +268,6 @@ export class LuthierManagerPatchesLupComponent implements OnInit, OnDestroy, Aft
             (this.helps && this.helps.canSave()) ||
             (this.messages && this.messages.canSave());
         return canSave;
-
-         */
     }
 
     clearFile() {
@@ -444,12 +474,29 @@ export class LuthierManagerPatchesLupComponent implements OnInit, OnDestroy, Aft
     }
 
     onLupTypeChange(event: MatButtonToggleChange) {
-        // console.log(event);
-        // setTimeout(() => {
-        //     if (event.value === 'LAYOUTCONTROL') {
-        //         this.layoutControls.updateDataSource();
-        //     }
-        //     this.changeDetectorRef.detectChanges();
-        // }, 50);
+        // Força atualização do drawer quando o tipo muda
+        setTimeout(() => {
+            if (event.value === 'FILES' && this.files) {
+                this.files.forceDrawerUpdate();
+            } else if (event.value === 'REPORT' && this.reports) {
+                this.reports.forceDrawerUpdate();
+            } else if (event.value === 'RESOURCE' && this.resources) {
+                this.resources.forceDrawerUpdate();
+            } else if (event.value === 'MENU' && this.menus) {
+                this.menus.forceDrawerUpdate();
+            } else if (event.value === 'PARAMETER' && this.parameters) {
+                this.parameters.forceDrawerUpdate();
+            } else if (event.value === 'LAYOUTCONTROL' && this.layoutControls) {
+                this.layoutControls.forceDrawerUpdate();
+            } else if (event.value === 'HELP' && this.helps) {
+                this.helps.forceDrawerUpdate();
+            } else if (event.value === 'MESSAGE' && this.messages) {
+                this.messages.forceDrawerUpdate();
+            } else if (event.value === 'PROJECT' && this.projects) {
+                this.projects.forceDrawerUpdate();
+            }
+
+            this.changeDetectorRef.detectChanges();
+        }, 100);
     }
 }

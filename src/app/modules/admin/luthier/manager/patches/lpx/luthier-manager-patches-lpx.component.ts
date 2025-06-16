@@ -7,7 +7,7 @@ import {
     ViewChild,
     ViewEncapsulation
 } from '@angular/core';
-import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {MatButtonToggleChange, MatButtonToggleModule} from '@angular/material/button-toggle';
 import {FormsModule} from '@angular/forms';
 import {LuthierManagerPatchesComponent} from '../luthier-manager-patches.component';
 import {LuthierService} from '../../../luthier.service';
@@ -70,28 +70,54 @@ export class LuthierManagerPatchesLpxComponent implements OnInit, OnDestroy, Aft
     fileName: string;
 
     get service(): LuthierService {
-        if (this._parent != null) {
-            return this._parent.service;
+        if (this.parent != null) {
+            return this.parent.service;
         }
         return null;
     }
 
     get import(): boolean {
-        if (this._parent != null) {
-            return this._parent.import;
+        if (this.parent != null) {
+            return this.parent.import;
         }
         return false;
     }
 
     get messageService(): MessageDialogService {
-        if (this._parent != null) {
-            return this._parent.messageService;
+        if (this.parent != null) {
+            return this.parent.messageService;
         }
         return null;
     }
 
-    constructor(private _parent: LuthierManagerPatchesComponent,
-                private _changeDetectorRef: ChangeDetectorRef,
+    get drawerMode(): 'over' | 'side' {
+        if (this.parent != null) {
+            return this.parent.drawerMode;
+        }
+        return 'side';
+    }
+
+    set drawerMode(value: 'over' | 'side') {
+        if (this.parent != null) {
+            this.parent.drawerMode = value;
+        }
+    }
+
+    get drawerOpened(): boolean {
+        if (this.parent != null) {
+            return this.parent.drawerOpened;
+        }
+        return true;
+    }
+
+    set drawerOpened(value: boolean) {
+        if (this.parent != null) {
+            this.parent.drawerOpened = value;
+        }
+    }
+
+    constructor(public parent: LuthierManagerPatchesComponent,
+                public changeDetectorRef: ChangeDetectorRef,
                 private _matDialog: MatDialog) {
     }
 
@@ -121,14 +147,19 @@ export class LuthierManagerPatchesLpxComponent implements OnInit, OnDestroy, Aft
                 filter['PROCEDURE'] = this.procedures.isAllSelected() ? [] : this.procedures.selection.selected.map(item => item.code);
             }
 
-            this.service.generateLpx(filter)
-                .then(result => {
-                    this.service.download(result.link)
-                        .then(blob => {
-                            saveAs(blob, result.fileName);// Handle successful download
-                        })
-
-                });
+            // this.service.generateLpx(filter)
+            //     .then(result => {
+            //         this.service.download(result.link)
+            //             .then(blob => {
+            //                 saveAs(blob, result.fileName);// Handle successful download
+            //             })
+            //
+            //     });
+            const modal = this._matDialog.open(LuthierManagerPatchesLpxProcessModalComponent, { disableClose: true, panelClass: 'luthier-manager-patches-lpx-process-modal-container' });
+            modal.componentInstance.title = "Geração de Arquivo LPX";
+            modal.componentInstance.parent = this;
+            modal.componentInstance.model = filter;
+            modal.componentInstance.isImport = false;
         }
         else {
             const model = new LpxImportModel();
@@ -242,12 +273,27 @@ export class LuthierManagerPatchesLpxComponent implements OnInit, OnDestroy, Aft
                         });
                         me.fileLoaded = true;
                         me.fileName = result.fileName;
-                        me._changeDetectorRef.markForCheck();
+                        me.changeDetectorRef.markForCheck();
                     });
 
                 });
             }
         })
 
+    }
+
+    onLpxTypeChange(event: MatButtonToggleChange) {
+        // Força atualização do drawer quando o tipo muda
+        setTimeout(() => {
+            if (event.value === 'TABLE' && this.tables) {
+                this.tables.forceDrawerUpdate();
+            } else if (event.value === 'VISION' && this.visions) {
+                this.visions.forceDrawerUpdate();
+            } else if (event.value === 'PROCEDURE' && this.procedures) {
+                this.procedures.forceDrawerUpdate();
+            }
+
+            this.changeDetectorRef.detectChanges();
+        }, 100);
     }
 }

@@ -1185,6 +1185,31 @@ export enum LuthierResourceTypeEnum {
     OLE_WORD = ('OLE_WORD'),
     OLE_EXCEL = ('OLE_EXCEL')
 }
+export class LuthierResourceTypeParser {
+    public static parse(value: any): any {
+        switch (value) {
+            case 'NOT_FOUND':
+                return -1;
+            case 'STRING':
+                return 0;
+            case 'IMAGE_BITMAP':
+                return 1;
+            case 'IMAGE_ICO':
+                return 2;
+            case 'IMAGE_PNG':
+                return 3;
+            case 'IMAGE_JPEG':
+                return 4;
+            case 'IMAGE_WMF':
+                return 5;
+            case 'OLE_WORD':
+                return 20;
+            case 'OLE_EXCEL':
+                return 21;
+        }
+
+    }
+}
 export class LuthierResourceModel {
     code?: number
     name?: string

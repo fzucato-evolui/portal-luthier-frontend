@@ -38,6 +38,7 @@ import {cloneDeep} from 'lodash-es';
 import {PortalHistoryPersistTypeEnum} from '../../../shared/models/portal_luthier_history.model';
 import {UserService} from '../../../shared/services/user/user.service';
 import {AsyncRequestModel} from '../../../shared/models/async_request.model';
+import {FilterModel, FilterRequestModel} from '../../../shared/models/filter.model';
 
 @Injectable({providedIn: 'root'})
 export class LuthierService
@@ -1180,21 +1181,97 @@ export class LuthierService
         return firstValueFrom(this._httpClient.get<Array<LuthierScriptTableModel>>(`${this.baseManagerUrl}/all-scripts`));
     }
 
+    filterScripts(filter: FilterRequestModel): Promise<Array<LuthierScriptTableModel>> {
+        return firstValueFrom(this._httpClient.post<Array<LuthierScriptTableModel>>(`${this.baseManagerUrl}/filter-scripts`, filter));
+    }
+
     getReports(): Promise<Array<LuthierReportModel>> {
         return firstValueFrom(this._httpClient.get<Array<LuthierReportModel>>(`${this.baseManagerUrl}/all-reports`));
+    }
+
+    filterReports(filter: FilterRequestModel): Promise<Array<LuthierReportModel>> {
+        return firstValueFrom(this._httpClient.post<Array<LuthierReportModel>>(`${this.baseManagerUrl}/filter-reports`, filter));
     }
 
     getLayoutControls(): Promise<Array<LuthierLayoutControlModel>> {
         return firstValueFrom(this._httpClient.get<Array<LuthierLayoutControlModel>>(`${this.baseManagerUrl}/all-layout-controls`));
     }
 
+    filterLayoutControls(filter: FilterRequestModel): Promise<Array<LuthierLayoutControlModel>> {
+        return firstValueFrom(this._httpClient.post<Array<LuthierLayoutControlModel>>(`${this.baseManagerUrl}/filter-layout-controls`, filter));
+    }
+
     getTableHelps(): Promise<Array<LuthierTableHelpModel>> {
         return firstValueFrom(this._httpClient.get<Array<LuthierTableHelpModel>>(`${this.baseManagerUrl}/all-table-helps`));
+    }
+
+    filterTableHelps(filter: FilterRequestModel): Promise<Array<LuthierTableHelpModel>> {
+        return firstValueFrom(this._httpClient.post<Array<LuthierTableHelpModel>>(`${this.baseManagerUrl}/filter-table-helps`, filter));
     }
 
     getMessageTypes(): Promise<Array<LuthierMessageTypeModel>> {
         return firstValueFrom(this._httpClient.get<Array<LuthierMessageTypeModel>>(`${this.baseManagerUrl}/all-message-types`));
     }
+
+    filterMessageTypes(filter: FilterRequestModel): Promise<Array<LuthierMessageTypeModel>> {
+        return firstValueFrom(this._httpClient.post<Array<LuthierMessageTypeModel>>(`${this.baseManagerUrl}/filter-message-types`, filter));
+    }
+
+    filterSubsystems(filter: FilterRequestModel): Promise<Array<LuthierSubsystemModel>> {
+        return firstValueFrom(this._httpClient.post<Array<LuthierSubsystemModel>>(`${this.baseCommonUrl}/filter-subsystems`, filter));
+    }
+
+    filterParameters(filter: FilterRequestModel): Promise<Array<LuthierParameterModel>> {
+        return firstValueFrom(this._httpClient.post<Array<LuthierParameterModel>>(`${this.baseManagerUrl}/filter-parameters`, filter));
+    }
+
+    filterResources(filter: FilterRequestModel): Promise<Array<LuthierResourceModel>> {
+        return firstValueFrom(this._httpClient.post<Array<LuthierResourceModel>>(`${this.baseCommonUrl}/filter-resources`, filter));
+    }
+
+    filterProjects(filter: FilterRequestModel): Promise<Array<LuthierProjectModel>> {
+        return firstValueFrom(this._httpClient.post<Array<LuthierProjectModel>>(`${this.baseCommonUrl}/filter-projects`, filter));
+    }
+
+    filterTables(filter: FilterRequestModel): Promise<Array<LuthierTableModel>> {
+        return firstValueFrom(this._httpClient.post<Array<LuthierTableModel>>(`${this.baseDicUrl}/filter-tables`, filter));
+    }
+
+    filterProcedures(filter: FilterRequestModel): Promise<Array<LuthierProcedureModel>> {
+        return firstValueFrom(this._httpClient.post<Array<LuthierProcedureModel>>(`${this.baseDicUrl}/filter-procedures`, filter));
+    }
+
+    filterVisions(filter: FilterRequestModel): Promise<Array<LuthierVisionModel>> {
+        return firstValueFrom(this._httpClient.post<Array<LuthierVisionModel>>(`${this.baseDicUrl}/filter-visions`, filter));
+    }
+
+    filterExportedTables(filter: FilterRequestModel): Promise<Array<LuthierTableModel>> {
+        if (UtilFunctions.isValidStringOrArray(filter) === false) {
+            filter = new FilterRequestModel();
+        }
+        if (UtilFunctions.isValidStringOrArray(filter.filters) === false) {
+            filter.filters = new Array<FilterModel>();
+        }
+        const index = filter.filters.findIndex(x => x.column === 'export');
+        if (index >= 0) {
+            filter.filters[index].value = 1;
+
+        }
+        else {
+            const filterModel: FilterModel = {
+                column: 'export',
+                label: 'Exportado',
+                value: 1,
+                operator: 'EQUALS',
+                type: 'NUMBER',
+                required: false
+            }
+            filter.filters.push(filterModel);
+        }
+
+        return firstValueFrom(this._httpClient.post<Array<LuthierTableModel>>(`${this.baseDicUrl}/filter-tables`, filter));
+    }
+
 
     generateLed(filter: Array<number>): Promise<{link: string, fileName: string}> {
         return firstValueFrom(this._httpClient.patch<any>(`${this.baseManagerUrl}/generate-led`, filter))
@@ -1239,6 +1316,39 @@ export class LuthierService
 
     processLpxOld(model: LpxImportModel): Promise<LpxImportModel> {
         return firstValueFrom(this._httpClient.post<LpxImportModel>(`${this.baseManagerUrl}/process-lpx`, model));
+    }
+
+    generateLpxAsync(
+        body: {[key: string]: Array<number>},
+        callback: (msg: AsyncRequestModel<{link: string, fileName: string}>) => void
+    ): () => void {
+        return this.processAsync<AsyncRequestModel<{link: string, fileName: string}>>(
+            body,
+            `${this.baseManagerUrl}/generate-lpx-async`,
+            callback
+        );
+    }
+
+    generateLedAsync(
+        body: Array<number>,
+        callback: (msg: AsyncRequestModel<{link: string, fileName: string}>) => void
+    ): () => void {
+        return this.processAsync<AsyncRequestModel<{link: string, fileName: string}>>(
+            body,
+            `${this.baseManagerUrl}/generate-led-async`,
+            callback
+        );
+    }
+
+    generateLupAsync(
+        body: {[key: string]: Array<number>},
+        callback: (msg: AsyncRequestModel<{link: string, fileName: string}>) => void
+    ): () => void {
+        return this.processAsync<AsyncRequestModel<{link: string, fileName: string}>>(
+            body,
+            `${this.baseManagerUrl}/generate-lup-async`,
+            callback
+        );
     }
 
     processLpx(

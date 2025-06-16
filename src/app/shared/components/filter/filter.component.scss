@@ -1,0 +1,213 @@
+:host {
+    display: block;
+}
+
+// Fuse theme integration
+.fuse-mat-dense {
+    .mat-mdc-form-field {
+        .mat-mdc-text-field-wrapper {
+            .mat-mdc-form-field-flex {
+                .mat-mdc-form-field-infix {
+                    min-height: 40px;
+                    padding: 8px 0;
+                }
+            }
+        }
+    }
+}
+
+// Icon sizing for Fuse
+.icon-size-5 {
+    font-size: 1.25rem !important;
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    line-height: 1.25rem !important;
+}
+
+// Header buttons styling
+.mat-mdc-icon-button {
+    width: 36px;
+    height: 36px;
+
+    .mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+    }
+
+    &[color="primary"]:not(:disabled) {
+        color: var(--fuse-primary, #1976d2);
+    }
+}
+
+// Form field improvements
+.mat-mdc-form-field {
+    width: 100%;
+
+    &.fuse-mat-dense {
+        .mat-mdc-floating-label {
+            font-size: 14px;
+        }
+    }
+}
+
+// Date range input styling
+.mat-date-range-input {
+    input {
+        &::placeholder {
+            color: rgba(0, 0, 0, 0.54);
+            font-size: 14px;
+        }
+    }
+}
+
+:host-context(.dark) {
+    .mat-date-range-input {
+        input {
+            &::placeholder {
+                color: rgba(255, 255, 255, 0.54);
+            }
+        }
+    }
+}
+
+// Radio group improvements
+.mat-mdc-radio-group {
+    .mat-mdc-radio-button {
+        margin-bottom: 8px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+// Checkbox improvements
+.mat-mdc-checkbox {
+    .mdc-checkbox {
+        padding: 8px;
+    }
+}
+
+// Dark mode adjustments
+:host-context(.dark) {
+    .mat-mdc-form-field {
+        .mat-mdc-text-field-wrapper {
+            background-color: transparent;
+        }
+    }
+
+    .mat-mdc-icon-button:not([color]):not(:disabled) {
+        color: rgba(255, 255, 255, 0.7);
+
+        &:hover {
+            color: rgba(255, 255, 255, 0.9);
+        }
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 640px) {
+    .mat-mdc-form-field {
+        .mat-mdc-floating-label {
+            font-size: 14px;
+        }
+    }
+
+    .mat-mdc-icon-button {
+        width: 32px;
+        height: 32px;
+
+        .mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+        }
+    }
+}
+
+// Loading animation
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+// Spacing utilities (Tailwind-like)
+.space-y-4 > * + * {
+    margin-top: 1rem;
+}
+
+.space-y-3 > * + * {
+    margin-top: 0.75rem;
+}
+
+.space-y-2 > * + * {
+    margin-top: 0.5rem;
+}
+
+// Gap utilities
+.gap-1 {
+    gap: 0.25rem;
+}
+
+.gap-3 {
+    gap: 0.75rem;
+}
+
+// Flex utilities
+.flex-1 {
+    flex: 1 1 0%;
+}
+
+// Button group improvements
+.flex.items-center.gap-1 {
+    .mat-mdc-icon-button {
+        transition: all 0.2s ease-in-out;
+
+        &:hover {
+            transform: scale(1.05);
+        }
+
+        &:active {
+            transform: scale(0.95);
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            transform: none;
+        }
+    }
+}
+
+// Custom focus styles for better accessibility
+.mat-mdc-form-field.mat-focused {
+    .mat-mdc-floating-label {
+        color: var(--fuse-primary, #1976d2);
+    }
+}
+
+// Custom scrollbar for select dropdowns
+:host-context(.dark) {
+    .mat-mdc-select-panel {
+        &::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+    }
+}

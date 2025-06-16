@@ -82,7 +82,7 @@
                                 fontSet="fas" fontIcon="fa-t"
                                 matPrefix></mat-icon>
                             <mat-select #tablePK [compareWith]="parent.compareCode" (openedChange)="filterTablePK.value =null"
-                                        [formGroup]="formSave.get('tablePK') | asFormGroup" (selectionChange)="changeTablePK($event)">
+                                        [formControl]="formSave.get('tablePK') | asFormControl" (selectionChange)="changeTablePK($event)">
                                 <div class="flex flex-col h-full w-full">
                                     <div class="flex-none">
                                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
@@ -188,7 +188,7 @@
                                 matPrefix></mat-icon>
 
                             <mat-select [disabled]="!tablePK.value" [compareWith]="parent.compareCode" (openedChange)="filterFieldsPKKey.value =null"
-                                        [formGroup]="formSave.get('lookupFastField') | asFormGroup">
+                                        [formControl]="formSave.get('lookupFastField') | asFormControl">
                                 <div class="flex flex-col h-full w-full">
                                     <div class="flex-none">
                                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
@@ -219,7 +219,7 @@
                                 matPrefix></mat-icon>
 
                             <mat-select [disabled]="!tablePK.value" [compareWith]="parent.compareCode" (openedChange)="filterFieldsPKDescr.value =null"
-                                        [formGroup]="formSave.get('lookupDescriptionField') | asFormGroup">
+                                        [formControl]="formSave.get('lookupDescriptionField') | asFormControl">
                                 <div class="flex flex-col h-full w-full">
                                     <div class="flex-none">
                                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">

@@ -17,7 +17,7 @@ export const mainNavigation: FuseNavigationItem[] = [
         children: [
             {
                 id   : 'poral.luthier-databases',
-                title: 'Luthier Databases',
+                title: 'Bases Luthier',
                 type : 'basic',
                 awesomeIcon : {fontSet:"fas", fontIcon:"fa-database"},
                 link : '/portal/luthier-database',
@@ -49,7 +49,7 @@ export const mainNavigation: FuseNavigationItem[] = [
             },
             {
                 id      : 'portal.luthier-context',
-                title   : 'Context',
+                title   : 'Contexto',
                 type    : 'basic',
                 awesomeIcon    : {fontSet: 'fas', fontIcon: 'fa-arrows-to-circle'},
                 link    : '/portal/luthier-context',
@@ -108,7 +108,7 @@ export const mainNavigation: FuseNavigationItem[] = [
             },
             {
                 id   : 'luthier.manager',
-                title: 'Manager',
+                title: 'Utilitário',
                 type : 'basic',
                 //hidden  : item => {return true},
                 awesomeIcon    : {fontSet: 'fab', fontIcon: 'fa-markdown'},

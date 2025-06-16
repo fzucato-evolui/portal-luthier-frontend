@@ -1196,6 +1196,11 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                     fg.updateValueAndValidity();
                     this.saveRow(model, type);
                 }
+                else {
+                    model.row = null;
+                    model.editing = false;
+                    model.pending = false;
+                }
                 this._changeDetectorRef.detectChanges();
             });
         })

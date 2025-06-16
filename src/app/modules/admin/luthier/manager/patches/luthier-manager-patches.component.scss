@@ -12,4 +12,8 @@ luthier-manager-patches {
         pointer-events: none;
         opacity: 60%;
     }
+    .filter-selected .mdc-label {
+        @apply text-sm;
+        @apply font-semibold;
+    }
 }
