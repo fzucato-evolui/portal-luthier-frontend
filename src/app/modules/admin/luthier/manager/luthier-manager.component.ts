@@ -147,7 +147,7 @@ export class LuthierManagerComponent implements OnInit, OnDestroy
                         title: 'Patches',
                         type: 'aside',
                         awesomeIcon: {fontSet: 'fas', fontIcon: 'fa-file-zipper'},
-                        roles: ['ROLE_HYPER'],
+                        roles: ['ROLE_SUPER','ROLE_HYPER'],
                         children: [
                             {
                                 id: 'luthier.manager.objects.patches.import',

@@ -23,6 +23,8 @@ import {
     AsyncRequestViewerComponent
 } from '../../../../../../../shared/components/async-request-viewer/async-request-viewer.component';
 import {AsyncRequestModel, LogModel} from '../../../../../../../shared/models/async_request.model';
+import {UtilFunctions} from '../../../../../../../shared/util/util-functions';
+import {saveAs} from 'file-saver';
 
 
 @Component({
@@ -48,8 +50,9 @@ export class LuthierManagerPatchesLupProcessModalComponent implements OnInit, On
 {
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
-    public model: LupImportModel;
-    protected asyncModel : AsyncRequestModel<LupImportModel | any> = new AsyncRequestModel<LupImportModel | any>();
+    public isImport: boolean = true;
+    public model: LupImportModel | {[key: string]: Array<number>};
+    protected asyncModel : AsyncRequestModel<LupImportModel | {link: string, fileName: string} | any> = new AsyncRequestModel<LupImportModel | {link: string, fileName: string} | any>();
     title: string;
     private _service: LuthierService;
     private _parent: LuthierManagerPatchesLupComponent;
@@ -72,13 +75,34 @@ export class LuthierManagerPatchesLupProcessModalComponent implements OnInit, On
     }
 
     ngOnInit(): void {
-        this.abortFn = this._service.processLup(this.model, (data: AsyncRequestModel<LupImportModel>) => {
-            this.asyncModel = data;
-            if (data.finalized) {
-                this.parent.messageService.open('Processo finalizado!', 'SUCESSO', 'success');
-            }
-            this._changeDetectorRef.detectChanges();
-        });
+        if (this.isImport === true) {
+            this.abortFn = this._service.processLup(this.model as LupImportModel, (data: AsyncRequestModel<LupImportModel>) => {
+                this.asyncModel = data;
+                if (data.finalized) {
+                    this.parent.messageService.open('Processo finalizado!', 'SUCESSO', 'success');
+                }
+                this._changeDetectorRef.detectChanges();
+            });
+        }
+        else {
+            this.abortFn = this._service.generateLupAsync(this.model as {[key: string]: Array<number>}, (data: AsyncRequestModel<{link: string, fileName: string}>) => {
+                this.asyncModel = data;
+                if (data.finalized) {
+                    if (UtilFunctions.isValidStringOrArray(this.asyncModel?.data.link) === true) {
+                        this._service.download(data.data.link)
+                            .then(blob => {
+                                saveAs(blob, data.data.fileName);// Handle successful download
+                                this.parent.messageService.open(`Processo finalizado! Verifique nos downloads do navegador. O arquivo se chama ${data.data.fileName}`, 'SUCESSO', 'success');
+                            })
+
+                    }
+                    else {
+                        this.parent.messageService.open('Nenhum arquivo foi gerado!', 'ERRO', 'error');
+                    }
+                }
+                this._changeDetectorRef.detectChanges();
+            });
+        }
 
     }
 

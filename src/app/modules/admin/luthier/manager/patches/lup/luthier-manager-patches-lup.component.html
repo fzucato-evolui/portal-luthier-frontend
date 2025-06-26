@@ -3,11 +3,22 @@
         <div class="flex flex-col items-center w-full">
 
             <mat-button-toggle-group name="ledType" [(ngModel)]="lupType" vertical (change)="onLupTypeChange($event)">
-                <button *ngIf="import && fileLoaded" mat-button matTooltip="Remover arquivo importado" matTooltipPosition="right"
-                        class="mat-button-toggle"
-                        (click)="clearFile()">
-                    <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-trash"></mat-icon>
-                </button>
+                <div class="mat-button-toggle mat-button-toggle-appearance-standard" matTooltip="Salvar" matTooltipPosition="right">
+                    <button mat-button
+                            [disabled]="!canSave()"
+                            [color]="'primary'"
+                            class="mat-button-toggle-button"
+                            (click)="save()">
+                        <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-save"></mat-icon>
+                    </button>
+                </div>
+                <div *ngIf="import && fileLoaded" class="mat-button-toggle mat-button-toggle-appearance-standard" matTooltip="Remover arquivo importado" matTooltipPosition="right">
+                    <button mat-button
+                            class="mat-button-toggle-button"
+                            (click)="clearFile()">
+                        <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-trash"></mat-icon>
+                    </button>
+                </div>
                 <ng-container *ngIf="!import || fileLoaded">
                     <mat-button-toggle value="PROJECT" matTooltip="Projeto" matTooltipPosition="right">
                         <div class="relative">
@@ -109,7 +120,7 @@
                        [multiple]="false" [accept]="'.LUP'" dropZoneLabel="Arraste seu arquivo de LUP aqui">
 
             <ng-template ngx-file-drop-content-tmp let-openFileSelectorDocumentos="openFileSelector">
-                {{"Arraste seu arquivo LPX aqui"}}
+                {{"Arraste seu arquivo LUP aqui"}}
                 <button
                     class="px-6 ml-3"
                     mat-icon-button
@@ -134,7 +145,7 @@
     <div class="absolute bottom-0 right-0 z-50">
 
         <button
-            class="mr-4 mb-4"
+            class="mr-4 mb-4 hidden"
             [disabled]="!canSave()"
             (click)="save()"
             mat-flat-button

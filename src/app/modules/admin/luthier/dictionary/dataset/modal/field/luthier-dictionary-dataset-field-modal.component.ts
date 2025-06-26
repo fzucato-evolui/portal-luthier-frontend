@@ -16,7 +16,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatSelectChange, MatSelectModule} from '@angular/material/select';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import {JsonPipe, NgClass, NgFor, NgIf} from '@angular/common';
+import {NgClass, NgFor, NgIf} from '@angular/common';
 import {SharedPipeModule} from '../../../../../../../shared/pipes/shared-pipe.module';
 import {
     LuthierCustomFieldModel,
@@ -50,7 +50,6 @@ import {MatTooltipModule} from '@angular/material/tooltip';
         NgFor,
         NgClass,
         MatDialogModule,
-        JsonPipe,
         MatTableModule,
         MatSortModule,
         MatTooltipModule,
@@ -183,13 +182,13 @@ export class LuthierDictionaryDatasetFieldModalComponent implements OnInit, OnDe
                     this.parent.model.table = table;
                     this.model.table = cloneDeep(this.parent.model.table);
                     this.model.table.fields.forEach(x => {
-                        x['forbidden'] = this.parent.model.fields.findIndex(y => y.tableField.name === x.name) >= 0;
+                        x['forbidden'] = this.parent.model.fields.findIndex(y => y.tableField?.name === x.name) >= 0;
                         if (x['forbidden'] === false && this.fieldType === 'customFields') {
-                            x['forbidden'] = this.parent.model.customFields.findIndex(y => y.tableField.name === x.name) >= 0;
+                            x['forbidden'] = this.parent.model.customFields.findIndex(y => y.tableField?.name === x.name) >= 0;
                         }
                     })
                     this.model.table.customFields.forEach(x => {
-                        x['forbidden'] = this.parent.model.customFields.findIndex(y => y.tableField.name === x.name) >= 0;
+                        x['forbidden'] = this.parent.model.customFields.findIndex(y => y.tableField?.name === x.name) >= 0;
                     })
                     this.references = this.model.table.references;
                     if (event.value === LuthierVisionDatasetFieldTypeEnum.NORMAL) {

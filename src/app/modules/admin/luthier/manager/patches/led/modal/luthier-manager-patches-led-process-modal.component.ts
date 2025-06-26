@@ -22,6 +22,8 @@ import {
     AsyncRequestViewerComponent
 } from '../../../../../../../shared/components/async-request-viewer/async-request-viewer.component';
 import {AsyncRequestModel} from '../../../../../../../shared/models/async_request.model';
+import {UtilFunctions} from '../../../../../../../shared/util/util-functions';
+import {saveAs} from 'file-saver';
 
 
 @Component({
@@ -47,8 +49,9 @@ export class LuthierManagerPatchesLedProcessModalComponent implements OnInit, On
 {
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
-    public model: LedImportModel;
-    protected asyncModel : AsyncRequestModel<LedImportModel | any> = new AsyncRequestModel<LedImportModel | any>();
+    public isImport: boolean = true;
+    public model: LedImportModel | Array<number>;
+    protected asyncModel : AsyncRequestModel<LedImportModel | {link: string, fileName: string} | any> = new AsyncRequestModel<LedImportModel | {link: string, fileName: string} | any>();
     title: string;
     private _service: LuthierService;
     private _parent: LuthierManagerPatchesLedComponent;
@@ -71,13 +74,34 @@ export class LuthierManagerPatchesLedProcessModalComponent implements OnInit, On
     }
 
     ngOnInit(): void {
-        this.abortFn = this._service.processLed(this.model, (data: AsyncRequestModel<LedImportModel>) => {
-            this.asyncModel = data;
-            if (data.finalized) {
-                this.parent.messageService.open('Processo finalizado!', 'SUCESSO', 'success');
-            }
-            this._changeDetectorRef.detectChanges();
-        });
+        if (this.isImport === true) {
+            this.abortFn = this._service.processLed(this.model as LedImportModel, (data: AsyncRequestModel<LedImportModel>) => {
+                this.asyncModel = data;
+                if (data.finalized) {
+                    this.parent.messageService.open('Processo finalizado!', 'SUCESSO', 'success');
+                }
+                this._changeDetectorRef.detectChanges();
+            });
+        }
+        else {
+            this.abortFn = this._service.generateLedAsync(this.model as Array<number>, (data: AsyncRequestModel<{link: string, fileName: string}>) => {
+                this.asyncModel = data;
+                if (data.finalized) {
+                    if (UtilFunctions.isValidStringOrArray(this.asyncModel?.data.link) === true) {
+                        this._service.download(data.data.link)
+                            .then(blob => {
+                                saveAs(blob, data.data.fileName);// Handle successful download
+                                this.parent.messageService.open(`Processo finalizado! Verifique nos downloads do navegador. O arquivo se chama ${data.data.fileName}`, 'SUCESSO', 'success');
+                            })
+
+                    }
+                    else {
+                        this.parent.messageService.open('Nenhum arquivo foi gerado!', 'ERRO', 'error');
+                    }
+                }
+                this._changeDetectorRef.detectChanges();
+            });
+        }
 
     }
 

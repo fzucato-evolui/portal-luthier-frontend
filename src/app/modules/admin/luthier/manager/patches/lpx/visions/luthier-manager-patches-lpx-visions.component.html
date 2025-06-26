@@ -1,91 +1,130 @@
 <div class="h-full inset-0 flex flex-col min-w-0 overflow-hidden bg-card dark:bg-transparent z-50">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between pl-4 pb-2 border-b">
-        <div class="flex-1 min-w-0">
-            <!-- Title -->
-            <div>
-                <h2 class="text-xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
-                    Lista das Visões do Sistema
-                </h2>
+    <mat-drawer-container class="flex-auto h-full" #drawerContainer>
+        <mat-drawer *ngIf="!this.import"
+            class="w-80 dark:bg-gray-900"
+            [position]="'end'"
+            [autoFocus]="false"
+            [mode]="drawerMode"
+            [opened]="drawerOpened"
+            #matDrawer>
+            <div class="absolute py-1 h-full w-full flex flex-col overflow-hidden">
+                <!-- Componente de Filtro -->
+                <app-filter #appFilter class="w-full h-full overflow-hidden"
+                    [filters]="filters"
+                    [loading]="false"
+                    [showCloseButton]="true"
+                    (onClose)="toggleMatRight()"
+                    (onFilter)="handleFilter($event)">
+                </app-filter>
             </div>
-        </div>
-    </div>
+        </mat-drawer>
+        <mat-drawer-content class="flex flex-col overflow-hidden bg-inherit">
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between pl-4 pb-2 border-b">
+                <div class="flex-1 min-w-0">
+                    <!-- Title -->
+                    <div>
+                        <h2 class="text-xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                            Lista das Visões do Sistema
+                        </h2>
+                    </div>
+                </div>
+                <div class="flex shrink-0 mt-0 sm:mx-2" *ngIf="!this.import">
+                    <button mat-icon-button (click)="toggleMatRight()">
+                        <mat-icon class="evolui-menu-item-icon" fontSet="fas" fontIcon="fa-search"/>
+                    </button>
+                </div>
+            </div>
 
-    <!-- Main -->
-    <div
-        class="flex-auto p-2  overflow-y-hidden">
+            <!-- Main -->
+            <div
+                class="flex-auto p-2  overflow-y-hidden">
 
-        <div class="flex flex-col h-full overflow-hidden">
-            <div class="flex-none flex justify-between items-center py-1">
-                <div class="flex-none flex">
+                <div class="flex flex-col h-full overflow-hidden">
+                    <div class="flex-none flex justify-between items-center py-1">
+                        <div class="flex-none flex items-center">
+                            <mat-checkbox class="ml-2 filter-selected"
+                                          [checked]="getSelectionFilterChecked()"
+                                          [indeterminate]="getSelectionFilterIndeterminate()"
+                                          (change)="changeSelected($event)"> {{ getSelectionFilterLabel() }}
+                            </mat-checkbox>
+                            <span class="ml-4 text-sm text-gray-600 dark:text-gray-400">
+                                {{ getFilteredItemsCount() }} {{ getFilteredItemsCount() === 1 ? 'item' : 'itens' }}
+                                <span *ngIf="datasource.data.length !== getFilteredItemsCount()" class="text-gray-500">
+                                    de {{ datasource.data.length }} total
+                                </span>
+                            </span>
+                        </div>
+                        <div class="flex-none flex md:w-1/3 md:pr-1">
+                            <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                                <mat-icon
+                                    class="evolui-menu-item-icon"
+                                    fontSet="fas" fontIcon="fa-search"
+                                    matPrefix></mat-icon>
+                                <input
+                                    [autocomplete]="'off'"
+                                    class="text-sm"
+                                    (input)="filter($event)"
+                                    matInput>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-y-auto" cdkScrollable>
+                        <table #table mat-table matSort [dataSource]="datasource" class="table-auto">
+
+                            <ng-container matColumnDef="select">
+                                <th mat-header-cell *matHeaderCellDef>
+                                    <div class="flex flex-row items-center">
+                                        <mat-checkbox *ngIf="datasource.data.length > 0"
+                                            (change)="$event ? masterToggle() : null"
+                                            [checked]="selection.hasValue() && isAllSelected()"
+                                            [indeterminate]="selection.hasValue() && !isAllSelected()">
+                                        </mat-checkbox>
+                                        <button *ngIf="!import" mat-icon-button aria-label="Add" (click)="refresh()">
+                                            <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-sync"></mat-icon>
+                                        </button>
+                                    </div>
+                                </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <div *ngIf="!import || row['selectable'] === true">
+                                        <mat-checkbox
+                                            (click)="$event.stopPropagation()"
+                                            (change)="$event ? toggleSelection(row) : null"
+                                            [checked]="selection.isSelected(row)">
+                                        </mat-checkbox>
+                                    </div>
+                                    <div *ngIf="import && row['selectable'] === false" [matTooltip]="row['message']">
+                                        <mat-icon class="evolui-menu-item-icon text-red-500" fontSet="fas" fontIcon="fa-exclamation"></mat-icon>
+                                    </div>
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="status">
+                                <th mat-header-cell *matHeaderCellDef> Status </th>
+                                <td mat-cell *matCellDef="let model"> {{ model['status'] }} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="code">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+                                <td mat-cell *matCellDef="let model"> {{ model.code }} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="name">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome </th>
+                                <td mat-cell *matCellDef="let model"> {{ model.name }} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="description">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Descrição </th>
+                                <td mat-cell *matCellDef="let model"> {{ model.description }} </td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                        </table>
+                    </div>
 
                 </div>
-                <div class="flex-none flex md:w-1/3 md:pr-1">
-                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
-                        <mat-icon
-                            class="evolui-menu-item-icon"
-                            fontSet="fas" fontIcon="fa-search"
-                            matPrefix></mat-icon>
-                        <input
-                            [autocomplete]="'off'"
-                            class="text-sm"
-                            (input)="filter($event)"
-                            matInput>
-                    </mat-form-field>
-                </div>
+
+
             </div>
-            <div class="flex-1 overflow-y-auto" cdkScrollable>
-                <table #table mat-table matSort [dataSource]="datasource" class="table-auto">
-
-                    <ng-container matColumnDef="select">
-                        <th mat-header-cell *matHeaderCellDef>
-                            <div class="flex flex-row items-center">
-                                <mat-checkbox *ngIf="datasource.data.length > 0"
-                                    (change)="$event ? masterToggle() : null"
-                                    [checked]="selection.hasValue() && isAllSelected()"
-                                    [indeterminate]="selection.hasValue() && !isAllSelected()">
-                                </mat-checkbox>
-                                <button *ngIf="!import" mat-icon-button aria-label="Add" (click)="refresh()">
-                                    <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-sync"></mat-icon>
-                                </button>
-                            </div>
-                        </th>
-                        <td mat-cell *matCellDef="let row">
-                            <div *ngIf="!import || row['selectable'] === true">
-                                <mat-checkbox
-                                    (click)="$event.stopPropagation()"
-                                    (change)="$event ? toggleSelection(row) : null"
-                                    [checked]="selection.isSelected(row)">
-                                </mat-checkbox>
-                            </div>
-                            <div *ngIf="import && row['selectable'] === false" [matTooltip]="row['message']">
-                                <mat-icon class="evolui-menu-item-icon text-red-500" fontSet="fas" fontIcon="fa-exclamation"></mat-icon>
-                            </div>
-                        </td>
-                    </ng-container>
-                    <ng-container matColumnDef="status">
-                        <th mat-header-cell *matHeaderCellDef> Status </th>
-                        <td mat-cell *matCellDef="let model"> {{ model['status'] }} </td>
-                    </ng-container>
-                    <ng-container matColumnDef="code">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
-                        <td mat-cell *matCellDef="let model"> {{ model.code }} </td>
-                    </ng-container>
-                    <ng-container matColumnDef="name">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome </th>
-                        <td mat-cell *matCellDef="let model"> {{ model.name }} </td>
-                    </ng-container>
-                    <ng-container matColumnDef="description">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Descrição </th>
-                        <td mat-cell *matCellDef="let model"> {{ model.description }} </td>
-                    </ng-container>
-                    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                </table>
-            </div>
-
-        </div>
+        </mat-drawer-content>
+    </mat-drawer-container>
 
 
-    </div>
 </div>
