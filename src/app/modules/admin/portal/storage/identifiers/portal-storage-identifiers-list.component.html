@@ -1,0 +1,254 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden bg-card dark:bg-transparent sm:px-4 z-50">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-4 border-b">
+        <div class="flex-1 min-w-0">
+            <!-- Breadcrumbs -->
+            <nav class="flex mb-2" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3 text-sm">
+                    <li *ngFor="let breadcrumb of navigationState?.breadcrumbs; let last = last" class="inline-flex items-center">
+                        <button
+                            *ngIf="breadcrumb.clickable && !last"
+                            (click)="navigateTo(breadcrumb)"
+                            class="inline-flex items-center font-medium text-primary hover:text-primary-600 transition-colors">
+                            {{ breadcrumb.label }}
+                        </button>
+                        <span *ngIf="!breadcrumb.clickable || last" class="font-medium text-secondary">
+                            {{ breadcrumb.label }}
+                        </span>
+                        <mat-icon *ngIf="!last" class="w-3 h-3 mx-1 text-hint" [svgIcon]="'heroicons_outline:chevron-right'"></mat-icon>
+                    </li>
+                </ol>
+            </nav>
+
+            <div class="flex items-center">
+                <mat-icon class="icon-size-6 text-hint mr-3">fingerprint</mat-icon>
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        Identificadores da Entidade
+                    </h2>
+                    <p class="text-sm text-secondary mt-1">
+                        Gerenciar identificadores da entidade {{ getDisplayInfo().entityName }} do usuário {{ getDisplayInfo().userName }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center mt-4 sm:mt-0 sm:ml-4 space-x-2">
+            <button
+                mat-flat-button
+                color="primary"
+                (click)="addIdentifier()">
+                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                <span class="ml-2">Adicionar Identificador</span>
+            </button>
+
+            <button mat-stroked-button (click)="goBack()">
+                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+                <span class="ml-2">Voltar</span>
+            </button>
+
+            <button mat-stroked-button (click)="refresh()" [disabled]="isLoading">
+                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:arrow-path'"></mat-icon>
+                <span class="ml-2">Atualizar</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="flex-0 p-4 bg-gray-50 dark:bg-gray-900/50 border-b">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+
+            <!-- Total Identifiers -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-lg font-bold text-primary">{{ identifiers.length }}</div>
+                        <div class="text-xs text-secondary">Identificadores</div>
+                    </div>
+                    <mat-icon class="icon-size-5 text-blue-500" [svgIcon]="'heroicons_outline:hashtag'"></mat-icon>
+                </div>
+            </div>
+
+            <!-- Total Files -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-lg font-bold text-primary">{{ getTotalFiles() }}</div>
+                        <div class="text-xs text-secondary">Total de Arquivos</div>
+                    </div>
+                    <mat-icon class="icon-size-5 text-green-500" [svgIcon]="'heroicons_outline:document'"></mat-icon>
+                </div>
+            </div>
+
+            <!-- Total Directories -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-lg font-bold text-primary">{{ getTotalDirectories() }}</div>
+                        <div class="text-xs text-secondary">Pastas</div>
+                    </div>
+                    <mat-icon class="icon-size-5 text-yellow-500" [svgIcon]="'heroicons_outline:folder'"></mat-icon>
+                </div>
+            </div>
+
+            <!-- Total Storage -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-lg font-bold text-primary">{{ getTotalStorage() }}</div>
+                        <div class="text-xs text-secondary">Armazenamento Total</div>
+                    </div>
+                    <mat-icon class="icon-size-5 text-purple-500" [svgIcon]="'heroicons_outline:server-stack'"></mat-icon>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-auto p-2 overflow-y-hidden">
+
+        <!-- Loading -->
+        <div *ngIf="isLoading" class="flex flex-col h-full items-center justify-center">
+            <mat-spinner diameter="48"></mat-spinner>
+            <div class="mt-4 text-xl font-semibold tracking-tight text-secondary">Carregando identificadores...</div>
+        </div>
+
+        <!-- No identifiers -->
+        <div *ngIf="!isLoading && identifiers.length === 0" class="flex flex-col h-full items-center justify-center">
+            <mat-icon class="icon-size-24 text-hint" [svgIcon]="'heroicons_outline:hashtag'"></mat-icon>
+            <div class="mt-4 text-xl font-semibold tracking-tight text-secondary">Nenhum identificador encontrado</div>
+            <div class="mt-2 text-sm text-hint">Esta entidade ainda não possui identificadores</div>
+        </div>
+
+        <!-- Identifiers Table -->
+        <div *ngIf="!isLoading && identifiers.length > 0" class="flex flex-col h-full overflow-hidden">
+
+            <!-- Filter Bar -->
+            <div class="flex-none flex justify-between items-center py-1">
+                <div class="flex-none flex items-center space-x-2">
+                    <span class="text-sm text-secondary">{{ filteredIdentifiers.length }} de {{ identifiers.length }} identificadores</span>
+                </div>
+                <div class="flex-none flex md:w-1/3 md:pr-1">
+                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                        <mat-icon
+                            class="icon-size-5"
+                            [svgIcon]="'heroicons_outline:magnifying-glass'"
+                            matPrefix>
+                        </mat-icon>
+                        <input
+                            [autocomplete]="'off'"
+                            class="text-sm"
+                            placeholder="Pesquisar identificadores..."
+                            (input)="applyFilter($event)"
+                            matInput>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Scrollable Table -->
+            <div class="flex-1 overflow-y-auto" cdkScrollable>
+                <table mat-table [dataSource]="dataSource" class="w-full">
+
+                    <!-- Actions Column -->
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef class="font-semibold text-center">Ações</th>
+                        <td mat-cell *matCellDef="let identifier" class="text-center">
+                            <button
+                                mat-icon-button
+                                (click)="viewIdentifierFiles(identifier); $event.stopPropagation()"
+                                matTooltip="Navegar pelos Arquivos"
+                                class="text-primary">
+                                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:folder-open'"></mat-icon>
+                            </button>
+
+                            <button
+                                mat-icon-button
+                                (click)="editIdentifier(identifier); $event.stopPropagation()"
+                                matTooltip="Editar Entidade"
+                                class="text-primary">
+                                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                            </button>
+
+                            <button *ngIf="identifier.totalFiles > 0"
+                                    mat-icon-button
+                                    (click)="downloadIdentifierFiles(identifier); $event.stopPropagation()"
+                                    matTooltip="Download dos Arquivos do Identificador"
+                                    class="text-green-600">
+                                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:arrow-down-tray'"></mat-icon>
+                            </button>
+
+                            <button
+                                mat-icon-button
+                                (click)="deleteIdentifierStorage(identifier); $event.stopPropagation()"
+                                matTooltip="Remover armazenamento do Identificador"
+                                class="text-green-600">
+                                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                            </button>
+
+                        </td>
+                    </ng-container>
+
+                    <!-- ID Column -->
+                    <ng-container matColumnDef="id">
+                        <th mat-header-cell *matHeaderCellDef class="font-semibold text-center">ID</th>
+                        <td mat-cell *matCellDef="let entity" class="text-center">
+                            <span class="text-sm font-medium">{{ entity.entityIdentifierId }}</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Identifier Column -->
+                    <ng-container matColumnDef="identifier">
+                        <th mat-header-cell *matHeaderCellDef class="font-semibold text-left">Identificador</th>
+                        <td mat-cell *matCellDef="let identifier" class="py-3">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 w-8 h-8">
+                                    <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center">
+                                        <mat-icon class="icon-size-4 text-primary" [svgIcon]="'heroicons_outline:hashtag'"></mat-icon>
+                                    </div>
+                                </div>
+                                <div class="ml-3 min-w-0 flex-1">
+                                    <div class="font-medium text-primary truncate">{{ identifier.entityIdentifierName }}</div>
+                                    <div *ngIf="identifier.description" class="text-sm text-secondary truncate">{{ identifier.description }}</div>
+                                </div>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Files Column -->
+                    <ng-container matColumnDef="files">
+                        <th mat-header-cell *matHeaderCellDef class="font-semibold text-center">Arquivos</th>
+                        <td mat-cell *matCellDef="let identifier" class="text-center">
+                            <div class="text-sm">
+                                <div class="font-medium">{{ identifier.totalFiles }}</div>
+                                <div class="text-xs text-secondary">{{ identifier.totalDirectories }} pastas</div>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Size Column -->
+                    <ng-container matColumnDef="size">
+                        <th mat-header-cell *matHeaderCellDef class="font-semibold text-center">Tamanho</th>
+                        <td mat-cell *matCellDef="let identifier" class="text-center">
+                            <span class="text-sm font-medium">{{ formatFileSize(identifier.totalBytes) }}</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Last Activity Column -->
+                    <ng-container matColumnDef="lastActivity">
+                        <th mat-header-cell *matHeaderCellDef class="font-semibold text-center">Última Atividade</th>
+                        <td mat-cell *matCellDef="let identifier" class="text-center">
+                            <span class="text-sm">{{ formatDate(identifier.lastActivity) }}</span>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                        class="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors duration-200"
+                        (click)="viewIdentifierFiles(row)"></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

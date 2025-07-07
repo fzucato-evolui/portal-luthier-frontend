@@ -1,0 +1,35 @@
+/* Modal container styles - seguindo padrão do projeto */
+.portal-storage-entity-modal-container {
+    max-width: 70vw !important;
+    width: 70vw !important;
+    max-height: 90vh !important;
+    height: 90vh !important;
+
+    mat-dialog-container {
+        padding: 10px !important;
+    }
+    .readOnly {
+        pointer-events: none;
+        opacity: 60%;
+    }
+    .mat-card-header-text {
+        @apply w-full #{'!important'};
+    }
+}
+
+portal-storage-entity-modal {
+    // Padrão básico para modais do sistema
+    .mat-mdc-form-field {
+        width: 100%;
+    }
+
+    // Responsive adjustments
+    @media (max-width: 768px) {
+        .portal-storage-entity-modal-container {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
+        }
+    }
+}

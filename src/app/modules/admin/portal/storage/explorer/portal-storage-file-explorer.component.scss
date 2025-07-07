@@ -1,0 +1,227 @@
+portal-storage-file-explorer {
+    .mat-mdc-table {
+        .mat-mdc-header-row {
+            @apply bg-gray-50 dark:bg-gray-900;
+            // Ensure sticky header stays below settings component (z-90)
+            z-index: 80;
+        }
+
+        .mat-mdc-row {
+            transition: background-color 0.2s ease;
+
+            &:hover {
+                @apply bg-gray-50 dark:bg-gray-800;
+            }
+        }
+
+        .mat-mdc-cell,
+        .mat-mdc-header-cell {
+            @apply border-b border-gray-200 dark:border-gray-700;
+        }
+    }
+
+    .file-grid-item {
+        transition: all 0.2s ease;
+
+        &:hover {
+            transform: translateY(-2px);
+            @apply shadow-lg;
+        }
+
+        &.selected {
+            @apply border-primary-500 bg-primary-50 dark:bg-primary-900;
+        }
+
+        .mat-mdc-checkbox {
+            .mat-mdc-checkbox-frame {
+                @apply border-gray-300;
+            }
+        }
+    }
+
+    .mat-mdc-toolbar {
+        .mat-mdc-form-field {
+            .mat-mdc-form-field-wrapper {
+                padding-bottom: 0;
+            }
+
+            .mat-mdc-form-field-subscript-wrapper {
+                display: none;
+            }
+        }
+    }
+
+    // Breadcrumb styling
+    nav ol li button {
+        transition: color 0.2s ease;
+
+        &:hover {
+            @apply text-primary-600;
+        }
+    }
+
+    // Empty state styling
+    .empty-state {
+        .mat-icon {
+            opacity: 0.3;
+        }
+    }
+
+    // Selection state styling
+    .selection-toolbar {
+        @apply bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900 dark:to-primary-800;
+    }
+
+    // Context menu improvements
+    .mat-mdc-menu-panel {
+        .mat-mdc-menu-item {
+            .mat-icon {
+                @apply text-gray-500 mr-3;
+            }
+
+            &.text-red-600 {
+                .mat-icon {
+                    @apply text-red-500;
+                }
+            }
+        }
+    }
+
+    // Search field styling
+    .search-field {
+        .mat-mdc-form-field-wrapper {
+            @apply bg-white rounded-lg dark:bg-gray-800;
+        }
+    }
+
+    // Responsive adjustments
+    @media (max-width: 768px) {
+        .mat-mdc-toolbar {
+            .flex {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .search-field {
+                width: 100%;
+            }
+        }
+
+        .file-grid-item {
+            .absolute {
+                position: static;
+                opacity: 1;
+                margin-top: 0.5rem;
+            }
+        }
+    }
+
+    // Loading state
+    .loading-overlay {
+        backdrop-filter: blur(2px);
+        @apply bg-white bg-opacity-80 dark:bg-black dark:bg-opacity-80;
+    }
+
+    // Drag & Drop Styles
+    &.drag-over {
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(59, 130, 246, 0.1);
+            border: 2px dashed rgb(59, 130, 246);
+            border-radius: 8px;
+            z-index: 1000;
+            pointer-events: none;
+        }
+    }
+
+    .file-grid-item {
+        transition: all 0.2s ease;
+
+        &.selected {
+            border-color: rgb(59, 130, 246);
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    .upload-progress-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 12px;
+        background: white;
+        border-radius: 6px;
+        border: 1px solid #e5e7eb;
+        margin-bottom: 8px;
+        animation: slideInUp 0.3s ease-out;
+
+        &:global(.dark) {
+            background: #374151;
+            border-color: #4b5563;
+        }
+    }
+
+    // Upload button styling
+    .upload-button {
+        background: linear-gradient(135deg, rgb(59, 130, 246), rgb(37, 99, 235));
+        border: none;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        transition: all 0.2s ease;
+
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+    }
+
+    // Drag and drop indicators
+    .drop-zone {
+        @apply border-2 border-dashed border-primary-300 bg-primary-50 dark:border-primary-700 dark:bg-primary-900;
+    }
+
+    // Animations
+    @keyframes slideInUp {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    // ngx-file-drop styling
+    :global(.ngx-file-drop__drop-zone) {
+        border: 2px dashed transparent;
+        transition: all 0.3s ease;
+
+        &:global(.ngx-file-drop__drop-zone--over) {
+            border-color: rgb(59, 130, 246);
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+    }
+}
+
+// Global styles for file type indicators
+.file-type-indicator {
+    &.document { @apply text-blue-500; }
+    &.image { @apply text-green-500; }
+    &.video { @apply text-purple-500; }
+    &.audio { @apply text-orange-500; }
+    &.archive { @apply text-yellow-600; }
+    &.code { @apply text-gray-600; }
+    &.directory { @apply text-blue-600; }
+}

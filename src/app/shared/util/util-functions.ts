@@ -146,29 +146,32 @@ export class UtilFunctions {
         }, {});
     }
 
-    public static getHttpErrorMessage(value) {
+    public static getHttpErrorMessage(value): string {
         let errorMessage;
-        if (value.error && value.error.detail !== undefined) {
+        if (value?.error && value?.error?.detail !== undefined) {
             errorMessage = value.error.detail;
-        } else if (value.error && value.error.message) {
+        } else if (value?.error && value?.error?.message) {
             errorMessage = value.error.message;
-        } else if (value.error && value.error.error) {
+        } else if (value?.error && value?.error?.error) {
             errorMessage = value.error.error;
-        } else if (value.error && value.error.fieldErrors) {
-            errorMessage = value.error.fieldErrors[0].message;
-        } else if (value.error && value.error.message) {
+        } else if (value?.error && value?.error?.fieldErrors) {
+            errorMessage = value.error.fieldErrors[0]?.message;
+        } else if (value?.error && value?.error?.message) {
             errorMessage = value.error.message;
-        } else if (value.error) {
+        } else if (value?.error) {
             errorMessage = value.error;
-        } else if (value.message !== undefined) {
+        } else if (value?.message !== undefined) {
             errorMessage = value.message;
         } else {
             errorMessage = value;
         }
+
         if (errorMessage === null || errorMessage === undefined) {
             errorMessage = 'Erro desconhecido';
         }
-        return errorMessage;
+
+        // Ensure we always return a string
+        return typeof errorMessage === 'string' ? errorMessage : String(errorMessage);
     }
 
     public static getInvalidFields(form: FormGroup | FormArray, parentKey: string = ''): string[] {

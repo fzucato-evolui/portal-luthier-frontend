@@ -1,0 +1,16 @@
+portal-storage-identifiers-list {
+    // Angular Material table border override (can't be done with Tailwind classes)
+    .mat-mdc-table {
+        .mat-mdc-header-cell,
+        .mat-mdc-cell {
+            border-bottom: 1px solid rgb(229 231 235);
+            @apply dark:border-gray-700;
+        }
+
+        .mat-mdc-header-row {
+            @apply bg-gray-50 dark:bg-gray-900;
+            // Ensure sticky header stays below settings component (z-90)
+            z-index: 80;
+        }
+    }
+}

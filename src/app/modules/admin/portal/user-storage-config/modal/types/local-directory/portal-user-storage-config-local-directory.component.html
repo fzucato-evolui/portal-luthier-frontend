@@ -10,7 +10,7 @@
                 <mat-icon class="mr-2" fontSet="fas" fontIcon="fa-check"></mat-icon>
                 Ativar
             </button>
-            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading" form="localDirectoryConfigForm">
+            <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="form.invalid" form="localDirectoryConfigForm">
                 <mat-icon class="mr-2" fontSet="fas" fontIcon="fa-save"></mat-icon>
                 Salvar
             </button>
@@ -37,7 +37,7 @@
             </ng-template>
         </div>
 
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4" id="localDirectoryConfigForm">
+        <form [formGroup]="form" class="flex flex-col gap-4" id="localDirectoryConfigForm">
             <mat-card>
                 <mat-card-content>
                     <div class="grid grid-cols-1 gap-4">
@@ -59,4 +59,4 @@
             </mat-card>
         </form>
     </div>
-</div> 
+</div>

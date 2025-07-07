@@ -18,6 +18,7 @@ import {UtilFunctions} from '../../../shared/util/util-functions';
     styles       : [
         `
             settings {
+                z-index: 1000;
                 position: static;
                 display: block;
                 flex: none;

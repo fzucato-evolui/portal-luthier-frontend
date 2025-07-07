@@ -11,6 +11,7 @@ import {provideIcons} from 'app/core/icons/icons.provider';
 import {provideTransloco} from 'app/core/transloco/transloco.provider';
 import {mockApiServices} from 'app/mock-api';
 import {provideRoot} from './shared/services/root/root.provider';
+import {HIGHLIGHT_OPTIONS} from 'ngx-highlightjs';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -48,6 +49,31 @@ export const appConfig: ApplicationConfig = {
         // Fuse
         provideAuth(),
         provideIcons(),
+
+        // Highlight.js Global Configuration
+        {
+            provide: HIGHLIGHT_OPTIONS,
+            useValue: {
+                coreLibraryLoader: () => import('highlight.js/lib/core'),
+                lineNumbersLoader: () => import('ngx-highlightjs/line-numbers'),
+                languages: {
+                    typescript: () => import('highlight.js/lib/languages/typescript'),
+                    javascript: () => import('highlight.js/lib/languages/javascript'),
+                    css: () => import('highlight.js/lib/languages/css'),
+                    xml: () => import('highlight.js/lib/languages/xml'),
+                    json: () => import('highlight.js/lib/languages/json'),
+                    java: () => import('highlight.js/lib/languages/java'),
+                    python: () => import('highlight.js/lib/languages/python'),
+                    php: () => import('highlight.js/lib/languages/php'),
+                    sql: () => import('highlight.js/lib/languages/sql'),
+                    bash: () => import('highlight.js/lib/languages/bash'),
+                    markdown: () => import('highlight.js/lib/languages/markdown'),
+                    yaml: () => import('highlight.js/lib/languages/yaml'),
+                    dockerfile: () => import('highlight.js/lib/languages/dockerfile')
+                }
+            }
+        },
+
         provideFuse({
             mockApi: {
                 delay   : 0,

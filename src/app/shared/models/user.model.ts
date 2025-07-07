@@ -11,13 +11,28 @@ export class UserConfigModel {
     public scheme?: Scheme;
 }
 
+// Frontend representation of backend RoleTypeEnum
+export enum RoleTypeEnum {
+    HIERARCHICAL = 'HIERARCHICAL',
+    FUNCTIONAL = 'FUNCTIONAL'
+}
+
+// Frontend representation of backend RoleBean
+export interface RoleModel {
+    id: number;
+    name: string;
+    type: RoleTypeEnum;
+    hierarchyLevel?: number;
+}
+
 export class UserModel {
     public id: number;
     public name: string;
     public login: string;
     public email: string;
     public password: string;
-    public authorities: Array<string>;
+    // Replace authorities with roles
+    public roles: RoleModel[];
     public enabled: boolean;
     public image: string;
     public base64Image: string;

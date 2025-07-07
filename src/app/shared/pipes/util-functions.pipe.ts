@@ -101,6 +101,14 @@ export class AsFormControlPipe implements PipeTransform {
 })
 export class AsFormGroupPipe implements PipeTransform {
     transform(control: AbstractControl | null): FormGroup | null {
+        if (control instanceof FormGroup) {
+            console.log('Eh um formGroup', control);
+            // Verifica se o controle é um FormGroup e retorna
+            return control;
+        }
+        else {
+            console.log('NAUM eh um FormGroup', control);
+        }
         return control instanceof FormGroup ? control : null;
     }
 }

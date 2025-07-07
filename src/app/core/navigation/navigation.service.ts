@@ -39,10 +39,17 @@ export const mainNavigation: FuseNavigationItem[] = [
                 roles : ['ROLE_SUPER', 'ROLE_HYPER']
             },
             {
+                id   : 'portal.storage',
+                title: 'Armazenamento',
+                type : 'basic',
+                awesomeIcon : {fontSet:"fas", fontIcon:"fa-box"},
+                link : '/portal/storage',
+                roles : ['ROLE_SUPER', 'ROLE_HYPER']
+            },
+            {
                 id   : 'portal.users',
                 title: 'Usuários',
                 type : 'basic',
-                hidden  : item => {return true},
                 awesomeIcon : {fontSet:"fas", fontIcon:"fa-users"},
                 link : '/portal/users',
                 roles : ['ROLE_SUPER', 'ROLE_HYPER']

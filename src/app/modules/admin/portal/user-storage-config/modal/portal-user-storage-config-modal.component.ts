@@ -1,33 +1,31 @@
+import {ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, ViewEncapsulation} from '@angular/core';
+import {CommonModule, KeyValue} from '@angular/common';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {firstValueFrom, Subject, takeUntil} from 'rxjs';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
+import {MatCardModule} from '@angular/material/card';
+import {MatChipsModule} from '@angular/material/chips';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {
-    ChangeDetectorRef,
-    Component,
-    Inject,
-    OnDestroy,
-    OnInit,
-    ViewEncapsulation
-} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { firstValueFrom, Subject, takeUntil } from 'rxjs';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { PortalUserStorageConfig, PortalUserStorageConfigType } from '../../../../../shared/models/portal-user-storage-config.model';
-import { PortalUserStorageConfigService } from '../portal-user-storage-config.service';
-import { PortalUserStorageConfigComponent } from '../portal-user-storage-config.component';
-import { PortalUserStorageConfigGoogleDriveComponent } from './types/google-drive/portal-user-storage-config-google-drive.component';
-import { PortalUserStorageConfigDropboxComponent } from './types/dropbox/portal-user-storage-config-dropbox.component';
-import { PortalUserStorageConfigAwsS3Component } from './types/aws-s3/portal-user-storage-config-aws-s3.component';
-import { PortalUserStorageConfigLocalDirectoryComponent } from './types/local-directory/portal-user-storage-config-local-directory.component';
-import { KeyValue } from '@angular/common';
-import { MatSelectModule } from '@angular/material/select';
-import { FormsModule } from '@angular/forms';
-import { UserModel } from 'app/shared/models/user.model';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { MatDrawerMode } from '@angular/material/sidenav';
-import { MatSidenavModule } from '@angular/material/sidenav';
+    PortalUserStorageConfig,
+    PortalUserStorageConfigType
+} from '../../../../../shared/models/portal-user-storage-config.model';
+import {PortalUserStorageConfigService} from '../portal-user-storage-config.service';
+import {PortalUserStorageConfigComponent} from '../portal-user-storage-config.component';
+import {
+    PortalUserStorageConfigGoogleDriveComponent
+} from './types/google-drive/portal-user-storage-config-google-drive.component';
+import {PortalUserStorageConfigDropboxComponent} from './types/dropbox/portal-user-storage-config-dropbox.component';
+import {PortalUserStorageConfigAwsS3Component} from './types/aws-s3/portal-user-storage-config-aws-s3.component';
+import {
+    PortalUserStorageConfigLocalDirectoryComponent
+} from './types/local-directory/portal-user-storage-config-local-directory.component';
+import {MatSelectModule} from '@angular/material/select';
+import {FormsModule} from '@angular/forms';
+import {UserModel} from 'app/shared/models/user.model';
+import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
+import {MatDrawerMode, MatSidenavModule} from '@angular/material/sidenav';
 
 @Component({
     selector: 'portal-user-storage-config-modal',
@@ -56,12 +54,11 @@ export class PortalUserStorageConfigModalComponent implements OnInit, OnDestroy 
     userId: number | null;
     userName: string | null;
     configs: PortalUserStorageConfig[] = [];
-    loading = false;
     error: string | null = null;
     readonly configTypes = PortalUserStorageConfigType;
     selectedConfigType: PortalUserStorageConfigType | null = null;
     storageTypes: KeyValue<string, PortalUserStorageConfigType>[] = Object.entries(this.configTypes).map(([key, value]) => ({ key, value }));
-    
+
     users: UserModel[] = [];
     selectedUserId: number | null = null;
 
@@ -143,7 +140,6 @@ export class PortalUserStorageConfigModalComponent implements OnInit, OnDestroy 
             return;
         }
 
-        this.loading = true;
         const existingConfig = this.getConfig(type);
         const configToSave: PortalUserStorageConfig = {
             id: existingConfig ? existingConfig.id : undefined,
@@ -164,13 +160,11 @@ export class PortalUserStorageConfigModalComponent implements OnInit, OnDestroy 
                     this.configs = this.configs.filter(c => !(c.userId === this.userId && c.storageType === savedConfig.storageType));
                     this.configs.push(savedConfig);
                 }
-                this.loading = false;
                 this.error = null;
                 this._changeDetectorRef.markForCheck();
             },
             error: (error) => {
                 this.error = 'Erro ao salvar configuração';
-                this.loading = false;
                 this._changeDetectorRef.markForCheck();
                 console.error(error);
             }
@@ -178,20 +172,17 @@ export class PortalUserStorageConfigModalComponent implements OnInit, OnDestroy 
     }
 
     onActivate(id: number): void {
-        this.loading = true;
         this._service.activateConfig(id).subscribe({
             next: () => {
                 this.configs = this.configs.map(config => ({
                     ...config,
                     active: config.id === id
                 }));
-                this.loading = false;
                 this.error = null;
                 this._changeDetectorRef.markForCheck();
             },
             error: (error) => {
                 this.error = 'Erro ao ativar configuração';
-                this.loading = false;
                 this._changeDetectorRef.markForCheck();
                 console.error(error);
             }
@@ -201,28 +192,25 @@ export class PortalUserStorageConfigModalComponent implements OnInit, OnDestroy 
     onDelete(id: number): void {
         this.parent.messageService.open('Tem certeza que deseja excluir esta configuração?', 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
             if (result === 'confirmed') {
-                this.loading = true;
             this._service.deleteConfig(id).subscribe({
                 next: () => {
                     this.configs = this.configs.filter(config => config.id !== id);
-                    this.loading = false;
                     this.error = null;
                     this._changeDetectorRef.markForCheck();
                 },
                 error: (error) => {
                     this.error = 'Erro ao excluir configuração';
-                    this.loading = false;
                     this._changeDetectorRef.markForCheck();
                     console.error(error);
                 }
             });
             }
         });
-        
+
     }
 
     close(): void {
         this._dialogRef.close();
         this._parent.refresh();
     }
-} 
+}

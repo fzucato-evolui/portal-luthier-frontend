@@ -5,13 +5,7 @@
         "logLevel": "debug",
         "changeOrigin": true
     },
-    "/api/public/root/*": {
-        "target": "http://localhost:8039",
-        "secure": false,
-        "logLevel": "debug",
-        "changeOrigin": true
-    },
-    "/api/public/auth/*": {
+    "/api/public/*": {
         "target": "http://localhost:8039",
         "secure": false,
         "logLevel": "debug",

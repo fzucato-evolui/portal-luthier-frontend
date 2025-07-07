@@ -1,0 +1,68 @@
+file-preview-panel {
+    // Animation for panel slide-in/out
+    .fixed {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    // Ensure content doesn't overflow
+    img, video, iframe {
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    // Custom scrollbar for content
+    .overflow-auto {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+
+        &::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 3px;
+        }
+
+        &::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.7);
+        }
+    }
+
+    // Mobile responsiveness
+    @media (max-width: 1024px) {
+        .fixed {
+            width: 100% !important;
+            left: 0 !important;
+            right: 0 !important;
+        }
+    }
+
+    // Focus styles for accessibility
+    button:focus-visible {
+        outline: 2px solid rgba(59, 130, 246, 0.8);
+        outline-offset: 2px;
+    }
+
+    // High contrast mode support
+    @media (prefers-contrast: high) {
+        .border-gray-200 {
+            border-color: rgb(0, 0, 0);
+        }
+
+        .border-gray-700 {
+            border-color: rgb(255, 255, 255);
+        }
+    }
+
+    // Reduced motion support
+    @media (prefers-reduced-motion: reduce) {
+        .fixed {
+            transition: none;
+        }
+    }
+}

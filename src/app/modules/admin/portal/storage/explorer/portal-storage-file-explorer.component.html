@@ -1,0 +1,647 @@
+<!-- Main Layout with Gallery Drawer -->
+<mat-drawer-container class="absolute inset-0">
+
+    <!-- Main Content -->
+    <mat-drawer-content class="flex flex-col min-w-0 overflow-hidden bg-card dark:bg-transparent sm:px-4"
+                        [ngClass]="{'drag-over': isDragOver}"
+                        (drop)="onFilesDropped($event)"
+                        (dragover)="onDragOver($event)"
+                        (dragleave)="onDragLeave($event)"
+                        (dragenter)="onDragEnter($event)">
+
+        <!-- Drag Overlay -->
+        <div *ngIf="isDragOver"
+             class="absolute inset-0 bg-primary bg-opacity-10 border-2 border-dashed border-primary z-50 flex items-center justify-center">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-lg text-center">
+                <mat-icon class="icon-size-12 text-primary mb-4" [svgIcon]="'heroicons_outline:cloud-arrow-up'"></mat-icon>
+                <h3 class="text-xl font-semibold text-primary mb-2">Solte os arquivos ou pastas aqui</h3>
+                <p class="text-secondary">Os arquivos e pastas serão enviados para a pasta atual</p>
+            </div>
+        </div>
+
+        <!-- Header with Breadcrumbs and Actions -->
+        <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-4 border-b">
+            <div class="flex-1 min-w-0">
+                <!-- Breadcrumbs -->
+                <nav class="flex mb-2" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-2 text-sm">
+                        <!-- Show navigation state breadcrumbs if available -->
+                        <ng-container *ngIf="navigationState?.breadcrumbs?.length; else fallbackBreadcrumbs">
+                            <li *ngFor="let breadcrumb of navigationState.breadcrumbs; let last = last" class="inline-flex items-center">
+                                <button
+                                    *ngIf="breadcrumb.clickable && !last"
+                                    (click)="navigateTo(breadcrumb)"
+                                    class="inline-flex items-center font-medium text-primary hover:text-primary-600 transition-colors">
+                                    {{ breadcrumb.label }}
+                                </button>
+                                <span *ngIf="!breadcrumb.clickable || last" class="font-medium text-secondary">
+                                    {{ breadcrumb.label }}
+                                </span>
+                                <mat-icon *ngIf="!last" class="w-3 h-3 mx-1 text-hint" [svgIcon]="'heroicons_outline:chevron-right'"></mat-icon>
+                            </li>
+                        </ng-container>
+
+                        <!-- Fallback breadcrumbs when navigationState is not available -->
+                        <ng-template #fallbackBreadcrumbs>
+                            <li class="inline-flex items-center">
+                                <button
+                                    (click)="_router.navigate(['/portal/storage'])"
+                                    class="inline-flex items-center font-medium text-primary hover:text-primary-600 transition-colors">
+                                    Administração de Armazenamento
+                                </button>
+                                <mat-icon class="w-3 h-3 mx-1 text-hint" [svgIcon]="'heroicons_outline:chevron-right'"></mat-icon>
+                            </li>
+                            <li class="inline-flex items-center">
+                                <button
+                                    (click)="_router.navigate(['/portal/storage/users', getDisplayInfo().userId, 'entities'])"
+                                    class="inline-flex items-center font-medium text-primary hover:text-primary-600 transition-colors">
+                                    {{ getDisplayInfo().userName }}
+                                </button>
+                                <mat-icon class="w-3 h-3 mx-1 text-hint" [svgIcon]="'heroicons_outline:chevron-right'"></mat-icon>
+                            </li>
+                            <li class="inline-flex items-center">
+                                <button
+                                    (click)="_router.navigate(['/portal/storage/users', getDisplayInfo().userId, 'entities', getDisplayInfo().entityName, 'identifiers'])"
+                                    class="inline-flex items-center font-medium text-primary hover:text-primary-600 transition-colors">
+                                    {{ getDisplayInfo().entityName }}
+                                </button>
+                                <mat-icon class="w-3 h-3 mx-1 text-hint" [svgIcon]="'heroicons_outline:chevron-right'"></mat-icon>
+                            </li>
+                            <li class="inline-flex items-center">
+                                <span class="font-medium text-secondary">
+                                    {{ getDisplayInfo().entityIdentifier }}
+                                </span>
+                            </li>
+                        </ng-template>
+                    </ol>
+                </nav>
+
+                <!-- Title -->
+                <div class="flex items-center">
+                    <mat-icon class="icon-size-6 text-hint mr-2">folder_open</mat-icon>
+                    <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-primary truncate">
+                        <ng-container *ngIf="navigationState?.currentPath; else rootTitle">
+                            {{ navigationState.currentPath }}
+                        </ng-container>
+                        <ng-template #rootTitle>
+                            {{ getDisplayInfo().entityIdentifier }} Arquivos
+                        </ng-template>
+                    </h2>
+                </div>
+                <div class="text-sm text-secondary mt-1">
+                    Suporte para upload de arquivos individuais e pastas completas
+                </div>
+            </div>
+
+            <!-- Header Actions -->
+            <div class="flex items-center mt-4 sm:mt-0 sm:ml-4 space-x-2">
+                <!-- Upload Button -->
+                <button
+                    mat-flat-button
+                    color="primary"
+                    [matMenuTriggerFor]="uploadMenu"
+                    matTooltip="Enviar Arquivos ou Pastas"
+                    class="upload-button">
+                    <mat-icon [svgIcon]="'heroicons_outline:cloud-arrow-up'"></mat-icon>
+                    <span class="ml-2 hidden sm:inline">Upload</span>
+                    <mat-icon class="ml-1" [svgIcon]="'heroicons_outline:chevron-down'"></mat-icon>
+                </button>
+
+                <mat-menu #uploadMenu="matMenu">
+                    <button mat-menu-item (click)="openUploadDialog()">
+                        <mat-icon [svgIcon]="'heroicons_outline:document'"></mat-icon>
+                        <span>Enviar Arquivos</span>
+                    </button>
+                    <button mat-menu-item (click)="openFolderUploadDialog()">
+                        <mat-icon [svgIcon]="'heroicons_outline:folder'"></mat-icon>
+                        <span>Enviar Pasta</span>
+                    </button>
+                </mat-menu>
+
+                <!-- Create Folder Button -->
+                <button
+                    mat-stroked-button
+                    (click)="openCreateFolderDialog()"
+                    matTooltip="Nova Pasta">
+                    <mat-icon [svgIcon]="'heroicons_outline:folder-plus'"></mat-icon>
+                    <span class="ml-2 hidden sm:inline">Nova Pasta</span>
+                </button>
+
+                <button
+                    mat-icon-button
+                    (click)="goBack()"
+                    matTooltip="Voltar aos Identificadores"
+                    class="text-secondary">
+                    <mat-icon [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+                </button>
+
+                <button
+                    *ngIf="navigationState?.currentPath"
+                    mat-icon-button
+                    (click)="navigateUp()"
+                    matTooltip="Subir"
+                    class="text-secondary">
+                    <mat-icon [svgIcon]="'heroicons_outline:arrow-up'"></mat-icon>
+                </button>
+
+                <button
+                    mat-icon-button
+                    (click)="refresh()"
+                    [disabled]="isLoading"
+                    matTooltip="Atualizar"
+                    class="text-secondary">
+                    <mat-icon [svgIcon]="'heroicons_outline:arrow-path'"></mat-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Upload Progress Area -->
+        <div *ngIf="uploadProgress.length > 0" class="flex-none p-4 bg-gray-50 dark:bg-gray-800 border-b">
+            <div class="flex justify-between items-center mb-2">
+                <h4 class="text-sm font-medium text-secondary">Uploads</h4>
+                <button
+                    *ngIf="hasCompletedOrErrorUploads()"
+                    mat-icon-button
+                    (click)="clearCompletedUploads()"
+                    matTooltip="Limpar uploads concluídos/com erro"
+                    class="text-gray-500">
+                    <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                </button>
+            </div>
+            <div class="space-y-2">
+                <div *ngFor="let upload of uploadProgress" class="upload-progress-item">
+                    <mat-icon class="icon-size-4 text-hint" [svgIcon]="getFileIconFromName(upload.fileName)"></mat-icon>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm text-primary truncate">{{ upload.fileName }}</div>
+                        <mat-progress-bar
+                            mode="determinate"
+                            [value]="upload.progress"
+                            class="h-1 mt-1">
+                        </mat-progress-bar>
+                    </div>
+                    <div class="text-xs text-secondary">{{ upload.progress }}%</div>
+                    <button
+                        *ngIf="upload.status === 'uploading'"
+                        mat-icon-button
+                        (click)="cancelUpload(upload.id)"
+                        matTooltip="Cancelar upload"
+                        class="text-red-600">
+                        <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                    </button>
+                    <button
+                        *ngIf="upload.status === 'error'"
+                        mat-icon-button
+                        (click)="removeUploadProgress(upload.id)"
+                        matTooltip="Remover da lista"
+                        class="text-red-600">
+                        <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                    </button>
+                    <button
+                        *ngIf="upload.status === 'completed'"
+                        mat-icon-button
+                        (click)="removeUploadProgress(upload.id)"
+                        matTooltip="Remover da lista"
+                        class="text-gray-400">
+                        <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                    </button>
+                    <mat-icon
+                        *ngIf="upload.status === 'completed'"
+                        class="icon-size-4 text-green-600 mr-2"
+                        [svgIcon]="'heroicons_outline:check-circle'"
+                        matTooltip="Upload concluído">
+                    </mat-icon>
+                    <mat-icon
+                        *ngIf="upload.status === 'error'"
+                        class="icon-size-4 text-red-600 mr-2"
+                        [svgIcon]="'heroicons_outline:exclamation-circle'"
+                        matTooltip="Erro no upload">
+                    </mat-icon>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-auto p-2 overflow-y-hidden">
+
+            <!-- Loading -->
+            <div *ngIf="isLoading" class="flex flex-col h-full items-center justify-center">
+                <mat-spinner diameter="48"></mat-spinner>
+                <div class="mt-4 text-xl font-semibold tracking-tight text-secondary">Carregando arquivos...</div>
+            </div>
+
+            <!-- Empty state with upload suggestion -->
+            <div *ngIf="!isLoading && filteredFiles.length === 0 && !searchTerm"
+                 class="flex flex-col h-full items-center justify-center">
+                <mat-icon class="icon-size-24 text-hint mb-4" [svgIcon]="'heroicons_outline:folder-open'"></mat-icon>
+                <div class="text-2xl font-semibold tracking-tight text-secondary mb-2">Pasta Vazia</div>
+                <div class="text-md text-hint mb-6">Arraste arquivos ou pastas aqui ou clique no botão para fazer upload</div>
+                <button
+                    mat-flat-button
+                    color="primary"
+                    [matMenuTriggerFor]="uploadMenuEmpty"
+                    class="upload-button">
+                    <mat-icon [svgIcon]="'heroicons_outline:cloud-arrow-up'"></mat-icon>
+                    <span class="ml-2">Enviar Arquivos</span>
+                    <mat-icon class="ml-1" [svgIcon]="'heroicons_outline:chevron-down'"></mat-icon>
+                </button>
+
+                <mat-menu #uploadMenuEmpty="matMenu">
+                    <button mat-menu-item (click)="openUploadDialog()">
+                        <mat-icon [svgIcon]="'heroicons_outline:document'"></mat-icon>
+                        <span>Enviar Arquivos</span>
+                    </button>
+                    <button mat-menu-item (click)="openFolderUploadDialog()">
+                        <mat-icon [svgIcon]="'heroicons_outline:folder'"></mat-icon>
+                        <span>Enviar Pasta</span>
+                    </button>
+                </mat-menu>
+            </div>
+
+            <!-- No search results -->
+            <div *ngIf="!isLoading && filteredFiles.length === 0 && searchTerm"
+                 class="flex flex-col h-full items-center justify-center">
+                <mat-icon class="icon-size-24 text-hint mb-4" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+                <div class="text-2xl font-semibold tracking-tight text-secondary mb-2">Nenhum resultado encontrado</div>
+                <div class="text-md text-hint">Nenhum arquivo corresponde à sua pesquisa por "{{ searchTerm }}"</div>
+                <button mat-stroked-button class="mt-4" (click)="onSearchInput('')">
+                    Limpar Pesquisa
+                </button>
+            </div>
+
+            <!-- Files Content -->
+            <div *ngIf="!isLoading && filteredFiles.length > 0" class="flex flex-col h-full overflow-hidden">
+
+                <!-- Toolbar -->
+                <div class="flex-none flex justify-between items-center py-1 border-b">
+                    <!-- Left side - Selection info and actions -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Selection info -->
+                        <div *ngIf="selectionState.selectedFiles.length > 0" class="flex items-center text-sm text-secondary">
+                            <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
+                            {{ selectionState.selectedFiles.length }} selecionados
+                        </div>
+
+                        <!-- Selection actions -->
+                        <div *ngIf="selectionState.selectedFiles.length > 0" class="flex items-center space-x-2">
+                            <button
+                                mat-stroked-button
+                                (click)="deleteSelectedFiles()"
+                                class="text-red-600 border-red-600 hover:bg-red-50">
+                                <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                Excluir
+                            </button>
+                            <button
+                                *ngIf="selectionState.selectedFiles.length === 1"
+                                mat-stroked-button
+                                (click)="openRenameDialog(selectionState.selectedFiles[0])"
+                                class="text-blue-600 border-blue-600 hover:bg-blue-50">
+                                <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                                Renomear
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right side - View options and search -->
+                    <div class="flex items-center space-x-4">
+                        <!-- File count -->
+                        <span class="text-sm text-secondary">{{ filteredFiles.length }} itens</span>
+
+                        <!-- Search -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-64">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:magnifying-glass'" matPrefix></mat-icon>
+                            <input
+                                matInput
+                                placeholder="Pesquisar arquivos..."
+                                [value]="searchTerm"
+                                (input)="onSearchInput($any($event.target).value)">
+                        </mat-form-field>
+
+                        <!-- View toggle -->
+                        <button
+                            mat-icon-button
+                            (click)="toggleViewMode()"
+                            [matTooltip]="gridConfig.viewMode === 'list' ? 'Visualização em Grade' : 'Visualização em Lista'">
+                            <mat-icon [svgIcon]="gridConfig.viewMode === 'list' ? 'heroicons_outline:squares-2x2' : 'heroicons_outline:list-bullet'"></mat-icon>
+                        </button>
+
+                        <!-- Gallery button -->
+                        <button
+                            *ngIf="showInGallery()"
+                            mat-icon-button
+                            (click)="openGalleryForAll()"
+                            matTooltip="Abrir Galeria">
+                            <mat-icon [svgIcon]="'heroicons_outline:photo'"></mat-icon>
+                        </button>
+
+                        <!-- Preview mode toggle -->
+                        <button
+                            mat-icon-button
+                            (click)="togglePreviewMode()"
+                            [matTooltip]="'Modo: ' + (previewMode === 'gallery' ? 'Galeria' : 'Painel')">
+                            <mat-icon [svgIcon]="previewMode === 'gallery' ? 'heroicons_outline:squares-plus' : 'heroicons_outline:rectangle-group'"></mat-icon>
+                        </button>
+
+                        <!-- Sort menu -->
+                        <button mat-icon-button [matMenuTriggerFor]="sortMenu" matTooltip="Opções de Classificação">
+                            <mat-icon [svgIcon]="'heroicons_outline:bars-3-bottom-left'"></mat-icon>
+                        </button>
+                        <mat-menu #sortMenu="matMenu">
+                            <button mat-menu-item (click)="sortFiles('name')">
+                                <mat-icon [svgIcon]="'heroicons_outline:language'"></mat-icon>
+                                <span>Nome</span>
+                                <mat-icon *ngIf="gridConfig.sortBy === 'name'"
+                                          class="ml-auto"
+                                          [svgIcon]="gridConfig.sortDirection === 'asc' ? 'heroicons_outline:chevron-up' : 'heroicons_outline:chevron-down'">
+                                </mat-icon>
+                            </button>
+                            <button mat-menu-item (click)="sortFiles('size')">
+                                <mat-icon [svgIcon]="'heroicons_outline:scale'"></mat-icon>
+                                <span>Tamanho</span>
+                                <mat-icon *ngIf="gridConfig.sortBy === 'size'"
+                                          class="ml-auto"
+                                          [svgIcon]="gridConfig.sortDirection === 'asc' ? 'heroicons_outline:chevron-up' : 'heroicons_outline:chevron-down'">
+                                </mat-icon>
+                            </button>
+                            <button mat-menu-item (click)="sortFiles('modified')">
+                                <mat-icon [svgIcon]="'heroicons_outline:clock'"></mat-icon>
+                                <span>Modificado</span>
+                                <mat-icon *ngIf="gridConfig.sortBy === 'modified'"
+                                          class="ml-auto"
+                                          [svgIcon]="gridConfig.sortDirection === 'asc' ? 'heroicons_outline:chevron-up' : 'heroicons_outline:chevron-down'">
+                                </mat-icon>
+                            </button>
+                        </mat-menu>
+                    </div>
+                </div>
+
+                <!-- Scrollable Content Area -->
+                <div class="flex-1 overflow-y-auto" cdkScrollable>
+
+                    <!-- List View -->
+                    <div *ngIf="gridConfig.viewMode === 'list'">
+                        <table mat-table [dataSource]="dataSource" class="w-full">
+
+                            <!-- Actions Column -->
+                            <ng-container matColumnDef="actions">
+                                <th mat-header-cell *matHeaderCellDef class="w-16">Ações</th>
+                                <td mat-cell *matCellDef="let file" class="w-16">
+                                    <button
+                                        mat-icon-button
+                                        [matMenuTriggerFor]="fileMenu"
+                                        (click)="$event.stopPropagation()"
+                                        class="text-secondary">
+                                        <mat-icon [svgIcon]="'heroicons_outline:ellipsis-vertical'"></mat-icon>
+                                    </button>
+
+                                    <mat-menu #fileMenu="matMenu">
+                                        <button *ngIf="file.isDirectory" mat-menu-item (click)="navigateToDirectory(file)">
+                                            <mat-icon [svgIcon]="'heroicons_outline:folder-open'"></mat-icon>
+                                            <span>Abrir</span>
+                                        </button>
+                                        <button *ngIf="file.isDirectory" mat-menu-item (click)="downloadFolder(file)">
+                                            <mat-icon [svgIcon]="'heroicons_outline:arrow-down-tray'"></mat-icon>
+                                            <span>Download da Pasta</span>
+                                        </button>
+                                        <button *ngIf="!file.isDirectory" mat-menu-item (click)="previewFile(file)">
+                                            <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                                            <span>Visualizar</span>
+                                        </button>
+                                        <button *ngIf="!file.isDirectory" mat-menu-item (click)="downloadFile(file)">
+                                            <mat-icon [svgIcon]="'heroicons_outline:arrow-down-tray'"></mat-icon>
+                                            <span>Baixar</span>
+                                        </button>
+                                        <button *ngIf="!file.isDirectory && canShowInGallery(file)" mat-menu-item (click)="openGallery([file], 0)">
+                                            <mat-icon [svgIcon]="'heroicons_outline:photo'"></mat-icon>
+                                            <span>Abrir Galeria</span>
+                                        </button>
+                                        <button *ngIf="!file.isDirectory && canShowInGallery(file)" mat-menu-item (click)="openPreviewPanel(file)">
+                                            <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                                            <span>Visualizar Painel</span>
+                                        </button>
+                                        <mat-divider></mat-divider>
+                                        <button mat-menu-item (click)="openRenameDialog(file)">
+                                            <mat-icon [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                                            <span>Renomear</span>
+                                        </button>
+                                        <button mat-menu-item (click)="openEditDialog(file)">
+                                            <mat-icon [svgIcon]="'heroicons_outline:pencil-square'"></mat-icon>
+                                            <span>Editar Detalhes</span>
+                                        </button>
+                                        <mat-divider></mat-divider>
+                                        <button mat-menu-item (click)="deleteFile(file)" class="text-red-600">
+                                            <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                            <span>Excluir</span>
+                                        </button>
+                                    </mat-menu>
+                                </td>
+                            </ng-container>
+
+                            <!-- Select Column -->
+                            <ng-container matColumnDef="select">
+                                <th mat-header-cell *matHeaderCellDef class="w-12">
+                                    <mat-checkbox
+                                        [checked]="selectionState.allSelected"
+                                        [indeterminate]="selectionState.someSelected"
+                                        (change)="toggleAllSelection()">
+                                    </mat-checkbox>
+                                </th>
+                                <td mat-cell *matCellDef="let file" class="w-12">
+                                    <mat-checkbox
+                                        [checked]="selection.isSelected(file)"
+                                        (change)="toggleFileSelection(file)"
+                                        (click)="$event.stopPropagation()">
+                                    </mat-checkbox>
+                                </td>
+                            </ng-container>
+
+                            <!-- Icon Column -->
+                            <ng-container matColumnDef="icon">
+                                <th mat-header-cell *matHeaderCellDef class="w-12"></th>
+                                <td mat-cell *matCellDef="let file" class="w-12">
+                                    <mat-icon class="icon-size-5 text-hint" [svgIcon]="getFileIcon(file)"></mat-icon>
+                                </td>
+                            </ng-container>
+
+                            <!-- Name Column -->
+                            <ng-container matColumnDef="name">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-left">Nome</th>
+                                <td mat-cell *matCellDef="let file" class="py-3 file-name-cell">
+                                    <div class="flex flex-col">
+                                        <div class="font-medium text-primary cursor-pointer hover:text-primary-600 transition-colors"
+                                             (click)="onFileNameClick(file, $event)">
+                                            {{ file.originalName }}
+                                        </div>
+                                        <div *ngIf="file.description" class="text-xs text-secondary mt-1">
+                                            {{ file.description }}
+                                        </div>
+                                    </div>
+                                </td>
+                            </ng-container>
+
+                            <!-- Size Column -->
+                            <ng-container matColumnDef="size">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right w-24">Tamanho</th>
+                                <td mat-cell *matCellDef="let file" class="text-right w-24">
+                                    <span *ngIf="!file.isDirectory" class="text-sm text-secondary">
+                                        {{ formatFileSize(file.size) }}
+                                    </span>
+                                    <span *ngIf="file.isDirectory" class="text-sm text-hint">—</span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Modified Column -->
+                            <ng-container matColumnDef="modified">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right w-32">Modificado</th>
+                                <td mat-cell *matCellDef="let file" class="text-right w-32">
+                                    <span class="text-sm text-secondary">{{ formatDate(file.updatedAt) }}</span>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                                class="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                                (click)="onRowClick(row, $event)"></tr>
+                        </table>
+                    </div>
+
+                    <!-- Grid View -->
+                    <div *ngIf="gridConfig.viewMode === 'grid'" class="p-6">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+                            <div *ngFor="let file of filteredFiles; trackBy: trackByFn"
+                                 class="file-grid-item group relative bg-card rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-all cursor-pointer"
+                                 [class.selected]="selection.isSelected(file)"
+                                 (click)="toggleFileSelection(file)"
+                                 (dblclick)="onFileDoubleClick(file)">
+
+                                <!-- Selection checkbox -->
+                                <mat-checkbox
+                                    class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    [class.opacity-100]="selection.isSelected(file)"
+                                    [checked]="selection.isSelected(file)"
+                                    (change)="toggleFileSelection(file)"
+                                    (click)="$event.stopPropagation()">
+                                </mat-checkbox>
+
+                                <!-- File icon -->
+                                <div class="flex justify-center mb-3">
+                                    <mat-icon class="icon-size-12 text-hint" [svgIcon]="getFileIcon(file)"></mat-icon>
+                                </div>
+
+                                <!-- File name -->
+                                <div class="text-center">
+                                    <div class="text-sm font-medium text-primary truncate" [title]="file.originalName">
+                                        {{ file.originalName }}
+                                    </div>
+                                    <div *ngIf="!file.isDirectory" class="text-xs text-secondary mt-1">
+                                        {{ formatFileSize(file.size) }}
+                                    </div>
+                                </div>
+
+                                <!-- Context menu trigger -->
+                                <button
+                                    mat-icon-button
+                                    class="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    [matMenuTriggerFor]="gridFileMenu"
+                                    (click)="$event.stopPropagation()">
+                                    <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:ellipsis-vertical'"></mat-icon>
+                                </button>
+
+                                <mat-menu #gridFileMenu="matMenu">
+                                    <button *ngIf="file.isDirectory" mat-menu-item (click)="navigateToDirectory(file)">
+                                        <mat-icon [svgIcon]="'heroicons_outline:folder-open'"></mat-icon>
+                                        <span>Abrir</span>
+                                    </button>
+                                    <button *ngIf="file.isDirectory" mat-menu-item (click)="downloadFolder(file)">
+                                        <mat-icon [svgIcon]="'heroicons_outline:arrow-down-tray'"></mat-icon>
+                                        <span>Download da Pasta</span>
+                                    </button>
+                                    <button *ngIf="!file.isDirectory" mat-menu-item (click)="previewFile(file)">
+                                        <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                                        <span>Visualizar</span>
+                                    </button>
+                                    <button *ngIf="!file.isDirectory" mat-menu-item (click)="downloadFile(file)">
+                                        <mat-icon [svgIcon]="'heroicons_outline:arrow-down-tray'"></mat-icon>
+                                        <span>Baixar</span>
+                                    </button>
+                                    <button *ngIf="!file.isDirectory && canShowInGallery(file)" mat-menu-item (click)="openGallery([file], 0)">
+                                        <mat-icon [svgIcon]="'heroicons_outline:photo'"></mat-icon>
+                                        <span>Abrir Galeria</span>
+                                    </button>
+                                    <button *ngIf="!file.isDirectory && canShowInGallery(file)" mat-menu-item (click)="openPreviewPanel(file)">
+                                        <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                                        <span>Visualizar Painel</span>
+                                    </button>
+                                    <mat-divider></mat-divider>
+                                    <button mat-menu-item (click)="openRenameDialog(file)">
+                                        <mat-icon [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                                        <span>Renomear</span>
+                                    </button>
+                                    <button mat-menu-item (click)="openEditDialog(file)">
+                                        <mat-icon [svgIcon]="'heroicons_outline:pencil-square'"></mat-icon>
+                                        <span>Editar Detalhes</span>
+                                    </button>
+                                    <mat-divider></mat-divider>
+                                    <button mat-menu-item (click)="deleteFile(file)" class="text-red-600">
+                                        <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                        <span>Excluir</span>
+                                    </button>
+                                </mat-menu>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden file input for manual upload -->
+        <input
+            #fileInput
+            type="file"
+            multiple
+            style="display: none"
+            (change)="onFilesSelected($event)">
+
+        <!-- Hidden folder input for manual folder upload -->
+        <input
+            #folderInput
+            type="file"
+            webkitdirectory
+            multiple
+            style="display: none"
+            (change)="onFilesSelected($event)">
+
+        <!-- File Preview Panel Component -->
+        <file-preview-panel
+            [file]="previewPanelFile"
+            [visible]="previewPanelVisible"
+            position="right"
+            width="400px"
+            (close)="onPreviewPanelClose()"
+            (download)="onPreviewPanelDownload($event)"
+            (fullscreen)="onPreviewPanelFullscreen($event)">
+        </file-preview-panel>
+
+    </mat-drawer-content>
+
+    <!-- Gallery Drawer -->
+    <mat-drawer
+        class="w-full dark:bg-gray-900 bg-white"
+        [autoFocus]="false"
+        [mode]="'over'"
+        [position]="'end'"
+        [opened]="galleryVisible"
+        (closed)="onGalleryClose()"
+        #galleryDrawer>
+
+        <file-gallery *ngIf="galleryVisible"
+            [files]="galleryFiles"
+            [config]="galleryConfig"
+            [currentIndex]="galleryCurrentIndex"
+            [visible]="galleryVisible"
+            (close)="onGalleryClose()"
+            (download)="onGalleryDownload($event)"
+            (indexChanged)="onGalleryIndexChange($event)">
+        </file-gallery>
+    </mat-drawer>
+
+</mat-drawer-container>

@@ -1,0 +1,25 @@
+portal-storage-download-entities-files {
+    .mat-mdc-dialog-container {
+        .mdc-dialog__surface {
+            border-radius: 16px;
+        }
+    }
+}
+.portal-storage-download-entities-files-container {
+    max-width: 90vw !important;
+    width: 90vw !important;
+    max-height: 90vh !important;
+    height: 90vh !important;
+
+    mat-dialog-container {
+        padding: 10px !important;
+    }
+    .readOnly {
+        pointer-events: none;
+        opacity: 60%;
+    }
+    .mat-card-header-text {
+        @apply w-full #{'!important'};
+    }
+}
+

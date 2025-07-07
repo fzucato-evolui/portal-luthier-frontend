@@ -86,7 +86,6 @@
                         <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
                         <td mat-cell *matCellDef="let model">
                             <mat-icon [svgIcon]="'custom:' + model.luthierDatabase.databaseType.toLowerCase()" class="evolui-menu-item-icon icon-size-8"/>
-                            {{ model.luthierDatabase.databaseType | enumTranslate:'DatabaseTypeEnum' }}
                         </td>
                     </ng-container>
                     <!-- debugDataBase -->

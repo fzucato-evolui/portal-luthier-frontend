@@ -1,0 +1,125 @@
+<!-- Preview Panel Overlay -->
+<div *ngIf="visible"
+     class="fixed top-0 bottom-0 bg-white dark:bg-gray-900 shadow-2xl z-50 flex flex-col border-l border-gray-200 dark:border-gray-700 transition-transform duration-300"
+     [class.right-0]="position === 'right'"
+     [class.left-0]="position === 'left'"
+     [style.width]="width">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+        <div class="flex items-center space-x-3 min-w-0 flex-1">
+            <mat-icon [svgIcon]="getFileIcon()" class="text-gray-500 dark:text-gray-400"></mat-icon>
+            <div class="min-w-0 flex-1">
+                <h3 class="font-medium text-gray-900 dark:text-white truncate">
+                    {{ file?.originalName || 'Arquivo' }}
+                </h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ formatFileSize(file?.size || 0) }}
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-1">
+            <button mat-icon-button
+                    (click)="onDownload()"
+                    matTooltip="Baixar"
+                    class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <mat-icon [svgIcon]="'heroicons_outline:arrow-down-tray'"></mat-icon>
+            </button>
+
+            <button mat-icon-button
+                    (click)="onFullscreen()"
+                    matTooltip="Tela Cheia"
+                    class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <mat-icon [svgIcon]="'heroicons_outline:arrow-top-right-on-square'"></mat-icon>
+            </button>
+
+            <button mat-icon-button
+                    (click)="onClose()"
+                    matTooltip="Fechar"
+                    class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Preview Content -->
+    <div class="flex-1 overflow-hidden">
+        <div *ngIf="!canPreview() || file?.isDirectory"
+             class="h-full flex flex-col items-center justify-center p-8 text-center">
+            <mat-icon [svgIcon]="getFileIcon()"
+                      class="text-6xl text-gray-300 dark:text-gray-600 mb-4"></mat-icon>
+            <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                <span *ngIf="file?.isDirectory">Diretório</span>
+                <span *ngIf="!file?.isDirectory">Visualização não disponível</span>
+            </h4>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                <span *ngIf="file?.isDirectory">Use o explorador para navegar neste diretório.</span>
+                <span *ngIf="!file?.isDirectory">Este tipo de arquivo não pode ser visualizado no painel.</span>
+            </p>
+            <button *ngIf="!file?.isDirectory"
+                    mat-stroked-button
+                    (click)="onDownload()"
+                    class="text-blue-600 border-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-400">
+                <mat-icon [svgIcon]="'heroicons_outline:arrow-down-tray'" class="mr-2"></mat-icon>
+                Baixar Arquivo
+            </button>
+        </div>
+
+        <div *ngIf="canPreview() && !file?.isDirectory" class="h-full p-4">
+            <!-- Images -->
+            <img *ngIf="isImage() && safeUrl"
+                 [src]="safeUrl"
+                 [alt]="file?.originalName"
+                 class="w-full h-auto max-h-full object-contain rounded-lg shadow-sm">
+
+            <!-- Videos -->
+            <video *ngIf="isVideo() && safeUrl"
+                   [src]="safeUrl"
+                   controls
+                   preload="metadata"
+                   controlsList="nodownload"
+                   class="w-full h-auto max-h-full rounded-lg shadow-sm">
+                Seu navegador não suporta a reprodução de vídeo.
+            </video>
+
+            <!-- Audio -->
+            <div *ngIf="isAudio() && safeUrl"
+                 class="flex flex-col items-center justify-center h-full space-y-6">
+                <mat-icon [svgIcon]="'heroicons_outline:musical-note'"
+                          class="text-6xl text-blue-500"></mat-icon>
+                <audio [src]="safeUrl"
+                       controls
+                       preload="metadata"
+                       class="w-full">
+                    Seu navegador não suporta a reprodução de áudio.
+                </audio>
+            </div>
+
+            <!-- Office Documents -->
+            <iframe *ngIf="isOfficeDocument()"
+                    [src]="getOfficeViewerUrl()"
+                    class="w-full h-full border-0 rounded-lg"
+                    frameborder="0">
+            </iframe>
+
+            <!-- PDF -->
+            <iframe *ngIf="isPdf() && safeUrl"
+                    [src]="safeUrl"
+                    class="w-full h-full border-0 rounded-lg"
+                    frameborder="0">
+            </iframe>
+        </div>
+    </div>
+
+    <!-- File Details -->
+    <div *ngIf="file?.description"
+         class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+        <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Descrição</h4>
+        <p class="text-sm text-gray-600 dark:text-gray-300">{{ file.description }}</p>
+    </div>
+
+    <!-- Background overlay for mobile -->
+    <div class="fixed inset-0 bg-black bg-opacity-20 -z-10 lg:hidden"
+         (click)="onClose()"></div>
+</div>

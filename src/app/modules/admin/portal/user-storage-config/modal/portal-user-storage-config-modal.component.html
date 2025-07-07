@@ -83,14 +83,9 @@
             </button>
 
             <div class="flex-auto p-6 overflow-y-auto">
-                <ng-container *ngIf="loading">
-                    <div class="flex flex-auto items-center justify-center">
-                        <mat-spinner [diameter]="40"></mat-spinner>
-                    </div>
-                </ng-container>
-                <ng-container *ngIf="!loading && selectedConfigType">
+                <ng-container *ngIf="selectedConfigType">
                     <!-- Dynamic Content Area for each Config Type -->
-                    <div *ngIf="error" class="text-red-500 mb-4">{{ error }}</div>
+                    <div *ngIf="error" class="text-red-500 mb-4 hidden">{{ error }}</div>
 
                     <ng-container [ngSwitch]="selectedConfigType">
                         <ng-container *ngSwitchCase="configTypes.GOOGLE_DRIVE">
@@ -128,7 +123,7 @@
                     </ng-container>
 
                 </ng-container>
-                <ng-container *ngIf="!loading && !selectedConfigType">
+                <ng-container *ngIf="!selectedConfigType">
                     <div class="flex flex-auto items-center justify-center text-secondary">
                         Selecione um tipo de armazenamento no menu lateral.
                     </div>
@@ -138,4 +133,4 @@
 
     </mat-drawer-container>
 
-</div> 
+</div>

@@ -1,0 +1,391 @@
+<!-- Gallery Content -->
+<div class="flex flex-col h-full bg-black text-white"
+     [class.bg-white]="config.theme === 'light'"
+     [class.text-gray-900]="config.theme === 'light'">
+
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="flex-1 flex items-center justify-center">
+        <mat-spinner diameter="64"
+                   [color]="config.theme === 'light' ? 'primary' : 'accent'"></mat-spinner>
+    </div>
+
+    <!-- Gallery Content -->
+    <ng-container *ngIf="currentFile && !isLoading">
+
+        <!-- Header Controls -->
+        <div class="flex-none flex items-center justify-between p-4 bg-black bg-opacity-20 backdrop-blur-sm"
+             [class.bg-gray-100]="config.theme === 'light'">
+            <!-- File Info -->
+            <div *ngIf="config.showFileInfo" class="flex items-center space-x-3 min-w-0">
+                <mat-icon [svgIcon]="getFileIcon(currentFile)"
+                          class="text-gray-300"
+                          [class.text-gray-600]="config.theme === 'light'"></mat-icon>
+                <div class="min-w-0">
+                    <div class="font-medium truncate">{{ currentFile.originalName }}</div>
+                    <div class="text-sm text-gray-300"
+                         [class.text-gray-600]="config.theme === 'light'">
+                        <span *ngIf="!currentFile.isDirectory">
+                            {{ formatFileSize(currentFile.size) }}
+                        </span>
+                        <span *ngIf="currentFile.isDirectory" class="text-blue-400">
+                            Diretório
+                        </span>
+                        <span *ngIf="files.length > 1" class="ml-2">
+                            {{ currentIndex + 1 }} de {{ files.length }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center space-x-2">
+                <button *ngIf="config.allowDownload && !currentFile.isDirectory"
+                        mat-icon-button
+                        (click)="onDownload()"
+                        matTooltip="Baixar Arquivo"
+                        class="text-white hover:bg-white hover:bg-opacity-10"
+                        [class.text-gray-700]="config.theme === 'light'"
+                        [class.hover:bg-gray-200]="config.theme === 'light'">
+                    <mat-icon [svgIcon]="'heroicons_outline:arrow-down-tray'"></mat-icon>
+                </button>
+
+                <button *ngIf="config.allowFullscreen && canEmbed(currentFile) && !currentFile.isDirectory"
+                        mat-icon-button
+                        (click)="onFullscreen()"
+                        matTooltip="Abrir em Nova Aba"
+                        class="text-white hover:bg-white hover:bg-opacity-10"
+                        [class.text-gray-700]="config.theme === 'light'"
+                        [class.hover:bg-gray-200]="config.theme === 'light'">
+                    <mat-icon [svgIcon]="'heroicons_outline:arrow-top-right-on-square'"></mat-icon>
+                </button>
+
+                <button mat-icon-button
+                        (click)="onClose()"
+                        matTooltip="Fechar"
+                        class="text-white hover:bg-white hover:bg-opacity-10"
+                        [class.text-gray-700]="config.theme === 'light'"
+                        [class.hover:bg-gray-200]="config.theme === 'light'">
+                    <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex items-center justify-center p-4 min-h-0 relative">
+
+            <!-- Navigation: Previous -->
+            <button *ngIf="files.length > 1 && currentIndex > 0"
+                    mat-fab
+                    (click)="goToPrevious()"
+                    matTooltip="Anterior"
+                    class="absolute left-4 top-1/2 transform -translate-y-1/2 z-10"
+                    [class.bg-black]="config.theme !== 'light'"
+                    [class.bg-opacity-30]="config.theme !== 'light'"
+                    [class.hover:bg-opacity-50]="config.theme !== 'light'"
+                    [class.bg-white]="config.theme === 'light'"
+                    [class.bg-opacity-90]="config.theme === 'light'">
+                <mat-icon [svgIcon]="'heroicons_outline:chevron-left'"
+                          class="text-white"
+                          [class.text-gray-700]="config.theme === 'light'"></mat-icon>
+            </button>
+
+            <!-- Navigation: Next -->
+            <button *ngIf="files.length > 1 && currentIndex < files.length - 1"
+                    mat-fab
+                    (click)="goToNext()"
+                    matTooltip="Próximo"
+                    class="absolute right-4 top-1/2 transform -translate-y-1/2 z-10"
+                    [class.bg-black]="config.theme !== 'light'"
+                    [class.bg-opacity-30]="config.theme !== 'light'"
+                    [class.hover:bg-opacity-50]="config.theme !== 'light'"
+                    [class.bg-white]="config.theme === 'light'"
+                    [class.bg-opacity-90]="config.theme === 'light'">
+                <mat-icon [svgIcon]="'heroicons_outline:chevron-right'"
+                          class="text-white"
+                          [class.text-gray-700]="config.theme === 'light'"></mat-icon>
+            </button>
+
+            <!-- Content Display -->
+            <div *ngIf="visible" class="w-full h-full flex items-center justify-center">
+
+                <!-- Directory Display -->
+                <div *ngIf="currentFile.isDirectory"
+                     class="flex flex-col items-center space-y-6 text-center">
+                    <mat-icon [svgIcon]="'heroicons_outline:folder'"
+                              class="text-8xl text-blue-400"></mat-icon>
+
+                    <div class="space-y-2">
+                        <h3 class="text-xl font-semibold">{{ currentFile.originalName }}</h3>
+                        <p class="text-gray-300"
+                           [class.text-gray-600]="config.theme === 'light'">Diretório</p>
+                        <p *ngIf="currentFile.description"
+                           class="text-sm text-gray-400"
+                           [class.text-gray-500]="config.theme === 'light'">
+                            {{ currentFile.description }}
+                        </p>
+                    </div>
+
+                    <button mat-stroked-button
+                            (click)="onClose()"
+                            class="text-white border-white hover:bg-white hover:bg-opacity-10"
+                            [class.text-gray-700]="config.theme === 'light'"
+                            [class.border-gray-700]="config.theme === 'light'"
+                            [class.hover:bg-gray-100]="config.theme === 'light'">
+                        <mat-icon [svgIcon]="'heroicons_outline:folder-open'" class="mr-2"></mat-icon>
+                        Fechar e Navegar
+                    </button>
+                </div>
+
+                <!-- Images -->
+                <img *ngIf="isImage(currentFile) && safeUrl && !currentFile.isDirectory"
+                     [src]="safeUrl"
+                     [alt]="currentFile.originalName"
+                     (load)="onMediaLoad()"
+                     (error)="onMediaError($event)"
+                     class="max-w-full max-h-full object-contain rounded-lg shadow-2xl bg-white">
+
+                <!-- Videos -->
+                <video *ngIf="isVideo(currentFile) && safeUrl && !currentFile.isDirectory"
+                       [src]="safeUrl"
+                       controls
+                       preload="metadata"
+                       controlsList="nodownload"
+                       (loadeddata)="onMediaLoad()"
+                       (error)="onMediaError($event)"
+                       class="max-w-full max-h-full rounded-lg shadow-2xl">
+                    <p>Seu navegador não suporta a reprodução de vídeo.</p>
+                </video>
+
+                <!-- Audio -->
+                <div *ngIf="isAudio(currentFile) && safeUrl && !currentFile.isDirectory"
+                     class="flex flex-col items-center space-y-8 bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-8 min-w-96"
+                     [class.bg-gray-100]="config.theme === 'light'">
+                    <div class="text-center">
+                        <mat-icon [svgIcon]="'heroicons_outline:musical-note'"
+                                  class="text-8xl mb-4 text-white"
+                                  [class.text-gray-700]="config.theme === 'light'"></mat-icon>
+                        <h3 class="text-lg font-medium mb-2">{{ currentFile.originalName }}</h3>
+                        <p class="text-sm text-gray-300"
+                           [class.text-gray-600]="config.theme === 'light'">{{ formatFileSize(currentFile.size) }}</p>
+                    </div>
+                    <audio [src]="safeUrl"
+                           controls
+                           preload="metadata"
+                           (loadeddata)="onMediaLoad()"
+                           (error)="onMediaError($event)"
+                           class="w-full max-w-md">
+                        <p>Seu navegador não suporta a reprodução de áudio.</p>
+                    </audio>
+                </div>
+
+                <!-- Office Documents -->
+                <div *ngIf="isOfficeDocument(currentFile) && !currentFile.isDirectory"
+                     class="w-full h-full flex flex-col">
+                    <iframe [src]="getOfficeViewerUrl()"
+                            (load)="onMediaLoad()"
+                            class="w-full flex-1 rounded-lg shadow-2xl border-0"
+                            frameborder="0">
+                    </iframe>
+                </div>
+
+                <!-- PDF Documents -->
+                <iframe *ngIf="isPdf(currentFile) && safeUrl && !currentFile.isDirectory"
+                        [src]="safeUrl"
+                        (load)="onMediaLoad()"
+                        class="w-full h-full rounded-lg shadow-2xl border-0"
+                        frameborder="0">
+                </iframe>
+
+                <!-- Code/Text Files (with content preview) -->
+                <div *ngIf="(isCode(currentFile) || isText(currentFile)) && !currentFile.isDirectory"
+                     class="w-full h-full flex flex-col">
+
+                    <!-- Content Area -->
+                    <div class="flex-1 p-4 overflow-auto">
+                        <div *ngIf="isLoadingTextContent" class="flex items-center justify-center h-full">
+                            <mat-spinner diameter="32"></mat-spinner>
+                            <span class="ml-3 text-gray-300" [class.text-gray-600]="config.theme === 'light'">
+                                Carregando conteúdo...
+                            </span>
+                        </div>
+
+                        <div *ngIf="!isLoadingTextContent && textContent && textContent.length > 0"
+                             class="bg-gray-900 rounded-lg p-4 h-full overflow-hidden"
+                             [class.bg-gray-50]="config.theme === 'light'"
+                             [class.border]="config.theme === 'light'"
+                             [class.border-gray-200]="config.theme === 'light'">
+
+                            <!-- Code with syntax highlighting -->
+                            <div *ngIf="isCode(currentFile) && textContent" class="h-full overflow-auto">
+                                <code
+                                    class="hljs text-sm leading-relaxed font-mono block p-4 rounded-lg overflow-auto"
+                                    [highlight]="textContent"
+                                    [lineNumbers]="true"
+                                    [languages]="getHighlightLanguage()">
+                                </code>
+                            </div>
+
+                            <!-- Plain text -->
+                            <div *ngIf="!isCode(currentFile) && textContent" class="h-full overflow-auto">
+                                <pre class="text-sm text-gray-300 whitespace-pre-wrap break-words font-mono leading-relaxed p-4 rounded-lg"
+                                     [class.text-gray-800]="config.theme === 'light'">{{ textContent }}</pre>
+                            </div>
+                        </div>
+
+                        <div *ngIf="!isLoadingTextContent && textContentError"
+                             class="flex flex-col items-center justify-center h-full text-center space-y-4">
+                            <mat-icon [svgIcon]="'heroicons_outline:exclamation-triangle'"
+                                      class="text-6xl text-red-400 mb-4"></mat-icon>
+                            <h3 class="text-lg font-semibold text-red-400 mb-2">Erro ao carregar conteúdo</h3>
+                            <p class="text-gray-300 max-w-md" [class.text-gray-600]="config.theme === 'light'">
+                                {{ textContentError }}
+                            </p>
+
+                            <!-- Show alternative actions when there's a CORS error -->
+                            <div *ngIf="textContentError.includes('CORS')" class="flex space-x-3 mt-4">
+                                <button *ngIf="config.allowDownload"
+                                        mat-stroked-button
+                                        (click)="onDownload()"
+                                        class="text-white border-white hover:bg-white hover:bg-opacity-10"
+                                        [class.text-gray-700]="config.theme === 'light'"
+                                        [class.border-gray-700]="config.theme === 'light'"
+                                        [class.hover:bg-gray-100]="config.theme === 'light'">
+                                    <mat-icon [svgIcon]="'heroicons_outline:arrow-down-tray'" class="mr-2"></mat-icon>
+                                    Baixar Arquivo
+                                </button>
+
+                                <button *ngIf="config.allowFullscreen && currentFile.presignedUrl"
+                                        mat-stroked-button
+                                        (click)="onFullscreen()"
+                                        class="text-white border-white hover:bg-white hover:bg-opacity-10"
+                                        [class.text-gray-700]="config.theme === 'light'"
+                                        [class.border-gray-700]="config.theme === 'light'"
+                                        [class.hover:bg-gray-100]="config.theme === 'light'">
+                                    <mat-icon [svgIcon]="'heroicons_outline:arrow-top-right-on-square'" class="mr-2"></mat-icon>
+                                    Abrir em Nova Aba
+                                </button>
+                            </div>
+                        </div>
+
+                        <div *ngIf="!isLoadingTextContent && (!textContent || textContent.length === 0) && !textContentError"
+                             class="flex flex-col items-center justify-center h-full text-center">
+                            <mat-icon [svgIcon]="getFileIcon(currentFile)"
+                                      class="text-8xl text-gray-300 mb-6"
+                                      [class.text-gray-600]="config.theme === 'light'"></mat-icon>
+
+                            <div class="space-y-2 mb-6">
+                                <h3 class="text-xl font-semibold">{{ currentFile.originalName }}</h3>
+                                <p class="text-gray-300"
+                                   [class.text-gray-600]="config.theme === 'light'">
+                                    Arquivo {{ isCode(currentFile) ? 'de código' : 'de texto' }}
+                                </p>
+                                <p class="text-sm text-gray-400"
+                                   [class.text-gray-500]="config.theme === 'light'">
+                                    Tamanho: {{ formatFileSize(currentFile.size) }}
+                                </p>
+                            </div>
+
+                            <div class="flex space-x-3">
+                                <button *ngIf="config.allowDownload"
+                                        mat-stroked-button
+                                        (click)="onDownload()"
+                                        class="text-white border-white hover:bg-white hover:bg-opacity-10"
+                                        [class.text-gray-700]="config.theme === 'light'"
+                                        [class.border-gray-700]="config.theme === 'light'"
+                                        [class.hover:bg-gray-100]="config.theme === 'light'">
+                                    <mat-icon [svgIcon]="'heroicons_outline:arrow-down-tray'" class="mr-2"></mat-icon>
+                                    Baixar Arquivo
+                                </button>
+
+                                <button *ngIf="config.allowFullscreen && currentFile.presignedUrl"
+                                        mat-stroked-button
+                                        (click)="onFullscreen()"
+                                        class="text-white border-white hover:bg-white hover:bg-opacity-10"
+                                        [class.text-gray-700]="config.theme === 'light'"
+                                        [class.border-gray-700]="config.theme === 'light'"
+                                        [class.hover:bg-gray-100]="config.theme === 'light'">
+                                    <mat-icon [svgIcon]="'heroicons_outline:arrow-top-right-on-square'" class="mr-2"></mat-icon>
+                                    Abrir em Nova Aba
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Other unsupported files -->
+                <div *ngIf="!canEmbed(currentFile) && !isCode(currentFile) && !isText(currentFile) && !currentFile.isDirectory"
+                     class="flex flex-col items-center space-y-6 text-center">
+                    <mat-icon [svgIcon]="getFileIcon(currentFile)"
+                              class="text-8xl text-gray-300"
+                              [class.text-gray-600]="config.theme === 'light'"></mat-icon>
+
+                    <div class="space-y-2">
+                        <h3 class="text-xl font-semibold">{{ currentFile.originalName }}</h3>
+                        <p class="text-gray-300"
+                           [class.text-gray-600]="config.theme === 'light'">Visualização não disponível para este tipo de arquivo</p>
+                        <p class="text-sm text-gray-400"
+                           [class.text-gray-500]="config.theme === 'light'">Tamanho: {{ formatFileSize(currentFile.size) }}</p>
+                        <p *ngIf="currentFile.description"
+                           class="text-sm text-gray-400"
+                           [class.text-gray-500]="config.theme === 'light'">
+                            {{ currentFile.description }}
+                        </p>
+                    </div>
+
+                    <div class="flex space-x-3">
+                        <button *ngIf="config.allowDownload"
+                                mat-stroked-button
+                                (click)="onDownload()"
+                                class="text-white border-white hover:bg-white hover:bg-opacity-10"
+                                [class.text-gray-700]="config.theme === 'light'"
+                                [class.border-gray-700]="config.theme === 'light'"
+                                [class.hover:bg-gray-100]="config.theme === 'light'">
+                            <mat-icon [svgIcon]="'heroicons_outline:arrow-down-tray'" class="mr-2"></mat-icon>
+                            Baixar Arquivo
+                        </button>
+
+                        <button *ngIf="config.allowFullscreen && currentFile.presignedUrl"
+                                mat-stroked-button
+                                (click)="onFullscreen()"
+                                class="text-white border-white hover:bg-white hover:bg-opacity-10"
+                                [class.text-gray-700]="config.theme === 'light'"
+                                [class.border-gray-700]="config.theme === 'light'"
+                                [class.hover:bg-gray-100]="config.theme === 'light'">
+                            <mat-icon [svgIcon]="'heroicons_outline:arrow-top-right-on-square'" class="mr-2"></mat-icon>
+                            Abrir em Nova Aba
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thumbnail Navigation -->
+        <div *ngIf="files.length > 1"
+             class="flex-none bg-black bg-opacity-20 backdrop-blur-sm p-4"
+             [class.bg-gray-100]="config.theme === 'light'">
+            <div class="flex space-x-2 overflow-x-auto pb-2">
+                <button *ngFor="let file of files; let i = index"
+                        (click)="goToIndex(i)"
+                        [class.ring-2]="i === currentIndex"
+                        [class.ring-blue-400]="i === currentIndex"
+                        class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-800 hover:bg-gray-700 transition-all"
+                        [class.bg-gray-200]="config.theme === 'light'"
+                        [class.hover:bg-gray-300]="config.theme === 'light'">
+
+                    <!-- Thumbnail for images -->
+                    <img *ngIf="isImage(file) && file.presignedUrl && !file.isDirectory"
+                         [src]="file.presignedUrl"
+                         [alt]="file.originalName"
+                         class="w-full h-full object-cover">
+
+                    <!-- Icon for other files -->
+                    <div *ngIf="!isImage(file) || file.isDirectory"
+                         class="w-full h-full flex items-center justify-center">
+                        <mat-icon [svgIcon]="getFileIcon(file)"
+                                  class="text-gray-400 text-lg"
+                                  [class.text-gray-600]="config.theme === 'light'"></mat-icon>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </ng-container>
+</div>

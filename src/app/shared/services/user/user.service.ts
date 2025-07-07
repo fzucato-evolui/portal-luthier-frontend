@@ -5,7 +5,7 @@ import {UtilFunctions} from "../../util/util-functions";
 import {catchError, switchMap} from "rxjs/operators";
 import {of} from "rxjs/internal/observable/of";
 import {RootService} from "../root/root.service";
-import {UserConfigModel, UserModel} from '../../models/user.model';
+import {RoleTypeEnum, UserConfigModel, UserModel} from '../../models/user.model';
 
 export interface StorageChange {
     key: string;
@@ -113,16 +113,54 @@ export class UserService
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
 
-    hasAnyAuthority(authorities: any[]): boolean {
-        if(authorities.length === 0 && UtilFunctions.isValidObject(this.model)) {
+    /**
+     * Check if the current user has a specific role by name.
+     * @param roleName The name of the role to check.
+     * @returns boolean - True if the user has the role, false otherwise.
+     */
+    userHasRole(roleName: string): boolean {
+        // If model or roles are not valid, user has no roles
+        if (!UtilFunctions.isValidObject(this.model) || !Array.isArray(this.model.roles)) {
+             return false;
+        }
+        return this.model.roles.some(role => role.name === roleName);
+    }
+
+    /**
+     * Find the highest hierarchical role level for the current user.
+     * @returns number | undefined - The highest hierarchy level or undefined if no hierarchical roles.
+     */
+    getUserHighestHierarchyLevel(): number | undefined {
+        // If model or roles are not valid, user has no roles
+        if (!UtilFunctions.isValidObject(this.model) || !Array.isArray(this.model.roles)) {
+             return undefined;
+        }
+        const hierarchicalRoles = this.model.roles.filter(role => role.type === RoleTypeEnum.HIERARCHICAL);
+        if (hierarchicalRoles.length === 0) {
+            return undefined;
+        }
+        // Assuming higher number means higher level
+        return Math.max(...hierarchicalRoles.map(role => role.hierarchyLevel || 0));
+    }
+
+    hasAnyAuthority(authorities: string[]): boolean {
+        // Check if authorities array is empty or model is invalid
+        if (authorities.length === 0 && UtilFunctions.isValidObject(this.model)) {
             return true;
         }
 
-        for (let i = 0; i < authorities.length; i++) {
-            if (UtilFunctions.isValidStringOrArray(this.model.authorities) === true && this.model.authorities.findIndex( x => x === authorities[i]) >= 0) {
+        // If model or roles are not valid, user has no authorities to check against
+        if (!UtilFunctions.isValidObject(this.model) || !Array.isArray(this.model.roles)) {
+             return false;
+        }
+
+        // Check if the user has any of the provided authorities (role names)
+        for (const authorityName of authorities) {
+            if (this.userHasRole(authorityName)) { // Use the new helper method
                 return true;
             }
         }
+
         return false;
     }
 

@@ -19,9 +19,12 @@ export const authInterceptor = (req: HttpRequest<unknown>, next: HttpHandlerFn):
     const splashService = inject(FuseSplashScreenService)
 
     const showWarning = (error) => {
+        const errorMessage = UtilFunctions.getHttpErrorMessage(error);
+        const messageText = typeof errorMessage === 'string' ? errorMessage : String(errorMessage || 'Erro desconhecido');
+
         const config: DialogConfirmationConfig = {
             title      : 'ALERTA',
-            message    : (UtilFunctions.getHttpErrorMessage(error) as string).replace(new RegExp('\r?\n','g'), '<br />'),
+            message    : messageText.replace(new RegExp('\r?\n','g'), '<br />'),
             icon       : {
                 show : true,
                 name : 'fa-exclamation-circle',
@@ -41,7 +44,7 @@ export const authInterceptor = (req: HttpRequest<unknown>, next: HttpHandlerFn):
         };
 
         const dialogRef = _messageService.open(
-            (UtilFunctions.getHttpErrorMessage(error) as string).replace(new RegExp('\r?\n','g'), '<br />'),
+            messageText.replace(new RegExp('\r?\n','g'), '<br />'),
             "ALERTA",
             'error');
     }
@@ -64,6 +67,7 @@ export const authInterceptor = (req: HttpRequest<unknown>, next: HttpHandlerFn):
         headers: headers,
         withCredentials: true
     });
+
     // Response
     return next(newReq).pipe(
         catchError((error) =>
@@ -78,6 +82,7 @@ export const authInterceptor = (req: HttpRequest<unknown>, next: HttpHandlerFn):
                 location.reload();
                 return;
             }
+
             splashService.hide();
             showWarning(error);
             return throwError(error);
