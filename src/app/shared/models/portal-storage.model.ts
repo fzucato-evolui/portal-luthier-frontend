@@ -45,7 +45,7 @@ export interface PortalStorageFileModel {
     identifierId: number;
     originalName: string;
     fileName: string;
-    fullPath: string;
+    parentId: number;
     storagePath: string;
     fileKey: string;
     isDirectory: boolean;
@@ -54,10 +54,13 @@ export interface PortalStorageFileModel {
     fileType?: PortalFileTypeEnum;
     description?: string;
     identifier?: PortalStorageEntityIdentifierModel;
+    parent?: PortalStorageFileModel;
     createdAt: Date;
     updatedAt: Date;
     presignedUrl?: string; // Campo transient para URLs pré-assinadas
     extension?: string; // Extensão do arquivo
+    children?: PortalStorageFileModel[]; // Para diretórios, lista de arquivos/diretórios filhos
+    ancestors?: { [key: number]: string };
 }
 
 export interface PortalStorageEntityIdentifierModel {
@@ -69,7 +72,7 @@ export interface PortalStorageEntityIdentifierModel {
     description?: string;
     files?: PortalStorageFileModel[];
     entity?: PortalStorageEntityModel;
-    fullStoragePath?: string;
+    currentDirectory?: PortalStorageFileModel;
 }
 
 export interface PortalStorageEntityModel {
@@ -109,6 +112,7 @@ export interface StorageNavigationStateModel {
     entityName?: string;
     identifierId?: number;
     identifierName?: string;
+    directory?: PortalStorageFileModel;
     currentPath: string;
     breadcrumbs: StorageBreadcrumbModel[];
 }
@@ -119,31 +123,10 @@ export interface StorageBreadcrumbModel {
     clickable: boolean;
 }
 
-export interface FileUploadRequestModel {
-    userId: number;
-    entityName: string;
-    entityIdentifier: string;
-    file: File;
-    fullPath?: string;
-    description?: string;
-}
-
-export interface CreateDirectoryRequestModel {
-    userId: number;
-    entityName: string;
-    entityIdentifier: string;
-    directoryPath: string;
-    description?: string;
-}
-
 export interface EditFileRequestModel {
     id: number;
     description?: string;
     tags?: string;
-}
-
-export interface MoveFileRequestModel {
-    newFullPath: string;
 }
 
 export interface PresignedUrlResponseModel {

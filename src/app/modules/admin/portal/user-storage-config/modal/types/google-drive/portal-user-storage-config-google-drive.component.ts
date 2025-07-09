@@ -1,5 +1,5 @@
-import {Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation} from '@angular/core';
+import {CommonModule, JsonPipe} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
@@ -9,6 +9,10 @@ import {MatCardModule} from '@angular/material/card';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {PortalUserStorageConfig} from '../../../../../../../shared/models/portal-user-storage-config.model';
 import {GoogleDriveConfig} from '../../../../../../../shared/models/portal-user-storage-config-types.model';
+import {NgxFileDropEntry, NgxFileDropModule} from 'ngx-file-drop';
+import {UtilFunctions} from '../../../../../../../shared/util/util-functions';
+import {GoogleServiceAccountModel} from '../../../../../../../shared/models/system-config.model';
+import {MessageDialogService} from '../../../../../../../shared/services/message/message-dialog-service';
 
 @Component({
     selector: 'portal-user-storage-config-google-drive',
@@ -23,7 +27,9 @@ import {GoogleDriveConfig} from '../../../../../../../shared/models/portal-user-
         MatButtonModule,
         MatIconModule,
         MatCardModule,
-        MatCheckboxModule
+        MatCheckboxModule,
+        NgxFileDropModule,
+        JsonPipe,
     ]
 })
 export class PortalUserStorageConfigGoogleDriveComponent implements OnInit {
@@ -35,14 +41,12 @@ export class PortalUserStorageConfigGoogleDriveComponent implements OnInit {
 
     form: FormGroup;
 
-    constructor(private _formBuilder: FormBuilder) {}
+    constructor(private _formBuilder: FormBuilder, private _messageService: MessageDialogService, private _changeDetectorRef: ChangeDetectorRef,) {}
 
     ngOnInit(): void {
         const config = this.config?.config as GoogleDriveConfig;
         this.form = this._formBuilder.group({
-            clientId: [config?.clientId || '', [Validators.required]],
-            clientSecret: [config?.clientSecret || '', [Validators.required]],
-            refreshToken: [config?.refreshToken || '', [Validators.required]],
+            serviceAccount: [config?.serviceAccount || '', [Validators.required]],
             rootFolderId: [config?.rootFolderId || '', [Validators.required]]
         });
     }
@@ -65,5 +69,41 @@ export class PortalUserStorageConfigGoogleDriveComponent implements OnInit {
         if (this.config?.id) {
             this.delete.emit(this.config.id);
         }
+    }
+
+    public dropped(files: NgxFileDropEntry[]) {
+        const me = this;
+        files.forEach(x => {
+            if (x.fileEntry.isFile) {
+                const ext = UtilFunctions.getFileExtension(x.relativePath);
+                if (ext !== '.json') {
+                    this._messageService.open('Extensão não permitida', 'ERRO', 'error');
+                    return;
+                }
+                const fileEntry = x.fileEntry as FileSystemFileEntry;
+
+                fileEntry.file((file: File) => {
+                    file.arrayBuffer().then( buffer=> {
+                        const googleServiceAccount: GoogleServiceAccountModel = JSON.parse(UtilFunctions.arrayBufferToString(buffer));
+                        if (!GoogleServiceAccountModel.validate(googleServiceAccount)) {
+                            throw Error("Arquivo inválido");
+                        }
+                        me.form.get('serviceAccount').patchValue(googleServiceAccount);
+                        me._changeDetectorRef.markForCheck();
+
+                        setTimeout(function () { //Para atualizar o vídeo
+                            me._changeDetectorRef.markForCheck();
+                        }, 200);
+
+                    }).catch(reason => {
+                        me._messageService.open(reason, 'ERRO', 'error');
+                    }).finally(() => {
+
+                    });
+
+                });
+            }
+        })
+
     }
 }

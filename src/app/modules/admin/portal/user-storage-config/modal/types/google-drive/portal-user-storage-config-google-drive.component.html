@@ -41,32 +41,6 @@
             <mat-card>
                 <mat-card-content>
                     <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
-                        <!-- Client ID -->
-                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
-                            <mat-label>Client ID</mat-label>
-                            <input matInput formControlName="clientId" placeholder="Digite o Client ID">
-                            <mat-error *ngIf="form.get('clientId')?.hasError('required')">
-                                Client ID é obrigatório
-                            </mat-error>
-                        </mat-form-field>
-
-                        <!-- Client Secret -->
-                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
-                            <mat-label>Client Secret</mat-label>
-                            <input matInput formControlName="clientSecret" placeholder="Digite o Client Secret">
-                            <mat-error *ngIf="form.get('clientSecret')?.hasError('required')">
-                                Client Secret é obrigatório
-                            </mat-error>
-                        </mat-form-field>
-
-                        <!-- Refresh Token -->
-                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
-                            <mat-label>Refresh Token</mat-label>
-                            <input matInput formControlName="refreshToken" placeholder="Digite o Refresh Token">
-                            <mat-error *ngIf="form.get('refreshToken')?.hasError('required')">
-                                Refresh Token é obrigatório
-                            </mat-error>
-                        </mat-form-field>
 
                         <!-- Root Folder ID -->
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
@@ -76,6 +50,28 @@
                                 ID da pasta raiz é obrigatório
                             </mat-error>
                         </mat-form-field>
+                    </div>
+                    <div class="w-full my-2">
+                        <ngx-file-drop class="mb-4"
+                                       [multiple]="false" [accept]="'.json'" dropZoneLabel="Arraste seu arquivo de configuração da conta de serviço aqui"
+                                       (onFileDrop)="dropped($event)">
+
+                            <ng-template ngx-file-drop-content-tmp let-openFileSelectorDocumentos="openFileSelector">
+                                {{"Arraste seu arquivo de configuração da conta de serviço aqui"}}
+                                <button
+                                    class="px-6 ml-3"
+                                    mat-icon-button
+                                    [color]="'primary'"
+                                    (click)="openFileSelectorDocumentos()">
+                                    <mat-icon class="icon-size-5" fontSet="fas" fontIcon="fa-upload"></mat-icon>
+                                </button>
+                            </ng-template>
+                        </ngx-file-drop>
+                    </div>
+                    <div class="w-full max-w-full overflow-x-auto box-content" *ngIf="form.get('serviceAccount').value">
+                        <pre class="text-xs whitespace-pre-line">
+                          {{form.get('serviceAccount').value | json}}
+                        </pre>
                     </div>
                 </mat-card-content>
             </mat-card>

@@ -1,7 +1,7 @@
+import {GoogleServiceAccountModel} from './system-config.model';
+
 export interface GoogleDriveConfig {
-    clientId: string;
-    clientSecret: string;
-    refreshToken: string;
+    serviceAccount: GoogleServiceAccountModel;
     rootFolderId: string;
 }
 
@@ -25,4 +25,4 @@ export interface LocalDirectoryConfig {
     createMissingDirectories: boolean;
 }
 
-export type StorageConfig = GoogleDriveConfig | DropboxConfig | AWSConfig | LocalDirectoryConfig; 
+export type StorageConfig = GoogleDriveConfig | DropboxConfig | AWSConfig | LocalDirectoryConfig;

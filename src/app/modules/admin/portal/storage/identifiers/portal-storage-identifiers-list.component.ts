@@ -204,7 +204,7 @@ export class PortalStorageIdentifiersListComponent implements OnInit, OnDestroy 
             entityName,
             identifier.entityIdentifierId,
             identifier.entityIdentifierName,
-            '' // Caminho de diretório vazio para nível raiz
+            null // Caminho de diretório vazio para nível raiz
         );
 
         this._router.navigate([

@@ -178,23 +178,16 @@
                     </audio>
                 </div>
 
-                <!-- Office Documents -->
-                <div *ngIf="isOfficeDocument(currentFile) && !currentFile.isDirectory"
+                <!-- Office Documents or PDF -->
+                <div *ngIf="(isOfficeDocument(currentFile) || isPdf(currentFile)) && !currentFile.isDirectory"
                      class="w-full h-full flex flex-col">
-                    <iframe [src]="getOfficeViewerUrl()"
+                    <iframe [src]="getGoogleViewerUrl()"
                             (load)="onMediaLoad()"
                             class="w-full flex-1 rounded-lg shadow-2xl border-0"
                             frameborder="0">
                     </iframe>
                 </div>
 
-                <!-- PDF Documents -->
-                <iframe *ngIf="isPdf(currentFile) && safeUrl && !currentFile.isDirectory"
-                        [src]="safeUrl"
-                        (load)="onMediaLoad()"
-                        class="w-full h-full rounded-lg shadow-2xl border-0"
-                        frameborder="0">
-                </iframe>
 
                 <!-- Code/Text Files (with content preview) -->
                 <div *ngIf="(isCode(currentFile) || isText(currentFile)) && !currentFile.isDirectory"

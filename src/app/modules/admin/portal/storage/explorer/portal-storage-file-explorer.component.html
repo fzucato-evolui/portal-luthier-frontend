@@ -80,8 +80,8 @@
                 <div class="flex items-center">
                     <mat-icon class="icon-size-6 text-hint mr-2">folder_open</mat-icon>
                     <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-primary truncate">
-                        <ng-container *ngIf="navigationState?.currentPath; else rootTitle">
-                            {{ navigationState.currentPath }}
+                        <ng-container *ngIf="navigationState?.directory; else rootTitle">
+                            {{ navigationState.directory.originalName}}
                         </ng-container>
                         <ng-template #rootTitle>
                             {{ getDisplayInfo().entityIdentifier }} Arquivos

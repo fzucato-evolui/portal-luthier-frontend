@@ -14,6 +14,7 @@ import {
     UserWithStorageConfigModel
 } from 'app/shared/models/portal-storage.model';
 import {AsyncRequestModel} from 'app/shared/models/async_request.model';
+import {UtilFunctions} from '../../../../shared/util/util-functions';
 
 @Injectable({
     providedIn: 'root'
@@ -142,11 +143,9 @@ export class PortalStorageService {
         entityName: string,
         identifierId: number,
         identifierName: string,
-        directoryPath: string = ''
+        directory?: PortalStorageFileModel,
     ): void {
-        // Clean the directory path first
-        const cleanDirectoryPath = this._cleanDirectoryPath(directoryPath);
-        const pathSegments = cleanDirectoryPath ? cleanDirectoryPath.split('/').filter(s => s) : [];
+
 
         // Build breadcrumbs with correct paths for navigation using query parameters
         const breadcrumbs = [
@@ -168,20 +167,31 @@ export class PortalStorageService {
             {
                 label: identifierName,
                 path: `/portal/storage/users/${userId}/entities/${entityId}/identifiers/${identifierId}/files`,
-                clickable: pathSegments.length > 0
+                clickable: UtilFunctions.isValidObject(directory) === true
             }
         ];
+        let keysAncestors = [];
 
-        // Add directory breadcrumbs using query parameters
-        let currentPath = '';
-        pathSegments.forEach((segment, index) => {
-            currentPath += (currentPath ? '/' : '') + segment;
-            breadcrumbs.push({
-                label: segment,
-                path: `/portal/storage/users/${userId}/entities/${entityId}/identifiers/${identifierId}/files?path=${encodeURIComponent(currentPath)}`,
-                clickable: index < pathSegments.length - 1 // Only clickable if not the last segment
-            });
-        });
+        if (UtilFunctions.isValidObject(directory) === true) {
+            keysAncestors = Object.keys(directory.ancestors || {});
+
+            if (UtilFunctions.isValidStringOrArray(keysAncestors) === true && keysAncestors.length > 3) {
+                keysAncestors.forEach((ancestor, index) => {
+                    // 0 = user, 1 = entity, 2 = identifier, 3 = directory
+                    if (index >= 3) {
+
+                        breadcrumbs.push({
+                            label: directory.ancestors[ancestor],
+                            path: `/portal/storage/users/${userId}/entities/${entityId}/identifiers/${identifierId}/files/${ancestor})}`,
+                            clickable: index < keysAncestors.length - 1 // Only clickable if not the last segment
+                        })
+                    }
+                })
+            }
+
+
+        }
+        const currentPath = breadcrumbs[breadcrumbs.length - 1].path;
 
         console.log('🔍 NavigateToFileExplorer Debug (Query Params):', {
             userId,
@@ -190,9 +200,9 @@ export class PortalStorageService {
             entityName,
             identifierId,
             identifierName,
-            directoryPath,
-            cleanDirectoryPath,
-            breadcrumbs
+            directory,
+            breadcrumbs,
+            currentPath,
         });
 
         this._navigationState.next({
@@ -202,7 +212,8 @@ export class PortalStorageService {
             entityName,
             identifierId,
             identifierName,
-            currentPath: cleanDirectoryPath,
+            directory: directory,
+            currentPath: currentPath,
             breadcrumbs
         });
     }
@@ -345,14 +356,10 @@ export class PortalStorageService {
     /**
      * Get files in a specific directory
      */
-    getIdentifierDirectoryContents(identifierId: number, directoryPath: string): Observable<PortalStorageEntityIdentifierModel> {
+    getIdentifierDirectoryContents(identifierId: number, directoryId: number): Observable<PortalStorageEntityIdentifierModel> {
         this._isLoading.next(true);
 
-        // FIXED: Clean the directory path to remove any URL prefixes
-        const cleanPath = this._cleanDirectoryPath(directoryPath);
-        const params = new HttpParams().set('directoryPath', cleanPath);
-
-        return this._httpClient.get<PortalStorageEntityIdentifierModel>(`${this.apiUrl}/identifier-directory-files/${identifierId}`, { params })
+        return this._httpClient.get<PortalStorageEntityIdentifierModel>(`${this.apiUrl}/identifier-directory/${identifierId}/${directoryId}`)
             .pipe(
                 tap(identifier => {
                     this._files.next(identifier.files);
@@ -455,11 +462,11 @@ export class PortalStorageService {
      */
     generatePresignedUrlsForIdentifier(
         identifierId: number,
-        directoryPath: string = '',
+        folderId: number = null,
         expirationMinutes: number = 60
     ): Observable<PortalStorageFileModel[]> {
         const params = new HttpParams()
-            .set('directoryPath', directoryPath)
+            .set('directoryId', folderId)
             .set('expirationMinutes', expirationMinutes.toString());
 
         return this._httpClient.post<PortalStorageFileModel[]>(

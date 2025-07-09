@@ -58,6 +58,7 @@ import {
 } from '../modal/portal-storage-download-folders-files.component';
 import {cloneDeep} from 'lodash-es';
 import {MessageDialogService} from '../../../../../shared/services/message/message-dialog-service';
+import {UtilFunctions} from '../../../../../shared/util/util-functions';
 
 interface UploadProgress {
     id: string;
@@ -99,7 +100,6 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
 
     // Route parameters - fallback when navigationState is not available
     private _currentIdenfier: PortalStorageEntityIdentifierModel | null = null;
-    private _currentDirectoryPath: string = '';
 
     // Grid configuration
     gridConfig: FileGridConfigModel = {
@@ -322,10 +322,10 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
      * Start batch upload of multiple files
      */
     private startBatchUpload(files: File[]): void {
-        const currentPath = this.navigationState?.currentPath || '';
+        const currentDirectoryId = this.navigationState?.directory?.id || null;
 
         files.forEach(file => {
-            this.uploadFile(file, currentPath);
+            this.uploadFile({file: file, path: file.name}, currentDirectoryId);
         });
     }
 
@@ -419,18 +419,16 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
      * Start batch upload with file paths
      */
     private startBatchUploadWithPaths(files: { file: File; path: string }[]): void {
-        const currentPath = this.navigationState?.currentPath || '';
+        const currentDirectoryId = this.navigationState?.directory?.id || null;
 
         console.log(`🎯 Iniciando batch upload de ${files.length} arquivos:`);
         files.forEach((item, index) => {
             console.log(`  ${index + 1}. ${item.file.name} -> ${item.path}`);
         });
 
-        files.forEach(({ file, path }) => {
+        files.forEach((item, index) => {
             // Combina o path atual da navegação com o path relativo do arquivo
-            const fullPath = currentPath ? `${currentPath}/${path}` : path;
-            console.log(`📤 Preparando upload: ${file.name} com fullPath: ${fullPath}`);
-            this.uploadFile(file, fullPath);
+            this.uploadFile(item, currentDirectoryId);
         });
 
         console.log(`🚀 Todos os ${files.length} uploads foram iniciados`);
@@ -439,18 +437,18 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
     /**
      * Upload a single file with progress tracking (updated to support full paths)
      */
-    private uploadFile(file: File, fullPath: string = ''): void {
+    private uploadFile(item: { file: File; path: string; }, directoryId: number = null): void {
         const identifierId = this._getCurrentIdentifierId();
 
         if (!identifierId) {
             this._snackBar.open('Erro: parâmetros de upload inválidos', 'Fechar', { duration: 3000 });
             return;
         }
-
+        const file = item.file;
         const uploadId = this.generateUploadId();
 
         // Se fullPath foi fornecido, usa ele; senão, usa apenas o nome do arquivo
-        const finalPath = fullPath || file.name;
+        const finalPath = item.path;
 
         console.log(`🚀 Iniciando upload: ${file.name} -> ${finalPath}`);
 
@@ -467,6 +465,7 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
 
         // Create FormData
         const formData = new FormData();
+        formData.append('directoryId', UtilFunctions.isValidStringOrArray(directoryId) ? directoryId.toString() : '');
         formData.append('file', file);
         formData.append('fullPath', finalPath);
 
@@ -710,28 +709,7 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
      * Rename file
      */
     private renameFile(file: FileListItemModel, newName: string): void {
-        const oldPath = file.fullPath;
-        const pathParts = oldPath.split('/');
-        pathParts[pathParts.length - 1] = newName;
-        const newPath = pathParts.join('/');
 
-        fetch(`/api/admin/portal/storage/files/${file.id}/move`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ newFullPath: newPath })
-        }).then(response => {
-            if (response.ok) {
-                this._snackBar.open('Arquivo renomeado com sucesso', 'Fechar', { duration: 3000 });
-                this.refresh();
-            } else {
-                this._snackBar.open('Erro ao renomear arquivo', 'Fechar', { duration: 3000 });
-            }
-        }).catch(error => {
-            console.error('Error renaming file:', error);
-            this._snackBar.open('Erro ao renomear arquivo', 'Fechar', { duration: 3000 });
-        });
     }
 
     /**
@@ -764,20 +742,19 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
 
     loadFilesFromRoute(): void {
         const identifierId = this._route.snapshot.paramMap.get('identifierId');
+        const derectoryId = this._route.snapshot.paramMap.get('directoryId');
 
         if (identifierId) {
-            const id = parseInt(identifierId, 10);
-
-            const directoryPath = this._route.snapshot.queryParamMap.get('path') || '';
-            this._currentDirectoryPath = directoryPath;
-            this.loadDirectory(id, directoryPath);
+            const idIdentifier = parseInt(identifierId, 10);
+            const idDirectory = UtilFunctions.isValidStringOrArray(derectoryId) ? parseInt(derectoryId, 10) : null
+            this.loadDirectory(idIdentifier, idDirectory);
 
         }
     }
 
-    loadDirectory(identifierId: number, directoryPath: string = ''): void {
-        if (directoryPath) {
-            firstValueFrom(this._storageService.getIdentifierDirectoryContents(identifierId, directoryPath)).then(result => {
+    loadDirectory(identifierId: number, directoryId: number): void {
+        if (UtilFunctions.isValidStringOrArray(directoryId) === true) {
+            firstValueFrom(this._storageService.getIdentifierDirectoryContents(identifierId, directoryId)).then(result => {
                 this._currentIdenfier = result;
                 this._storageService.navigateToFileExplorer(
                     result.entity.user.id,
@@ -786,7 +763,7 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
                     result.entity.name,
                     identifierId,
                     result.name,
-                    directoryPath
+                    this._currentIdenfier.currentDirectory
                 );
             });
         }
@@ -800,7 +777,7 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
                     result.entity.name,
                     identifierId,
                     result.name,
-                    directoryPath
+                    null
                 );
             });
         }
@@ -818,42 +795,21 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
             return;
         }
 
-        const currentPath = this.navigationState?.currentPath ?? this._currentDirectoryPath;
-        const newPath = currentPath ? `${currentPath}/${file.originalName}` : file.originalName;
-
         this._router.navigate(
-            ['/portal/storage/users', userId, 'entities', entityId, 'identifiers', identifierId, 'files'],
-            { queryParams: { path: newPath } }
+            ['/portal/storage/users', userId, 'entities', entityId, 'identifiers', identifierId, 'files', file.id]
         );
+
     }
 
     navigateUp(): void {
-        const userId = this._getCurrentUserId();
-        const entityId = this._getCurrentEntityId();
-        const identifierId = this._getCurrentIdentifierId();
-        const currentPath = this.navigationState?.currentPath ?? this._currentDirectoryPath;
+        const currentDirectory = this.navigationState?.directory;
 
-        if (!userId || !entityId || !identifierId) {
-            console.error('Parâmetros de navegação obrigatórios ausentes');
-            return;
-        }
 
-        if (!currentPath) return;
+        if (!currentDirectory) return;
 
-        const pathParts = currentPath.split('/');
-        pathParts.pop();
-        const newPath = pathParts.join('/');
+        const newPath: any = this.navigationState.breadcrumbs[this.navigationState.breadcrumbs.length - 2]?.path || '';
 
-        if (newPath) {
-            this._router.navigate(
-                ['/portal/storage/users', userId, 'entities', entityId, 'identifiers', identifierId, 'files'],
-                { queryParams: { path: newPath } }
-            );
-        } else {
-            this._router.navigate([
-                '/portal/storage/users', userId, 'entities', entityId, 'identifiers', identifierId, 'files'
-            ]);
-        }
+        this._router.navigate(newPath);
     }
 
     navigateTo(breadcrumb: any): void {
@@ -978,7 +934,7 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
         if (!file.isDirectory) return;
 
         const identifierId = this.navigationState?.identifierId;
-        const currentPath = this.navigationState?.currentPath ?? this._currentDirectoryPath;
+        const currentPath = this.navigationState?.currentPath;
         const folderPath = currentPath ? `${currentPath}/${file.originalName}` : file.originalName;
 
         if (!identifierId) {
@@ -1075,10 +1031,10 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
 
     refresh(): void {
         const identifierId = this.navigationState?.identifierId;
-        const currentPath = this.navigationState?.currentPath ?? this._currentDirectoryPath;
+        const currentDirectory = this.navigationState?.directory;
 
         if (identifierId) {
-            this.loadDirectory(identifierId, currentPath);
+            this.loadDirectory(identifierId, currentDirectory?.id);
         } else {
             this.loadFilesFromRoute();
         }
@@ -1234,7 +1190,7 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
      */
     openGallery(files: FileListItemModel[], startIndex: number = 0): void {
         const identifierId = this.navigationState?.identifierId;
-        const currentPath = this.navigationState?.currentPath ?? this._currentDirectoryPath;
+        const currentDirectory = this.navigationState?.directory;
 
         if (!identifierId) {
             this._snackBar.open('Erro: ID do identificador não encontrado', 'Fechar', { duration: 3000 });
@@ -1245,7 +1201,7 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
         this._snackBar.open('Carregando galeria...', 'Fechar', { duration: 2000 });
 
         // Generate presigned URLs for files
-        this._storageService.generatePresignedUrlsForIdentifier(identifierId, currentPath, 120).subscribe({
+        this._storageService.generatePresignedUrlsForIdentifier(identifierId, currentDirectory ? currentDirectory.id : null, 120).subscribe({
             next: (filesWithUrls) => {
                 // Filter only non-directory files for gallery
                 const previewableFiles = filesWithUrls
@@ -1359,7 +1315,6 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
      */
     openPreviewPanel(file: FileListItemModel): void {
         const entityId = this.navigationState?.entityId;
-        const currentPath = this.navigationState?.currentPath ?? this._currentDirectoryPath;
 
         if (!entityId) {
             this._snackBar.open('Erro: ID da entidade não encontrado', 'Fechar', { duration: 3000 });

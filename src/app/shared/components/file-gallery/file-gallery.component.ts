@@ -121,8 +121,8 @@ export class FileGalleryComponent implements OnInit, OnChanges {
             this.clearTextContent();
 
             // Limpar cache do Office quando mudar arquivo
-            this.cachedOfficeUrl = null;
-            this.lastOfficeFileUrl = null;
+            this.cachedGoogleUrl = null;
+            this.lastGoogleFileUrl = null;
 
             // Don't load content for directories
             if (this.currentFile.isDirectory) {
@@ -140,8 +140,8 @@ export class FileGalleryComponent implements OnInit, OnChanges {
         } else {
             this.currentFile = null;
             this.safeUrl = null;
-            this.cachedOfficeUrl = null;
-            this.lastOfficeFileUrl = null;
+            this.cachedGoogleUrl = null;
+            this.lastGoogleFileUrl = null;
             this.clearTextContent();
         }
     }
@@ -252,28 +252,26 @@ export class FileGalleryComponent implements OnInit, OnChanges {
         }
     }
 
-    private cachedOfficeUrl: SafeResourceUrl | null = null;
-    private lastOfficeFileUrl: string | null = null;
+    private cachedGoogleUrl: SafeResourceUrl | null = null;
+    private lastGoogleFileUrl: string | null = null;
 
-    /**
-     * Get Office 365 viewer URL for Office documents (with caching)
-     */
-    getOfficeViewerUrl(): SafeResourceUrl | null {
-        if (!this.currentFile?.presignedUrl || !this.isOfficeDocument(this.currentFile)) {
+
+    getGoogleViewerUrl(): SafeResourceUrl | null {
+        if (!this.currentFile?.presignedUrl || (!this.isOfficeDocument(this.currentFile) && !this.isPdf(this.currentFile))) {
             return null;
         }
 
         // Use cache se a URL não mudou
-        if (this.lastOfficeFileUrl === this.currentFile.presignedUrl && this.cachedOfficeUrl) {
-            return this.cachedOfficeUrl;
+        if (this.lastGoogleFileUrl === this.currentFile.presignedUrl && this.cachedGoogleUrl) {
+            return this.cachedGoogleUrl;
         }
 
         // Use Google Docs viewer (mais estável que Office Online)
         const viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(this.currentFile.presignedUrl)}&embedded=true`;
-        this.cachedOfficeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(viewerUrl);
-        this.lastOfficeFileUrl = this.currentFile.presignedUrl;
+        this.cachedGoogleUrl = this.sanitizer.bypassSecurityTrustResourceUrl(viewerUrl);
+        this.lastGoogleFileUrl = this.currentFile.presignedUrl;
 
-        return this.cachedOfficeUrl;
+        return this.cachedGoogleUrl;
     }
 
     formatFileSize(bytes: number): string {
