@@ -57,11 +57,13 @@
                                 <mat-icon class="mr-2 evolui-menu-item-icon"
                                           [fontSet]="type.value === configTypes.LOCAL_DIRECTORY ? 'fas' : 'fab'"
                                           [fontIcon]="type.value === configTypes.GOOGLE_DRIVE ? 'fa-google-drive' :
+                                                        type.value === configTypes.GOOGLE_CLOUD ? 'fa-google' :
                                                         type.value === configTypes.DROPBOX ? 'fa-dropbox' :
                                                         type.value === configTypes.AWS_S3 ? 'fa-aws' :
                                                         type.value === configTypes.LOCAL_DIRECTORY ? 'fa-folder' : ''">
                                 </mat-icon>
                                 <span>{{ type.value === configTypes.GOOGLE_DRIVE ? 'Google Drive' :
+                                          type.value === configTypes.GOOGLE_CLOUD ? 'Google Cloud' :
                                           type.value === configTypes.DROPBOX ? 'Dropbox' :
                                           type.value === configTypes.AWS_S3 ? 'AWS S3' :
                                           type.value === configTypes.LOCAL_DIRECTORY ? 'Diretório Local' : type.value }}
@@ -95,6 +97,14 @@
                                                                      (activate)="onActivate($event)"
                                                                      (delete)="onDelete($event)">
                             </portal-user-storage-config-google-drive>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="configTypes.GOOGLE_CLOUD">
+                            <portal-user-storage-config-google-cloud [config]="getConfig(configTypes.GOOGLE_CLOUD)"
+                                                                     [userId]="userId !== null ? userId : selectedUserId!"
+                                                                     (save)="onSave($event, configTypes.GOOGLE_CLOUD)"
+                                                                     (activate)="onActivate($event)"
+                                                                     (delete)="onDelete($event)">
+                            </portal-user-storage-config-google-cloud>
                         </ng-container>
                         <ng-container *ngSwitchCase="configTypes.DROPBOX">
                             <portal-user-storage-config-dropbox [config]="getConfig(configTypes.DROPBOX)"

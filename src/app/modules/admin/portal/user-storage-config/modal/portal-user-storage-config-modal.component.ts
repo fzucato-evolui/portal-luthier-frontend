@@ -16,6 +16,9 @@ import {PortalUserStorageConfigComponent} from '../portal-user-storage-config.co
 import {
     PortalUserStorageConfigGoogleDriveComponent
 } from './types/google-drive/portal-user-storage-config-google-drive.component';
+import {
+    PortalUserStorageConfigGoogleCloudComponent
+} from './types/google-cloud/portal-user-storage-config-google-cloud.component';
 import {PortalUserStorageConfigDropboxComponent} from './types/dropbox/portal-user-storage-config-dropbox.component';
 import {PortalUserStorageConfigAwsS3Component} from './types/aws-s3/portal-user-storage-config-aws-s3.component';
 import {
@@ -43,6 +46,7 @@ import {MatDrawerMode, MatSidenavModule} from '@angular/material/sidenav';
         MatProgressSpinnerModule,
         MatSelectModule,
         PortalUserStorageConfigGoogleDriveComponent,
+        PortalUserStorageConfigGoogleCloudComponent,
         PortalUserStorageConfigDropboxComponent,
         PortalUserStorageConfigAwsS3Component,
         PortalUserStorageConfigLocalDirectoryComponent,

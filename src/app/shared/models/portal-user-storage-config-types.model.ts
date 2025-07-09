@@ -5,6 +5,12 @@ export interface GoogleDriveConfig {
     rootFolderId: string;
 }
 
+export interface GoogleCloudConfig {
+    serviceAccount: GoogleServiceAccountModel;
+    bucketName: string;
+    rootFolder: string;
+}
+
 export interface DropboxConfig {
     accessToken: string;
     appKey: string;
@@ -25,4 +31,4 @@ export interface LocalDirectoryConfig {
     createMissingDirectories: boolean;
 }
 
-export type StorageConfig = GoogleDriveConfig | DropboxConfig | AWSConfig | LocalDirectoryConfig;
+export type StorageConfig = GoogleDriveConfig | GoogleCloudConfig | DropboxConfig | AWSConfig | LocalDirectoryConfig;

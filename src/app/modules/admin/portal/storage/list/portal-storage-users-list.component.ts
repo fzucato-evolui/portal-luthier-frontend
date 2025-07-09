@@ -167,6 +167,7 @@ export class PortalStorageUsersListComponent implements OnInit, OnDestroy {
             'LOCAL_DIRECTORY': 'Diretório Local',
             'AWS_S3': 'Amazon S3',
             'GOOGLE_DRIVE': 'Google Drive',
+            'GOOGLE_CLOUD': 'Google Cloud Storage',
             'DROPBOX': 'Dropbox',
             'AZURE_BLOB': 'Azure Blob'
         };
@@ -184,6 +185,7 @@ export class PortalStorageUsersListComponent implements OnInit, OnDestroy {
             'LOCAL': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
             'AWS_S3': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
             'GOOGLE_DRIVE': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+            'GOOGLE_CLOUD': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
             'DROPBOX': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300',
             'AZURE_BLOB': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300'
         };
