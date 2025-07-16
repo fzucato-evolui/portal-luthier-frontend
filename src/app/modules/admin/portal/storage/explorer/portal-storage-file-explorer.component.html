@@ -625,7 +625,7 @@
 
     <!-- Gallery Drawer -->
     <mat-drawer
-        class="w-full dark:bg-gray-900 bg-white"
+        class="w-full h-full dark:bg-gray-900 bg-white"
         [autoFocus]="false"
         [mode]="'over'"
         [position]="'end'"
@@ -633,15 +633,120 @@
         (closed)="onGalleryClose()"
         #galleryDrawer>
 
-        <file-gallery *ngIf="galleryVisible"
-            [files]="galleryFiles"
-            [config]="galleryConfig"
-            [currentIndex]="galleryCurrentIndex"
-            [visible]="galleryVisible"
-            (close)="onGalleryClose()"
-            (download)="onGalleryDownload($event)"
-            (indexChanged)="onGalleryIndexChange($event)">
-        </file-gallery>
+<!--        <file-gallery *ngIf="galleryVisible"-->
+<!--            [files]="galleryFiles"-->
+<!--            [config]="galleryConfig"-->
+<!--            [currentIndex]="galleryCurrentIndex"-->
+<!--            [visible]="galleryVisible"-->
+<!--            (close)="onGalleryClose()"-->
+<!--            (download)="onGalleryDownload($event)"-->
+<!--            (indexChanged)="onGalleryIndexChange($event)">-->
+<!--        </file-gallery>-->
+        <div class="w-full h-full flex flex-col overflow-hidden">
+            <!-- Gallery Header -->
+            <div class="flex-none flex items-center justify-between p-1 bg-black bg-opacity-20 backdrop-blur-sm">
+                <!-- File Info -->
+                <div *ngIf="currentSwiperFile && mainSwiperInstance" class="flex items-center space-x-3 min-w-0">
+                    <mat-icon [svgIcon]="getFileIcon(currentSwiperFile)"
+                              class="text-gray-300"></mat-icon>
+                    <div class="min-w-0">
+                        <div class="font-medium truncate">{{ currentSwiperFile.originalName }}</div>
+                        <div class="text-sm text-gray-300">
+                        <span *ngIf="!currentSwiperFile.isDirectory">
+                            {{ formatFileSize(currentSwiperFile.size) }}
+                        </span>
+                            <span *ngIf="currentSwiperFile.isDirectory" class="text-blue-400">
+                            Diretório
+                        </span>
+                            <span *ngIf="files.length > 1" class="ml-2">
+                            {{ mainSwiperInstance.activeIndex + 1 }} de {{ swiperFiles.length }}
+                        </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center space-x-2">
+                    <button *ngIf="!currentSwiperFile?.isDirectory"
+                            mat-icon-button
+                            (click)="alert('falta implementar')"
+                            matTooltip="Baixar Arquivo"
+                            class="text-white hover:bg-white hover:bg-opacity-10">
+                        <mat-icon [svgIcon]="'heroicons_outline:arrow-down-tray'"></mat-icon>
+                    </button>
+
+                    <button *ngIf="!currentSwiperFile?.isDirectory"
+                            mat-icon-button
+                            (click)="alert('falta implementar')"
+                            matTooltip="Abrir em Nova Aba"
+                            class="text-white hover:bg-white hover:bg-opacity-10">
+                        <mat-icon [svgIcon]="'heroicons_outline:arrow-top-right-on-square'"></mat-icon>
+                    </button>
+
+                    <button mat-icon-button
+                            (click)="galleryVisible = false"
+                            matTooltip="Fechar"
+                            class="text-white hover:bg-white hover:bg-opacity-10">
+                        <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Gallery Content -->
+            <div class="flex-1 flex flex-col min-h-0 overflow-hidden position-relative">
+                <!-- Main Swiper -->
+                <div class="flex-1 h-1 w-full gallery-main-swiper">
+                    <swiper-container
+                        #mainSwiper
+                        class="w-full h-full"
+                        navigation="true"
+                        pagination="true"
+                        pagination-clickable="true"
+                        space-between="10"
+                        slides-per-view="1"
+                        keyboard="true"
+                    >
+                        <ng-container *ngIf="galleryVisible">
+                            <ng-container *ngFor="let file of swiperFiles">
+                                <swiper-slide *ngIf="!file.isDirectory" class="pb-[20px] h-full flex items-center justify-center">
+                                    <file-viewer [model]="file" class="max-w-full max-h-full"></file-viewer>
+                                </swiper-slide>
+                            </ng-container>
+                        </ng-container>
+                    </swiper-container>
+                </div>
+
+                <!-- Thumbs Swiper -->
+                <div class="h-12 w-full gallery-thumbs-swiper">
+                    <swiper-container
+                        #thumbsSwiper
+                        class="w-full h-full"
+                        space-between="10"
+                        slides-per-view="6"
+                        free-mode="true"
+                        watch-slides-progress="true"
+                        centered-slides="false"
+                    >
+                        <ng-container *ngIf="galleryVisible">
+                            <ng-container *ngFor="let file of swiperFiles">
+                                <swiper-slide *ngIf="!file.isDirectory" class="p-1 h-full cursor-pointer">
+                                    <div class="w-full h-full" [ngClass]="currentSwiperFile?.id === file.id ? 'border-2 border-primary' : ''">
+                                        <!--
+                                        <file-viewer *ngIf="isImage(file)" [showDocControls]="false" [model]="file" class="w-full h-full object-cover"></file-viewer>
+                                        !-->
+                                        <div matTooltip="{{file.originalName}}" class="w-full h-full flex items-center justify-center">
+                                            <mat-icon [svgIcon]="getFileIcon(file)"
+                                                      class="text-gray-300"></mat-icon>
+                                        </div>
+
+                                    </div>
+                                </swiper-slide>
+                            </ng-container>
+                        </ng-container>
+                    </swiper-container>
+                </div>
+            </div>
+        </div>
     </mat-drawer>
 
 </mat-drawer-container>

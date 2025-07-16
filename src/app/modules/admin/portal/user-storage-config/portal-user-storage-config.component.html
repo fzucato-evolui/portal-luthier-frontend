@@ -90,6 +90,7 @@
                         <td mat-cell *matCellDef="let user">
                             <ng-container *ngIf="user.activeStorageType; else noConfig">
                                 {{ user.activeStorageType === 'GOOGLE_DRIVE' ? 'Google Drive' :
+                                   user.activeStorageType === 'GOOGLE_CLOUD' ? 'Google Cloud' :
                                    user.activeStorageType === 'DROPBOX' ? 'Dropbox' :
                                    user.activeStorageType === 'AWS_S3' ? 'AWS S3' :
                                    user.activeStorageType === 'LOCAL_DIRECTORY' ? 'Diretório  Local' : ''

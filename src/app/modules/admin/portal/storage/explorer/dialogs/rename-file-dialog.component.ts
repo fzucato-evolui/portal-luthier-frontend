@@ -18,7 +18,7 @@ import {NgIf} from '@angular/common';
         <form [formGroup]="renameForm" (ngSubmit)="onSubmit()">
             <mat-dialog-content class="space-y-4">
                 <div class="text-sm text-secondary mb-4">
-                    Nome atual: <strong>{{ data.fileName }}</strong>
+                    Nome atual: <strong>{{ data.fileName + (data.isDirectory ? '.' + data.extension : '') }}</strong>
                 </div>
 
                 <mat-form-field class="w-full">
@@ -29,7 +29,10 @@ import {NgIf} from '@angular/common';
                         placeholder="Digite o novo nome"
                         required
                         #nameInput>
-                    <mat-icon matSuffix>{{ data.isDirectory ? 'folder' : 'description' }}</mat-icon>
+                    <mat-icon matPrefix>{{ data.isDirectory ? 'folder' : 'description' }}</mat-icon>
+                    <span matSuffix *ngIf="!data.isDirectory">
+                        .{{ data.extension }}
+                    </span>
                     <mat-error *ngIf="renameForm.get('name')?.hasError('required')">
                         Nome é obrigatório
                     </mat-error>
@@ -43,7 +46,7 @@ import {NgIf} from '@angular/common';
 
                 <div *ngIf="!data.isDirectory" class="text-xs text-secondary">
                     <mat-icon class="icon-size-4 mr-1">info</mat-icon>
-                    Dica: Mantenha a extensão do arquivo para preservar seu tipo
+                    Atenção: Não é permitido alterar a extensão do arquivo.
                 </div>
             </mat-dialog-content>
 
@@ -82,8 +85,13 @@ export class RenameFileDialogComponent {
     constructor(
         private fb: FormBuilder,
         private dialogRef: MatDialogRef<RenameFileDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: { fileName: string; isDirectory: boolean }
+        @Inject(MAT_DIALOG_DATA) public data: { fileName: string; isDirectory: boolean; extension: string }
     ) {
+        //Remove a extensão do nome do arquivo se não for um diretório
+        if (!data.isDirectory && data.fileName.includes('.')) {
+            data.fileName = data.fileName.substring(0, data.fileName.lastIndexOf('.'));
+        }
+
         this.renameForm = this.fb.group({
             name: [data.fileName, [
                 Validators.required,
@@ -95,7 +103,7 @@ export class RenameFileDialogComponent {
 
     onSubmit(): void {
         if (this.renameForm.valid) {
-            const newName = this.renameForm.value.name.trim();
+            const newName = this.renameForm.value.name.trim() + (this.data.isDirectory ? '' : '.' + this.data.extension);
             this.dialogRef.close(newName);
         }
     }

@@ -1,0 +1,135 @@
+<div class="h-full min-h-full max-h-full flex flex-col viewer-container" [ngClass]="{'relative': showInfo() === true}"
+     (mouseenter)="setHover('expanded')" (mouseleave)="setHover('collapsed')"
+     (touchstart)="setHover('expanded')" (touchend)="setHover('collapsed')"
+>
+    <input type="hidden" name="titulo" #tituloModel
+           [(ngModel)]="model.originalName">
+    <input type="hidden" name="descricao" #descricaoModel
+           [ngModel]="model.description">
+    <input type="hidden" name="link" #linkModel
+           [(ngModel)]="model.presignedUrl">
+
+    <ng-container *ngIf="model['canView']; else onlyDownload">
+        <div class="h-full flex items-center" *ngIf="model.fileType === 'DOCUMENT' || model.fileType === 'SPREADSHEET' || model.fileType === 'PRESENTATION'">
+            <ngx-doc-viewer
+                [url]="url"
+                [viewer]="model.fileType === 'SPREADSHEET' || model.fileType === 'PRESENTATION' ? 'office' : 'google'"
+                [disableContent]="showDocControls === false ? 'all' : 'none'"
+                class="w-full h-full"
+            ></ngx-doc-viewer>
+<!--            <iframe-->
+<!--                [src]="url"-->
+<!--                class="w-full h-full"-->
+<!--                (load)="onIframeLoad($event)"-->
+<!--                (error)="onIframeError($event)"-->
+<!--            ></iframe>-->
+        </div>
+
+        <div class="h-full flex items-center" *ngIf="model.fileType === 'IMAGE'">
+            <img *ngIf="model.fileType === 'IMAGE'"
+                 [src]="url"
+                 [alt]="model.originalName"
+                 (error)="clearImage($event)"
+                 class="object-scale-down max-h-full bg-white">
+        </div>
+
+        <div class="h-full flex items-center justify-center" *ngIf="model.fileType === 'AUDIO'">
+            <audio [src]="url"
+                   controls
+                   preload="metadata"
+                   (error)="onMediaError($event)"
+                   class="w-full max-w-md">
+                <p>Seu navegador não suporta a reprodução de áudio.</p>
+            </audio>
+        </div>
+
+        <div class="h-full flex items-center justify-center" *ngIf="model.fileType === 'VIDEO'">
+            <video
+                [src]="url"
+                controls
+                preload="metadata"
+                controlsList="nodownload"
+                (error)="onMediaError($event)"
+                class="h-full flex items-center justify-center">
+                <p>Seu navegador não suporta a reprodução de vídeo.</p>
+            </video>
+        </div>
+
+        <div class="h-full w-full flex items-center justify-center" *ngIf="model.fileType === 'CODE' || model.fileType === 'TEXT'">
+
+            <!-- Content Area -->
+            <div class="h-full w-full overflow-auto">
+                <div *ngIf="isLoadingTextContent" class="flex items-center justify-center h-full">
+                    <mat-spinner diameter="32"></mat-spinner>
+                    <span class="ml-3 text-gray-300">
+                                Carregando conteúdo...
+                            </span>
+                </div>
+
+                <div *ngIf="!isLoadingTextContent && textContent && textContent.length > 0"
+                     class="bg-gray-900 rounded-lg h-full overflow-hidden">
+
+                    <!-- Code with syntax highlighting -->
+                    <div *ngIf="model.fileType === 'CODE' && textContent" class="h-full overflow-hidden">
+                        <code
+                            class="hljs text-sm leading-relaxed font-mono block p-4 rounded-lg overflow-auto"
+                            [highlight]="textContent"
+                            [lineNumbers]="true"
+                            [languages]="model['languages']">
+                        </code>
+                    </div>
+
+                    <!-- Plain text -->
+                    <div *ngIf="model.fileType !== 'CODE' && textContent" class="h-full overflow-auto">
+                                <pre class="text-sm text-gray-300 whitespace-pre-wrap break-words font-mono leading-relaxed p-4 rounded-lg">{{ textContent }}</pre>
+                    </div>
+                </div>
+
+                <div *ngIf="!isLoadingTextContent && textContentError"
+                     class="flex flex-col items-center justify-center h-full text-center space-y-4">
+                    <mat-icon [svgIcon]="'heroicons_outline:exclamation-triangle'"
+                              class="text-6xl text-red-400 mb-4"></mat-icon>
+                    <h3 class="text-lg font-semibold text-red-400 mb-2">Erro ao carregar conteúdo</h3>
+                    <p class="text-gray-300 max-w-md">
+                        {{ textContentError }}
+                    </p>
+
+                </div>
+
+
+            </div>
+        </div>
+        <div class="absolute top-0 left-0 bg-accent-600 bg-opacity-75 w-full" *ngIf="showInfo() === true">
+            <div #infoContainer class="flex flex-wrap justify-between items-center p-2">
+                <div class="flex flex-col">
+                    <div class="mr-3 text-lg text-white font-extrabold text-left" *ngIf="model.originalName | isValidStringOrArray">
+                        {{model.originalName}}
+                    </div>
+                    <div class="mr-3 text-sm text-white text-left" *ngIf="model.description | isValidStringOrArray">
+                        {{model.description}}
+                    </div>
+                </div>
+                <div class="mr-3 text-sm text-white" *ngIf="model.presignedUrl | isValidStringOrArray">
+                    <a (click)="navigate()" class="cursor-pointer">Saiba Mais</a>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+    <ng-template #onlyDownload>
+        <div class="h-full flex items-center justify-center">
+            <mat-icon [svgIcon]="'heroicons_outline:folder'"
+                      class="icon-size-8 mx-2"></mat-icon>
+
+            <div class="space-y-2">
+                <h3 class="text-xl font-semibold">{{ model.originalName }}</h3>
+                <p>Visualização não disponível para este tipo de arquivo</p>
+                <p class="text-sm">Tamanho: {{ formatFileSize(model.size) }}</p>
+                <p *ngIf="model.description"
+                   class="text-sm">
+                    {{ model.description }}
+                </p>
+            </div>
+        </div>
+    </ng-template>
+
+</div>

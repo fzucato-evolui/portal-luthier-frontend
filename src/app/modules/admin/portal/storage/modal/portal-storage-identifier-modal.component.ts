@@ -74,7 +74,7 @@ export class PortalStorageIdentifierModalComponent implements OnInit, OnDestroy 
         this.formSave = this._formBuilder.group({
             id: [null],
             entityId: [{ value: this.data.entityId }, [Validators.required]],
-            name: [{ value: this.data.name || '', disabled: !!this.data.name }, [Validators.required, Validators.maxLength(100)]],
+            name: [this.data.name, [Validators.required, Validators.maxLength(100)]],
             description: ['', [Validators.maxLength(500)]]
         });
 

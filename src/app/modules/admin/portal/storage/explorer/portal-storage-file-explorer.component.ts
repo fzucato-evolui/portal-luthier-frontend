@@ -1,8 +1,10 @@
 import {NgClass, NgFor, NgIf} from '@angular/common';
 import {
+    AfterViewInit,
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
+    CUSTOM_ELEMENTS_SCHEMA,
     ElementRef,
     OnDestroy,
     OnInit,
@@ -34,6 +36,7 @@ import {
     FileGridConfigModel,
     FileListItemModel,
     FileSelectionStateModel,
+    MimeHelper,
     PortalStorageEntityIdentifierModel,
     PortalStorageFileModel,
     StorageNavigationStateModel
@@ -45,11 +48,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {CreateFolderDialogComponent} from './dialogs/create-folder-dialog.component';
 import {RenameFileDialogComponent} from './dialogs/rename-file-dialog.component';
 import {EditFileDialogComponent} from './dialogs/edit-file-dialog.component';
-import {
-    FileGalleryComponent,
-    FileGalleryConfig,
-    FileGalleryItem
-} from 'app/shared/components/file-gallery/file-gallery.component';
+import {FileGalleryConfig, FileGalleryItem} from 'app/shared/components/file-gallery/file-gallery.component';
 import {FilePreviewPanelComponent} from 'app/shared/components/file-preview-panel/file-preview-panel.component';
 import {FileGalleryService} from 'app/shared/services/file-gallery.service';
 import {
@@ -59,7 +58,11 @@ import {
 import {cloneDeep} from 'lodash-es';
 import {MessageDialogService} from '../../../../../shared/services/message/message-dialog-service';
 import {UtilFunctions} from '../../../../../shared/util/util-functions';
+import Swiper from 'swiper';
+import {register as registerSwiper} from 'swiper/element/bundle';
+import {FileViewerComponent} from '../../../../../shared/components/file-viewer/file-viewer.component';
 
+registerSwiper();
 interface UploadProgress {
     id: string;
     fileName: string;
@@ -76,21 +79,27 @@ interface UploadProgress {
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
     imports: [
         NgIf, NgFor, NgClass, FormsModule,
         MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatProgressBarModule,
         MatTableModule, MatTooltipModule, MatCardModule, MatChipsModule,
         MatMenuModule, MatCheckboxModule, MatToolbarModule, MatSidenavModule,
         MatListModule, MatDividerModule, MatInputModule, MatFormFieldModule,
-        MatSnackBarModule, MatDialogModule, ScrollingModule, FileGalleryComponent,
-        FilePreviewPanelComponent
+        MatSnackBarModule, MatDialogModule, ScrollingModule, FilePreviewPanelComponent, FileViewerComponent
     ],
 })
-export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
+export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
     @ViewChild('folderInput') folderInput!: ElementRef<HTMLInputElement>;
+    @ViewChild('mainSwiper', { static: false }) mainSwiperRef!: ElementRef;
+    @ViewChild('thumbsSwiper', { static: false }) thumbsSwiperRef!: ElementRef;
 
+    protected mainSwiperInstance?: Swiper;
+    private thumbsSwiperInstance?: Swiper;
     files: FileListItemModel[] = [];
+    swiperFiles: FileListItemModel[] = [];
+    currentSwiperFile: FileListItemModel;
     isLoading = false;
     navigationState: StorageNavigationStateModel | null = null;
 
@@ -211,7 +220,59 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
         this.loadFilesFromRoute();
     }
 
+    ngAfterViewInit() {
+        // Aguarda o DOM estar totalmente renderizado
+        setTimeout(() => {
+            this.setupSwiperConnection();
+        }, 100);
+    }
+
+    private setupSwiperConnection() {
+        if (!this.mainSwiperRef || !this.thumbsSwiperRef) {
+            return;
+        }
+
+        // Aguarda os elementos estarem disponíveis
+        const mainSwiper = this.mainSwiperRef.nativeElement;
+        const thumbsSwiper = this.thumbsSwiperRef.nativeElement;
+
+        // Configura a conexão entre os swipers quando ambos estão prontos
+        const setupConnection = () => {
+            if (mainSwiper.swiper && thumbsSwiper.swiper) {
+                // Conecta os swipers
+                mainSwiper.swiper.thumbs.swiper = thumbsSwiper.swiper;
+                mainSwiper.swiper.thumbs.init();
+                mainSwiper.swiper.thumbs.update();
+
+                this.mainSwiperInstance = mainSwiper.swiper;
+                this.thumbsSwiperInstance = thumbsSwiper.swiper;
+
+                this.mainSwiperInstance.on('slideChange', () => {
+                    const currentIndex = this.mainSwiperInstance.activeIndex;
+                    this.currentSwiperFile = this.swiperFiles[currentIndex];
+                    this._changeDetectorRef.markForCheck();
+                });
+                console.log('Swipers conectados com sucesso');
+            } else {
+                // Tenta novamente após um curto período
+                setTimeout(setupConnection, 100);
+            }
+        };
+
+        setupConnection();
+    }
+
     ngOnDestroy(): void {
+
+        // Limpa as instâncias do Swiper
+        if (this.mainSwiperInstance) {
+            this.mainSwiperInstance.destroy(true, true);
+            this.mainSwiperInstance = undefined;
+        }
+        if (this.thumbsSwiperInstance) {
+            this.thumbsSwiperInstance.destroy(true, true);
+            this.thumbsSwiperInstance = undefined;
+        }
         // Cancel any ongoing uploads
         this.uploadProgress.forEach(upload => {
             if (upload.xhr) {
@@ -628,6 +689,7 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
      */
     openCreateFolderDialog(): void {
         const identifierId = this._getCurrentIdentifierId();
+        const currentDirectory = this.navigationState?.directory;
         const currentPath = this.navigationState?.currentPath || '';
 
         if (!identifierId) {
@@ -644,27 +706,36 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
 
         dialogRef.afterClosed().subscribe(result => {
             if (result) {
-                const params = new URLSearchParams();
-                params.set('directoryPath', currentPath ? `${currentPath}/${result.name}` : result.name);
-                if (result.description) {
-                    params.set('description', result.description);
+                const model: PortalStorageFileModel = {
+                    originalName: result.name.trim(),
+                    description: result.description ? result.description.trim() : '',
+                    isDirectory: true,
+                    size: 0,
+                    identifierId: identifierId,
+                    parentId: currentDirectory ? currentDirectory.id : null,
+                    parent: currentDirectory
                 }
 
-                fetch(`/api/admin/portal/storage/create-directory/${identifierId}`, {
-                    method: 'POST',
-                    body: params
-                }).then(response => {
-                    if (response.ok) {
+                firstValueFrom(this._storageService.createDirectory(model))
+                    .then( response => {
+                        console.log('Directory created successfully:', response);
+                        const newFile: FileListItemModel = {
+                            ...response,
+                            selected: false,
+                            icon: this._storageService.getFileIcon(response),
+                            sizeFormatted: this.formatFileSize(response.size),
+                            lastModifiedFormatted: this.formatDate(response.updatedAt)
+                        };
+                        this.dataSource.data.push(newFile);
+                        this.dataSource._updateChangeSubscription();
+                        this._changeDetectorRef.detectChanges();
                         this._snackBar.open('Pasta criada com sucesso', 'Fechar', { duration: 3000 });
-                        this.refresh();
-                    } else {
+                    }).catch(error => {
+                        console.error('Error creating directory:', error);
                         this._snackBar.open('Erro ao criar pasta', 'Fechar', { duration: 3000 });
-                    }
-                }).catch(error => {
-                    console.error('Error creating directory:', error);
-                    this._snackBar.open('Erro ao criar pasta', 'Fechar', { duration: 3000 });
-                });
-            }
+                    });
+
+                }
         });
     }
 
@@ -676,7 +747,8 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
             width: '500px',
             data: {
                 fileName: file.originalName,
-                isDirectory: file.isDirectory
+                isDirectory: file.isDirectory,
+                extension: file.extension
             }
         });
 
@@ -709,6 +781,27 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
      * Rename file
      */
     private renameFile(file: FileListItemModel, newName: string): void {
+        const saveFile = cloneDeep(file);
+        saveFile.originalName = newName.trim();
+        firstValueFrom(this._storageService.renameFile(saveFile)).then(result => {
+            console.log('File renamed successfully:', result);
+            file = {
+                ...result,
+                selected: false,
+                icon: this._storageService.getFileIcon(result),
+                sizeFormatted: this.formatFileSize(result.size),
+                lastModifiedFormatted: this.formatDate(file.updatedAt)
+            }
+            const index = this.dataSource.data.findIndex(x => x.id === result.id);
+            this.dataSource.data[index] = file;
+            this.dataSource._updateChangeSubscription();
+            this._changeDetectorRef.detectChanges();
+            this._snackBar.open('Arquivo renomeado com sucesso', 'Fechar', { duration: 3000 });
+
+        }).catch(error => {
+            console.error('Error renaming file:', error);
+            this._snackBar.open('Erro ao renomear arquivo', 'Fechar', { duration: 3000 });
+        });
 
     }
 
@@ -809,7 +902,7 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
 
         const newPath: any = this.navigationState.breadcrumbs[this.navigationState.breadcrumbs.length - 2]?.path || '';
 
-        this._router.navigate(newPath);
+        this._router.navigateByUrl(newPath);
     }
 
     navigateTo(breadcrumb: any): void {
@@ -1221,8 +1314,31 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
 
                 this.galleryFiles = galleryItems;
                 this.galleryCurrentIndex = Math.max(0, actualStartIndex);
+
+                // colocar na mesma ordem que o dataSource
+                previewableFiles.sort((a, b) => {
+                    const aIndex = this.dataSource.data.findIndex(f => f.id === a.id);
+                    const bIndex = this.dataSource.data.findIndex(f => f.id === b.id);
+                    return aIndex - bIndex;
+                });
+
+                this.swiperFiles = previewableFiles;
+                const currentSwiperIndex = this.swiperFiles.findIndex(f => f.id === targetFile.id);
+                this.currentSwiperFile = this.swiperFiles[currentSwiperIndex];
                 this.galleryVisible = true;
-                this._changeDetectorRef.markForCheck();
+
+
+                const me = this;
+                // Reinicializa o Swiper após o DOM ser atualizado
+                setTimeout(() => {
+                    this.setupSwiperConnection();
+
+                    // Navega para o slide correto
+                    if (this.mainSwiperInstance && currentSwiperIndex >= 0) {
+                        this.mainSwiperInstance.slideTo(currentSwiperIndex, 0);
+                    }
+                    me._changeDetectorRef.detectChanges();
+                }, 200);
             },
             error: (error) => {
                 console.error('Error generating presigned URLs:', error);
@@ -1266,6 +1382,9 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
         this.galleryVisible = false;
         this.galleryFiles = [];
         this.galleryCurrentIndex = 0;
+        this.swiperFiles = [];
+        this.currentSwiperFile = null;
+
         this._changeDetectorRef.markForCheck();
     }
 
@@ -1369,5 +1488,12 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy {
      */
     showInGallery(): boolean {
         return this.filteredFiles.some(f => !f.isDirectory);
+    }
+
+    protected readonly print = print;
+    protected readonly alert = alert;
+
+    isImage(file: FileListItemModel) {
+        return MimeHelper.isImage(file);
     }
 }

@@ -465,9 +465,13 @@ export class PortalStorageService {
         folderId: number = null,
         expirationMinutes: number = 60
     ): Observable<PortalStorageFileModel[]> {
-        const params = new HttpParams()
-            .set('directoryId', folderId)
+        let params = new HttpParams()
             .set('expirationMinutes', expirationMinutes.toString());
+        if (UtilFunctions.isValidStringOrArray(folderId) === true && folderId > 0) {
+            params = new HttpParams()
+                .set('directoryId', folderId)
+                .set('expirationMinutes', expirationMinutes.toString());
+        }
 
         return this._httpClient.post<PortalStorageFileModel[]>(
             `${this.apiUrl}/identifier-presigned-url/${identifierId}`,
@@ -495,6 +499,14 @@ export class PortalStorageService {
         const params = new HttpParams().set('recursive', recursive.toString());
 
         return this._httpClient.delete<void>(`${this.apiUrl}/file/${fileId}`, { params });
+    }
+
+    createDirectory(model: PortalStorageFileModel): Observable<PortalStorageFileModel> {
+        return this._httpClient.post<PortalStorageFileModel>(`${this.apiUrl}/create-directory`, model);
+    }
+
+    renameFile(model: PortalStorageFileModel): Observable<PortalStorageFileModel> {
+        return this._httpClient.put<PortalStorageFileModel>(`${this.apiUrl}/rename-file`, model);
     }
 
     /**
@@ -672,6 +684,7 @@ export class PortalStorageService {
 
         return () => controller.abort();
     }
+
 
 
 }

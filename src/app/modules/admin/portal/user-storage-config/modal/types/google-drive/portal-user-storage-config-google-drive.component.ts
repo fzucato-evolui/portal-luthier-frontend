@@ -47,7 +47,9 @@ export class PortalUserStorageConfigGoogleDriveComponent implements OnInit {
         const config = this.config?.config as GoogleDriveConfig;
         this.form = this._formBuilder.group({
             serviceAccount: [config?.serviceAccount || '', [Validators.required]],
-            rootFolderId: [config?.rootFolderId || '', [Validators.required]]
+            rootFolderId: [config?.rootFolderId || ''],
+            sharedDriveId: [config?.sharedDriveId || ''],
+            realDelegateAccount: [config?.realDelegateAccount || ''],
         });
     }
 

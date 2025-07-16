@@ -69,7 +69,8 @@ export const appConfig: ApplicationConfig = {
                     bash: () => import('highlight.js/lib/languages/bash'),
                     markdown: () => import('highlight.js/lib/languages/markdown'),
                     yaml: () => import('highlight.js/lib/languages/yaml'),
-                    dockerfile: () => import('highlight.js/lib/languages/dockerfile')
+                    dockerfile: () => import('highlight.js/lib/languages/dockerfile'),
+                    plaintext: () => import('highlight.js/lib/languages/plaintext')
                 }
             }
         },

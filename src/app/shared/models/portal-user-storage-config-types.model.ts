@@ -3,6 +3,8 @@ import {GoogleServiceAccountModel} from './system-config.model';
 export interface GoogleDriveConfig {
     serviceAccount: GoogleServiceAccountModel;
     rootFolderId: string;
+    sharedDriveId: string;
+    realDelegateAccount: string;
 }
 
 export interface GoogleCloudConfig {
