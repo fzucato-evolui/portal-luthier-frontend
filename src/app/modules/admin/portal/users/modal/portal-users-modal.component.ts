@@ -114,7 +114,7 @@ export class PortalUsersModalComponent implements OnInit, OnDestroy {
         };
 
         // Remove campos desnecessários
-        delete userToSave.newPassword;
+        //delete userToSave.newPassword;
 
         // Salva o usuário
         const saveOperation = this.isNewUser ?
