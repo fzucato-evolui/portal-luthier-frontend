@@ -65,7 +65,10 @@
                     <!-- Login -->
                     <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
                         <mat-label>Login</mat-label>
-                        <input matInput formControlName="login" required>
+                        <input matInput formControlName="login" required
+                               autocomplete="new-password"
+                               [attr.autocomplete]="isNewUser ? 'new-password' : 'username'"
+                               type="text">
                         <mat-error *ngIf="form.get('login').hasError('required')">
                             Login é obrigatório
                         </mat-error>
@@ -90,7 +93,9 @@
                         <mat-label>Senha</mat-label>
                         <input [readonly]="!isNewUser"
                             [required]="isNewUser"
-                            matInput formControlName="password" type="password">
+                            matInput formControlName="password" type="password"
+                            autocomplete="new-password"
+                            [attr.autocomplete]="isNewUser ? 'new-password' : 'current-password'">
                         <mat-error *ngIf="form.get('password').hasError('required')">
                             Senha é obrigatória
                         </mat-error>
