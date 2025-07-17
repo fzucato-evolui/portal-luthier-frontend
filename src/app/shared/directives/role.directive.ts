@@ -1,6 +1,7 @@
 import {Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef} from '@angular/core';
 import {UserService} from '../services/user/user.service';
 import {Subscription} from 'rxjs';
+import {UtilFunctions} from '../util/util-functions';
 
 export enum HierarchyComparison {
     EQUAL = '=',
@@ -98,23 +99,28 @@ export class HasHierarchyLevelDirective implements OnInit, OnDestroy {
         const userLevel = this.userService.getUserHighestHierarchyLevel();
         let hasAccess = false;
 
-        if (userLevel !== undefined) {
-            switch (this.comparison) {
-                case HierarchyComparison.EQUAL:
-                    hasAccess = userLevel === this.requiredLevel;
-                    break;
-                case HierarchyComparison.GREATER:
-                    hasAccess = userLevel < this.requiredLevel;
-                    break;
-                case HierarchyComparison.GREATER_EQUAL:
-                    hasAccess = userLevel <= this.requiredLevel;
-                    break;
-                case HierarchyComparison.LESS:
-                    hasAccess = userLevel > this.requiredLevel;
-                    break;
-                case HierarchyComparison.LESS_EQUAL:
-                    hasAccess = userLevel >= this.requiredLevel;
-                    break;
+        if (UtilFunctions.isValidStringOrArray(userLevel) === true) {
+            if (UtilFunctions.isValidStringOrArray(this.requiredLevel) === false) {
+                hasAccess = true;
+            }
+            else {
+                switch (this.comparison) {
+                    case HierarchyComparison.EQUAL:
+                        hasAccess = userLevel === this.requiredLevel;
+                        break;
+                    case HierarchyComparison.GREATER:
+                        hasAccess = userLevel < this.requiredLevel;
+                        break;
+                    case HierarchyComparison.GREATER_EQUAL:
+                        hasAccess = userLevel <= this.requiredLevel;
+                        break;
+                    case HierarchyComparison.LESS:
+                        hasAccess = userLevel > this.requiredLevel;
+                        break;
+                    case HierarchyComparison.LESS_EQUAL:
+                        hasAccess = userLevel >= this.requiredLevel;
+                        break;
+                }
             }
         }
 

@@ -125,7 +125,7 @@
                             <ng-container *ngFor="let role of availableRoles">
                                 <ng-container *hasHierarchyLevel="{ level: role.hierarchyLevel, comparison: HierarchyComparison.GREATER }">
                                     <mat-option [value]="role">
-                                        {{role.name}}
+                                        {{role.name + ' (' + role.type + ')'}}
                                     </mat-option>
                                 </ng-container>
                             </ng-container>

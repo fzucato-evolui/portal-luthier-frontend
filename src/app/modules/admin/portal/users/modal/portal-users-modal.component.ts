@@ -76,7 +76,6 @@ export class PortalUsersModalComponent implements OnInit, OnDestroy {
             roles: [this.model.roles || [], [Validators.required]]
         });
 
-
         // Se for edição, desabilita alguns campos
         if (!this.isNewUser) {
             this.form.get('login').disable();
@@ -159,8 +158,12 @@ export class PortalUsersModalComponent implements OnInit, OnDestroy {
 
         if (changedRole?.type === RoleTypeEnum.HIERARCHICAL) {
             // Se a role alterada é hierárquica, mantém apenas ela e as não-hierárquicas
+            rolesControl.setValue([changedRole], { emitEvent: false });
+        }
+        else {
+            // Se não é hierárquica, mantém apenas as não-hierárquicas
             const nonHierarchicalRoles = selectedRoles.filter(r => r.type !== RoleTypeEnum.HIERARCHICAL);
-            rolesControl.setValue([...nonHierarchicalRoles, changedRole], { emitEvent: false });
+            rolesControl.setValue([...nonHierarchicalRoles], { emitEvent: false });
         }
     }
 
