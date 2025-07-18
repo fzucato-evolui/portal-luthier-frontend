@@ -44,7 +44,7 @@ export const mainNavigation: FuseNavigationItem[] = [
                 type : 'basic',
                 awesomeIcon : {fontSet:"fas", fontIcon:"fa-box"},
                 link : '/portal/storage',
-                roles : ['ROLE_SUPER', 'ROLE_HYPER']
+                roles : ['ROLE_HYPER']
             },
             {
                 id   : 'portal.users',
@@ -68,7 +68,7 @@ export const mainNavigation: FuseNavigationItem[] = [
                 type    : 'basic',
                 awesomeIcon    : {fontSet: 'fas', fontIcon: 'fa-arrows-to-circle'},
                 link    : '/portal/luthier-context',
-                roles : ['ROLE_SUPER', 'ROLE_HYPER']
+                roles : ['ROLE_HYPER']
             },
             {
                 id      : 'portal.license',
@@ -76,7 +76,8 @@ export const mainNavigation: FuseNavigationItem[] = [
                 subtitle: '',
                 type    : 'basic',
                 awesomeIcon    : {fontSet: 'fas', fontIcon: 'fa-key'},
-                link    : '/portal/license'
+                link    : '/portal/license',
+                roles : ['ROLE_HYPER']
             },
 
         ]
@@ -187,7 +188,7 @@ export class NavigationService
     {
         const items = cloneDeep(mainNavigation);
         items.forEach(item => {
-            if(item.id === 'luthier') {
+            if(item.id === 'luthier' || item.id === 'portal') {
                 item.children.sort((a,b) => a.title.localeCompare(b.title));
             }
             this.setRoles(item);
