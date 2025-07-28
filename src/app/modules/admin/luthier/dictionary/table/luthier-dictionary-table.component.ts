@@ -94,6 +94,9 @@ import {Clipboard} from '@angular/cdk/clipboard';
 import {SharedDirectiveModule} from '../../../../../shared/directives/shared-directive.module';
 import {FilterPredicateUtil} from '../../../../../shared/util/util-classes';
 import {TranslocoModule} from '@ngneat/transloco';
+import {
+    LuthierDictionaryMetadataChangesModalComponent
+} from '../modal/metadata-changes/luthier-dictionary-metadata-changes-modal.component';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searches' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -210,7 +213,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
     displayedBondColumns = [ 'code', 'name', 'description'];
     displayedDatasetBondColumns = [ 'code', 'name', 'description', 'visionCode', 'visionName', 'visionDescription'];
     displayedSearchColumns = [ 'buttons', 'code', 'name', 'customName', 'order', 'status', 'type'];
-    displayedHistoricalColumns = [ 'code', 'user.name', 'date', 'type'];
+    displayedHistoricalColumns = [ 'buttons', 'code', 'user.name', 'date', 'type'];
     LuthierFieldTypeEnum = LuthierFieldTypeEnum;
     LuthierFieldModifierEnum = LuthierFieldModifierEnum;
     LuthierFieldLayoutEnum = LuthierFieldLayoutEnum;
@@ -2129,5 +2132,14 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             }
         }
         return allRows;
+    }
+
+    viewMetadataHistoryChange(model: LuthierMetadataHistoryChangeModel) {
+        this.service.getMetadataHistoryChange(model.code).then(result => {
+            const modal = this._matDialog.open(LuthierDictionaryMetadataChangesModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-metadata-changes-modal-container' });
+            modal.componentInstance.title = "Alteração da tabela " + this.model.name;
+            result.table = this.model;
+            modal.componentInstance.model = result;
+        })
     }
 }

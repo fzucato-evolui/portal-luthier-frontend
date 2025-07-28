@@ -137,6 +137,17 @@
                 </div>
                 <div class="flex-1 overflow-y-auto" cdkScrollable>
                     <table #procedure mat-table matSort #sortHistorical="matSort" [dataSource]="historicalDataSource" class="table-auto" (matSortChange)="announceSortChange($event)">
+                        <ng-container matColumnDef="buttons">
+                            <th mat-header-cell *matHeaderCellDef sticky>
+                            </th>
+                            <td mat-cell *matCellDef="let model; let i = index" sticky>
+                                <div class="flex flex-row items-center" *ngIf="model.type === 'UPDATE'">
+                                    <button mat-icon-button aria-label="Visualizar" (click)="viewMetadataHistoryChange(model)" matTooltip="Visualizar Alterações Detalhadas">
+                                        <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-glasses"></mat-icon>
+                                    </button>
+                                </div>
+                            </td>
+                        </ng-container>
                         <ng-container matColumnDef="code">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
                             <td mat-cell *matCellDef="let model"> {{ model.code }} </td>

@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-import {DatePipe, JsonPipe, NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import {DatePipe, JsonPipe, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
 import {
     FormArray,
     FormBuilder,
@@ -61,6 +61,10 @@ import {MatMenuModule} from '@angular/material/menu';
 import {Clipboard} from '@angular/cdk/clipboard';
 import {SharedDirectiveModule} from '../../../../../shared/directives/shared-directive.module';
 import {FilterPredicateUtil} from '../../../../../shared/util/util-classes';
+import {
+    LuthierDictionaryMetadataChangesModalComponent
+} from '../modal/metadata-changes/luthier-dictionary-metadata-changes-modal.component';
+import {MatDialog} from '@angular/material/dialog';
 
 export type ProcedureType = 'dependencies' | 'bodies' | 'bonds' ;
 @Component({
@@ -71,7 +75,6 @@ export type ProcedureType = 'dependencies' | 'bodies' | 'bonds' ;
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone   : true,
     imports: [
-        NgClass,
         MatIconModule,
         MatButtonModule,
         NgForOf,
@@ -146,7 +149,7 @@ export class LuthierDictionaryProcedureComponent implements OnInit, OnDestroy, A
     formSave: FormGroup;
     displayedDependenciesColumns = ['buttons', 'dependency.code', 'dependency.name'];
     displayedBondColumns = [ 'code', 'name'];
-    displayedHistoricalColumns = [ 'code', 'user.name', 'date', 'type'];
+    displayedHistoricalColumns = [ 'buttons', 'code', 'user.name', 'date', 'type'];
     LuthierViewBodyEnum = LuthierViewBodyEnum;
     // @ts-ignore
     @HostListener('document:keydown', ['$event'])
@@ -167,6 +170,7 @@ export class LuthierDictionaryProcedureComponent implements OnInit, OnDestroy, A
     }
     constructor(private _changeDetectorRef: ChangeDetectorRef,
                 public formBuilder: FormBuilder,
+                private _matDialog: MatDialog,
                 private _parent: LuthierDictionaryComponent)
     {
     }
@@ -668,5 +672,14 @@ export class LuthierDictionaryProcedureComponent implements OnInit, OnDestroy, A
                 x.id = x.code.toString();
                 return x;
             });
+    }
+
+    viewMetadataHistoryChange(model: LuthierMetadataHistoryChangeModel) {
+        this.service.getMetadataHistoryChange(model.code).then(result => {
+            const modal = this._matDialog.open(LuthierDictionaryMetadataChangesModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-metadata-changes-modal-container' });
+            modal.componentInstance.title = "Alteração da tabela " + this.model.name;
+            result.procedure = this.model;
+            modal.componentInstance.model = result;
+        })
     }
 }

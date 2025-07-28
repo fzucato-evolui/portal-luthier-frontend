@@ -280,6 +280,17 @@
                 </div>
                 <div class="flex-1 overflow-y-auto" cdkScrollable>
                     <table #table mat-table matSort #sortHistorical="matSort" [dataSource]="historicalDataSource" class="table-auto" (matSortChange)="announceSortChange($event)">
+                        <ng-container matColumnDef="buttons">
+                            <th mat-header-cell *matHeaderCellDef sticky>
+                            </th>
+                            <td mat-cell *matCellDef="let model; let i = index" sticky>
+                                <div class="flex flex-row items-center" *ngIf="model.type === 'UPDATE'">
+                                    <button mat-icon-button aria-label="Visualizar" (click)="viewMetadataHistoryChange(model)" matTooltip="Visualizar Alterações Detalhadas">
+                                        <mat-icon class="icon-size-4 text-blue-500" fontSet="fas" fontIcon="fa-glasses"></mat-icon>
+                                    </button>
+                                </div>
+                            </td>
+                        </ng-container>
                         <ng-container matColumnDef="code">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
                             <td mat-cell *matCellDef="let model"> {{ model.code }} </td>
@@ -936,9 +947,13 @@
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome </th>
                 <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div>
-                        {{ field.tableField?.name }}
+                        {{ field.tableField ? field.tableField?.name : field.fieldDatasetName }}
                     </div>
                 </td>
+            </ng-container>
+            <ng-container matColumnDef="fieldDatasetName">
+                <th mat-header-cell *matHeaderCellDef class="hidden"></th>
+                <td mat-cell *matCellDef="let field" class="hidden"></td>
             </ng-container>
             <ng-container matColumnDef="label">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Rótulo </th>

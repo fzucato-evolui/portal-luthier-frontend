@@ -138,9 +138,9 @@ export class LuthierDictionaryDatasetFieldModalComponent implements OnInit, OnDe
                 .then(table => {
                     this.model.reference.tablePK = table;
                     this.model.reference.tablePK.fields.forEach(x => {
-                        x['forbidden'] = this.parent.model.fields.findIndex(y => y.tableField.name === x.name) >= 0;
+                        x['forbidden'] = this.parent.model.fields.findIndex(y => y.tableField?.name === x.name) >= 0;
                         if (x['forbidden'] === false && this.fieldType === 'customFields') {
-                            x['forbidden'] = this.parent.model.customFields.findIndex(y => y.tableField.name === x.name) >= 0;
+                            x['forbidden'] = this.parent.model.customFields.findIndex(y => y.tableField?.name === x.name) >= 0;
                         }
                     })
                     this.dataSource.data = this.model.reference.tablePK.fields;

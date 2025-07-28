@@ -1,0 +1,117 @@
+<div class="inset-0 w-full h-full flex flex-col min-w-0 md:overflow-y-auto relative">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-2 sm:py-4 sm:px-4 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="flex flex-row flex-row-reverse mt-2 items-center">
+                <div class="mr-2">
+                    <button
+                        mat-icon-button aria-label="close dialog" mat-dialog-close>
+                        <mat-icon
+                            class="icon-size-4"
+                            fontSet="fas" fontIcon="fa-times"></mat-icon>
+                    </button>
+                </div>
+                <div class="w-full">
+                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        {{title}}
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bean Details Section -->
+    <div id="beanDetails" class="p-4 border-b bg-gray-50 dark:bg-gray-900/50" *ngIf="model">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Basic Information -->
+            <div class="space-y-2">
+                <h3 class="font-semibold text-sm text-gray-600 dark:text-gray-400">Informações Gerais</h3>
+                <div class="space-y-1">
+                    <div *ngIf="model.code" class="text-sm">
+                        <span class="font-medium text-gray-500">Código:</span> {{model.code}}
+                    </div>
+                    <div *ngIf="model.date" class="text-sm">
+                        <span class="font-medium text-gray-500">Data:</span> {{model.date | date:'dd/MM/yyyy HH:mm:ss'}}
+                    </div>
+                    <div *ngIf="model.type" class="text-sm">
+                        <span class="font-medium text-gray-500">Tipo:</span>
+                        <span [ngClass]="{
+                            'text-green-600': model.type === 'CREATE',
+                            'text-blue-600': model.type === 'UPDATE',
+                            'text-red-600': model.type === 'DELETE'
+                        }">{{model.type}}</span>
+                    </div>
+                    <div *ngIf="model.user?.name" class="text-sm">
+                        <span class="font-medium text-gray-500">Usuário:</span> {{model.user.name}}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Information -->
+            <div class="space-y-2" *ngIf="model.table">
+                <h3 class="font-semibold text-sm text-gray-600 dark:text-gray-400">Tabela</h3>
+                <div class="space-y-1">
+                    <div *ngIf="model.table.code" class="text-sm">
+                        <span class="font-medium text-gray-500">Código:</span> {{model.table.code}}
+                    </div>
+                    <div *ngIf="model.table.name" class="text-sm">
+                        <span class="font-medium text-gray-500">Nome:</span> {{model.table.name}}
+                    </div>
+                    <div *ngIf="model.table.description" class="text-sm">
+                        <span class="font-medium text-gray-500">Descrição:</span> {{model.table.description}}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dataset Information -->
+            <div class="space-y-2" *ngIf="model.dataset">
+                <h3 class="font-semibold text-sm text-gray-600 dark:text-gray-400">Dataset</h3>
+                <div class="space-y-1">
+                    <div *ngIf="model.dataset.code" class="text-sm">
+                        <span class="font-medium text-gray-500">Código:</span> {{model.dataset.code}}
+                    </div>
+                    <div *ngIf="model.dataset.name" class="text-sm">
+                        <span class="font-medium text-gray-500">Nome:</span> {{model.dataset.name}}
+                    </div>
+                    <div *ngIf="model.dataset.description" class="text-sm">
+                        <span class="font-medium text-gray-500">Descrição:</span> {{model.dataset.description}}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Procedure Information -->
+            <div class="space-y-2" *ngIf="model.procedure">
+                <h3 class="font-semibold text-sm text-gray-600 dark:text-gray-400">Procedure</h3>
+                <div class="space-y-1">
+                    <div *ngIf="model.procedure.code" class="text-sm">
+                        <span class="font-medium text-gray-500">Código:</span> {{model.procedure.code}}
+                    </div>
+                    <div *ngIf="model.procedure.name" class="text-sm">
+                        <span class="font-medium text-gray-500">Nome:</span> {{model.procedure.name}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-auto p-2 overflow-y-hidden flex flex-row">
+        <div id="detailedChanges" *ngIf="model.detailedChanges | isValidStringOrArray; else plainChanges" class="flex-1 overflow-y-auto p-3"
+             cdkScrollable>
+            <h3 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
+                Alterações Detalhadas
+            </h3>
+            <luthier-dictionary-bean-changes
+                [changes]="model.detailedChanges || []"
+                [level]="0">
+            </luthier-dictionary-bean-changes>
+        </div>
+        <ng-template #plainChanges>
+            <div class="flex-1 overflow-y-auto p-3"
+                 cdkScrollable>
+                <pre style="font-size: 0.75rem; white-space: pre-wrap;">{{ model.changes | json}}</pre>
+            </div>
+        </ng-template>
+    </div>
+
+</div>

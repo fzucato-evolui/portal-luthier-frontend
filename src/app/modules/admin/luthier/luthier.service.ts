@@ -16,6 +16,7 @@ import {
     LuthierMenuModel,
     LuthierMenuTreeModel,
     LuthierMessageTypeModel,
+    LuthierMetadataHistoryChangeModel,
     LuthierModuleModel,
     LuthierParameterModel,
     LuthierProcedureModel,
@@ -1442,4 +1443,7 @@ export class LuthierService
     }
 
 
+    getMetadataHistoryChange(code: number): Promise<LuthierMetadataHistoryChangeModel> {
+        return firstValueFrom(this._httpClient.get<LuthierMetadataHistoryChangeModel>(`${this.baseDicUrl}/metadata-history-change/${code}`));
+    }
 }

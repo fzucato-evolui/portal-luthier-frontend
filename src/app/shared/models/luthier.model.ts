@@ -1915,6 +1915,9 @@ export class LuthierMetadataHistoryChangeModel extends LuthierBasicModel {
     user?: LuthierUserModel
     table?: LuthierTableModel
     dataset?: LuthierVisionDatasetModel
+    procedure?: LuthierProcedureModel
+    detailedChanges?: BeanChangeModel[]
+
 }
 
 export enum LuthierMetadataHistoryChangeTypeEnum {
@@ -2223,4 +2226,13 @@ export class LuthierTableHelpModel {
 export class LuthierMessageTypeModel {
     code?: number;
     name?: string;
+}
+
+export interface BeanChangeModel {
+    fieldName?: string;
+    key?: string;
+    changeType?: LuthierMetadataHistoryChangeTypeEnum;
+    beforeValue?: string;
+    afterValue?: string;
+    changes?: BeanChangeModel[]; // Recursivo
 }

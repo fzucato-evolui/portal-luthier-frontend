@@ -114,6 +114,8 @@
                                             <mat-select-trigger>
                                                 <img width="16" src="{{ 'data:image/png;base64,' + getSeletctedImage(imageResource.value)}}" />
                                             </mat-select-trigger>
+                                            <mat-option [value]="null" >
+                                            </mat-option>
                                             <ng-container *ngFor="let t of resources">
                                                 <mat-option *ngIf="t.height === 16" [value]="fieldType === 'fields' ? {code: t.code, name: t.name} : t.name" >
                                                     <img height="16" width="16" [src]="'data:image/png;base64,' + t.file"/>

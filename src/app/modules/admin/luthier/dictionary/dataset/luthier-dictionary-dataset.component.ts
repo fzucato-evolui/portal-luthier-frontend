@@ -75,6 +75,9 @@ import {FilterPredicateUtil} from '../../../../../shared/util/util-classes';
 import {MatMenuModule} from '@angular/material/menu';
 import {Subject, takeUntil} from 'rxjs';
 import {SharedDirectiveModule} from '../../../../../shared/directives/shared-directive.module';
+import {
+    LuthierDictionaryMetadataChangesModalComponent
+} from '../modal/metadata-changes/luthier-dictionary-metadata-changes-modal.component';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searches' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -157,14 +160,14 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
         'uiConfiguration', 'layoutSize'];
     displayedGroupInfoColumns = ['buttons', 'code', 'order', 'description', 'groupInfoType',
         'parent.description'];
-    displayedCustomFieldColumns = ['buttons', 'order', 'code', 'fieldType', 'tableField.key', 'tableField.name', 'label', 'mask', 'groupInfo',
+    displayedCustomFieldColumns = ['buttons', 'order', 'code', 'fieldType', 'tableField.key', 'tableField.name', 'fieldDatasetName', 'label', 'mask', 'groupInfo',
         'tableField.fieldType', 'tableField.size',  'readOnly', 'visible', 'notNull', 'search', 'tableField.defaultValue', 'tableField.precision',
         'tableField.maxValue', 'tableField.minValue', 'charCase', 'editor', 'lookupFilter', 'reference', 'technicalDescription', 'userDescription',
         'uiConfiguration', 'layoutSize'];
     displayedCustomizationsColumns = ['buttons', 'code', 'tableField.name', 'customMask', 'customReadOnly',
         'customVisible', 'customNotNull', 'customCharCase', 'customEditor', 'customLookupFilter', 'customUiConfiguration'];
     displayedSearchColumns = [ 'buttons', 'code', 'name', 'customName', 'order', 'status', 'type'];
-    displayedHistoricalColumns = [ 'code', 'user.name', 'date', 'type'];
+    displayedHistoricalColumns = [ 'buttons', 'code', 'user.name', 'date', 'type'];
     LuthierVisionDatasetFieldTypeEnum = LuthierVisionDatasetFieldTypeEnum;
     LuthierFieldTypeEnum = LuthierFieldTypeEnum;
     LuthierFieldModifierEnum = LuthierFieldModifierEnum;
@@ -1849,5 +1852,14 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
             }
         }
         return allRows;
+    }
+
+    viewMetadataHistoryChange(model: LuthierMetadataHistoryChangeModel) {
+        this.service.getMetadataHistoryChange(model.code).then(result => {
+            const modal = this._matDialog.open(LuthierDictionaryMetadataChangesModalComponent, { disableClose: true, panelClass: 'luthier-dictionary-metadata-changes-modal-container' });
+            modal.componentInstance.title = "Alteração do dataset " + this.model.name;
+            result.dataset = this.model;
+            modal.componentInstance.model = result;
+        })
     }
 }
