@@ -18,17 +18,15 @@ import {
 } from '../../../../../shared/components/async-request-viewer/async-request-viewer.component';
 import {saveAs} from 'file-saver';
 
-export interface StorageDownloadEntitiesFilesModalData {
+export interface StorageDownloadRootFilesModalData {
     rootId: number;
     rootIdentifier: string;
-    entityName: string;
-    entityId: number;
 }
 
 @Component({
-    selector: 'portal-storage-download-entities-files',
-    styleUrls: ['./portal-storage-download-entities-files.component.scss'],
-    templateUrl: './portal-storage-download-entities-files.component.html',
+    selector: 'portal-storage-download-root-files',
+    styleUrls: ['./portal-storage-download-root-files.component.scss'],
+    templateUrl: './portal-storage-download-root-files.component.html',
     imports: [
         MatIconModule,
         MatButtonModule,
@@ -39,9 +37,9 @@ export interface StorageDownloadEntitiesFilesModalData {
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
 })
-export class PortalStorageDownloadEntitiesFilesComponent implements OnInit, OnDestroy {
+export class PortalStorageDownloadRootFilesComponent implements OnInit, OnDestroy {
 
-    data: StorageDownloadEntitiesFilesModalData;
+    data: StorageDownloadRootFilesModalData;
     title: string = '';
     protected asyncModel: AsyncRequestModel<{ link: string, fileName: string } | any> = new AsyncRequestModel<{ link: string, fileName: string } | any>();
 
@@ -52,14 +50,14 @@ export class PortalStorageDownloadEntitiesFilesComponent implements OnInit, OnDe
         private _storageService: PortalStorageService,
         private _messageService: MessageDialogService,
         private _changeDetectorRef: ChangeDetectorRef,
-        public dialogRef: MatDialogRef<PortalStorageDownloadEntitiesFilesComponent>
+        public dialogRef: MatDialogRef<PortalStorageDownloadRootFilesComponent>
     ) {}
 
     ngOnInit(): void {
-        this.title = `Download dos arquivos da entidade: ${this.data.entityName} (${this.data.rootIdentifier})`;
+        this.title = `Download dos arquivos do armazenamento: ${this.data.rootIdentifier}`;
 
-        this.abortFn = this._storageService.downloadEntitiesFilesAsync(
-            this.data.entityId,
+        this.abortFn = this._storageService.downloadRootFilesAsync(
+            this.data.rootId,
             (data: AsyncRequestModel<{ token: string, fileName: string }>) => {
                 this.asyncModel = data;
                 if (data.finalized) {

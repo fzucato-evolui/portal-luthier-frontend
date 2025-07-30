@@ -7,7 +7,7 @@ import {TranslocoService} from '@ngneat/transloco';
     name: 'isValidStringOrArray',
 })
 export class IsValidStringOrArrayPipe implements PipeTransform{
-    transform(value: string | any[]): boolean {
+    transform(value: string | any[] | any): boolean {
         return UtilFunctions.isValidStringOrArray(value);
     }
 

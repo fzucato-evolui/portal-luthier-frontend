@@ -20,7 +20,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import {ActivatedRoute, Router} from '@angular/router';
 import {PortalStorageService} from '../portal-storage.service';
-import {AdminStorageEntitySummaryModel, StorageNavigationStateModel} from 'app/shared/models/portal-storage.model';
+import {StorageEntitySummaryModel, StorageNavigationStateModel} from 'app/shared/models/portal-storage.model';
 import {firstValueFrom, Subject, takeUntil} from 'rxjs';
 import {
     PortalStorageEntityModalComponent,
@@ -46,15 +46,15 @@ import {MessageDialogService} from '../../../../../shared/services/message/messa
     ],
 })
 export class PortalStorageEntitiesListComponent implements OnInit, OnDestroy {
-    entities: AdminStorageEntitySummaryModel[] = [];
-    filteredEntities: AdminStorageEntitySummaryModel[] = [];
+    entities: StorageEntitySummaryModel[] = [];
+    filteredEntities: StorageEntitySummaryModel[] = [];
     isLoading = false;
     navigationState: StorageNavigationStateModel | null = null;
     displayedColumns: string[] = ['actions', 'id', 'entity', 'identifiers', 'files', 'size', 'lastActivity'];
-    dataSource = new MatTableDataSource<AdminStorageEntitySummaryModel>();
+    dataSource = new MatTableDataSource<StorageEntitySummaryModel>();
 
     // Route parameters - fallback when navigationState is not available
-    private _currentUserId: number | null = null;
+    private _currentRootId: number | null = null;
 
     private _unsubscribeAll: Subject<void> = new Subject<void>();
 
@@ -98,14 +98,14 @@ export class PortalStorageEntitiesListComponent implements OnInit, OnDestroy {
                 this._changeDetectorRef.markForCheck();
             });
 
-        // Get userId from route and load entities
-        const userId = this._route.snapshot.paramMap.get('userId');
-        if (userId) {
-            this._currentUserId = parseInt(userId, 10);
-            this.loadEntities(this._currentUserId);
+        // Get rootId from route and load entities
+        const rootId = this._route.snapshot.paramMap.get('rootId');
+        if (rootId) {
+            this._currentRootId = parseInt(rootId, 10);
+            this.loadEntities(this._currentRootId);
 
             // Always initialize navigation state to ensure proper breadcrumbs
-            this._initializeNavigationState(this._currentUserId);
+            this._initializeNavigationState(this._currentRootId);
         }
     }
 
@@ -119,30 +119,30 @@ export class PortalStorageEntitiesListComponent implements OnInit, OnDestroy {
     // -----------------------------------------------------------------------------------------------------
 
     /**
-     * Get current user ID from navigation state or route params
+     * Get current root ID from navigation state or route params
      */
-    private _getCurrentUserId(): number | null {
-        return this.navigationState?.userId ?? this._currentUserId;
+    private _getCurrentRootId(): number | null {
+        return this.navigationState?.rootId ?? this._currentRootId;
     }
 
     /**
-     * Get current user name from navigation state or try to get from service/API
+     * Get current root name from navigation state or try to get from service/API
      */
-    private _getCurrentUserName(): string | null {
-        return this.navigationState?.userName ?? 'Usuário'; // Fallback para nome genérico
+    private _getCurrentRootIdentifier(): string | null {
+        return this.navigationState?.rootIdentifier ?? 'Root'; // Fallback para nome genérico
     }
 
     /**
      * Initialize navigation state when accessing page directly via URL
      */
-    private _initializeNavigationState(userId: number): void {
-        this._storageService.getUser(userId)
+    private _initializeNavigationState(rootId: number): void {
+        this._storageService.getRoot(rootId)
             .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe(user => {
-                if (user) {
-                    this._storageService.navigateToUserEntities(
-                        userId,
-                        user.userName
+            .subscribe(root => {
+                if (root) {
+                    this._storageService.navigateToRootEntities(
+                        rootId,
+                        root.identifier
                     );
                 }
             });
@@ -153,60 +153,60 @@ export class PortalStorageEntitiesListComponent implements OnInit, OnDestroy {
     // -----------------------------------------------------------------------------------------------------
 
     /**
-     * Load entities for the user
+     * Load entities for the root
      */
-    loadEntities(userId: number): void {
-        this._storageService.getUserEntities(userId).subscribe();
+    loadEntities(rootId: number): void {
+        this._storageService.getRootEntities(rootId).subscribe();
     }
 
     /**
      * Navigate to entity identifiers
      */
-    viewEntityIdentifiers(entity: AdminStorageEntitySummaryModel): void {
-        const userId = this._getCurrentUserId();
-        const userName = this._getCurrentUserName();
+    viewEntityIdentifiers(entity: StorageEntitySummaryModel): void {
+        const rootId = this._getCurrentRootId();
+        const rootIdentifier = this._getCurrentRootIdentifier();
 
-        if (!userId) {
+        if (!rootId) {
             console.error('Parâmetros de navegação obrigatórios ausentes');
             return;
         }
 
         // ALWAYS update navigation state for entity identifiers
         this._storageService.navigateToEntityIdentifiers(
-            userId,
-            userName || 'Usuário',
+            rootId,
+            rootIdentifier || 'Usuário',
             entity.entityId,
             entity.entityName
         );
 
         this._router.navigate([
-            '/portal/storage/users',
-            userId,
+            '/portal/storage/roots',
+            rootId,
             'entities',
             entity.entityId,
             'identifiers'
         ]);
     }
 
-    editEntity(entity: AdminStorageEntitySummaryModel): void {
-        const userId = this._getCurrentUserId();
+    editEntity(entity: StorageEntitySummaryModel): void {
+        const rootId = this._getCurrentRootId();
 
-        if (!userId) {
-            console.error('ID do usuário ausente para criação de entidade');
+        if (!rootId) {
+            console.error('ID do armazenamento ausente para criação de entidade');
             return;
         }
 
         const modalData: StorageEntityModalData = {
             title: 'Editar Entidade de Armazenamento',
-            userId: userId,
-            userName: this._getCurrentUserName() || 'Usuário',
+            rootId: rootId,
+            rootIdentifier: this._getCurrentRootIdentifier() || 'Usuário',
             breadcrumbs: [...this.navigationState?.breadcrumbs] || [],
             mode: 'edit',
             entity: {
                 id: entity.entityId,
                 name: entity.entityName,
                 description: entity.description || '',
-                userId: userId
+                storageRootId: rootId
             }
         };
 
@@ -227,10 +227,10 @@ export class PortalStorageEntitiesListComponent implements OnInit, OnDestroy {
         });
     }
 
-    deleteEntityStorage(entity: AdminStorageEntitySummaryModel): void {
+    deleteEntityStorage(entity: StorageEntitySummaryModel): void {
         this._messageService.open("Tem certeza de que deseja remover o armazenamento da entidade?", 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
             if (result === 'confirmed') {
-                // ALWAYS update navigation state for user entities
+                // ALWAYS update navigation state for root entities
                 firstValueFrom(this._storageService.deleteEntity(entity.entityId)).then(result => {
                     const message = `${result['message']}<br>Aquivos Removidos: ${result['filesRemoved']}`;
                     this._messageService.open(message, 'SUCESSO','success');
@@ -244,18 +244,18 @@ export class PortalStorageEntitiesListComponent implements OnInit, OnDestroy {
     /**
      * Open download modal for entity files
      */
-    downloadEntityFiles(entity: AdminStorageEntitySummaryModel): void {
-        const userId = this._getCurrentUserId();
-        const userName = this._getCurrentUserName();
+    downloadEntityFiles(entity: StorageEntitySummaryModel): void {
+        const rootId = this._getCurrentRootId();
+        const rootIdentifier = this._getCurrentRootIdentifier();
 
-        if (!userId) {
+        if (!rootId) {
             console.error('Parâmetros de navegação obrigatórios ausentes');
             return;
         }
 
         const modalData: StorageDownloadEntitiesFilesModalData = {
-            userId: userId,
-            userName: userName || 'Usuário',
+            rootId: rootId,
+            rootIdentifier: rootIdentifier || 'Root',
             entityName: entity.entityName,
             entityId: entity.entityId
         };
@@ -270,7 +270,7 @@ export class PortalStorageEntitiesListComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Navigate back to users list
+     * Navigate back to roots list
      */
     goBack(): void {
         this._storageService.resetNavigation();
@@ -319,10 +319,10 @@ export class PortalStorageEntitiesListComponent implements OnInit, OnDestroy {
      * Refresh data
      */
     refresh(): void {
-        const userId = this._getCurrentUserId();
+        const rootId = this._getCurrentRootId();
 
-        if (userId) {
-            this.loadEntities(userId);
+        if (rootId) {
+            this.loadEntities(rootId);
         }
     }
 
@@ -349,7 +349,7 @@ export class PortalStorageEntitiesListComponent implements OnInit, OnDestroy {
     /**
      * Track by function for ngFor loops
      */
-    trackByFn(_index: number, item: AdminStorageEntitySummaryModel): any {
+    trackByFn(_index: number, item: StorageEntitySummaryModel): any {
         return item.entityName;
     }
 
@@ -379,17 +379,17 @@ export class PortalStorageEntitiesListComponent implements OnInit, OnDestroy {
      * Open modal to add a new entity
      */
     addEntity(): void {
-        const userId = this._getCurrentUserId();
+        const rootId = this._getCurrentRootId();
 
-        if (!userId) {
+        if (!rootId) {
             console.error('ID do usuário ausente para criação de entidade');
             return;
         }
 
         const modalData: StorageEntityModalData = {
             title: 'Adicionar Nova Entidade de Armazenamento',
-            userId: userId,
-            userName: this._getCurrentUserName() || 'Usuário',
+            rootId: rootId,
+            rootIdentifier: this._getCurrentRootIdentifier() || 'Usuário',
             breadcrumbs: [...this.navigationState?.breadcrumbs] || [],
             mode: 'create'
         };
@@ -416,7 +416,7 @@ export class PortalStorageEntitiesListComponent implements OnInit, OnDestroy {
      */
     getDisplayInfo() {
         return {
-            userName: this._getCurrentUserName() || 'Usuário'
+            rootIdentifier: this._getCurrentRootIdentifier() || 'Usuário'
         };
     }
 }

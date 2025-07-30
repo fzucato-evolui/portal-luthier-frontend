@@ -128,7 +128,7 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy, Af
     };
 
     // Table configuration
-    displayedColumns: string[] = ['actions', 'select', 'icon', 'name', 'size', 'modified'];
+    displayedColumns: string[] = ['actions', 'select', 'icon', 'id', 'name', 'size', 'modified'];
     dataSource = new MatTableDataSource<FileListItemModel>();
 
     // Search
@@ -149,7 +149,7 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy, Af
     // Preview panel state
     previewPanelVisible = false;
     previewPanelFile: FileGalleryItem | null = null;
-    previewMode: 'gallery' | 'panel' = 'gallery'; // User preference
+    previewMode: 'gallery' | 'panel' = 'gallery'; // Root preference
 
     private _unsubscribeAll: Subject<void> = new Subject<void>();
     private _searchSubject = new Subject<string>();
@@ -850,8 +850,8 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy, Af
             firstValueFrom(this._storageService.getIdentifierDirectoryContents(identifierId, directoryId)).then(result => {
                 this._currentIdenfier = result;
                 this._storageService.navigateToFileExplorer(
-                    result.entity.user.id,
-                    result.entity.user.name,
+                    result.entity.storageRoot.id,
+                    result.entity.storageRoot.identifier,
                     result.entityId,
                     result.entity.name,
                     identifierId,
@@ -864,8 +864,8 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy, Af
             firstValueFrom(this._storageService.getIdentifierRootFiles(identifierId)).then(result => {
                 this._currentIdenfier = result;
                 this._storageService.navigateToFileExplorer(
-                    result.entity.user.id,
-                    result.entity.user.name,
+                    result.entity.storageRoot.id,
+                    result.entity.storageRoot.identifier,
                     result.entityId,
                     result.entity.name,
                     identifierId,
@@ -879,17 +879,17 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy, Af
     navigateToDirectory(file: FileListItemModel): void {
         if (!file.isDirectory) return;
 
-        const userId = this._getCurrentUserId();
+        const rootId = this._getCurrentRootId();
         const entityId = this._getCurrentEntityId();
         const identifierId = this._getCurrentIdentifierId();
 
-        if (!userId || !entityId || !identifierId) {
+        if (!rootId || !entityId || !identifierId) {
             console.error('Parâmetros de navegação obrigatórios ausentes');
             return;
         }
 
         this._router.navigate(
-            ['/portal/storage/users', userId, 'entities', entityId, 'identifiers', identifierId, 'files', file.id]
+            ['/portal/storage/roots', rootId, 'entities', entityId, 'identifiers', identifierId, 'files', file.id]
         );
 
     }
@@ -911,17 +911,17 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy, Af
     }
 
     goBack(): void {
-        const userId = this._getCurrentUserId();
+        const rootId = this._getCurrentRootId();
         const entityId = this._getCurrentEntityId();
 
-        if (!userId || !entityId) {
+        if (!rootId || !entityId) {
             this._router.navigate(['/portal/storage']);
             return;
         }
 
         this._router.navigate([
-            '/portal/storage/users',
-            userId,
+            '/portal/storage/roots',
+            rootId,
             'entities',
             entityId,
             'identifiers'
@@ -1173,16 +1173,16 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy, Af
 
     getDisplayInfo() {
         return {
-            userId: this._getCurrentUserId(),
-            userName: this._getCurrentUserName() || 'Usuário',
+            rootId: this._getCurrentRootId(),
+            rootIdentifier: this._getCurrentRootName() || 'Armazenamento',
             entityName: this._getCurrentEntityName() || 'Entidade',
             entityIdentifier: this._getCurrentIdentifierName() || 'Identificador'
         };
     }
 
     // Private methods
-    private _getCurrentUserId(): number | null {
-        return this.navigationState?.userId ?? this._currentIdenfier?.entity.userId;
+    private _getCurrentRootId(): number | null {
+        return this.navigationState?.rootId ?? this._currentIdenfier?.entity.storageRootId;
     }
 
     private _getCurrentEntityName(): string | null {
@@ -1201,8 +1201,8 @@ export class PortalStorageFileExplorerComponent implements OnInit, OnDestroy, Af
         return this.navigationState?.identifierId ?? this._currentIdenfier?.id;
     }
 
-    private _getCurrentUserName(): string | null {
-        return this.navigationState?.userName ?? 'Usuário';
+    private _getCurrentRootName(): string | null {
+        return this.navigationState?.rootIdentifier ?? 'Armazenamento';
     }
 
     private processFiles(files: PortalStorageFileModel[]): void {

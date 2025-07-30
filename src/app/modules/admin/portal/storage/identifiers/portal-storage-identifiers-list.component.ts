@@ -20,7 +20,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import {ActivatedRoute, Router} from '@angular/router';
 import {PortalStorageService} from '../portal-storage.service';
-import {AdminStorageIdentifierSummaryModel, StorageNavigationStateModel} from 'app/shared/models/portal-storage.model';
+import {StorageIdentifierSummaryModel, StorageNavigationStateModel} from 'app/shared/models/portal-storage.model';
 import {firstValueFrom, Subject, takeUntil} from 'rxjs';
 import {
     PortalStorageDownloadIdentifiersFilesComponent,
@@ -47,12 +47,12 @@ import {MessageDialogService} from '../../../../../shared/services/message/messa
     ],
 })
 export class PortalStorageIdentifiersListComponent implements OnInit, OnDestroy {
-    identifiers: AdminStorageIdentifierSummaryModel[] = [];
-    filteredIdentifiers: AdminStorageIdentifierSummaryModel[] = [];
+    identifiers: StorageIdentifierSummaryModel[] = [];
+    filteredIdentifiers: StorageIdentifierSummaryModel[] = [];
     isLoading = false;
     navigationState: StorageNavigationStateModel | null = null;
     displayedColumns: string[] = ['actions', 'id', 'identifier', 'files', 'size', 'lastActivity'];
-    dataSource = new MatTableDataSource<AdminStorageIdentifierSummaryModel>();
+    dataSource = new MatTableDataSource<StorageIdentifierSummaryModel>();
 
     // Route parameters - fallback when navigationState is not available
     private _currentUserId: number | null = null;
@@ -102,11 +102,11 @@ export class PortalStorageIdentifiersListComponent implements OnInit, OnDestroy 
             });
 
         // Get route parameters and load identifiers
-        const userId = this._route.snapshot.paramMap.get('userId');
+        const rootId = this._route.snapshot.paramMap.get('rootId');
         const entityId = this._route.snapshot.paramMap.get('entityId');
 
-        if (userId && entityId) {
-            this._currentUserId = parseInt(userId, 10);
+        if (rootId && entityId) {
+            this._currentUserId = parseInt(rootId, 10);
             this._currentEntityId = parseInt(entityId, 10);
             this.loadIdentifiers(this._currentEntityId);
 
@@ -125,10 +125,10 @@ export class PortalStorageIdentifiersListComponent implements OnInit, OnDestroy 
     // -----------------------------------------------------------------------------------------------------
 
     /**
-     * Get current user ID from navigation state or route params
+     * Get current root ID from navigation state or route params
      */
     private _getCurrentUserId(): number | null {
-        return this.navigationState?.userId ?? this._currentUserId;
+        return this.navigationState?.rootId ?? this._currentUserId;
     }
 
     /**
@@ -146,10 +146,10 @@ export class PortalStorageIdentifiersListComponent implements OnInit, OnDestroy 
     }
 
     /**
-     * Get current user name from navigation state or try to get from service/API
+     * Get current root name from navigation state or try to get from service/API
      */
     private _getCurrentUserName(): string | null {
-        return this.navigationState?.userName ?? 'Usuário'; // Fallback para nome genérico
+        return this.navigationState?.rootIdentifier ?? 'Usuário'; // Fallback para nome genérico
     }
 
     /**
@@ -162,8 +162,8 @@ export class PortalStorageIdentifiersListComponent implements OnInit, OnDestroy 
                 if (entity) {
                     this._currentEntityName = entity.entityName;
                     this._storageService.navigateToEntityIdentifiers(
-                        entity.userId,
-                        entity.userName,
+                        entity.rootId,
+                        entity.rootIdentifier,
                         entityId,
                         entity.entityName
                     );
@@ -185,21 +185,21 @@ export class PortalStorageIdentifiersListComponent implements OnInit, OnDestroy 
     /**
      * Navigate to file explorer for identifier
      */
-    viewIdentifierFiles(identifier: AdminStorageIdentifierSummaryModel): void {
-        const userId = this._getCurrentUserId();
-        const userName = this._getCurrentUserName();
+    viewIdentifierFiles(identifier: StorageIdentifierSummaryModel): void {
+        const rootId = this._getCurrentUserId();
+        const rootIdentifier = this._getCurrentUserName();
         const entityId = this._getCurrentEntityId();
         const entityName = this._getCurrentEntityName();
 
-        if (!userId || !entityName) {
+        if (!rootId || !entityName) {
             console.error('Parâmetros de navegação obrigatórios ausentes');
             return;
         }
 
         // ALWAYS update navigation state for file explorer
         this._storageService.navigateToFileExplorer(
-            userId,
-            userName || 'Usuário',
+            rootId,
+            rootIdentifier || 'Armazenamento',
             entityId,
             entityName,
             identifier.entityIdentifierId,
@@ -208,8 +208,8 @@ export class PortalStorageIdentifiersListComponent implements OnInit, OnDestroy 
         );
 
         this._router.navigate([
-            '/portal/storage/users',
-            userId,
+            '/portal/storage/roots',
+            rootId,
             'entities',
             entityId,
             'identifiers',
@@ -221,23 +221,23 @@ export class PortalStorageIdentifiersListComponent implements OnInit, OnDestroy 
     /**
      * Open download modal for identifier files
      */
-    downloadIdentifierFiles(identifier: AdminStorageIdentifierSummaryModel): void {
-        const userId = this._getCurrentUserId();
-        const userName = this._getCurrentUserName();
+    downloadIdentifierFiles(identifier: StorageIdentifierSummaryModel): void {
+        const rootId = this._getCurrentUserId();
+        const rootIdentifier = this._getCurrentUserName();
         const entityName = this._getCurrentEntityName();
         const entityId = this._getCurrentEntityId();
         const identifierId = identifier.entityIdentifierId;
         const identifierName = identifier.entityIdentifierName;
 
 
-        if (!userId || !entityName) {
+        if (!rootId || !entityName) {
             console.error('Parâmetros de navegação obrigatórios ausentes');
             return;
         }
 
         const modalData: StorageDownloadIdentifiersFilesModalData = {
-            userId: userId,
-            userName: userName || 'Usuário',
+            rootId: rootId,
+            rootIdentifier: rootIdentifier || 'Usuário',
             entityName: entityName,
             entityId: entityId,
             identifierId: identifierId,
@@ -257,9 +257,9 @@ export class PortalStorageIdentifiersListComponent implements OnInit, OnDestroy 
      * Navigate back to entities list
      */
     goBack(): void {
-        const userId = this._getCurrentUserId();
+        const rootId = this._getCurrentUserId();
 
-        if (!userId) {
+        if (!rootId) {
             console.error('Não é possível navegar para trás: ID do usuário ausente');
             // Fallback para raiz do armazenamento
             this._router.navigate(['/portal/storage']);
@@ -267,8 +267,8 @@ export class PortalStorageIdentifiersListComponent implements OnInit, OnDestroy 
         }
 
         this._router.navigate([
-            '/portal/storage/users',
-            userId,
+            '/portal/storage/roots',
+            rootId,
             'entities'
         ]);
     }
@@ -346,7 +346,7 @@ export class PortalStorageIdentifiersListComponent implements OnInit, OnDestroy 
     /**
      * Track by function for ngFor loops
      */
-    trackByFn(_index: number, item: AdminStorageIdentifierSummaryModel): any {
+    trackByFn(_index: number, item: StorageIdentifierSummaryModel): any {
         return item.entityId;
     }
 
@@ -416,11 +416,11 @@ export class PortalStorageIdentifiersListComponent implements OnInit, OnDestroy 
     getDisplayInfo() {
         return {
             entityName: this._getCurrentEntityName() || 'Entidade',
-            userName: this._getCurrentUserName() || 'Usuário'
+            rootIdentifier: this._getCurrentUserName() || 'Usuário'
         };
     }
 
-    editIdentifier(identifier: AdminStorageIdentifierSummaryModel): void {
+    editIdentifier(identifier: StorageIdentifierSummaryModel): void {
         const entityId = this._getCurrentEntityId();
         const entityName = this._getCurrentEntityName();
 
@@ -456,10 +456,10 @@ export class PortalStorageIdentifiersListComponent implements OnInit, OnDestroy 
         });
     }
 
-    deleteIdentifierStorage(identifier: AdminStorageIdentifierSummaryModel): void {
+    deleteIdentifierStorage(identifier: StorageIdentifierSummaryModel): void {
         this._messageService.open("Tem certeza de que deseja remover o armazenamento do identificador?", 'CONFIRMAÇÃO', 'confirm').subscribe((result) => {
             if (result === 'confirmed') {
-                // ALWAYS update navigation state for user entities
+                // ALWAYS update navigation state for root entities
                 firstValueFrom(this._storageService.deleteIdentifier(identifier.entityIdentifierId)).then(result => {
                     const message = `${result['message']}<br>Aquivos Removidos: ${result['filesRemoved']}`;
                     this._messageService.open(message, 'SUCESSO','success');

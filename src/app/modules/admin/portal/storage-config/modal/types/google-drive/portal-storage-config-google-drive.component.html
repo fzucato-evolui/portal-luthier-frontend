@@ -1,0 +1,92 @@
+<div class="flex flex-col h-full">
+    <div class="flex flex-0 items-center justify-between p-4 border-b">
+        <h3 class="text-lg font-medium">Configuração do Google Drive</h3>
+        <div class="flex justify-end gap-2">
+            <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!canSave()" form="googleDriveConfigForm">
+                <mat-icon class="mr-2" fontSet="fas" fontIcon="fa-save"></mat-icon>
+                Salvar
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-auto overflow-y-auto p-6">
+        <!-- Exibir status configurado/não configurado -->
+        <div class="mb-4">
+            <ng-container *ngIf="config?.id; else notConfigured">
+                <div class="flex items-center space-x-2 text-green-600">
+                    <mat-icon [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                    <span>Configurado</span>
+                </div>
+                <div class="mt-2 text-sm text-secondary">
+                    Última atualização: {{ config.updatedAt | date:'medium' }}
+                </div>
+            </ng-container>
+            <ng-template #notConfigured>
+                <div class="flex items-center space-x-2 text-secondary">
+                    <mat-icon [svgIcon]="'heroicons_solid:x-circle'"></mat-icon>
+                    <span>Não configurado</span>
+                </div>
+            </ng-template>
+        </div>
+
+        <form [formGroup]="form" class="flex flex-col gap-4" id="googleDriveConfigForm">
+            <mat-card>
+                <mat-card-content>
+                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mb-1">
+
+                        <!-- Root Folder ID -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>ID da Pasta Raiz</mat-label>
+                            <input matInput formControlName="rootFolderId" placeholder="Digite o ID da pasta raiz">
+                            <mat-hint>
+                                ID da pasta raiz. É obrigatório se não for um drive compartilhado
+                            </mat-hint>
+                        </mat-form-field>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mb-1">
+                        <!-- Shared Drive ID -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>ID do Drive Compartilhado</mat-label>
+                            <input matInput formControlName="sharedDriveId" placeholder="Digite o ID do drive compartilhado">
+                            <mat-hint>
+                                ID do drive compartilhado. É obrigatório se a conta de serviço não tiver delgações nas apis
+                            </mat-hint>
+                        </mat-form-field>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mb-1">
+                        <!-- Real Delegate Account  -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Conta Real do Usuário</mat-label>
+                            <input matInput formControlName="realDelegateAccount" placeholder="Digite o email da conta real do usuário do drive">
+                            <mat-hint>
+                                Email da conta real do usuário do drive. É obrigatório se não for um drive compartilhado
+                            </mat-hint>
+                        </mat-form-field>
+                    </div>
+                    <div class="w-full my-2">
+                        <ngx-file-drop class="mb-4"
+                                       [multiple]="false" [accept]="'.json'" dropZoneLabel="Arraste seu arquivo de configuração da conta de serviço aqui"
+                                       (onFileDrop)="dropped($event)">
+
+                            <ng-template ngx-file-drop-content-tmp let-openFileSelectorDocumentos="openFileSelector">
+                                {{"Arraste seu arquivo de configuração da conta de serviço aqui"}}
+                                <button
+                                    class="px-6 ml-3"
+                                    mat-icon-button
+                                    [color]="'primary'"
+                                    (click)="openFileSelectorDocumentos()">
+                                    <mat-icon class="icon-size-5" fontSet="fas" fontIcon="fa-upload"></mat-icon>
+                                </button>
+                            </ng-template>
+                        </ngx-file-drop>
+                    </div>
+                    <div class="w-full max-w-full overflow-x-auto box-content" *ngIf="form.get('serviceAccount').value">
+                        <pre class="text-xs whitespace-pre-line">
+                          {{form.get('serviceAccount').value | json}}
+                        </pre>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </form>
+    </div>
+</div>

@@ -2,25 +2,26 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {BehaviorSubject, Observable, tap} from 'rxjs';
 import {
-    AdminStorageEntitySummaryModel,
-    AdminStorageIdentifierSummaryModel,
-    AdminStorageUserSummaryModel,
     PortalStorageEntityIdentifierModel,
     PortalStorageEntityModel,
     PortalStorageFileModel,
+    PortalStorageRootModel,
     PresignedUrlResponseModel,
+    StorageEntitySummaryModel,
+    StorageIdentifierSummaryModel,
     StorageNavigationStateModel,
-    StorageStatisticsModel,
-    UserWithStorageConfigModel
+    StorageRootSummaryModel
 } from 'app/shared/models/portal-storage.model';
 import {AsyncRequestModel} from 'app/shared/models/async_request.model';
 import {UtilFunctions} from '../../../../shared/util/util-functions';
+import {PortalStorageConfigModel} from '../../../../shared/models/portal-storage-config.model';
 
 @Injectable({
     providedIn: 'root'
 })
 export class PortalStorageService {
     private readonly apiUrl = '/api/admin/portal/storage';
+    private readonly apiConfigUrl = '/api/admin/portal/storage-config';
 
     // Navigation state
     private _navigationState = new BehaviorSubject<StorageNavigationStateModel>({
@@ -29,11 +30,11 @@ export class PortalStorageService {
     });
 
     // Current data
-    private _users = new BehaviorSubject<AdminStorageUserSummaryModel[]>([]);
-    private _entities = new BehaviorSubject<AdminStorageEntitySummaryModel[]>([]);
-    private _identifiers = new BehaviorSubject<AdminStorageIdentifierSummaryModel[]>([]);
+    private _configs = new BehaviorSubject<PortalStorageConfigModel[]>([]);
+    private _roots = new BehaviorSubject<StorageRootSummaryModel[]>([]);
+    private _entities = new BehaviorSubject<StorageEntitySummaryModel[]>([]);
+    private _identifiers = new BehaviorSubject<StorageIdentifierSummaryModel[]>([]);
     private _files = new BehaviorSubject<PortalStorageFileModel[]>([]);
-    private _statistics = new BehaviorSubject<StorageStatisticsModel | null>(null);
 
     // Loading states
     private _isLoading = new BehaviorSubject<boolean>(false);
@@ -48,24 +49,24 @@ export class PortalStorageService {
         return this._navigationState.asObservable();
     }
 
-    get users$(): Observable<AdminStorageUserSummaryModel[]> {
-        return this._users.asObservable();
+    get configs$(): Observable<PortalStorageConfigModel[]> {
+        return this._configs.asObservable();
     }
 
-    get entities$(): Observable<AdminStorageEntitySummaryModel[]> {
+    get roots$(): Observable<StorageRootSummaryModel[]> {
+        return this._roots.asObservable();
+    }
+
+    get entities$(): Observable<StorageEntitySummaryModel[]> {
         return this._entities.asObservable();
     }
 
-    get identifiers$(): Observable<AdminStorageIdentifierSummaryModel[]> {
+    get identifiers$(): Observable<StorageIdentifierSummaryModel[]> {
         return this._identifiers.asObservable();
     }
 
     get files$(): Observable<PortalStorageFileModel[]> {
         return this._files.asObservable();
-    }
-
-    get statistics$(): Observable<StorageStatisticsModel | null> {
-        return this._statistics.asObservable();
     }
 
     get isLoading$(): Observable<boolean> {
@@ -77,7 +78,7 @@ export class PortalStorageService {
     // -----------------------------------------------------------------------------------------------------
 
     /**
-     * Reset navigation to root level (users list)
+     * Reset navigation to root level (roots list)
      */
     resetNavigation(): void {
         this._navigationState.next({
@@ -94,18 +95,18 @@ export class PortalStorageService {
     }
 
     /**
-     * Navigate to user's entities
+     * Navigate to root's entities
      */
-    navigateToUserEntities(userId: number, userName: string): void {
-        console.log('🔍 NavigateToUserEntities Debug:', { userId, userName });
+    navigateToRootEntities(rootId: number, rootIdentifier: string): void {
+        console.log('🔍 NavigateToRootEntities Debug:', { rootId, rootIdentifier: rootIdentifier });
 
         this._navigationState.next({
-            userId,
-            userName,
-            currentPath: `/portal/storage/users/${userId}`,
+            rootId,
+            rootIdentifier: rootIdentifier,
+            currentPath: `/portal/storage/roots/${rootId}`,
             breadcrumbs: [
                 { label: 'Administração de Armazenamento', path: '/portal/storage', clickable: true },
-                { label: userName, path: `/portal/storage/users/${userId}/entities`, clickable: false }
+                { label: rootIdentifier, path: `/portal/storage/roots/${rootId}/entities`, clickable: false }
             ]
         });
         this._identifiers.next([]);
@@ -115,19 +116,19 @@ export class PortalStorageService {
     /**
      * Navigate to entity identifiers
      */
-    navigateToEntityIdentifiers(userId: number, userName: string, entityId: number, entityName: string): void {
-        console.log('🔍 NavigateToEntityIdentifiers Debug:', { userId, userName, entityId, entityName });
+    navigateToEntityIdentifiers(rootId: number, rootIdentifier: string, entityId: number, entityName: string): void {
+        console.log('🔍 NavigateToEntityIdentifiers Debug:', { rootId, rootIdentifier, entityId, entityName });
 
         this._navigationState.next({
-            userId,
-            userName,
+            rootId,
+            rootIdentifier,
             entityId,
             entityName,
-            currentPath: `/portal/storage/users/${userId}/entities/${entityId}`,
+            currentPath: `/portal/storage/roots/${rootId}/entities/${entityId}`,
             breadcrumbs: [
                 { label: 'Administração de Armazenamento', path: '/portal/storage', clickable: true },
-                { label: userName, path: `/portal/storage/users/${userId}/entities`, clickable: true },
-                { label: entityName, path: `/portal/storage/users/${userId}/entities/${entityId}/identifiers`, clickable: false }
+                { label: rootIdentifier, path: `/portal/storage/roots/${rootId}/entities`, clickable: true },
+                { label: entityName, path: `/portal/storage/roots/${rootId}/entities/${entityId}/identifiers`, clickable: false }
             ]
         });
         this._files.next([]);
@@ -137,8 +138,8 @@ export class PortalStorageService {
      * Navigate to file explorer
      */
     navigateToFileExplorer(
-        userId: number,
-        userName: string,
+        rootId: number,
+        rootIdentifier: string,
         entityId: number,
         entityName: string,
         identifierId: number,
@@ -155,18 +156,18 @@ export class PortalStorageService {
                 clickable: true
             },
             {
-                label: userName,
-                path: `/portal/storage/users/${userId}/entities`,
+                label: rootIdentifier,
+                path: `/portal/storage/roots/${rootId}/entities`,
                 clickable: true
             },
             {
                 label: entityName,
-                path: `/portal/storage/users/${userId}/entities/${entityId}/identifiers`,
+                path: `/portal/storage/roots/${rootId}/entities/${entityId}/identifiers`,
                 clickable: true
             },
             {
                 label: identifierName,
-                path: `/portal/storage/users/${userId}/entities/${entityId}/identifiers/${identifierId}/files`,
+                path: `/portal/storage/roots/${rootId}/entities/${entityId}/identifiers/${identifierId}/files`,
                 clickable: UtilFunctions.isValidObject(directory) === true
             }
         ];
@@ -177,12 +178,12 @@ export class PortalStorageService {
 
             if (UtilFunctions.isValidStringOrArray(keysAncestors) === true && keysAncestors.length > 3) {
                 keysAncestors.forEach((ancestor, index) => {
-                    // 0 = user, 1 = entity, 2 = identifier, 3 = directory
+                    // 0 = root, 1 = entity, 2 = identifier, 3 = directory
                     if (index >= 3) {
 
                         breadcrumbs.push({
                             label: directory.ancestors[ancestor],
-                            path: `/portal/storage/users/${userId}/entities/${entityId}/identifiers/${identifierId}/files/${ancestor})}`,
+                            path: `/portal/storage/roots/${rootId}/entities/${entityId}/identifiers/${identifierId}/files/${ancestor})}`,
                             clickable: index < keysAncestors.length - 1 // Only clickable if not the last segment
                         })
                     }
@@ -194,8 +195,8 @@ export class PortalStorageService {
         const currentPath = breadcrumbs[breadcrumbs.length - 1].path;
 
         console.log('🔍 NavigateToFileExplorer Debug (Query Params):', {
-            userId,
-            userName,
+            rootId,
+            rootIdentifier: rootIdentifier,
             entityId,
             entityName,
             identifierId,
@@ -206,8 +207,8 @@ export class PortalStorageService {
         });
 
         this._navigationState.next({
-            userId,
-            userName,
+            rootId,
+            rootIdentifier: rootIdentifier,
             entityId,
             entityName,
             identifierId,
@@ -222,25 +223,44 @@ export class PortalStorageService {
     // @ Public methods - API calls
     // -----------------------------------------------------------------------------------------------------
 
-    /**
-     * Get users with storage statistics
-     */
-    getUsers(): Observable<AdminStorageUserSummaryModel[]> {
+    getConfigs(): Observable<PortalStorageConfigModel[]> {
         this._isLoading.next(true);
 
-        return this._httpClient.get<AdminStorageUserSummaryModel[]>(`${this.apiUrl}/users-summary`)
+        return this._httpClient.get<PortalStorageConfigModel[]>(`${this.apiConfigUrl}`)
             .pipe(
-                tap(users => {
-                    this._users.next(users);
+                tap(configs => {
+                    this._configs.next(configs);
                     this._isLoading.next(false);
                 })
             );
     }
     /**
-     * Get user by ID for navigation context
+     * Get roots with storage statistics
      */
-    getUser(userId: number): Observable<AdminStorageUserSummaryModel | null> {
-        return this._httpClient.get<AdminStorageUserSummaryModel>(`${this.apiUrl}/user-summary/${userId}`);
+    getRoots(): Observable<StorageRootSummaryModel[]> {
+        this._isLoading.next(true);
+
+        return this._httpClient.get<StorageRootSummaryModel[]>(`${this.apiUrl}/roots-summary`)
+            .pipe(
+                tap(roots => {
+                    this._roots.next(roots);
+                    this._isLoading.next(false);
+                })
+            );
+    }
+    /**
+     * Get root by ID for navigation context
+     */
+    getRoot(rootId: number): Observable<StorageRootSummaryModel | null> {
+        return this._httpClient.get<StorageRootSummaryModel>(`${this.apiUrl}/root-summary/${rootId}`);
+    }
+
+    createRoot(root: PortalStorageRootModel): Observable<PortalStorageRootModel> {
+        return this._httpClient.post<PortalStorageRootModel>(`${this.apiUrl}/root`, root);
+    }
+
+    updateRoot(root: PortalStorageRootModel): Observable<PortalStorageRootModel> {
+        return this._httpClient.put<PortalStorageRootModel>(`${this.apiUrl}/root`, root);
     }
     /**
      * Create a new storage entity
@@ -261,29 +281,29 @@ export class PortalStorageService {
         return this._httpClient.delete<Observable<{ [key: string]: any }>>(`${this.apiUrl}/entity/${entityId}`);
     }
     /**
-     * Delete user storage
+     * Delete root storage
      */
-    deleteUserStorage(userId: number): Observable<{ [key: string]: any }> {
-        return this._httpClient.delete<{ [key: string]: any }>(`${this.apiUrl}/user/${userId}`).pipe(
+    deleteRootStorage(rootId: number): Observable<{ [key: string]: any }> {
+        return this._httpClient.delete<{ [key: string]: any }>(`${this.apiUrl}/root/${rootId}`).pipe(
             tap((result) =>
             {
-                const index = this._users.getValue().findIndex(user => user.userId === userId);
+                const index = this._roots.getValue().findIndex(root => root.id === rootId);
                 if (index !== -1) {
-                    const updatedUsers = [...this._users.getValue()];
-                    updatedUsers.splice(index, 1);
-                    this._users.next(updatedUsers);
+                    const updatedRoots = [...this._roots.getValue()];
+                    updatedRoots.splice(index, 1);
+                    this._roots.next(updatedRoots);
                 }
                 return result;
             }),
         );
     }
     /**
-     * Get entities for a specific user
+     * Get entities for a specific root
      */
-    getUserEntities(userId: number): Observable<AdminStorageEntitySummaryModel[]> {
+    getRootEntities(rootId: number): Observable<StorageEntitySummaryModel[]> {
         this._isLoading.next(true);
 
-        return this._httpClient.get<AdminStorageEntitySummaryModel[]>(`${this.apiUrl}/user-entities/${userId}`)
+        return this._httpClient.get<StorageEntitySummaryModel[]>(`${this.apiUrl}/root-entities/${rootId}`)
             .pipe(
                 tap(entities => {
                     this._entities.next(entities);
@@ -295,24 +315,17 @@ export class PortalStorageService {
     /**
      * Get entity by ID for navigation context
      */
-    getEntity(entityId: number): Observable<AdminStorageEntitySummaryModel | null> {
-        return this._httpClient.get<AdminStorageEntitySummaryModel>(`${this.apiUrl}/entity-summary/${entityId}`);
-    }
-
-    /**
-     * Get users with storage configuration (for modal dropdown)
-     */
-    getUsersWithStorageConfig(): Observable<UserWithStorageConfigModel[]> {
-        return this._httpClient.get<UserWithStorageConfigModel[]>(`${this.apiUrl}/users-with-config`);
+    getEntity(entityId: number): Observable<StorageEntitySummaryModel | null> {
+        return this._httpClient.get<StorageEntitySummaryModel>(`${this.apiUrl}/entity-summary/${entityId}`);
     }
 
     /**
      * Get identifiers for a specific entity
      */
-    getEntityIdentifiers(entityId: number): Observable<AdminStorageIdentifierSummaryModel[]> {
+    getEntityIdentifiers(entityId: number): Observable<StorageIdentifierSummaryModel[]> {
         this._isLoading.next(true);
 
-        return this._httpClient.get<AdminStorageIdentifierSummaryModel[]>(`${this.apiUrl}/entity-identifiers/${entityId}`)
+        return this._httpClient.get<StorageIdentifierSummaryModel[]>(`${this.apiUrl}/entity-identifiers/${entityId}`)
             .pipe(
                 tap(identifiers => {
                     this._identifiers.next(identifiers);
@@ -376,15 +389,15 @@ export class PortalStorageService {
     }
 
     /**
-     * Download all files of a user as ZIP asynchronously
+     * Download all files of a root as ZIP asynchronously
      */
-    downloadUserFilesAsync(
+    downloadRootFilesAsync(
         id: number,
         callback: (msg: AsyncRequestModel<{ token: string, fileName: string }>) => void
     ): () => void {
         return this.processAsync<AsyncRequestModel<{ token: string, fileName: string }>>(
             null,
-            `${this.apiUrl}/user-download-zip-async/${id}`,
+            `${this.apiUrl}/root-download-zip-async/${id}`,
             callback
         );
     }

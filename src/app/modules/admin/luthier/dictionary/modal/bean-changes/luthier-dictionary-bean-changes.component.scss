@@ -1,0 +1,51 @@
+.bean-changes-container {
+    &.nested {
+        margin-left: 1rem;
+        padding-left: 1rem;
+        border-left: 2px solid rgba(0, 0, 0, 0.1);
+        
+        .dark & {
+            border-left-color: rgba(255, 255, 255, 0.1);
+        }
+    }
+    
+    mat-expansion-panel {
+        border-radius: 0.5rem;
+        overflow: hidden;
+        
+        &.mat-expanded {
+            mat-expansion-panel-header {
+                border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+                
+                .dark & {
+                    border-bottom-color: rgba(255, 255, 255, 0.1);
+                }
+            }
+        }
+    }
+    
+    pre {
+        margin: 0;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+    
+    .icon-size-4 {
+        font-size: 1rem;
+        width: 1rem;
+        height: 1rem;
+    }
+    
+    .icon-size-5 {
+        font-size: 1.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+    
+    .icon-size-8 {
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+    }
+}

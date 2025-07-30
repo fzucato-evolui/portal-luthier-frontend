@@ -1,0 +1,73 @@
+<div class="bean-changes-container" [class.nested]="level > 0">
+    <mat-accordion *ngIf="changes && changes.length > 0" [multi]="true">
+        <mat-expansion-panel *ngFor="let change of changes; let i = index" 
+                             class="mb-2 shadow-sm"
+                             [expanded]="level === 0 && i === 0">
+            <mat-expansion-panel-header>
+                <mat-panel-title class="flex items-center">
+                    <mat-icon [ngClass]="getChangeTypeColor(change.changeType)" 
+                              class="mr-2 icon-size-5"
+                              fontSet="fas" 
+                              [fontIcon]="getChangeTypeIcon(change.changeType)">
+                    </mat-icon>
+                    <span class="font-medium">{{change.fieldName || 'Campo'}}</span>
+                    <span *ngIf="change.key" class="ml-2 text-sm text-gray-500">[{{change.key}}]</span>
+                </mat-panel-title>
+                <mat-panel-description>
+                    <span [ngClass]="getChangeTypeColor(change.changeType)" class="text-sm">
+                        {{change.changeType || 'NONE'}}
+                    </span>
+                    <span *ngIf="hasNestedChanges(change)" class="ml-2 text-xs text-gray-500">
+                        ({{change.changes.length}} sub-alterações)
+                    </span>
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+            
+            <div class="p-4">
+                <!-- Valores Antes/Depois -->
+                <div *ngIf="!hasNestedChanges(change)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div *ngIf="change.beforeValue !== undefined && change.beforeValue !== null" 
+                         class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
+                        <h4 class="text-sm font-semibold text-red-700 dark:text-red-400 mb-2">
+                            <mat-icon class="icon-size-4 mr-1" fontSet="fas" fontIcon="fa-arrow-left"></mat-icon>
+                            Valor Anterior
+                        </h4>
+                        <div class="text-sm text-gray-700 dark:text-gray-300 break-words">
+                            <pre class="whitespace-pre-wrap">{{change.beforeValue}}</pre>
+                        </div>
+                    </div>
+                    
+                    <div *ngIf="change.afterValue !== undefined && change.afterValue !== null" 
+                         class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                        <h4 class="text-sm font-semibold text-green-700 dark:text-green-400 mb-2">
+                            <mat-icon class="icon-size-4 mr-1" fontSet="fas" fontIcon="fa-arrow-right"></mat-icon>
+                            Novo Valor
+                        </h4>
+                        <div class="text-sm text-gray-700 dark:text-gray-300 break-words">
+                            <pre class="whitespace-pre-wrap">{{change.afterValue}}</pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mudanças Aninhadas -->
+                <div *ngIf="hasNestedChanges(change)" class="mt-2">
+                    <div class="mb-2 text-sm text-gray-600 dark:text-gray-400">
+                        <mat-icon class="icon-size-4 mr-1" fontSet="fas" fontIcon="fa-sitemap"></mat-icon>
+                        Alterações detalhadas:
+                    </div>
+                    <luthier-dictionary-bean-changes 
+                        [changes]="change.changes" 
+                        [level]="level + 1">
+                    </luthier-dictionary-bean-changes>
+                </div>
+            </div>
+        </mat-expansion-panel>
+    </mat-accordion>
+    
+    <!-- Mensagem quando não há mudanças -->
+    <div *ngIf="!changes || changes.length === 0" 
+         class="text-center py-8 text-gray-500">
+        <mat-icon class="icon-size-8 mb-2" fontSet="fas" fontIcon="fa-info-circle"></mat-icon>
+        <p>Nenhuma alteração detalhada disponível</p>
+    </div>
+</div>

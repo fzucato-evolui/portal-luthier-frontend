@@ -1,23 +1,26 @@
 /**
  * Models para o sistema de storage administrativo do Portal
  */
-import {UserModel} from './user.model';
+import {PortalStorageConfigModel} from './portal-storage-config.model';
 
-export interface AdminStorageUserSummaryModel {
-    userId: number;
-    userName: string;
-    userEmail: string;
+export interface StorageRootSummaryModel {
+    id: number;
+    identifier: string;
+    description: string;
     storageType?: string;
+    configId?: number;
     totalEntities: number;
     totalFiles: number;
     totalDirectories: number;
     totalBytes: number;
     lastActivity?: Date;
+    storageId?: string;
 }
 
-export interface AdminStorageEntitySummaryModel {
-    userName: string;
-    userId: number;
+export interface StorageEntitySummaryModel {
+    rootIdentifier: string;
+    rootDescription: string;
+    rootId: number;
     entityId: number;
     entityName: string;
     totalIdentifiers: number;
@@ -26,12 +29,11 @@ export interface AdminStorageEntitySummaryModel {
     totalBytes: number;
     lastActivity?: Date;
     description?: string;
-    storageUserId?: string;
-    storageEntityId?: string;
+    storageId?: string;
 
 }
 
-export interface AdminStorageIdentifierSummaryModel {
+export interface StorageIdentifierSummaryModel {
     entityId: number;
     entityName: string;
     storageId?: string;
@@ -81,26 +83,32 @@ export interface PortalStorageEntityIdentifierModel {
 
 export interface PortalStorageEntityModel {
     id?: number;
-    userId: number;
+    storageRootId: number;
     name: string;
     description?: string;
     createdAt?: Date;
     updatedAt?: Date;
     identifiers?: PortalStorageEntityIdentifierModel[];
-    user?: UserModel
+    storageRoot?: PortalStorageRootModel
 }
 
-export interface UserWithStorageConfigModel {
-    id: number;
-    name: string;
-    email: string;
-    storageType?: string;
+export interface PortalStorageRootModel {
+    id?: number;
+    configId: number;
+    identifier: string;
+    description?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+    entities?: PortalStorageEntityModel[];
+    config?: PortalStorageConfigModel
 }
+
+
 export type MediaType = 'AUDIO' | 'CODE' | 'COMPRESSED' | 'DOCUMENT' | 'IMAGE' | 'PRESENTATION' | 'SPREADSHEET' | 'TEXT' | 'VIDEO' | 'OTHER';
 
 export interface StorageNavigationStateModel {
-    userId?: number;
-    userName?: string;
+    rootId?: number;
+    rootIdentifier?: string;
     entityId?: number;
     entityName?: string;
     identifierId?: number;

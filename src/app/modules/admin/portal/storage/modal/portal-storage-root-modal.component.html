@@ -40,21 +40,66 @@
                             </li>
                         </ol>
                     </nav>
-                    <div class="text-xl">Entidade de Armazenamento</div>
-                    <div class="text-secondary">{{data.entity?.id ? 'Editar entidade' : 'Criar uma nova entidade'}} de armazenamento para organizar arquivos</div>
+                    <div class="text-xl">Armazenamento Raiz</div>
+                    <div class="text-secondary">{{data.root?.id ? 'Editar Armazenamento Raiz' : 'Criar um nova raiz'}} de armazenamento para organizar arquivos</div>
                 </div>
 
                 <div class="grid sm:grid-cols-12 gap-2 mt-4 mx-1">
 
-                    <div *ngIf="data.entity?.id" class="sm:col-span-3">
+                    <!-- User Selection (only show if userId not preset) -->
+                    <div class="sm:col-span-12">
+
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
-                            <mat-label>ID da Entidade</mat-label>
+                            <mat-label>Configurações</mat-label>
+                            <mat-icon
+                                class="icon-size-5"
+                                fontSet="fas" fontIcon="fa-user"
+                                matPrefix></mat-icon>
+
+                            <input *ngIf="data.root?.id | isValidStringOrArray"
+                                   matInput
+                                   [disabled]="true"
+                                   [value]="getConfigDisplayName(savedConfig)" />
+                            <ng-container *ngIf="!data.root?.id">
+                                <input
+                                    matInput
+                                    [formControl]="configSearchControl"
+                                    placeholder="Digite para buscar configurações..."
+                                    [matAutocomplete]="configAutocomplete"
+                                    [required]="true">
+                                <mat-autocomplete
+                                    #configAutocomplete="matAutocomplete"
+                                    [displayWith]="displayConfigFn"
+                                    (optionSelected)="onConfigSelected($event)">
+                                    <mat-option
+                                        *ngFor="let user of filteredConfigs | async"
+                                        [value]="user">
+                                        {{ getConfigDisplayName(user) }}
+                                    </mat-option>
+                                    <mat-option
+                                        *ngIf="(filteredConfigs | async)?.length === 0"
+                                        class="text-secondary"
+                                        disabled>
+                                        Nenhuma configuração encontrada
+                                    </mat-option>
+                                </mat-autocomplete>
+                                <mat-error *ngIf="formSave.get('configId')?.hasError('required')">
+                                    Configuração é obrigatória
+                                </mat-error>
+                            </ng-container>
+
+                        </mat-form-field>
+                    </div>
+
+                    <div *ngIf="data.root?.id" class="sm:col-span-3">
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>ID</mat-label>
                             <mat-icon
                                 class="icon-size-5"
                                 fontSet="fas" fontIcon="fa-list-ol"
                                 matPrefix></mat-icon>
                             <input
-                                [value]="data.entity.id"
+                                [value]="data.root.id"
                                 readonly
                                 matInput>
                         </mat-form-field>
@@ -62,15 +107,15 @@
                     <!-- Entity Name -->
                     <div class="sm:col-span-12">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
-                            <mat-label>Nome da Entidade</mat-label>
+                            <mat-label>Identificador</mat-label>
                             <mat-icon
                                 class="icon-size-5"
                                 fontSet="fas" fontIcon="fa-cube"
                                 matPrefix></mat-icon>
                             <input
                                 [required]="true"
-                                [formControlName]="'name'"
-                                placeholder="ex.: Propriedade, Cliente, Documento"
+                                [formControlName]="'identifier'"
+                                [patterns]="customPatterns" mask="I*"
                                 maxlength="100"
                                 matInput>
                         </mat-form-field>
@@ -86,7 +131,7 @@
                                 matPrefix></mat-icon>
                             <textarea
                                 [formControlName]="'description'"
-                                placeholder="Descrição opcional desta entidade"
+                                placeholder="Descrição opcional"
                                 maxlength="500"
                                 rows="3"
                                 matInput>
@@ -106,7 +151,7 @@
                 mat-flat-button
                 type="button"
                 [color]="'primary'">
-                {{ data.mode === 'edit' ? 'Atualizar' : 'Criar' }} Entidade
+                {{ data.mode === 'edit' ? 'Atualizar' : 'Criar' }} Armazenamento
             </button>
         </div>
     </div>

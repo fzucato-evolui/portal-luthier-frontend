@@ -1,0 +1,121 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden bg-card dark:bg-transparent z-50">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-4 border-b">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="mt-2">
+                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                    Configurações de Armazenamento
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex-auto p-2 overflow-y-hidden">
+        <div class="flex flex-col h-full overflow-hidden">
+            <div class="flex-none flex justify-between items-center py-1">
+                <div class="flex-none flex">
+                    <!-- Botões de ação podem ser adicionados aqui se necessário -->
+                </div>
+                <div class="flex-none flex md:w-1/3 md:pr-1">
+                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense no-label w-full">
+                        <mat-icon
+                            class="evolui-menu-item-icon"
+                            fontSet="fas"
+                            fontIcon="fa-search"
+                            matPrefix></mat-icon>
+                        <input
+                            [autocomplete]="'off'"
+                            class="text-sm"
+                            (input)="filter($event)"
+                            matInput
+                            placeholder="Buscar usuários...">
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto" cdkScrollable>
+                <table #table mat-table matSort [dataSource]="dataSource" class="table-auto" (matSortChange)="announceSortChange()">
+                    <!-- Botões -->
+                    <ng-container matColumnDef="buttons">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <div class="flex flex-row items-center">
+                                <button mat-icon-button aria-label="Refresh" (click)="refresh()">
+                                    <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-sync"></mat-icon>
+                                </button>
+                                <button mat-icon-button
+                                        aria-label="Add"
+                                        (click)="addConfig()">
+                                    <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-plus"></mat-icon>
+                                </button>
+                            </div>
+                        </th>
+                        <td mat-cell *matCellDef="let model">
+                            <div class="flex flex-row items-center">
+                                <button
+                                        mat-icon-button
+                                        aria-label="Edit"
+                                        (click)="edit(model)"
+                                        matTooltip="Configurar Armazenamento">
+                                    <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-cog"></mat-icon>
+                                </button>
+                                <button
+                                    mat-icon-button
+                                    aria-label="Delete"
+                                    (click)="delete(model)"
+                                    matTooltip="Remover Configurção de Armazenamento">
+                                    <mat-icon class="icon-size-5 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- ID - Apenas visível para ROLE_HYPER ou superior -->
+                    <ng-container matColumnDef="id">
+                        <ng-container>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+                            <td mat-cell *matCellDef="let model">{{ model.id }}</td>
+                        </ng-container>
+                    </ng-container>
+
+                    <!-- identifier -->
+                    <ng-container matColumnDef="identifier">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Identificador</th>
+                        <td mat-cell *matCellDef="let model">{{ model.identifier }}</td>
+                    </ng-container>
+
+                    <!-- description -->
+                    <ng-container matColumnDef="description">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Descrição</th>
+                        <td mat-cell *matCellDef="let model">{{ model.description }}</td>
+                    </ng-container>
+
+                    <!-- storageType -->
+                    <ng-container matColumnDef="storageType">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo Armazenamento</th>
+                        <td mat-cell *matCellDef="let model">
+                            {{ model.storageType === 'GOOGLE_DRIVE' ? 'Google Drive' :
+                            model.storageType === 'GOOGLE_CLOUD' ? 'Google Cloud' :
+                                model.storageType === 'DROPBOX' ? 'Dropbox' :
+                                    model.storageType === 'AWS_S3' ? 'AWS S3' :
+                                        model.storageType === 'LOCAL_DIRECTORY' ? 'Diretório  Local' : ''
+                            }}
+                        </td>
+                    </ng-container>
+
+                    <!-- updatedAt -->
+                    <ng-container matColumnDef="updatedAt">
+                        <ng-container>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Última Atualização</th>
+                            <td mat-cell *matCellDef="let model">{{ model.updatedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                        </ng-container>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

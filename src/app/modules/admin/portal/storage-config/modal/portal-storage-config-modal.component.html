@@ -1,0 +1,128 @@
+<div class="flex flex-col w-full h-full bg-card dark:bg-transparent">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b">
+        <div class="text-lg font-medium">{{ title }}</div>
+        <div class="flex-shrink-0">
+            <button class="hidden" mat-icon-button (click)="matDrawer.toggle()" aria-label="Ocultar painel">
+                <mat-icon
+                    class="icon-size-4"
+                    fontSet="fas" fontIcon="fa-cog"></mat-icon>
+            </button>
+            <button mat-icon-button
+                (click)="close()" aria-label="Fechar">
+                <mat-icon
+                    class="icon-size-4"
+                    fontSet="fas" fontIcon="fa-times"></mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <mat-drawer-container class="flex-auto h-full">
+
+        <!-- Drawer -->
+        <mat-drawer
+            class="w-72 border-r bg-gray-50 dark:bg-gray-900"
+            [autoFocus]="false"
+            [mode]="drawerMode"
+            [opened]="drawerOpened"
+            #matDrawer>
+            <div class="py-2 h-full flex flex-col overflow-hidden">
+
+                <div class="flex-shrink-0 px-4 mb-6">
+                    <div class="text-sm font-semibold text-secondary mb-2">Identificador</div>
+                    <mat-form-field class="w-full fuse-mat-dense" [subscriptSizing]="'dynamic'">
+                        <input matInput required [patterns]="customPatterns" mask="I*" [(ngModel)]="config.identifier"/>
+                    </mat-form-field>
+                </div>
+
+                <div class="flex-shrink-0 px-4 mb-6">
+                    <div class="text-sm font-semibold text-secondary mb-2">Descrição</div>
+                    <mat-form-field class="w-full fuse-mat-dense" [subscriptSizing]="'dynamic'">
+                        <textarea style="resize: none" [rows]="2" matInput required [(ngModel)]="config.description" ></textarea>
+                    </mat-form-field>
+                </div>
+
+                <div class="flex-auto overflow-y-auto overflow-x-hidden">
+                    <div class="flex flex-col divide-y border-t border-b">
+                        <div class="text-sm font-semibold text-secondary px-4 py-2">Tipos de Armazenamento</div>
+                        <ng-container *ngFor="let type of storageTypes">
+                            <button class="flex items-center px-4 py-3 w-full text-left rounded-none"
+                                    [ngClass]="{'bg-primary text-white': selectedConfigType === type.value,
+                                                'hover:bg-gray-200 dark:hover:bg-gray-700': selectedConfigType !== type.value}"
+                                    (click)="selectConfigType(type.value)">
+                                <mat-icon class="mr-2 evolui-menu-item-icon"
+                                          [fontSet]="type.value === configTypes.LOCAL_DIRECTORY ? 'fas' : 'fab'"
+                                          [fontIcon]="type.value === configTypes.GOOGLE_DRIVE ? 'fa-google-drive' :
+                                                        type.value === configTypes.GOOGLE_CLOUD ? 'fa-google' :
+                                                        type.value === configTypes.DROPBOX ? 'fa-dropbox' :
+                                                        type.value === configTypes.AWS_S3 ? 'fa-aws' :
+                                                        type.value === configTypes.LOCAL_DIRECTORY ? 'fa-folder' : ''">
+                                </mat-icon>
+                                <span>{{ type.value === configTypes.GOOGLE_DRIVE ? 'Google Drive' :
+                                          type.value === configTypes.GOOGLE_CLOUD ? 'Google Cloud' :
+                                          type.value === configTypes.DROPBOX ? 'Dropbox' :
+                                          type.value === configTypes.AWS_S3 ? 'AWS S3' :
+                                          type.value === configTypes.LOCAL_DIRECTORY ? 'Diretório Local' : type.value }}
+                                </span>
+                            </button>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+        </mat-drawer>
+
+        <!-- Drawer content -->
+        <mat-drawer-content class="flex flex-col overflow-hidden relative">
+
+            <button class="flex-shrink-0 absolute top-2 left-2" mat-icon-button (click)="matDrawer.toggle()" aria-label="Ocultar painel">
+                <mat-icon
+                    class="icon-size-4"
+                    fontSet="fas" fontIcon="fa-cog"></mat-icon>
+            </button>
+
+            <div class="flex-auto p-6 overflow-y-auto">
+                <ng-container *ngIf="selectedConfigType">
+                    <!-- Dynamic Content Area for each Config Type -->
+                    <div *ngIf="error" class="text-red-500 mb-4 hidden">{{ error }}</div>
+
+                    <ng-container [ngSwitch]="selectedConfigType">
+                        <ng-container *ngSwitchCase="configTypes.GOOGLE_DRIVE">
+                            <portal-storage-config-google-drive [config]="getConfig(configTypes.GOOGLE_DRIVE)"
+                                                                     (save)="onSave($event, configTypes.GOOGLE_DRIVE)">
+                            </portal-storage-config-google-drive>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="configTypes.GOOGLE_CLOUD">
+                            <portal-storage-config-google-cloud [config]="getConfig(configTypes.GOOGLE_CLOUD)"
+                                                                     (save)="onSave($event, configTypes.GOOGLE_CLOUD)">
+                            </portal-storage-config-google-cloud>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="configTypes.DROPBOX">
+                            <portal-storage-config-dropbox [config]="getConfig(configTypes.DROPBOX)"
+                                                                (save)="onSave($event, configTypes.DROPBOX)">
+                            </portal-storage-config-dropbox>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="configTypes.AWS_S3">
+                            <portal-storage-config-aws-s3 [config]="getConfig(configTypes.AWS_S3)"
+                                                             (save)="onSave($event, configTypes.AWS_S3)">
+                            </portal-storage-config-aws-s3>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="configTypes.LOCAL_DIRECTORY">
+                            <portal-storage-config-local-directory [config]="getConfig(configTypes.LOCAL_DIRECTORY)"
+                                                                        (save)="onSave($event, configTypes.LOCAL_DIRECTORY)">
+                            </portal-storage-config-local-directory>
+                        </ng-container>
+                    </ng-container>
+
+                </ng-container>
+                <ng-container *ngIf="!selectedConfigType">
+                    <div class="flex flex-auto items-center justify-center text-secondary">
+                        Selecione um tipo de armazenamento no menu lateral.
+                    </div>
+                </ng-container>
+            </div>
+        </mat-drawer-content>
+
+    </mat-drawer-container>
+
+</div>

@@ -19,8 +19,8 @@ import {
 import {saveAs} from 'file-saver';
 
 export interface StorageDownloadIdentifiersFilesModalData {
-    userId: number;
-    userName: string;
+    rootId: number;
+    rootIdentifier: string;
     entityName: string;
     entityId: number;
     identifierId: number;
@@ -58,7 +58,7 @@ export class PortalStorageDownloadIdentifiersFilesComponent implements OnInit, O
     ) {}
 
     ngOnInit(): void {
-        this.title = `Download dos arquivos do identificador: ${this.data.entityName}/${this.data.identifierName} (${this.data.userName})`;
+        this.title = `Download dos arquivos do identificador: ${this.data.entityName}/${this.data.identifierName} (${this.data.rootIdentifier})`;
 
         this.abortFn = this._storageService.downloadIdentifierFilesAsync(
             this.data.identifierId,

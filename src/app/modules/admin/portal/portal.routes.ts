@@ -11,7 +11,7 @@ export default [
             {path: "historical", loadChildren: () => import('app/modules/admin/portal/luthier-history/portal-luthier-history.routes')},
             {path: "luthier-context", loadChildren: () => import('app/modules/admin/portal/luthier-context/portal-luthier-context.routes')},
             {path: "license", loadChildren: () => import('app/modules/admin/portal/license/portal-license.routes')},
-            {path: "user-storage-config", loadChildren: () => import('app/modules/admin/portal/user-storage-config/portal-user-storage-config.routes')},
+            {path: "storage-config", loadChildren: () => import('app/modules/admin/portal/storage-config/portal-storage-config.routes')},
             {path: "storage", loadChildren: () => import('app/modules/admin/portal/storage/portal-storage.routes')},
             // FIXED: Move the default route to the end so it doesn't interfere
             {path: "", component: Error404Component}
