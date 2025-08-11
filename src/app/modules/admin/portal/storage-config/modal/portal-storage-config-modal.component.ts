@@ -106,7 +106,15 @@ export class PortalStorageConfigModalComponent implements OnInit, OnDestroy {
     }
 
     getConfig(type: PortalStorageConfigType): PortalStorageConfigModel | undefined {
-        return this.config?.storageType === type ? this.config : undefined;
+        return this.config?.storageType === type ? this.config : {
+            id: null,
+            identifier: this.config.identifier,
+            description: this.config.description,
+            storageType: type,
+            config: {},
+            createdAt: new Date(),
+            updatedAt: new Date()
+        }
     }
 
     ngOnInit(): void {
