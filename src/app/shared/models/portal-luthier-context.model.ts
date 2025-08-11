@@ -1,4 +1,5 @@
 import {PortalLuthierDatabaseModel} from './portal-luthier-database.model';
+import {PortalStorageRootModel} from './portal-storage.model';
 
 
 export enum DatabaseTypeEnum {
@@ -38,6 +39,12 @@ export class PortalLuthierContextModel {
     public disableLibs: boolean;
     public luthierDatabase: PortalLuthierDatabaseModel;
     public serviceProvidersDataCollection: Array<LuthierServiceProviderModel>
+    public storageProvider: PortalLuthierContextStorageProviderModel;
+}
+
+export class PortalLuthierContextStorageProviderModel {
+    public id: number;
+    public storage: PortalStorageRootModel;
 }
 
 export class LuthierServiceProviderModel {

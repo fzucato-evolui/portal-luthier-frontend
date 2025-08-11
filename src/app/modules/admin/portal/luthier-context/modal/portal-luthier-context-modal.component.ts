@@ -10,7 +10,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatSelectChange, MatSelectModule} from '@angular/material/select';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import {JsonPipe, NgFor} from '@angular/common';
+import {NgFor} from '@angular/common';
 import {SharedPipeModule} from '../../../../../shared/pipes/shared-pipe.module';
 import {NgxMaskDirective, provideNgxMask} from 'ngx-mask';
 import {LuthierDatabaseModel} from '../../../../../shared/models/luthier.model';
@@ -19,6 +19,8 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {UtilFunctions} from '../../../../../shared/util/util-functions';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatCardModule} from '@angular/material/card';
+import {PortalStorageRootModel} from '../../../../../shared/models/portal-storage.model';
+import {PortalStorageConfigType} from '../../../../../shared/models/portal-storage-config.model';
 
 @Component({
     selector       : 'portal-luthier-context-modal',
@@ -35,7 +37,6 @@ import {MatCardModule} from '@angular/material/card';
         NgFor,
         MatDialogModule,
         NgxMaskDirective,
-        JsonPipe,
         MatSlideToggleModule,
         MatTabsModule,
         MatCardModule
@@ -55,6 +56,7 @@ export class PortalLuthierContextModalComponent implements OnInit, OnDestroy
     public model: PortalLuthierContextModel;
     public databases: Array<LuthierDatabaseModel>;
     public luthierDatabases: Array<PortalLuthierDatabaseModel>;
+    public rootStorages: Array<PortalStorageRootModel>;
     title: string;
     private _service: PortalLuthierContextService;
     private _parent: PortalLuthierContextComponent;
@@ -94,7 +96,11 @@ export class PortalLuthierContextModalComponent implements OnInit, OnDestroy
             metadataFile: [''],
             luthierProviderService: [''],
             luthierDatabase: [null, [Validators.required]],
-            serviceProvidersDataCollection: this._formBuilder.array([])
+            serviceProvidersDataCollection: this._formBuilder.array([]),
+            storageProvider: this._formBuilder.group({
+                id: [null],
+                storage: [null]
+            })
         });
         if (UtilFunctions.isValidStringOrArray(this.model.serviceProvidersDataCollection) === true) {
             for (const x of this.model.serviceProvidersDataCollection) {
@@ -167,4 +173,6 @@ export class PortalLuthierContextModalComponent implements OnInit, OnDestroy
     deleteProvider(index) {
         this.getProviders().removeAt(index);
     }
+
+    protected readonly configTypes = PortalStorageConfigType;
 }

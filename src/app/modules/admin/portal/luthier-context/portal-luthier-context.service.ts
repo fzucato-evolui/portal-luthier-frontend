@@ -5,6 +5,7 @@ import {PortalLuthierContextModel} from '../../../../shared/models/portal-luthie
 import {UtilFunctions} from '../../../../shared/util/util-functions';
 import {LuthierDatabaseModel} from '../../../../shared/models/luthier.model';
 import {PortalLuthierDatabaseModel} from '../../../../shared/models/portal-luthier-database.model';
+import {PortalStorageRootModel} from '../../../../shared/models/portal-storage.model';
 
 
 @Injectable({providedIn: 'root'})
@@ -97,6 +98,10 @@ export class PortalLuthierContextService
             switchMap((response: Array<PortalLuthierDatabaseModel>) => {
                 return of(response);
             })));
+    }
+
+    getAllRootStorages(): Promise<Array<PortalStorageRootModel>> {
+        return firstValueFrom(this._httpClient.get<Array<PortalStorageRootModel>>(`${this.baseRestUrl}/all-root-storages`));
     }
 
 }

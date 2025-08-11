@@ -95,15 +95,19 @@ export class PortalLuthierContextComponent implements OnInit, OnDestroy, AfterVi
         this.dataSource.sort = this.sort;
     }
     add() {
-        this.service.getAllLuthierDatabases()
-            .then(value => {
-                const modal = this._matDialog.open(PortalLuthierContextModalComponent, { disableClose: true, panelClass: 'portal-luthier-context-modal-container' });
-                modal.componentInstance.title = "Luthier Context";
-                modal.componentInstance.parent = this;
-                modal.componentInstance.model = new PortalLuthierContextModel();
-                modal.componentInstance.luthierDatabases = value;
-            });
-
+        Promise.all(
+            [
+                this.service.getAllLuthierDatabases(),
+                this.service.getAllRootStorages(),
+            ]
+        ).then(async value => {
+            const modal = this._matDialog.open(PortalLuthierContextModalComponent, { disableClose: true, panelClass: 'portal-luthier-context-modal-container' });
+            modal.componentInstance.title = "Luthier Context";
+            modal.componentInstance.parent = this;
+            modal.componentInstance.model = new PortalLuthierContextModel();
+            modal.componentInstance.luthierDatabases = value[0];
+            modal.componentInstance.rootStorages = value[1];
+        });
     }
 
     refresh() {
@@ -123,7 +127,8 @@ export class PortalLuthierContextComponent implements OnInit, OnDestroy, AfterVi
             [
                 this.service.get(model.id),
                 this.service.getAllDatabases(model.luthierDatabase.id),
-                this.service.getAllLuthierDatabases()
+                this.service.getAllLuthierDatabases(),
+                this.service.getAllRootStorages(),
             ]
         ).then(async value => {
             const modal = this._matDialog.open(PortalLuthierContextModalComponent, { disableClose: true, panelClass: 'portal-luthier-context-modal-container' });
@@ -132,6 +137,7 @@ export class PortalLuthierContextComponent implements OnInit, OnDestroy, AfterVi
             modal.componentInstance.model = value[0];
             modal.componentInstance.databases = value[1];
             modal.componentInstance.luthierDatabases = value[2];
+            modal.componentInstance.rootStorages = value[3];
         });
 
 
