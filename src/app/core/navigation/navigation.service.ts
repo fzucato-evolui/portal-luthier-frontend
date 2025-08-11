@@ -44,7 +44,7 @@ export const mainNavigation: FuseNavigationItem[] = [
                 type : 'basic',
                 awesomeIcon : {fontSet:"fas", fontIcon:"fa-box"},
                 link : '/portal/storage',
-                roles : ['ROLE_HYPER']
+                roles : ['ROLE_SUPER', 'ROLE_HYPER']
             },
             {
                 id   : 'portal.users',
