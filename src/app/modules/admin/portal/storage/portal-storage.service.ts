@@ -174,20 +174,22 @@ export class PortalStorageService {
         let keysAncestors = [];
 
         if (UtilFunctions.isValidObject(directory) === true) {
-            keysAncestors = Object.keys(directory.ancestors || {});
+            keysAncestors = directory.ancestors || [];
 
             if (UtilFunctions.isValidStringOrArray(keysAncestors) === true && keysAncestors.length > 3) {
-                keysAncestors.forEach((ancestor, index) => {
+                keysAncestors.forEach((ancestorObj, index) => {
                     // 0 = root, 1 = entity, 2 = identifier, 3 = directory
                     if (index >= 3) {
+                        const id = Number(Object.keys(ancestorObj)[0]);
+                        const name = ancestorObj[id];
 
                         breadcrumbs.push({
-                            label: directory.ancestors[ancestor],
-                            path: `/portal/storage/roots/${rootId}/entities/${entityId}/identifiers/${identifierId}/files/${ancestor})}`,
-                            clickable: index < keysAncestors.length - 1 // Only clickable if not the last segment
-                        })
+                            label: name,
+                            path: `/portal/storage/roots/${rootId}/entities/${entityId}/identifiers/${identifierId}/files/${id}`,
+                            clickable: index < keysAncestors.length - 1 // só clicar se não for o último
+                        });
                     }
-                })
+                });
             }
 
 

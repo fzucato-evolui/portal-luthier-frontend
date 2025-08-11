@@ -65,7 +65,7 @@ export interface PortalStorageFileModel {
     presignedUrl?: string; // Campo transient para URLs pré-assinadas
     extension?: string; // Extensão do arquivo
     children?: PortalStorageFileModel[]; // Para diretórios, lista de arquivos/diretórios filhos
-    ancestors?: { [key: number]: string };
+    ancestors?: Array<{ [key: number]: string }>;
     content?: any;
 }
 
