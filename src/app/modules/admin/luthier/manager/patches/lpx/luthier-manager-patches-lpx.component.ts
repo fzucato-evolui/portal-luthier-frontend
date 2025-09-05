@@ -1,6 +1,7 @@
 import {
     AfterViewInit,
-    ChangeDetectionStrategy, ChangeDetectorRef,
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     OnDestroy,
     OnInit,
@@ -24,15 +25,12 @@ import {MessageDialogService} from '../../../../../../shared/services/message/me
 import {NgxFileDropEntry, NgxFileDropModule} from 'ngx-file-drop';
 import {UtilFunctions} from '../../../../../../shared/util/util-functions';
 import {
-    LedImportModel,
-    LpxImportModel, LuthierProcedureModel,
-    LuthierTableModel, LuthierVisionModel,
+    LpxImportModel,
+    LuthierProcedureModel,
+    LuthierTableModel,
+    LuthierVisionModel,
     PatchImportItemModel
 } from '../../../../../../shared/models/luthier.model';
-import {saveAs} from 'file-saver';
-import {
-    LuthierManagerPatchesLupProcessModalComponent
-} from '../lup/modal/luthier-manager-patches-lup-process-modal.component';
 import {MatDialog} from '@angular/material/dialog';
 import {
     LuthierManagerPatchesLpxProcessModalComponent
@@ -138,13 +136,16 @@ export class LuthierManagerPatchesLpxComponent implements OnInit, OnDestroy, Aft
         if (!this.import) {
             const filter: {[key: string]: Array<number>} = {};
             if (this.tables.canSave()) {
-                filter['TABLE'] = this.tables.isAllSelected() ? [] : this.tables.selection.selected.map(item => item.code);
+                //filter['TABLE'] = this.tables.isAllSelected() ? [] : this.tables.selection.selected.map(item => item.code);
+                filter['TABLE'] = this.tables.selection.selected.map(item => item.code);
             }
             if (this.visions.canSave()) {
-                filter['VISION'] = this.visions.isAllSelected() ? [] : this.visions.selection.selected.map(item => item.code);
+                //filter['VISION'] = this.visions.isAllSelected() ? [] : this.visions.selection.selected.map(item => item.code);
+                filter['VISION'] = this.visions.selection.selected.map(item => item.code);
             }
             if (this.procedures.canSave()) {
-                filter['PROCEDURE'] = this.procedures.isAllSelected() ? [] : this.procedures.selection.selected.map(item => item.code);
+                //filter['PROCEDURE'] = this.procedures.isAllSelected() ? [] : this.procedures.selection.selected.map(item => item.code);
+                filter['PROCEDURE'] = this.procedures.selection.selected.map(item => item.code);
             }
 
             // this.service.generateLpx(filter)

@@ -29,7 +29,6 @@ import {
 } from './layout-control/luthier-manager-patches-lup-layout-control.component';
 import {LuthierManagerPatchesLupHelpComponent} from './help/luthier-manager-patches-lup-help.component';
 import {LuthierManagerPatchesLupMessageComponent} from './message/luthier-manager-patches-lup-message.component';
-import {saveAs} from 'file-saver';
 import {
     LupImportModel,
     LuthierLayoutControlModel,
@@ -48,9 +47,6 @@ import {MatDialog} from '@angular/material/dialog';
 import {
     LuthierManagerPatchesLupProcessModalComponent
 } from './modal/luthier-manager-patches-lup-process-modal.component';
-import {
-    LuthierManagerPatchesLpxProcessModalComponent
-} from '../lpx/modal/luthier-manager-patches-lpx-process-modal.component';
 
 export type LupType = 'PROJECT' | 'FILES' | 'REPORT' | 'RESOURCE' | 'MENU' | 'PARAMETER' | 'LAYOUTCONTROL' | 'HELP' | 'MESSAGE';
 @Component({
@@ -160,31 +156,40 @@ export class LuthierManagerPatchesLupComponent implements OnInit, OnDestroy, Aft
         if (!this.import) {
             const filter: {[key: string]: Array<any>} = {};
             if (this.projects.canSave()) {
-                filter['PROJECT'] = this.projects.isAllSelected() ? [] : this.projects.selection.selected.map(item => item.code);
+                //filter['PROJECT'] = this.projects.isAllSelected() ? [] : this.projects.selection.selected.map(item => item.code);
+                filter['PROJECT'] = this.projects.selection.selected.map(item => item.code);
             }
             if (this.files.canSave()) {
-                filter['FILES'] = this.files.isAllSelected() ? [] : this.files.selection.selected.map(item => item.code);
+                //filter['FILES'] = this.files.isAllSelected() ? [] : this.files.selection.selected.map(item => item.code);
+                filter['FILES'] = this.files.selection.selected.map(item => item.code);
             }
             if (this.reports.canSave()) {
-                filter['REPORT'] = this.reports.isAllSelected() ? [] : this.reports.selection.selected.map(item => item.code);
+                //filter['REPORT'] = this.reports.isAllSelected() ? [] : this.reports.selection.selected.map(item => item.code);
+                filter['REPORT'] = this.reports.selection.selected.map(item => item.code);
             }
             if (this.resources.canSave()) {
-                filter['RESOURCE'] = this.resources.isAllSelected() ? [] : this.resources.selection.selected.map(item => item.code);
+                //filter['RESOURCE'] = this.resources.isAllSelected() ? [] : this.resources.selection.selected.map(item => item.code);
+                filter['RESOURCE'] = this.resources.selection.selected.map(item => item.code);
             }
             if (this.menus.canSave()) {
-                filter['MENU'] = this.menus.isAllSelected() ? [] : this.menus.selection.selected.map(item => item.code);
+                //filter['MENU'] = this.menus.isAllSelected() ? [] : this.menus.selection.selected.map(item => item.code);
+                filter['MENU'] = this.menus.selection.selected.map(item => item.code);
             }
             if (this.parameters.canSave()) {
-                filter['PARAMETER'] = this.parameters.isAllSelected() ? [] : this.parameters.selection.selected.map(item => item.name);
+                //filter['PARAMETER'] = this.parameters.isAllSelected() ? [] : this.parameters.selection.selected.map(item => item.name);
+                filter['PARAMETER'] = this.parameters.selection.selected.map(item => item.name);
             }
             if (this.layoutControls.canSave()) {
-                filter['LAYOUTCONTROL'] = this.layoutControls.isAllSelected() ? [] : this.layoutControls.selection.selected.map(item => item.name);
+                //filter['LAYOUTCONTROL'] = this.layoutControls.isAllSelected() ? [] : this.layoutControls.selection.selected.map(item => item.name);
+                filter['LAYOUTCONTROL'] = this.layoutControls.selection.selected.map(item => item.name);
             }
             if (this.helps.canSave()) {
-                filter['HELP'] = this.helps.isAllSelected() ? [] : this.helps.selection.selected.map(item => item.code);
+                //filter['HELP'] = this.helps.isAllSelected() ? [] : this.helps.selection.selected.map(item => item.code);
+                filter['HELP'] = this.helps.selection.selected.map(item => item.code);
             }
             if (this.messages.canSave()) {
-                filter['MESSAGE'] = this.messages.isAllSelected() ? [] : this.messages.selection.selected.map(item => item.code);
+                //filter['MESSAGE'] = this.messages.isAllSelected() ? [] : this.messages.selection.selected.map(item => item.code);
+                filter['MESSAGE'] = this.messages.selection.selected.map(item => item.code);
             }
 
             // this.service.generateLup(filter)

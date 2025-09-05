@@ -194,6 +194,9 @@ export class LuthierValidator {
             table.fields.forEach((field, index) => {
 
                 const errors : {[key: string]: any} = {};
+                if (UtilFunctions.isValidStringOrArray(field.invalidFields?.['query']) === true) {
+                    errors['query'] = field.invalidFields['query'];
+                }
                 if (UtilFunctions.isValidStringOrArray(field.name) === false) {
                     errors['name'] = ['Campo nome é obrigatório'];
                 }
@@ -836,7 +839,19 @@ export class LuthierValidator {
         const isSame = LuthierTableModel.equals(table, previousTable);
         //console.log('isSame', isSame);
 
-        return {needUpdate: needUpdate, isSame: isSame};
+
+
+
+
+
+
+
+
+
+
+
+
+       return {needUpdate: needUpdate, isSame: isSame};
 
     }
     static validateVision(vision: LuthierVisionModel, previousVision: LuthierVisionModel) : {needUpdate: boolean, isSame: boolean} {
@@ -872,6 +887,8 @@ export class LuthierValidator {
 
                 const errors : {[key: string]: any} = {};
 
+
+
                 if (UtilFunctions.isValidStringOrArray(field.fieldType) === false) {
                     errors['fieldType'] = ['Campo tipo de campo é obrigatório'];
                 }
@@ -891,9 +908,9 @@ export class LuthierValidator {
                     errors['tableField.size'] = ['Campo tamanho é obrigatório'];
                 }
 
-                if (field.fieldType === LuthierVisionDatasetFieldTypeEnum.LOOKUP) {
+                               if (field.fieldType === LuthierVisionDatasetFieldTypeEnum.LOOKUP) {
                     if (!field.reference || !UtilFunctions.isValidStringOrArray(field.reference.name)) {
-                        errors['reference.name'] = ['Campo referência é obrigatório'];
+                       errors['reference.name'] = ['Campo referência é obrigatório'];
                     }
                 }
                 if (_.isEqual(field.invalidFields, errors) === false ) {

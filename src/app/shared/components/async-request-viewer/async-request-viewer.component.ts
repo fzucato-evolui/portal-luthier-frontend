@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import {AsyncRequestModel, LogLevelEnum, LogModel} from '../../models/async_request.model';
 import {FormsModule, NgModel} from '@angular/forms';
-import {AsyncPipe, KeyValuePipe, NgClass, NgForOf, NgIf} from '@angular/common';
+import {AsyncPipe, KeyValuePipe, NgForOf, NgIf} from '@angular/common';
 import {BehaviorSubject, Subject, takeUntil} from 'rxjs';
 import {UtilFunctions} from '../../util/util-functions';
 import {FuseMediaWatcherService} from '../../../../@fuse/services/media-watcher';
@@ -19,7 +19,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatIconModule} from '@angular/material/icon';
 import {NgxMaskDirective, provideNgxMask} from 'ngx-mask';
 import {SharedPipeModule} from '../../pipes/shared-pipe.module';
-import {CdkScrollable, ScrollingModule} from '@angular/cdk/scrolling';
+import {ScrollingModule} from '@angular/cdk/scrolling';
 import {MatButtonModule} from '@angular/material/button';
 import {MatSelectModule} from '@angular/material/select';
 
@@ -47,7 +47,6 @@ export class JobModel {
     imports: [
         FormsModule,
         NgForOf,
-        NgClass,
         NgIf,
         AsyncPipe,
         MatSidenavModule,
@@ -154,9 +153,9 @@ export class AsyncRequestViewerComponent implements OnInit, OnDestroy, AfterView
     }
 
     ngAfterViewChecked() {
-        if (!this.userScrolled) {
-            setTimeout(() => this.scrollToBottom(), 300);
-        }
+        // if (!this.userScrolled) {
+        //     setTimeout(() => this.scrollToBottom(), 300);
+        // }
     }
 
     filterData(data: LogModel): boolean {

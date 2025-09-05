@@ -357,10 +357,11 @@ export class LuthierManagerPatchesLedComponent implements OnInit, OnDestroy, Aft
 
     save() {
         if (!this.import) {
-            let filter = [];
-            if (this.isAllSelected() === false) {
-                filter = this.selection.selected.map(item => item.code);
-            }
+            // let filter = [];
+            // if (this.isAllSelected() === false) {
+            //     filter = this.selection.selected.map(item => item.code);
+            // }
+            let filter = this.selection.selected.map(item => item.code);
             // this.service.generateLed(filter)
             //     .then(result => {
             //         this.service.download(result.link)

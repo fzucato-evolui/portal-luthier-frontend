@@ -1513,6 +1513,7 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
             this.service.parseView(this.model.name, model)
                 .then(table => {
                     if (UtilFunctions.isValidStringOrArray(table.fields) === true) {
+                        let needForceValidation = false;
                         table.fields.forEach(x => {
                             const index = this.fieldsDataSource.data.findIndex(y => y.name.toUpperCase() === x.name.toUpperCase());
                             if (index < 0) {
@@ -1527,9 +1528,23 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                                 const newField = fg.value;
                                 //newField['pending'] = true;
                                 this.fieldsDataSource.data.push(newField);
-                                this.fieldsDataSource._updateChangeSubscription();
                             }
                         });
+                        this.fieldsDataSource.data.forEach((x, i) => {
+                            const index = table.fields.findIndex(y => y.name.toUpperCase() === x.name.toUpperCase());
+                            if (index < 0) {
+                                if (UtilFunctions.isValidObject(x.invalidFields) === false) {
+                                    x.invalidFields = {};
+                                }
+                                x.invalidFields['query'] = "Campo não participa da query";
+                            }
+                            else {
+                                if (UtilFunctions.isValidStringOrArray(x.invalidFields?.['query']) === true) {
+                                    x.invalidFields['query'] = null;
+                                }
+                            }
+                        });
+                        this.fieldsDataSource._updateChangeSubscription();
                     }
                     if (UtilFunctions.isValidStringOrArray(table.customFields) === true) {
                         table.customFields.forEach(x => {
@@ -1546,10 +1561,25 @@ export class LuthierDictionaryTableComponent implements OnInit, OnDestroy, After
                                 const newField = fg.value;
                                 //newField['pending'] = true;
                                 this.customFieldsDataSource.data.push(newField);
-                                this.customFieldsDataSource._updateChangeSubscription();
                             }
                         });
+                        this.customFieldsDataSource.data.forEach((x, i) => {
+                            const index = table.fields.findIndex(y => y.name.toUpperCase() === x.name.toUpperCase());
+                            if (index < 0) {
+                                if (UtilFunctions.isValidObject(x.invalidFields) === false) {
+                                    x.invalidFields = {};
+                                }
+                                x.invalidFields['query'] = "Campo não participa da query";
+                            }
+                            else {
+                                if (UtilFunctions.isValidStringOrArray(x.invalidFields?.['query']) === true) {
+                                    x.invalidFields['query'] = null;
+                                }
+                            }
+                        });
+                        this.customFieldsDataSource._updateChangeSubscription();
                     }
+
                     this.messageService.open('Campos importados com sucesso', 'SUCESSO', 'success');
                 })
         }
