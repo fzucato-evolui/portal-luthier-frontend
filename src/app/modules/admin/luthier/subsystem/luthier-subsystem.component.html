@@ -56,7 +56,7 @@
                                         <mat-icon class="icon-size-5 text-blue-500" fontSet="fas" fontIcon="fa-edit"></mat-icon>
                                     </button>
                                 </div>
-                                <button mat-icon-button aria-label="Delete" [disabled]="model.code === -1" (click)="delete(model.code)" matTooltip="Remover Subsistema">
+                                <button mat-icon-button aria-label="Delete" [disabled]="model.code === -1 || model.code === 1" (click)="delete(model.code)" matTooltip="Remover Subsistema">
                                     <mat-icon class="icon-size-5 text-red-500" fontSet="fas" fontIcon="fa-trash"></mat-icon>
                                 </button>
 
