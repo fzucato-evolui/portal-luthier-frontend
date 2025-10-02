@@ -516,7 +516,7 @@ export class LuthierDictionaryProcedureComponent implements OnInit, OnDestroy, A
                 this.importProcedure(model);
             })
         } catch (error) {
-            this.messageService.open('Erro ao ler conteúdo do clipboard '+ error, 'ERRO', 'error');
+            this.messageService.open('Erro ao ler conteúdo da área de transferência '+ error, 'ERRO', 'error');
             console.error('Failed to read clipboard contents: ', error);
         }
     }

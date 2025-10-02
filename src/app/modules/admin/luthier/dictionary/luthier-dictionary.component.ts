@@ -192,7 +192,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                     },
                     {
                         id      : 'luthier.dictionary.objects.procedures',
-                        title   : 'Procedures',
+                        title   : 'Procedimentos',
                         type    : 'basic',
                         awesomeIcon : {fontSet: 'fas', fontIcon: 'fa-code'},
                         function: item => {
@@ -740,7 +740,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 .then(result => {
                     if (clipBoard === true) {
                         this.clipboard.copy(JSON.stringify(result));
-                        this.messageService.open('Dados copiados para o clipboard', 'SUCESSO', 'success');
+                        this.messageService.open('Dados copiados para a área de transferência', 'SUCESSO', 'success');
                     }
                     else {
                         const blob = new Blob([JSON.stringify(result)], {type: "text/plain;charset=utf-8"});
@@ -753,7 +753,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 .then(result => {
                     if (clipBoard === true) {
                         this.clipboard.copy(JSON.stringify(result));
-                        this.messageService.open('Dados copiados para o clipboard', 'SUCESSO', 'success');
+                        this.messageService.open('Dados copiados para a área de transferência', 'SUCESSO', 'success');
                     }
                     else {
                         const blob = new Blob([JSON.stringify(result)], {type: "text/plain;charset=utf-8"});
@@ -766,7 +766,7 @@ export class LuthierDictionaryComponent implements OnInit, OnDestroy
                 .then(result => {
                     if (clipBoard === true) {
                         this.clipboard.copy(JSON.stringify(result));
-                        this.messageService.open('Dados copiados para o clipboard', 'SUCESSO', 'success');
+                        this.messageService.open('Dados copiados para a área de transferência', 'SUCESSO', 'success');
                     }
                     else {
                         const blob = new Blob([JSON.stringify(result)], {type: "text/plain;charset=utf-8"});

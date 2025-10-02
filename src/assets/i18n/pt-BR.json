@@ -342,13 +342,14 @@
             "GOOGLE": "Google",
             "LUTHIER_HISTORY": "Histórico Luthier"
         }
+
     },
     "objectType": {
         "TABLE": "TABELA",
         "VIEW": "VIEW",
-        "PROCEDURE": "PROCEDURE",
+        "PROCEDURE": "PROCEDIMENTO",
         "VISION": "VISÃO",
-        "DATASET": "DATASET"
+        "VISION_DATASET": "CONJUNTO DE DADOS"
     },
     "managerObjectType": {
         "PARAMETER": "PARÂMETRO",
@@ -359,4 +360,4 @@
         "PATCHES_EXPORT": "EXPORTAR PATCHES"
     }
 
-} 
+}

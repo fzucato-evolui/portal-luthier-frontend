@@ -27,6 +27,7 @@
         "@fortawesome/fontawesome-free": "6.4.2",
         "@fortawesome/free-brands-svg-icons": "6.4.2",
         "@ngneat/transloco": "4.2.7",
+        "@xmldom/xmldom": "^0.8.11",
         "apexcharts": "3.40.0",
         "crypto-js": "3.3.0",
         "file-saver": "2.0.5",

@@ -45,7 +45,7 @@
                 Dados Informativos
             </mat-panel-title>
             <mat-panel-description>
-                Nome, Descrição, Tabela, Dataset
+                Nome, Descrição, Tabela, Conjunto de Dados
                 <mat-icon svgIcon="mat_solid:info"></mat-icon>
             </mat-panel-description>
         </mat-expansion-panel-header>
@@ -76,7 +76,7 @@
                             <input
                                 readonly
                                 class="text-sm"
-                                [formControlName]="'objectType'"
+                                [value]="'objectType.' + formSave.get('objectType').value | transloco:{ defaultValue: formSave.get('objectType').value }"
                                 matInput>
                         </mat-form-field>
                     </div>
@@ -128,7 +128,7 @@
                     </div>
                     <div class="sm:col-span-6">
                         <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-xdense w-full">
-                            <mat-label class="text-sm">Dataset Pai</mat-label>
+                            <mat-label class="text-sm">Conjunto de Dados Pai</mat-label>
                             <mat-icon
                                 class="evolui-menu-item-icon"
                                 fontSet="fas" fontIcon="fa-t"
@@ -305,7 +305,7 @@
                         </ng-container>
                         <ng-container matColumnDef="type">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
-                            <td mat-cell *matCellDef="let model"> {{ model.type }} </td>
+                            <td mat-cell *matCellDef="let model"> {{ model.type | enumTranslate:'LuthierMetadataHistoryChangeTypeEnum' }} </td>
                         </ng-container>
 
                         <tr mat-header-row *matHeaderRowDef="displayedHistoricalColumns; sticky: true"></tr>
@@ -434,12 +434,12 @@
                         </ng-container>
                         <!-- order -->
                         <ng-container matColumnDef="order">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Order </th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Ordem </th>
                             <td mat-cell [evoluiMatCell]="model" *matCellDef="let model"> {{ model.order }} </td>
                         </ng-container>
                         <!-- status -->
                         <ng-container matColumnDef="status">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Situação </th>
                             <td mat-cell [evoluiMatCell]="model" *matCellDef="let model"> {{ model.status }} </td>
                         </ng-container>
                         <!-- type -->
@@ -613,10 +613,10 @@
                 </td>
             </ng-container>
             <ng-container matColumnDef="tableField.key">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> PK </th>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Chave </th>
                 <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div>
-                        {{ field.tableField?.key }}
+                        {{ field.tableField?.key | simNao }}
                     </div>
                 </td>
             </ng-container>
@@ -695,7 +695,7 @@
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
                 <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div>
-                        {{ field.tableField?.fieldType }}
+                        {{ field.tableField?.fieldType | enumTranslate:'LuthierFieldTypeEnum' }}
                     </div>
                 </td>
             </ng-container>
@@ -936,10 +936,10 @@
                 </td>
             </ng-container>
             <ng-container matColumnDef="tableField.key">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> PK </th>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Chave </th>
                 <td mat-cell [evoluiMatCell]="field" *matCellDef="let field let i = index">
                     <div>
-                        {{ field.tableField?.key }}
+                        {{ field.tableField?.key | simNao }}
                     </div>
                 </td>
             </ng-container>

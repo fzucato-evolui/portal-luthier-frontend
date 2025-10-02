@@ -16,7 +16,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import {JsonPipe, NgFor, NgIf} from '@angular/common';
+import {NgFor, NgIf} from '@angular/common';
 import {SharedPipeModule} from '../../../../../../../shared/pipes/shared-pipe.module';
 import {NgxMaskDirective, provideNgxMask} from 'ngx-mask';
 import {
@@ -55,7 +55,6 @@ import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
         NgFor,
         MatDialogModule,
         NgxMaskDirective,
-        JsonPipe,
         MatSlideToggleModule,
         MatTableModule,
         MatSortModule,
@@ -263,7 +262,7 @@ export class LuthierDictionaryTableFieldModalComponent implements OnInit, OnDest
 
     copyStaticValues() {
         this.parent.clipboard.copy(JSON.stringify(this.getStaticFields().value));
-        this.openSnackBar("Valores estáticos copiados para o clipboard", "Fechar")
+        this.openSnackBar("Valores estáticos copiados para a área de transferência", "Fechar")
     }
 
     async pasteStaticValues() {

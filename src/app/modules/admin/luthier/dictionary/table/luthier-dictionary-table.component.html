@@ -918,7 +918,7 @@
         <ng-container *ngIf="fieldtype === 'fields' || fieldtype === 'customFields'">
             <!-- key -->
             <ng-container matColumnDef="key">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> PK </th>
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Chave </th>
                 <td mat-cell [evoluiMatCell]="field" *matCellDef="let field; let i = index">
                     <div *ngIf="!field['editing']">
                         {{ field.key | simNao }}

@@ -78,6 +78,7 @@ import {SharedDirectiveModule} from '../../../../../shared/directives/shared-dir
 import {
     LuthierDictionaryMetadataChangesModalComponent
 } from '../modal/metadata-changes/luthier-dictionary-metadata-changes-modal.component';
+import {TranslocoModule} from '@ngneat/transloco';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searches' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -110,7 +111,8 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searches' | 'grou
         MatSelectModule,
         NgTemplateOutlet,
         MatMenuModule,
-        SharedDirectiveModule
+        SharedDirectiveModule,
+        TranslocoModule
     ],
     providers: [
         provideNgxMask(),
@@ -1354,7 +1356,7 @@ export class LuthierDictionaryDatasetComponent implements OnInit, OnDestroy, Aft
                 this.importDataset(model);
             })
         } catch (error) {
-            this.messageService.open('Erro ao ler conteúdo do clipboard '+ error, 'ERRO', 'error');
+            this.messageService.open('Erro ao ler conteúdo da área de transferência '+ error, 'ERRO', 'error');
             console.error('Failed to read clipboard contents: ', error);
         }
     }

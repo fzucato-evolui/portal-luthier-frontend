@@ -26,6 +26,7 @@ import {Subject, takeUntil} from 'rxjs';
 import {LuthierValidator} from '../../../../../shared/validators/luthier.validator';
 import {MatSelectModule} from '@angular/material/select';
 import {NgForOf} from '@angular/common';
+import {TranslocoModule} from '@ngneat/transloco';
 
 export type TableType = 'fields' | 'indexes' | 'references' | 'searches' | 'groupInfos' | 'customFields' | 'customizations' | 'views' | 'bonds' ;
 @Component({
@@ -45,7 +46,8 @@ export type TableType = 'fields' | 'indexes' | 'references' | 'searches' | 'grou
         NgxMaskDirective,
         MatMenuModule,
         MatSelectModule,
-        NgForOf
+        NgForOf,
+        TranslocoModule
     ],
     providers: [
         provideNgxMask(),
@@ -157,7 +159,7 @@ export class LuthierDictionaryVisionComponent implements OnInit, OnDestroy, Afte
                 this.importVision(model);
             })
         } catch (error) {
-            this.messageService.open('Erro ao ler conteúdo do clipboard '+ error, 'ERRO', 'error');
+            this.messageService.open('Erro ao ler conteúdo da área de transferência '+ error, 'ERRO', 'error');
             console.error('Failed to read clipboard contents: ', error);
         }
     }

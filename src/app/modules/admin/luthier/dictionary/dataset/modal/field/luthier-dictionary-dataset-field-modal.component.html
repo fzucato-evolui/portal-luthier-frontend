@@ -126,8 +126,8 @@
                             <td mat-cell *matCellDef="let field; let i = index"> {{field.code}} </td>
                         </ng-container>
                         <ng-container matColumnDef="key">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header> PK </th>
-                            <td mat-cell *matCellDef="let field; let i = index"> {{field.key}} </td>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Chave </th>
+                            <td mat-cell *matCellDef="let field; let i = index"> {{field.key | simNao}} </td>
                         </ng-container>
                         <ng-container matColumnDef="name">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Nome </th>
@@ -139,7 +139,7 @@
                         </ng-container>
                         <ng-container matColumnDef="fieldType">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
-                            <td mat-cell *matCellDef="let field; let i = index"> {{field.fieldType}} </td>
+                            <td mat-cell *matCellDef="let field; let i = index"> {{field.fieldType | enumTranslate:'LuthierFieldTypeEnum'}} </td>
                         </ng-container>
                         <ng-container matColumnDef="size">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Tamanho </th>

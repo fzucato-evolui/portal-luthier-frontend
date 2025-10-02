@@ -65,7 +65,7 @@
                 <input
                     readonly
                     class="text-sm"
-                    [value]="model.objectType"
+                    [value]="'objectType.' + model.objectType | transloco:{ defaultValue: model.objectType }"
                     matInput>
             </mat-form-field>
         </div>
