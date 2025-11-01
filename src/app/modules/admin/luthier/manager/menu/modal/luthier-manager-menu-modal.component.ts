@@ -121,7 +121,9 @@ const dictionary: Dictionary = {
 
     // outros
     'true': 'sim',
+    'TRUE': 'SIM',
     'false': 'nao',
+    'FALSE': 'NAO',
     'seachpanel': 'painelpesquisa',
     'doubleClickEdit': 'editarCliqueDuplo',
     'markselected': 'marcarSelecionado',
@@ -185,6 +187,18 @@ const dictionary: Dictionary = {
     'window.report.title': 'janela.relatorio.titulo',
     'window.report.dockType': 'janela.relatorio.tipoExibicao',
     'window.child.layout': 'janela.detalhe.layout',
+
+    "window.className": "janela.nomeClasse",
+    "window.initMethod.name": "janela.metodoInicial.nome",
+    "window.initMethod.param": "janela.metodoInicial.parametro",
+    "report.name": "relatorio.nome",
+    "report.backgroud": "relatorio.segundoPlano",
+    "report.notification": "relatorio.notificacao",
+    "report.executionType": "relatorio.tipoExecucao",
+    "window.closeAfterGenerate": "janela.fecharAposGerar",
+    "window.layout": "janela.layout",
+    "window.printReport": "janela.imprimirRelatorio",
+    "window.useCache": "janela.usarCache"
 };
 
 const reverseDictionary: Dictionary = Object.fromEntries(

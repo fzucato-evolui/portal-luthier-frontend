@@ -147,7 +147,7 @@
                         </ng-container>
                         <ng-container matColumnDef="notNull">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Obrigatório </th>
-                            <td mat-cell *matCellDef="let field; let i = index"> {{field.notNull}} </td>
+                            <td mat-cell *matCellDef="let field; let i = index"> {{field.notNull  | simNao}} </td>
                         </ng-container>
                         <ng-container matColumnDef="precision">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header> Precisão </th>
