@@ -139,22 +139,27 @@
             <div class="mt-6 text-lg tracking-tight leading-6 text-gray-400">
                 O Portal Luthier é um plataforma de configuração de metadados do FrameWork Luthier, bem como uma API de integração entre os seus produtos
             </div>
-            <div class="flex items-center mt-8" *ngIf="false">
-                <div class="flex flex-0 items-center -space-x-1.5">
-                    <img
-                        class="flex-0 w-10 h-10 rounded-full ring-4 ring-offset-1 ring-gray-800 ring-offset-gray-800 object-cover"
-                        src="assets/images/avatars/female-18.jpg">
-                    <img
-                        class="flex-0 w-10 h-10 rounded-full ring-4 ring-offset-1 ring-gray-800 ring-offset-gray-800 object-cover"
-                        src="assets/images/avatars/female-11.jpg">
-                    <img
-                        class="flex-0 w-10 h-10 rounded-full ring-4 ring-offset-1 ring-gray-800 ring-offset-gray-800 object-cover"
-                        src="assets/images/avatars/male-09.jpg">
-                    <img
-                        class="flex-0 w-10 h-10 rounded-full ring-4 ring-offset-1 ring-gray-800 ring-offset-gray-800 object-cover"
-                        src="assets/images/avatars/male-16.jpg">
+            <div class="mt-6 p-4 text-gray-200 space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="font-semibold">Frontend:</span>
+                    <span>{{ frontendEnvironment.version }} ({{ frontendEnvironment.buildTime | date:'dd/MM/yyyy HH:mm' }})</span>
                 </div>
-                <div *ngIf="false" class="ml-4 font-medium tracking-tight text-gray-400">More than 17k people joined us, it's your turn</div>
+                <div class="flex justify-between">
+                    <span class="font-semibold">Backend:</span>
+                    <span>{{ appProperties.version }} ({{ appProperties.buildTime | date:'dd/MM/yyyy HH:mm' }})</span>
+                </div>
+<!--                <div class="flex justify-between">-->
+<!--                    <span class="font-semibold">Modo de Compilação:</span>-->
+<!--                    <span>{{ appProperties.buildMode }}</span>-->
+<!--                </div>-->
+<!--                <div class="flex justify-between text-gray-400 text-xs">-->
+<!--                    <span>Frontend Env:</span>-->
+<!--                    <span>{{ frontendEnv }}</span>-->
+<!--                </div>-->
+<!--                <div class="flex justify-between text-gray-400 text-xs">-->
+<!--                    <span>Backend Env:</span>-->
+<!--                    <span>{{ backendEnv }}</span>-->
+<!--                </div>-->
             </div>
         </div>
     </div>

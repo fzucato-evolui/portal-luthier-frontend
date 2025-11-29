@@ -1,6 +1,6 @@
 {
     "name": "portal-luthier",
-    "version": "18.0.0",
+    "version": "1.0.0.0",
     "description": "Portal Luthier - Ferramenta de Edição de Metadados Luthier",
     "author": "Evolui Tecnologia",
     "license": "https://www.evoluitecnologia.com.br",
@@ -8,7 +8,10 @@
     "scripts": {
         "ng": "ng",
         "start": "ng serve --open --host 0.0.0.0 --disable-host-check --proxy-config proxy.conf.json",
-        "build": "ng build",
+        "build:prod": "npm run generate-version:prod && ng build --configuration production",
+        "build": "npm run generate-version:dev && ng build --configuration development",
+        "generate-version:dev": "node scripts/generate-version.js dev",
+        "generate-version:prod": "node scripts/generate-version.js prod",
         "watch": "ng build --watch --configuration development",
         "test": "ng test"
     },

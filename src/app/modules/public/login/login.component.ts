@@ -1,4 +1,4 @@
-import {NgIf} from '@angular/common';
+import {DatePipe, NgIf} from '@angular/common';
 import {AfterViewInit, Component, ElementRef, NgZone, OnInit, ViewChild, ViewEncapsulation} from '@angular/core';
 import {
     FormsModule,
@@ -14,7 +14,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {fuseAnimations} from '@fuse/animations';
 import {FuseAlertComponent, FuseAlertType} from '@fuse/components/alert';
 import {UserService} from '../../../shared/services/user/user.service';
@@ -22,6 +22,9 @@ import {Subject, takeUntil} from 'rxjs';
 import {UtilFunctions} from '../../../shared/util/util-functions';
 import {TipoUsuarioEnum, UserModel} from '../../../shared/models/user.model';
 import jwt_decode from "jwt-decode";
+import {environment} from '../../../../environments/environment';
+import {GoogleConfigModel, SystemConfigModelEnum} from '../../../shared/models/system-config.model';
+import {AppPropertiesModel} from '../../../shared/models/root.model';
 
 @Component({
     selector     : 'login',
@@ -29,7 +32,7 @@ import jwt_decode from "jwt-decode";
     encapsulation: ViewEncapsulation.None,
     animations   : fuseAnimations,
     standalone   : true,
-    imports      : [RouterLink, FuseAlertComponent, NgIf, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatCheckboxModule, MatProgressSpinnerModule],
+    imports: [FuseAlertComponent, NgIf, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatCheckboxModule, MatProgressSpinnerModule, DatePipe],
 })
 export class LoginComponent implements OnInit, AfterViewInit
 {
@@ -45,7 +48,8 @@ export class LoginComponent implements OnInit, AfterViewInit
     showAlert: boolean = false;
     enableSocialMedia = false;
     clientID: string;
-
+    appProperties: AppPropertiesModel;
+    frontendEnvironment = environment;
     /**
      * Constructor
      */
@@ -68,11 +72,16 @@ export class LoginComponent implements OnInit, AfterViewInit
      */
     ngOnInit(): void
     {
-        this._userService.rootService.googleConfig$
+        this._userService.rootService.model$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(value => {
-                this.enableSocialMedia = value && UtilFunctions.isValidStringOrArray(value.clientID);
-                this.clientID = value?.clientID;
+                const index = value.configs.findIndex(x => x.configType.toString() === SystemConfigModelEnum.GOOGLE.toString());
+                if (index >= 0) {
+                    const c: GoogleConfigModel = value.configs[index].config as GoogleConfigModel;
+                    this.enableSocialMedia = c && UtilFunctions.isValidStringOrArray(c.clientID);
+                    this.clientID = c?.clientID;
+                }
+                this.appProperties = value.appProperties;
             })
         // Create the form
         this.signInForm = this._formBuilder.group({
