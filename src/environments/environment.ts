@@ -1,5 +1,5 @@
 export const environment = {
-  mode: 'dev',
+  mode: 'prod',
   version: '1.0.0.0',
-  buildTime: '2025-11-28T21:17:41.508Z'
+  buildTime: '2025-11-30T12:48:27.174Z'
 };

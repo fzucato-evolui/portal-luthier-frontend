@@ -13,7 +13,7 @@ const content = `export const environment = {
 };
 `;
 
-const filePath = `src/environments/environment${mode === 'dev' ? '' : '.prod'}.ts`;
+const filePath = `src/environments/environment.ts`;
 fs.writeFileSync(filePath, content);
 
 console.log(`Generated ${filePath}`);

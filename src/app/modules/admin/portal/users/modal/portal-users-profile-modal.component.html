@@ -1,0 +1,232 @@
+<div class="inset-0 w-full h-full flex flex-col min-w-0 md:overflow-y-auto relative">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-2 sm:py-4 sm:px-4 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="flex flex-row flex-row-reverse mt-2 items-center">
+                <div class="mr-2">
+                    <button
+                        (click)="close()">
+                        <mat-icon
+                            class="icon-size-4"
+                            fontSet="fas" fontIcon="fa-times"></mat-icon>
+                    </button>
+                </div>
+                <div class="w-full">
+                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                        {{title}}
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div
+        class="flex-auto overflow-y-auto p-6"
+        cdkScrollable>
+        <div [formGroup]="form" class="h-full max-h-full max-w-full overflow-x-auto md:overflow-auto">
+            <div class="w-full mb-4">
+                <div class="w-full my-2">
+                    <div class="text-xl">Usuário</div>
+                    <div class="text-secondary">Configuração do usuário do sistema</div>
+
+                </div>
+            </div>
+            <div class="grid sm:grid-cols-12 gap-2 mt-4 mx-1">
+                <div class="sm:col-span-2">
+                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                        <mat-label>ID</mat-label>
+                        <mat-icon
+                            class="icon-size-5"
+                            fontSet="fas" fontIcon="fa-list-ol"
+                            matPrefix></mat-icon>
+                        <input
+                            readonly
+                            [formControlName]="'id'"
+                            matInput>
+                    </mat-form-field>
+                </div>
+                <div class="sm:col-span-10 text-sm flex items-center justify-center">
+                    <!-- Ativo -->
+                    <mat-slide-toggle formControlName="enabled">Usuário Ativo</mat-slide-toggle>
+                </div>
+                <div class="sm:col-span-6">
+                    <!-- Nome -->
+                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                        <mat-label>Nome</mat-label>
+                        <input matInput formControlName="name" required>
+                        <mat-error *ngIf="form.get('name').hasError('required')">
+                            Nome é obrigatório
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="sm:col-span-6">
+                    <!-- Login -->
+                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                        <mat-label>Login</mat-label>
+                        <input matInput formControlName="login" required
+                               autocomplete="new-password"
+                               [attr.autocomplete]="isNewUser ? 'new-password' : 'username'"
+                               type="text">
+                        <mat-error *ngIf="form.get('login').hasError('required')">
+                            Login é obrigatório
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="sm:col-span-12">
+                    <!-- Email -->
+                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                        <mat-label>Email</mat-label>
+                        <input matInput formControlName="email" required type="email">
+                        <mat-error *ngIf="form.get('email').hasError('required')">
+                            Email é obrigatório
+                        </mat-error>
+                        <mat-error *ngIf="form.get('email').hasError('email')">
+                            Email inválido
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="sm:col-span-6">
+                    <!-- Tipo de Usuário -->
+                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                        <mat-label>Tipo de Usuário</mat-label>
+                        <mat-select formControlName="userType" required>
+                            <mat-option *ngFor="let type of userTypes" [value]="type">
+                                {{type}}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="form.get('userType').hasError('required')">
+                            Tipo de usuário é obrigatório
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="sm:col-span-6">
+                    <!-- Roles -->
+                    <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                        <mat-label>Roles</mat-label>
+                        <mat-select formControlName="roles" multiple [compareWith]="compareRoles">
+                            <ng-container *ngFor="let role of availableRoles">
+                                <mat-option [value]="role">
+                                    {{role.name + ' (' + role.type + ')'}}
+                                </mat-option>
+                            </ng-container>
+
+                        </mat-select>
+                        <mat-error *ngIf="form.get('roles').hasError('required')">
+                            Pelo menos uma role é obrigatória
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <ng-container *ngIf="this.model.userType === 'CUSTOM'">
+                    <div class="sm:col-span-12">
+                        <!-- Password field -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Senha Atual</mat-label>
+                            <input
+                                autocomplete="new-password"
+                                matInput
+                                type="password"
+                                [formControlName]="'password'"
+                                #passwordField>
+                            <button
+                                mat-icon-button
+                                type="button"
+                                (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'"
+                                matSuffix>
+                                <mat-icon
+                                    class="icon-size-5"
+                                    *ngIf="passwordField.type === 'password'"
+                                    [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                                <mat-icon
+                                    class="icon-size-5"
+                                    *ngIf="passwordField.type === 'text'"
+                                    [svgIcon]="'heroicons_solid:eye-slash'"></mat-icon>
+                            </button>
+                            <mat-error *ngIf="form.get('password').hasError('required')">
+                                Senha Atual é Obrigatória
+                            </mat-error>
+                        </mat-form-field>
+
+                    </div>
+                    <div class="sm:col-span-12">
+                        <!-- Password field -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Senha Nova</mat-label>
+                            <input
+                                autocomplete="new-password"
+                                matInput
+                                type="password"
+                                [formControlName]="'newPassword'"
+                                #newPasswordField>
+                            <button
+                                mat-icon-button
+                                type="button"
+                                (click)="newPasswordField.type === 'password' ? newPasswordField.type = 'text' : newPasswordField.type = 'password'"
+                                matSuffix>
+                                <mat-icon
+                                    class="icon-size-5"
+                                    *ngIf="newPasswordField.type === 'password'"
+                                    [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                                <mat-icon
+                                    class="icon-size-5"
+                                    *ngIf="newPasswordField.type === 'text'"
+                                    [svgIcon]="'heroicons_solid:eye-slash'"></mat-icon>
+                            </button>
+                            <mat-error *ngIf="form.get('newPassword').hasError('required')">
+                                Senha Nova é Obrigatória
+                            </mat-error>
+                        </mat-form-field>
+
+                    </div>
+                    <div class="sm:col-span-12 mb-5">
+                        <!-- Password confirm field -->
+                        <mat-form-field [subscriptSizing]="'dynamic'" class="fuse-mat-dense w-full">
+                            <mat-label>Confirmação Senha</mat-label>
+                            <input
+                                autocomplete="new-password"
+                                matInput
+                                type="password"
+                                [formControlName]="'passwordConfirm'"
+                                #passwordConfirmField>
+                            <button
+                                mat-icon-button
+                                type="button"
+                                (click)="passwordConfirmField.type === 'password' ? passwordConfirmField.type = 'text' : passwordConfirmField.type = 'password'"
+                                matSuffix>
+                                <mat-icon
+                                    class="icon-size-5"
+                                    *ngIf="passwordConfirmField.type === 'password'"
+                                    [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                                <mat-icon
+                                    class="icon-size-5"
+                                    *ngIf="passwordConfirmField.type === 'text'"
+                                    [svgIcon]="'heroicons_solid:eye-slash'"></mat-icon>
+                            </button>
+                            <mat-error *ngIf="form.get('passwordConfirm').hasError('required')">
+                                Confirmação de Password é Obrigatória
+                            </mat-error>
+                            <mat-error *ngIf="form.get('passwordConfirm').hasError('mismatch')">
+                                Senhas não conferem
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </ng-container>
+
+            </div>
+        </div>
+        <div class="absolute bottom-0 right-0 z-50">
+
+            <button
+                class="mr-4 mb-4"
+                [disabled]="canSave() === false"
+                (click)="save()"
+                mat-flat-button
+                type="button"
+                [color]="'primary'">Salvar
+            </button>
+        </div>
+    </div>
+
+
+</div>

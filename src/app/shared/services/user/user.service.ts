@@ -232,4 +232,19 @@ export class UserService
         );
 
     }
+
+    update(model: UserModel): Observable<UserModel>
+    {
+        return this._httpClient.put<UserModel>('/api/admin/portal/user/update-current-user', model).pipe(
+            switchMap((response: UserModel) => {
+
+                this.user = response;
+                this.rootService.user = response;
+
+                // Return a new observable with the response
+                return of(response);
+            })
+        );
+
+    }
 }

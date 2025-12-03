@@ -6,7 +6,9 @@
         <img
             class="w-7 h-7 rounded-full"
             *ngIf="showAvatar && user.image"
-            [src]="user.image">
+            [src]="user.image"
+            (error)="onAvatarError($event)"
+        >
         <mat-icon
             *ngIf="!showAvatar || !user.image"
             [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
@@ -19,24 +21,24 @@
     #userActions="matMenu">
     <button mat-menu-item>
         <span class="flex flex-col leading-none">
-            <span>Signed in as</span>
+            <span>Logado como</span>
             <span class="mt-1.5 text-md font-medium">{{user.email}}</span>
         </span>
     </button>
     <mat-divider class="my-2"></mat-divider>
-    <button mat-menu-item>
+    <button mat-menu-item (click)="openProfileModal()">
         <mat-icon [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
-        <span>Profile</span>
+        <span>Perfil do Usuário</span>
     </button>
-    <button mat-menu-item>
-        <mat-icon [svgIcon]="'heroicons_outline:cog-8-tooth'"></mat-icon>
-        <span>Settings</span>
-    </button>
+<!--    <button mat-menu-item>-->
+<!--        <mat-icon [svgIcon]="'heroicons_outline:cog-8-tooth'"></mat-icon>-->
+<!--        <span>Settings</span>-->
+<!--    </button>-->
     <mat-divider class="my-2"></mat-divider>
     <button
         mat-menu-item
         (click)="signOut()">
         <mat-icon [svgIcon]="'heroicons_outline:arrow-right-on-rectangle'"></mat-icon>
-        <span>Sign out</span>
+        <span>Sair</span>
     </button>
 </mat-menu>

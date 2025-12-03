@@ -65,4 +65,8 @@ export class PortalUsersService {
             })
         );
     }
+
+    updateCurrentUser(user: UserModel): Observable<UserModel> {
+        return this._httpClient.put<UserModel>(`${this._baseUrl}/update-current-user`, user);
+    }
 }

@@ -1,5 +1,5 @@
 import {BooleanInput} from '@angular/cdk/coercion';
-import {NgClass, NgIf} from '@angular/common';
+import {NgIf} from '@angular/common';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -17,6 +17,10 @@ import {Router} from '@angular/router';
 import {firstValueFrom, Subject, takeUntil} from 'rxjs';
 import {UserModel} from '../../../shared/models/user.model';
 import {UserService} from '../../../shared/services/user/user.service';
+import {
+    PortalUsersProfileModalComponent
+} from '../../../modules/admin/portal/users/modal/portal-users-profile-modal.component';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
     selector       : 'user',
@@ -25,7 +29,7 @@ import {UserService} from '../../../shared/services/user/user.service';
     changeDetection: ChangeDetectionStrategy.OnPush,
     exportAs       : 'user',
     standalone     : true,
-    imports        : [MatButtonModule, MatMenuModule, NgIf, MatIconModule, NgClass, MatDividerModule],
+    imports: [MatButtonModule, MatMenuModule, NgIf, MatIconModule, MatDividerModule],
 })
 export class UserComponent implements OnInit, OnDestroy
 {
@@ -44,6 +48,7 @@ export class UserComponent implements OnInit, OnDestroy
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _router: Router,
+        private _matDialog: MatDialog,
         private _userService: UserService,
     )
     {
@@ -92,5 +97,19 @@ export class UserComponent implements OnInit, OnDestroy
                 this.user = null;
             });
 
+    }
+
+    openProfileModal(): void {
+        const modal = this._matDialog.open(PortalUsersProfileModalComponent, {
+            disableClose: true,
+            panelClass: 'portal-users-profile-modal-container'
+        });
+        modal.componentInstance.title = 'Perfil de Usuário';
+        modal.componentInstance.model = this.user;
+        modal.componentInstance.availableRoles = this.user.roles;
+    }
+
+    onAvatarError(event: Event) {
+        (event.target as HTMLImageElement).src = 'assets/images/noPicture.png';
     }
 }
